@@ -1,6 +1,6 @@
 import { hasPortableProjectSegments, hasProtectedProjectRoot } from '#shared/platform/project-path.ts';
 
-const GALLERY_TARGETS = ['src/plugin/harness', 'clickdummy'] as const;
+const GALLERY_TARGETS = ['harness', 'clickdummy'] as const;
 export type GalleryTarget = (typeof GALLERY_TARGETS)[number];
 const DEFAULT_OUT = 'reports/ui-gallery';
 export const DEFAULT_CLICKDUMMY = 'clickdummy.html';
@@ -27,7 +27,7 @@ function text(raw: RawGalleryOptions, name: string): string | undefined {
 /** Validates already-split options; the single rule set for the script and the `ui gallery` command. */
 export function galleryOptions(raw: RawGalleryOptions): GalleryOptions {
   for (const key of Object.keys(raw)) if (!known.has(key)) fail('GALLERY_OPTION', `Unknown option --${key}.`);
-  const target = text(raw, 'target') ?? 'src/plugin/harness';
+  const target = text(raw, 'target') ?? 'harness';
   if (!(GALLERY_TARGETS as readonly string[]).includes(target)) fail('GALLERY_TARGET', `--target must be ${GALLERY_TARGETS.join(' or ')}.`);
   const input = text(raw, 'input');
   if (input !== undefined && target !== 'clickdummy') fail('GALLERY_OPTION', '--input applies only to --target clickdummy.');

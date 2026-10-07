@@ -10,7 +10,7 @@ import { inspectWorkflow } from '../quality/check-repository.mjs';
 import { BUILD_STEPS, collectionName, inspectBuild, parseOptions, PRIVATE, qualifySiteTemplates, RENDERED, USAGE } from '../testing/qualify-site-templates.mjs';
 
 const repository = resolve(import.meta.dirname, '../..');
-const script = join(repository, 'scripts/testing/qualify-site-templates.mjs');
+const script = join(repository, 'tooling/testing/qualify-site-templates.mjs');
 async function scratch(t) {
   const folder = await mkdtemp(join(tmpdir(), 'site-qualification-'));
   t.after(() => rm(folder, { recursive: true, force: true }));
@@ -81,10 +81,10 @@ test('[SITE-QUALIFY-04] the site-templates workflow meets the security floor, st
   assert.equal(inspectWorkflow(text).jobs, 1);
   assert.equal(excludesProjects(text), true);
   for (const event of ['pull_request', 'push']) for (const path of ['templates/sites/**', 'src/cli/domain/site-template.ts', 'src/cli/domain/site-collections.ts', 'src/cli/adapters/site-templates.ts',
-    'src/cli/adapters/framework/site-command.ts', 'scripts/testing/qualify-site-templates.mjs', 'tests/fixtures/sites/**', '.github/workflows/site-templates.yml'])
+    'src/cli/adapters/framework/site-command.ts', 'tooling/testing/qualify-site-templates.mjs', 'tests/fixtures/sites/**', '.github/workflows/site-templates.yml'])
     assert.ok(data.on[event].paths.includes(path), `${event}: ${path}`);
   const job = Object.values(data.jobs)[0];
   assert.deepEqual([job['runs-on'], typeof job['timeout-minutes']], ['ubuntu-24.04', 'number']);
   assert.ok(job.steps.some(step => step.uses === './.github/actions/setup-qualified'));
-  assert.ok(job.steps.some(step => /node scripts\/testing\/qualify-site-templates\.mjs/.test(step.run ?? '')));
+  assert.ok(job.steps.some(step => /node tooling\/testing\/qualify-site-templates\.mjs/.test(step.run ?? '')));
 });

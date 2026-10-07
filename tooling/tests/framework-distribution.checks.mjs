@@ -9,12 +9,13 @@ import { standaloneSource, updateOwnership } from '../../src/cli/adapters/framew
 import { hash } from '../../src/cli/adapters/framework/files.ts';
 import { reviewedExamplesRemoved } from '../../src/cli/tests/example-sources-fixture.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const optionalFixture = 'docs/concepts/companion/editor/inventory-probe.ts';
+// The concept editor moved into src/companion/editor (the src root); the concept test kit stays an optional docs input.
+const optionalFixture = 'docs/concepts/companion/test-kit/inventory-probe.ts';
 // A synthetic reviewed README keeps these ownership checks independent of whether
 // this checkout still carries the showcase README or already removed examples.
 const reviewedReadme = Buffer.from('# Reviewed framework README\n\nSee the [CLI workflow](docs/development/FRAMEWORK-CLI.md) and [prototype](docs/concepts/companion/index.html).\n');
 async function pinnedOwnership() {
-  const ownership = JSON.parse(await readFile(join(root, 'scripts/examples/ownership.json'), 'utf8'));
+  const ownership = JSON.parse(await readFile(join(root, 'tooling/examples/ownership.json'), 'utf8'));
   return { ...ownership, files: ownership.files.map(file => file.path === 'README.md' ? { ...file, sha256: hash(reviewedReadme) } : file) };
 }
 test('release adaptation recognizes only the reviewed README across checkout line endings', async () => {
@@ -58,7 +59,7 @@ test('source-only archive fingerprints the canonical starter definitions the gen
   // Retired schema 5 concept data is gone; current projects come only from the starter definitions above.
   assert.ok(!inventory.files.some(item => item.path === 'docs/concepts/companion/companion-project.json' || item.path.startsWith('docs/concepts/companion/starters/') || item.path.startsWith('docs/concepts/companion/seeds/')));
 });
-test('optional concept editor input contributes exact bytes and refuses parent redirects', async t => {
+test('optional concept test-kit input contributes exact bytes and refuses parent redirects', async t => {
   const folder = await realpath(await mkdtemp(join(tmpdir(), 'framework-fixture-inventory-')));
   t.after(() => rm(folder, { recursive: true, force: true }));
   const inventory = await sourceInputs(root);
@@ -85,7 +86,7 @@ test('reviewed style removal preserves tokens across checkout line endings', asy
   const { planExampleRemoval } = await import('../examples/plan.mjs');
   const folder = await realpath(await mkdtemp(join(tmpdir(), 'framework-removal-')));
   t.after(() => rm(folder, { recursive: true, force: true }));
-  const metadata = await readFile(join(root, 'scripts/examples/ownership.json'), 'utf8');
+  const metadata = await readFile(join(root, 'tooling/examples/ownership.json'), 'utf8');
   const ownership = JSON.parse(metadata);
   const copy = async path => {
     const content = (await readFile(join(root, path), 'utf8')).replace(/\r\n/g, '\n');
@@ -94,23 +95,23 @@ test('reviewed style removal preserves tokens across checkout line endings', asy
   };
   // Exercise the actual three stylesheet replacements in a bounded fixture.
   // Canonical checkout EOL is not permission to adopt edited source hashes.
-  ownership.files = ownership.files.filter(file => ['src/styles/shell.css', 'src/styles/panels.css', 'src/styles/layout.css'].includes(file.path));
+  ownership.files = ownership.files.filter(file => ['src/plugin/styles/shell.css', 'src/plugin/styles/panels.css', 'src/plugin/styles/layout.css'].includes(file.path));
   assert.equal(ownership.files.length, 3);
-  await mkdir(join(folder, 'scripts/examples'), { recursive: true });
-  await writeFile(join(folder, 'scripts/examples/ownership.json'), JSON.stringify(ownership));
-  await copy('src/bootstrap/features.ts');
+  await mkdir(join(folder, 'tooling/examples'), { recursive: true });
+  await writeFile(join(folder, 'tooling/examples/ownership.json'), JSON.stringify(ownership));
+  await copy('src/plugin/bootstrap/features.ts');
   for (const file of ownership.files) {
     if (file.sha256 !== null) assert.equal(hash(await copy(file.path)), file.sha256, file.path);
     if (file.template) await copy('templates/examples/' + file.template);
   }
   const report = await planExampleRemoval(folder);
-  const shell = report.plan.changes.find(change => change.path === 'src/styles/shell.css');
-  const panels = report.plan.changes.find(change => change.path === 'src/styles/panels.css');
+  const shell = report.plan.changes.find(change => change.path === 'src/plugin/styles/shell.css');
+  const panels = report.plan.changes.find(change => change.path === 'src/plugin/styles/panels.css');
   assert.match(shell.content, /var\(--plugin-shell-surface\)/);
   assert.match(panels.content, /var\(--plugin-shell-control-radius\)/);
   assert.ok(panels.content.includes('.shell-field input:not([type="checkbox"])'), 'removing examples must preserve the checkbox sizing fix');
   assert.ok(!shell.content.includes('.shell-sidebar'));
-  const path = join(folder, 'src/styles/shell.css');
+  const path = join(folder, 'src/plugin/styles/shell.css');
   const canonical = await readFile(path, 'utf8');
   await writeFile(path, canonical.replace(/\n/g, '\r\n'));
   await assert.rejects(planExampleRemoval(folder), /EXAMPLES_EDITED_FILES/);

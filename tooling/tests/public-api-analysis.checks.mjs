@@ -7,14 +7,14 @@ import { archiveCommandFixture } from './archive-command-fixture.mjs';
 const implementation = 'export interface PublicContract { readonly title: string }\nexport const retained = () => 1;\n';
 async function analyzerProject(scratch, configure = config => config) {
   const config = JSON.parse(await readFile('configs/quality/fallow.json', 'utf8'));
-  const source = join(scratch, 'src'); const scripts = join(scratch, 'scripts/quality');
-  await mkdir(join(source, 'features'), { recursive: true }); await mkdir(join(source, 'application')); await mkdir(scripts, { recursive: true });
+  const source = join(scratch, 'src/plugin'); const scripts = join(scratch, 'tooling/quality');
+  await mkdir(join(source, 'features'), { recursive: true }); await mkdir(join(source, 'application'), { recursive: true }); await mkdir(scripts, { recursive: true });
   await writeFile(join(scratch, 'package.json'), JSON.stringify({ name: 'framework-api-analysis', private: true, type: 'module' }));
   await mkdir(join(scratch, 'configs/quality'), { recursive: true });
   await writeFile(join(scratch, 'configs/quality/fallow.json'), JSON.stringify(configure({ ...config,
-    entry: [...config.entry.filter(path => ['src/main.ts', 'src/features/api.ts'].includes(path)), 'scripts/quality/check-analyzer.mjs', 'scripts/quality/fallow-contract.mjs'], plugins: [],
+    entry: [...config.entry.filter(path => ['src/plugin/main.ts', 'src/plugin/features/api.ts'].includes(path)), 'tooling/quality/check-analyzer.mjs', 'tooling/quality/fallow-contract.mjs'], plugins: [],
   })));
-  for (const script of ['check-analyzer.mjs', 'fallow-contract.mjs']) await copyFile(`scripts/quality/${script}`, join(scripts, script));
+  for (const script of ['check-analyzer.mjs', 'fallow-contract.mjs']) await copyFile(`tooling/quality/${script}`, join(scripts, script));
   await symlink(resolve('node_modules'), join(scratch, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
   await writeFile(join(source, 'main.ts'), 'import { retained } from "./application/internal"; console.log(retained());\n');
   await writeFile(join(source, 'application/internal.ts'), implementation);
@@ -26,7 +26,7 @@ const report = async scratch => JSON.parse(await readFile(join(scratch, 'reports
 test('[FRAMEWORK-API-ANALYSIS] the declared public API survives without examples while unrelated source and private exports remain checked', async () => {
   await archiveCommandFixture(async ({ scratch, command }) => {
     const source = await analyzerProject(scratch);
-    const check = () => command(process.execPath, ['scripts/quality/check-analyzer.mjs'], scratch,
+    const check = () => command(process.execPath, ['tooling/quality/check-analyzer.mjs'], scratch,
       { ...process.env, FALLOW_TELEMETRY_DISABLED: '1' });
     const clean = check();
     assert.equal(clean.status, 0, clean.stdout + clean.stderr);
@@ -37,9 +37,9 @@ test('[FRAMEWORK-API-ANALYSIS] the declared public API survives without examples
     const rejected = check();
     assert.equal(rejected.status, 1, rejected.stdout + rejected.stderr);
     const found = await report(scratch);
-    assert.ok(found.unused_files.some(item => item.path === 'src/features/orphan.ts'));
-    assert.ok(found.unused_exports.some(item => item.path === 'src/application/internal.ts' && item.export_name === 'unusedImplementation'));
-    assert.ok(found.unused_types.some(item => item.path === 'src/application/internal.ts' && item.export_name === 'PrivateUnused'));
+    assert.ok(found.unused_files.some(item => item.path === 'src/plugin/features/orphan.ts'));
+    assert.ok(found.unused_exports.some(item => item.path === 'src/plugin/application/internal.ts' && item.export_name === 'unusedImplementation'));
+    assert.ok(found.unused_types.some(item => item.path === 'src/plugin/application/internal.ts' && item.export_name === 'PrivateUnused'));
     assert.ok(!found.unused_types.some(item => item.export_name === 'PublicContract'));
     assert.match(rejected.stderr, /ANALYZER_FAILED: 3/);
   }, { outputRoot: resolve('reports/analyzer-public-api') });
@@ -57,7 +57,7 @@ test('[ANALYZER-CONTRACT] consumed deprecated exports, degraded parsing and a mi
     await archiveCommandFixture(async ({ scratch, command }) => {
       const source = await analyzerProject(scratch, configure);
       await change(source);
-      const rejected = command(process.execPath, ['scripts/quality/check-analyzer.mjs'], scratch, { ...process.env, FALLOW_TELEMETRY_DISABLED: '1' });
+      const rejected = command(process.execPath, ['tooling/quality/check-analyzer.mjs'], scratch, { ...process.env, FALLOW_TELEMETRY_DISABLED: '1' });
       assert.equal(rejected.status, 1, `${label}: ${rejected.stdout}${rejected.stderr}`);
       assert.match(rejected.stderr, expected, label);
       if (label === 'deprecated') assert.deepEqual((await report(scratch)).deprecated_exports_in_use.map(item => [item.export_name, item.consumer_count]), [['legacy', 1]]);

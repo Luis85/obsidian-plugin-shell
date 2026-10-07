@@ -62,9 +62,9 @@ test('repository-local composite actions are referenced by exact name and inspec
 });
 test('repository checker inspects local actions and rejects a reference without one', async t => {
   const root = await mkdtemp(join(tmpdir(), 'repository-actions-')); t.after(() => rm(root, { recursive: true, force: true }));
-  for (const path of ['.github/workflows', 'src/styles']) await mkdir(join(root, path), { recursive: true });
+  for (const path of ['.github/workflows', 'src/plugin/styles']) await mkdir(join(root, path), { recursive: true });
   await writeFile(join(root, '.github/workflows/check.yml'), withLocal);
-  await writeFile(join(root, 'src/styles/owned.css'), '.owned { color: red; }');
+  await writeFile(join(root, 'src/plugin/styles/owned.css'), '.owned { color: red; }');
   await writeFile(join(root, 'README.md'), '# Readme\n');
   await assert.rejects(checkRepository(root), /WORKFLOW_LOCAL_ACTION_MISSING: setup-qualified/);
   await mkdir(join(root, '.github/actions/setup-qualified'), { recursive: true });
@@ -88,9 +88,9 @@ test('Markdown policy ignores examples and remote links but rejects incomplete f
 });
 test('repository checker discovers actual files and fails on a missing local document target', async t => {
   const root = await mkdtemp(join(tmpdir(), 'repository-policy-')); t.after(() => rm(root, { recursive: true, force: true }));
-  for (const path of ['.github/workflows', 'src/styles', 'docs']) await mkdir(join(root, path), { recursive: true });
+  for (const path of ['.github/workflows', 'src/plugin/styles', 'docs']) await mkdir(join(root, path), { recursive: true });
   await writeFile(join(root, '.github/workflows/check.yml'), workflow);
-  await writeFile(join(root, 'src/styles/owned.css'), '.owned { color: red; }');
+  await writeFile(join(root, 'src/plugin/styles/owned.css'), '.owned { color: red; }');
   await writeFile(join(root, 'README.md'), '# Readme\n\n[Guide](docs/guide.md)\n');
   await writeFile(join(root, 'docs/guide.md'), '# Guide\n');
   assert.equal((await checkRepository(root)).localLinks, 1);
@@ -99,9 +99,9 @@ test('repository checker discovers actual files and fails on a missing local doc
 });
 test('repository checker leaves the docs working directory out of the Markdown gate', async t => {
   const root = await mkdtemp(join(tmpdir(), 'repository-docs-')); t.after(() => rm(root, { recursive: true, force: true }));
-  for (const path of ['.github/workflows', 'src/styles', 'docs/concepts/draft']) await mkdir(join(root, path), { recursive: true });
+  for (const path of ['.github/workflows', 'src/plugin/styles', 'docs/concepts/draft']) await mkdir(join(root, path), { recursive: true });
   await writeFile(join(root, '.github/workflows/check.yml'), workflow);
-  await writeFile(join(root, 'src/styles/owned.css'), '.owned { color: red; }');
+  await writeFile(join(root, 'src/plugin/styles/owned.css'), '.owned { color: red; }');
   await writeFile(join(root, 'README.md'), '# Readme\n');
   await writeFile(join(root, 'docs/concepts/draft/notes.md'), '# Draft\n\n[Moved](gone.md)\n\n```js\nunclosed\n');
   const result = await checkRepository(root); assert.equal(result.markdown, 1); assert.equal(result.localLinks, 0);
@@ -146,8 +146,8 @@ test('jobs call only exact repository-local workflow files, never with inherited
 });
 test('repository checker requires each called workflow to exist and declare workflow_call, and keeps every other file read-only', async t => {
   const root = await mkdtemp(join(tmpdir(), 'repository-calls-')); t.after(() => rm(root, { recursive: true, force: true }));
-  for (const path of ['.github/workflows', 'src/styles']) await mkdir(join(root, path), { recursive: true });
-  await writeFile(join(root, 'src/styles/owned.css'), '.owned { color: red; }');
+  for (const path of ['.github/workflows', 'src/plugin/styles']) await mkdir(join(root, path), { recursive: true });
+  await writeFile(join(root, 'src/plugin/styles/owned.css'), '.owned { color: red; }');
   await writeFile(join(root, 'README.md'), '# Readme\n');
   await writeFile(join(root, '.github/workflows/release.yml'), callerOf('./.github/workflows/check.yml'));
   await assert.rejects(checkRepository(root), /release\.yml: WORKFLOW_LOCAL_WORKFLOW_MISSING: check\.yml/);
@@ -168,8 +168,8 @@ test('repository checker requires each called workflow to exist and declare work
 
 test('a synced project workflow keeps the portable review but follows its project, not the framework e2e tiers', async t => {
   const root = await mkdtemp(join(tmpdir(), 'repository-synced-')); t.after(() => rm(root, { recursive: true, force: true }));
-  for (const path of ['.github/workflows', 'src/styles']) await mkdir(join(root, path), { recursive: true });
-  await writeFile(join(root, 'src/styles/owned.css'), '.owned { color: red; }');
+  for (const path of ['.github/workflows', 'src/plugin/styles']) await mkdir(join(root, path), { recursive: true });
+  await writeFile(join(root, 'src/plugin/styles/owned.css'), '.owned { color: red; }');
   await writeFile(join(root, 'README.md'), '# Readme\n');
   const browser = workflow.replace(/run: .*/, 'run: npm run test:e2e');
   await writeFile(join(root, '.github/workflows/browser.yml'), browser);

@@ -7,7 +7,7 @@ import { parseBrowserStarter } from '../../src/cli/adapters/starters/browser.ts'
 import { evaluateStyleFiles, validateAllowlist, formatFindings } from '../styles/check-style-literals.mjs';
 const root = fileURLToPath(new URL('../../', import.meta.url)), template = await loadTemplateSnapshot(root);
 const catalog = JSON.parse(await readFile(new URL('docs/design/obsidian-tokens.json', `file://${root}`), 'utf8'));
-const allowlist = validateAllowlist(JSON.parse(await readFile(new URL('scripts/styles/generated-style-literal-allowlist.json', `file://${root}`), 'utf8')));
+const allowlist = validateAllowlist(JSON.parse(await readFile(new URL('tooling/styles/generated-style-literal-allowlist.json', `file://${root}`), 'utf8')));
 const emittedStyles = async (starter) => {
   const definition = parseBrowserStarter(await readFile(new URL(`configs/starters/${starter}.json`, `file://${root}`), 'utf8'));
   const result = await compileProject({ source: JSON.stringify(definition.generator.document), sourceName: starter + '.json', template });
@@ -21,7 +21,7 @@ for (const starter of ['feature-showcase', 'quick-capture']) {
     const result = evaluateStyleFiles(files, allowlist, catalog);
     assert.deepEqual(formatFindings(result.findings), [], 'new generated raw colours must use Obsidian tokens (docs/design/OBSIDIAN-TOKENS.md)');
     const emitted = new Set(files.map((file) => file.path));
-    assert.deepEqual(result.staleAllowlist.filter((path) => emitted.has(path)), [], 'a fixed known gap must leave scripts/styles/generated-style-literal-allowlist.json');
+    assert.deepEqual(result.staleAllowlist.filter((path) => emitted.has(path)), [], 'a fixed known gap must leave tooling/styles/generated-style-literal-allowlist.json');
     assert.ok(result.allowlisted.every((path) => allowlist.some((entry) => entry.path === path)));
     assert.equal(result.findings.length, 0);
     if (starter === 'feature-showcase') assert.deepEqual(result.allowlisted.sort(), allowlist.map((entry) => entry.path).sort());

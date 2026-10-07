@@ -18,7 +18,7 @@ async function headCommit(root: string): Promise<string | null> {
 }
 const defaultDependencies = (): CliDependencies => ({
   root: process.cwd(), clock: () => new Date(), commit: headCommit,
-  session: (options, root) => (options.target === 'src/plugin/harness' ? harnessSession(root) : clickdummySession(root, options.input ?? DEFAULT_CLICKDUMMY)),
+  session: (options, root) => (options.target === 'harness' ? harnessSession(root) : clickdummySession(root, options.input ?? DEFAULT_CLICKDUMMY)),
   out: text => { process.stdout.write(text); }, err: text => { process.stderr.write(text); },
 });
 function summary(options: GalleryOptions, result: GalleryResult): Record<string, unknown> {

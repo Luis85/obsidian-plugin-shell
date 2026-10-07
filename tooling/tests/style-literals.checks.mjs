@@ -96,9 +96,9 @@ test('[STYLE-06] suggestions are reviewed catalog tokens chosen from the propert
 async function fakeRoot(files, allowlist) {
   const folder = await mkdtemp(join(tmpdir(), 'style-literals-'));
   for (const [path, content] of Object.entries(files)) { await mkdir(join(folder, path, '..'), { recursive: true }); await writeFile(join(folder, path), content); }
-  await mkdir(join(folder, 'docs/design'), { recursive: true }); await mkdir(join(folder, 'scripts/styles'), { recursive: true });
+  await mkdir(join(folder, 'docs/design'), { recursive: true }); await mkdir(join(folder, 'tooling/styles'), { recursive: true });
   await copyFile(join(root, 'docs/design/obsidian-tokens.json'), join(folder, 'docs/design/obsidian-tokens.json'));
-  await writeFile(join(folder, 'scripts/styles/style-literal-allowlist.json'), JSON.stringify({ schemaVersion: 1, entries: allowlist }));
+  await writeFile(join(folder, 'tooling/styles/style-literal-allowlist.json'), JSON.stringify({ schemaVersion: 1, entries: allowlist }));
   return folder;
 }
 test('[STYLE-07] the checker fails with every offending file and passes once the literals become tokens', async () => {
@@ -130,10 +130,10 @@ test('[STYLE-08] the allowlist is exact-file and reasoned; it cannot hide other 
   assert.throws(() => validateAllowlist({ schemaVersion: 2, entries: [] }), /STYLE_ALLOWLIST_SHAPE/);
 });
 test('[STYLE-09] the repository CLI passes on the real sources and exits non-zero on a violation', async () => {
-  const run = spawnSync(process.execPath, ['scripts/styles/check-style-literals.mjs', '--json'], { cwd: root, encoding: 'utf8' });
+  const run = spawnSync(process.execPath, ['tooling/styles/check-style-literals.mjs', '--json'], { cwd: root, encoding: 'utf8' });
   assert.equal(run.status, 0, run.stderr); const result = JSON.parse(run.stdout);
   // Counted independently, so a consumer that removed the example features (fewer SFCs) is still checked exactly.
   const sources = (await readdir(join(root, 'src'), { recursive: true })).filter(path => /\.(?:vue|css)$/.test(path));
   assert.equal(result.status, 'passed'); assert.ok(sources.length > 0); assert.equal(result.files, sources.length); assert.deepEqual(result.findings, []);
-  assert.equal(spawnSync(process.execPath, ['scripts/styles/check-style-literals.mjs', '--bogus'], { cwd: root, encoding: 'utf8' }).status, 1);
+  assert.equal(spawnSync(process.execPath, ['tooling/styles/check-style-literals.mjs', '--bogus'], { cwd: root, encoding: 'utf8' }).status, 1);
 });
