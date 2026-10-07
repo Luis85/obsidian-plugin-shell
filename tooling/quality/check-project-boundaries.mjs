@@ -16,7 +16,7 @@ export const projectDependencies = Object.freeze({
   shared: [], tui: ['shared'], cli: ['shared', 'tui'], companion: ['shared'], plugin: ['shared'],
 });
 /** Top-level folders whose files may import the projects but must never be imported by them. */
-export const forbiddenRoots = Object.freeze(['tooling', 'tests']);
+const forbiddenRoots = Object.freeze(['tooling', 'tests']);
 const aliases = Object.freeze({ '#shared/': 'src/shared/', '#tui/': 'src/tui/' });
 const codeFile = /\.(?:[cm]?[jt]sx?|vue)$/;
 const skippedDirectories = new Set(['node_modules', 'dist', 'coverage', '.vite']);
