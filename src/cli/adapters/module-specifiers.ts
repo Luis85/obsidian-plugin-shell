@@ -16,7 +16,7 @@ export interface ModuleSpecifier { specifier: string; line: number; start: numbe
  * The `<script>` and `<script setup>` blocks of a single-file component with their offsets. The built CLI bundles no
  * Vue compiler (its optional template engines cannot be bundled), and module specifiers live only in these blocks.
  */
-export const scriptBlocks: ParseSfc = source => {
+const scriptBlocks: ParseSfc = source => {
   const blocks = [...source.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)].map(match => {
     const offset = match.index + match[0].indexOf('>') + 1;
     return { setup: /\bsetup\b/.test(match[1]!), block: { content: match[2]!, loc: { start: { offset, line: source.slice(0, offset).split('\n').length } } } };
