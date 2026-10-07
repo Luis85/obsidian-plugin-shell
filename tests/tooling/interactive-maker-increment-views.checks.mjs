@@ -163,3 +163,18 @@ test('increment, pr and issue plans add their document facts and branch step to 
   const other = view({ command: 'setup', status: 'planned', data: { planHash: 'g'.repeat(64), conflicts: [], changes: [], summary: { document: { kind: 'increment', id: 'x' } } } }).text;
   assert.ok(!other.includes('Document '), 'only the delivery families get the document facts');
 });
+
+test('hosted lifecycle previews expose the remote action and source commit before approval', () => {
+  const data = { action: 'merge', completed: false, planHash: 'b'.repeat(64), remote: { platform: 'github', repository: 'octo/demo', number: 12,
+    url: 'https://github.com/octo/demo/pull/12', head: 'increment/demo', base: 'main', headCommit: 'a'.repeat(40), before: 'open', after: 'merged' },
+    changes: [{ path: 'docs/increments/demo.md', status: 'update' }], next: 'node bin/app pr sync demo-kickoff' };
+  const preview = view({ command: 'pr merge', status: 'planned', data }).text;
+  has(preview, ['Merge using a merge commit', 'github octo/demo', '#12 https://github.com/octo/demo/pull/12', 'increment/demo', 'main', 'a'.repeat(40), 'open → merged',
+    'docs/increments/demo.md', `--apply ${data.planHash} to approve this remote action`]);
+  assert.ok(!preview.includes('undefined'));
+  const recorded = view({ command: 'pr merge', status: 'applied', data: { ...data, completed: true } }).text;
+  has(recorded, ['Record the already-completed remote transition', 'Remote verified', 'yes']);
+  for (const [action, label] of [['review', 'Mark ready for review'], ['close', 'Close without merging']]) {
+    has(view({ command: `pr ${action}`, status: 'planned', data: { ...data, action } }).text, [label, 'Source commit']);
+  }
+});

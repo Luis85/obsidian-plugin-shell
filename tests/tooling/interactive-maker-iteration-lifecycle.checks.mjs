@@ -22,6 +22,7 @@ async function plan(ws, id = 'delivery', ready = true) {
 
 test('iteration alias and planning interview record scope without offering premature branch creation', async () => {
   assert.equal(parseCliArguments(['iteration', 'plan', 'next', '--title', 'Next']).command, 'increment plan');
+  assert.equal(parseCliArguments(['--json', 'iteration', 'list']).command, 'increment list');
   const questions = [], answers = ['Next', 'Luis', 'M', 'optional', ''];
   const request = await guidedIncrement({ command: 'increment plan', args: ['next'], options: {} }, async q => { questions.push(q); return answers.shift(); });
   assert.equal(request.options.title, 'Next'); assert.equal(questions.length, 5);
@@ -37,6 +38,7 @@ test('planning and commitment preview without writes; apply creates a branch and
   const before = ws.read('docs/increments/delivery.md');
   const preview = await ws.run('increment commit', ['delivery'], { branch: true });
   assert.equal(preview.status, 'planned', JSON.stringify(preview));
+  assert.ok(preview.data.summary.commitPaths.includes('docs/issues/delivery.md'));
   assert.equal(ws.read('docs/increments/delivery.md'), before); assert.deepEqual(ws.branches(), ['main']);
   applied(await ws.run('increment commit', ['delivery'], { branch: true, apply: preview.data.planHash }));
   assert.equal(ws.git('branch', '--show-current'), 'increment/delivery');

@@ -43,8 +43,8 @@ async function plan(request: Request, context: Context) {
   }
   const before = await localBefore(loaded);
   const data = { planHash: planHash(context, request, { before, action, revision: pull.revision, headCommit: pull.headCommit }),
-    action, completed, remote: { number: pull.number, url: pull.url, before: pull.state, after: states[action], headCommit: pull.headCommit },
-    changes: Object.keys(before), next: action === 'close' ? `node bin/app increment carry-over ${loaded.increment.id} <next> --dry-run` : `node bin/app pr sync ${loaded.pull.id} --dry-run` };
+    action, completed, remote: { platform: loaded.target.platform, repository: loaded.target.repository, head: pull.head, base: pull.base, number: pull.number, url: pull.url, before: pull.state, after: states[action], headCommit: pull.headCommit },
+    changes: [loaded.pull.path, loaded.increment.path].map(path => ({ path, status: 'update', beforeHash: before[path] })), next: action === 'close' ? `node bin/app increment carry-over ${loaded.increment.id} <next> --dry-run` : `node bin/app pr sync ${loaded.pull.id} --dry-run` };
   return { loaded, pull, before, data, action };
 }
 export async function lifecycle(request: Request, context: Context): Promise<Result> {

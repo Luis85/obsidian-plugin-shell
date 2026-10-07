@@ -174,10 +174,10 @@ export function commandGroup(word: string): string[] {
 }
 export function parseCliArguments(argv: string[]): Request {
   argv = argv.map(arg => aliases.get(arg) ?? arg);
-  if (argv[0] === 'iteration') argv = ['increment', ...argv.slice(1)];
   if (argv[0] === '--version') argv = ['version', ...argv.slice(1)];
   requireThat(argv.length <= 100 && argv.every(safeArgument), 'ARGUMENT_LIMIT', 'Too many or oversized arguments.');
   const { positional, options } = scanArguments(argv);
+  if (positional[0] === 'iteration') positional[0] = 'increment';
   const bareGroup = positional.length === 1 && !commands.some(item => item.id === positional[0]) && commandGroup(positional[0]!).length > 0;
   const name = bareGroup ? 'help' : commandName(positional);
   const entry = descriptor(name), args = bareGroup ? positional : positional.slice(name === 'help' && positional.length === 0 ? 0 : name.split(' ').length);

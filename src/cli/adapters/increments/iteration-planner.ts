@@ -69,7 +69,7 @@ const commit: Planner = async (request, context) => {
     await git.commitPaths(paths, `Commit to iteration ${doc.id}`);
   } : undefined;
   return session.plan({ document: document(session, doc.id), statusBefore: doc.model.status, statusAfter: to,
-    edits: [{ section: 'Iteration commitment', action: 'add' }], branch, readiness: ready.source,
+    edits: [{ section: 'Iteration commitment', action: 'add' }], branch, readiness: ready.source, commitPaths: flag(request, 'branch') ? paths : [],
     next: flag(request, 'branch') ? `node bin/app pr publish ${kickoff.id} --dry-run` : 'Planning committed locally; no branch or hosted pull request was created.' }, { ...extra, ...(finalize ? { finalize } : {}) });
 };
 
