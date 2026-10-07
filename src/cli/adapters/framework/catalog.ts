@@ -1,6 +1,7 @@
 import { adoptCommands } from './adopt-catalog.ts';
 import { prototypeCommands } from './prototype-catalog.ts';
 import { incrementCommands } from './increment-catalog.ts';
+import { sourceCommands } from './source-catalog.ts';
 import { requireThat, OperationError, type Request, type Values } from './contracts.ts';
 import { assertJsonData } from '#shared/contracts/json-data.ts';
 import { suggestions, didYouMean } from './suggest.ts';
@@ -45,6 +46,7 @@ export const commands: readonly Command[] = [
   ...prototypeCommands,
   ...adoptCommands,
   ...incrementCommands,
+  ...sourceCommands,
   { id: 'handout generate', summary: 'Review create-only generation of the root product-trio handout; never overwrites answers or runs processes.', options: values('prds'), maxArgs: 0, effect: 'plan' },
   { id: 'handout refresh', summary: 'Review source-fingerprint refresh while preserving answers and notes and resetting review checkboxes.', options: values('prds'), maxArgs: 0, effect: 'plan' },
   { id: 'handout validate', summary: 'Validate required handout decisions and source freshness without writes or execution authorization.', options: values('prds'), maxArgs: 0, effect: 'read' },

@@ -1,0 +1,4 @@
+/** Entry module of the {{name}} command-line source project: pure argument handling, the process wiring stays in the caller. */
+export function run(argv: readonly string[]): string {
+  return argv.length ? `{{name}} ${argv.join(' ')}` : '{{name}}';
+}

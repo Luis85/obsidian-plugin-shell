@@ -28,6 +28,7 @@ import { pendingChecks } from './maker-checks.ts';
 import { didYouMean, suggestions } from './suggest.ts';
 import type { MakerCheck } from '../makers/plan.ts';
 import { incrementPlanners } from '../increments/planners.ts';
+import { sourcePlanners } from '../source-command.ts';
 /** `steps` are reviewed non-file steps bound into the plan hash; `prepare` runs them right before the file write. */
 interface Planned { plan: FilePlan; summary: unknown; conflicts: string[]; hash?: string; checks?: readonly MakerCheck[]; steps?: readonly unknown[]; prepare?: () => Promise<unknown> }
 /** Built-in and registered custom recipes are resolved before trust: only a real custom recipe needs --trust-custom. */
@@ -99,6 +100,7 @@ const planners: Record<string, Planner> = {
   'release prepare': releaseVersionPlan,
   'framework upgrade': frameworkUpgradePlan,
   ...incrementPlanners,
+  ...sourcePlanners,
 };
 function plannerFor(command: string): Planner {
   if (Object.hasOwn(planners, command)) return planners[command]!;
