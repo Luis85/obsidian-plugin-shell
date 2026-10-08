@@ -1,11 +1,7 @@
 /** Same production/core floors as src, independently measured so runtime coverage cannot mask the CLI. */
-import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { assertCoverageInventory, assertSelectedCoreGate } from './coverage-inventory.mjs';
+import { readFileSync } from 'node:fs';
+import { assertCoverageInventory, assertSelectedCoreGate, makerCoverageSources as sources } from './coverage-inventory.mjs';
 import { loadThresholds } from './thresholds.mjs';
-function sources(root, excluded = new Set()) { return readdirSync(root, { withFileTypes: true }).flatMap(entry => {
-  const path = join(root, entry.name); return excluded.has(path) ? [] : entry.isDirectory() ? sources(path, excluded) : path.endsWith('.ts') ? [path] : [];
-}); }
 const typedCore = ['src/shared/contracts/json-data.ts', 'src/shared/contracts/serialization.ts', 'src/shared/contracts/result.ts', 'src/shared/contracts/errors.ts', 'src/shared/contracts/result-runtime.mjs', 'src/shared/platform/process.ts', 'src/shared/platform/file-plan.ts', 'src/shared/platform/file-plan-runtime.ts', 'src/shared/platform/bounded-map.ts', 'src/shared/platform/confirmation.ts', 'src/shared/platform/input.ts', 'src/shared/platform/hash.ts', 'src/shared/platform/fs-presence.ts', 'src/shared/platform/project-path.ts', 'src/shared/platform/protected-directories.ts'];
 const movedDomain = ['src/shared/contracts/sketch-errors.ts', 'src/shared/companion/starters/project-generator.ts'];
 const files = [...sources('src/cli', new Set(['src/cli/sdk', 'src/cli/tooling', 'src/cli/tests'])),

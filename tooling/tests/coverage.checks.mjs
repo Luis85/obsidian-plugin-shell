@@ -1,11 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { resolve, dirname } from 'node:path';
+import { resolve, dirname, win32 } from 'node:path';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { assertCoverageInventory, assertCoverageGates, assertSelectedCoreGate, runtimeCoverageInputs } from '../quality/coverage-inventory.mjs';
+import { assertCoverageInventory, assertCoverageGates, assertSelectedCoreGate, runtimeCoverageInputs, makerCoverageSources } from '../quality/coverage-inventory.mjs';
 test('[COV-02-01] silently omitted production input makes the coverage inventory fail', () => {
   const source = resolve('src/plugin/bootstrap/mount-ui.ts');
   assert.throws(() => assertCoverageInventory({ total: {}, [source]: {} }, [source, 'src/plugin/main.ts']), /INCOMPLETE_PRODUCTION_COVERAGE/);
@@ -25,6 +25,26 @@ test('runtime coverage discovers all runtime sources while CLI inputs retain the
   assert.equal(assertCoverageInventory(report, inputs).productionInputs, runtime.length);
   delete report[join(root, 'src/plugin/new-area/new.ts')];
   assert.throws(() => assertCoverageInventory(report, inputs), /INCOMPLETE_PRODUCTION_COVERAGE/);
+});
+test('maker coverage prunes exact source-project exclusions with native and Windows path joins', t => {
+  const root = mkdtempSync(join(tmpdir(), 'shell-maker-inventory-'));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const retained = ['src/cli/domain/value.ts', 'src/cli/sdk-extra/value.ts', 'src/cli/domain/sdk/value.ts',
+    'src/cli/domain/tooling/value.ts', 'src/cli/domain/tests/value.ts', 'src/tui/core.ts', 'src/tui/domain/tests/value.ts'];
+  const excluded = ['src/cli/sdk', 'src/cli/tooling', 'src/cli/tests', 'src/tui/tests'];
+  for (const file of [...retained, ...excluded.map(folder => folder + '/nested/fixture.ts'), 'src/cli/notes.md']) {
+    const path = join(root, file); mkdirSync(dirname(path), { recursive: true }); writeFileSync(path, '');
+  }
+  const portable = file => join(root, file).replaceAll('\\', '/');
+  const skipped = new Set(excluded.map(portable));
+  const inputs = joinPath => ['src/cli', 'src/tui'].flatMap(folder => makerCoverageSources(join(root, folder), skipped, joinPath)).sort();
+  assert.deepEqual(inputs(join), retained.map(portable).sort());
+  const windows = inputs(win32.join);
+  assert.deepEqual(windows, retained.map(portable).sort(), 'Windows separators neither admit excluded projects nor drop nested production');
+  const report = Object.fromEntries([['total', {}], ...windows.map(file => [file, {}])]);
+  assert.equal(assertCoverageInventory(report, windows).productionInputs, retained.length);
+  delete report[portable('src/cli/domain/sdk/value.ts')];
+  assert.throws(() => assertCoverageInventory(report, windows), /INCOMPLETE_PRODUCTION_COVERAGE/);
 });
 test('[COV-03-02] the actual CLI fails closed for deficient, omitted and malformed production reports', () => {
   const root = mkdtempSync(join(tmpdir(), 'shell-coverage-')); const script = resolve('tooling/quality/coverage-inventory.mjs');

@@ -67,6 +67,13 @@ async function selectedCoreScope() {
   const { include, thresholds } = config.test.coverage;
   return { files: include.flatMap(pattern => globSync(pattern)), thresholds };
 }
+/** Typed maker inputs keep the same exact source-project exclusions on every host. */
+export function makerCoverageSources(root, excluded = new Set(), joinPath = join) {
+  return readdirSync(root, { withFileTypes: true }).flatMap(entry => {
+    const path = joinPath(root, entry.name).replaceAll('\\', '/');
+    return excluded.has(path) ? [] : entry.isDirectory() ? makerCoverageSources(path, excluded, joinPath) : path.endsWith('.ts') ? [path] : [];
+  });
+}
 function sources(directory, skipped) {
   return readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
     const path = join(directory, entry.name);
