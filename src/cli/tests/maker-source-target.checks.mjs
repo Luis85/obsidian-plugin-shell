@@ -138,3 +138,20 @@ test('a declared source directory link is rejected before a maker writes through
   await assert.rejects(planMaker(root, request('--source', 'domain')), /PLAN_SYMLINK/);
   await assert.rejects(readFile(join(root, 'runtime/features/records/record.definition.ts')), { code: 'ENOENT' });
 }));
+
+
+test('project-wide custom makers keep executable checks within their tooling owner', () => makerFixture(async root => {
+  await mkdir(join(root, 'tooling/makers/custom'), { recursive: true });
+  await writeFile(join(root, 'tooling/makers/custom/registry.mjs'), 'export const customMakers = [];\n');
+  const planned = await planMaker(root, parseArguments(['maker', 'reminder']));
+  const path = 'tooling/tests/custom-reminder.checks.mjs';
+  assert.ok(planned.plan.changes.some(change => change.path === path));
+  assert.ok(planned.plan.changes.every(change => !change.path.startsWith('tests/tooling/')));
+  assert.ok(planned.checks.some(check => check.args.includes(path)), 'post-apply checks use the emitted path');
+  await applyFilePlan(planned.plan);
+  const generated = await readFile(join(root, path), 'utf8');
+  assert.match(generated, /from '\.\.\/makers\/custom\/reminder\.mjs'/);
+  const run = spawnSync(process.execPath, ['--test', path], { cwd: root, encoding: 'utf8', timeout: 120000 });
+  assert.equal(run.error, undefined, run.error?.message);
+  assert.equal(run.status, 0, run.stdout + run.stderr);
+}));

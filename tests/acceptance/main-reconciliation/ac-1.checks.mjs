@@ -44,7 +44,7 @@ test('[AC-1] a copied bin runs, generates a project and authors a feature withou
   const made = invoke(['make', 'feature', 'portable-notes', '--entity', 'portable-note', '--yes'], 1);
   assert.equal(made.status, 'failed');
   assert.ok(made.diagnostics.some(item => item.code === 'MAKER_CHECKS_FAILED'), 'source is authored; project checks honestly require installed project dependencies');
-  assert.match(await readFile(join(root, 'src/features/portable-notes/portable-note.entity.ts'), 'utf8'), /portable/);
+  assert.match(await readFile(join(root, 'src/plugin/features/portable-notes/portable-note.entity.ts'), 'utf8'), /portable/);
   assert.ok(!(await readdir(root)).includes('node_modules'));
   await verifyKit(root);
 });

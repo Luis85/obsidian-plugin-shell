@@ -121,7 +121,7 @@ export function e2ePolicyFailures(manifest, e2eKinds) {
     const kinds = e2eKinds ? e2eKinds(suiteCommandText(suite)) : null;
     if (suite.level === e2eLevel) {
       if (suite.verify !== 'opt-in') failures.push(`E2E_SUITE_NOT_OPT_IN: suite "${suite.name}" is e2e but verify mode "${suite.verify}" runs it unconditionally. ${edit}: use "verify": "opt-in".`);
-      if (kinds && !kinds.length) failures.push(`E2E_SUITE_NOT_IN_POLICY: suite "${suite.name}" is e2e, but scripts/quality/e2e-policy.mjs does not classify its commands as end-to-end, so a workflow step running it would escape the e2e opt-in. Add its command to the policy's e2e command list.`);
+      if (kinds && !kinds.length) failures.push(`E2E_SUITE_NOT_IN_POLICY: suite "${suite.name}" is e2e, but tooling/quality/e2e-policy.mjs does not classify its commands as end-to-end, so a workflow step running it would escape the e2e opt-in. Add its command to the policy's e2e command list.`);
     } else if (kinds?.length) failures.push(`E2E_POLICY_LEVEL_MISMATCH: suite "${suite.name}" runs commands the e2e opt-in policy classifies as ${kinds.join(', ')}, but its level is "${suite.level}". ${edit}: use "level": "e2e".`);
   }
   return failures;

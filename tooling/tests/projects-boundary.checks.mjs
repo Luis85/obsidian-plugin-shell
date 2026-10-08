@@ -249,9 +249,9 @@ test('[PROJECTS-10] this checkout: every project is standalone, linked to its pr
 });
 
 test('[PROJECTS-11] the projects tooling, boundary workflow and synced copies never reach a framework kit or a generated project', () => {
-  for (const path of ['scripts/projects/projects.mjs', 'scripts/projects/workflows.mjs', 'tests/tooling/projects-boundary.checks.mjs', '.github/workflows/projects-boundary.yml', '.github/workflows/projects-required-checks.yml',
+  for (const path of ['tooling/projects/projects.mjs', 'tooling/projects/workflows.mjs', 'tooling/tests/projects-boundary.checks.mjs', '.github/workflows/projects-boundary.yml', '.github/workflows/projects-required-checks.yml',
     '.github/workflows/projects--companion--ci.yml',
-    '.github/workflows/site-templates.yml', 'scripts/testing/qualify-site-templates.mjs', 'tests/tooling/site-templates-qualification.checks.mjs', 'tests/fixtures/sites/vault/Site/Features.base']) {
+    '.github/workflows/site-templates.yml', 'tooling/testing/qualify-site-templates.mjs', 'tooling/tests/site-templates-qualification.checks.mjs', 'tests/fixtures/sites/vault/Site/Features.base']) {
     assert.equal(included(path), false, `kit: ${path}`);
     assert.equal(maintainerOnly(path), true, `generated project: ${path}`);
   }

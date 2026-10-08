@@ -30,8 +30,8 @@ test('Angular emits reusable component sources, native layouts/actions and a com
   assert.equal(JSON.parse(home.match(/template: (.*), styles:/)[1]).split('<' + definition(files, aliases.card).selector + ' ').length - 1, 2);
   assert.match(home, /data-wb-layout/); assert.match(home, /grid-template-columns/);
   assert.match(home, /"navigate"/); assert.match(home, new RegExp(aliases.details));
-  assert.match(files['src/ui/Starter.ts'], /hashchange/); assert.match(files['src/ui/Starter.ts'], /removeEventListener/);
-  assert.match(files['src/core/brick-manifest.ts'], /Order API/); assert.match(files['src/core/brick-manifest.ts'], /Browse/);
+  assert.match(files['src/plugin/ui/Starter.ts'], /hashchange/); assert.match(files['src/plugin/ui/Starter.ts'], /removeEventListener/);
+  assert.match(files['src/plugin/core/brick-manifest.ts'], /Order API/); assert.match(files['src/plugin/core/brick-manifest.ts'], /Browse/);
   assert.deepEqual(JSON.parse(files['design/angular-capabilities.json']).adapterRequirements, []);
   assert.deepEqual(angularBrickFiles(projectModel(document)), files);
 });

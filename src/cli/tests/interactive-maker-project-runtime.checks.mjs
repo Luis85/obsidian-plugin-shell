@@ -63,10 +63,10 @@ test('overlapping native opens release only stale application instances and unlo
 test('generated CLI source executes real human/JSON commands without any frontend or dependencies', async () => scratch(async root => {
   const document = runOperations(newDocument('Safe ${notExecuted}'), [{ op: 'page.add', title: '</script><script>throw 1</script>' }]).document;
   const result = await analyzeProject(documentText(document)); assert.equal(result.status, 'ok');
-  const files = { ...pluginExtensionFiles(), 'package.json': '{"type":"module"}', 'src/core/project.ts': coreSource(result.model),
-    'src/targets/cli/commands.ts': cliSource(), 'src/targets/cli/main.ts': '#!/usr/bin/env node\n' + cliEntry };
+  const files = { ...pluginExtensionFiles(), 'package.json': '{"type":"module"}', 'src/plugin/core/project.ts': coreSource(result.model),
+    'src/plugin/targets/cli/commands.ts': cliSource(), 'src/plugin/targets/cli/main.ts': '#!/usr/bin/env node\n' + cliEntry };
   for (const [path, source] of Object.entries(files)) { await mkdir(dirname(join(root, path)), { recursive: true }); await writeFile(join(root, path), source); }
-  function run(args) { return spawnSync(process.execPath, ['--experimental-strip-types', 'src/targets/cli/main.ts', ...args], { cwd: root, encoding: 'utf8', timeout: 5000, env: { ...process.env, NODE_NO_WARNINGS: '1' } }); }
+  function run(args) { return spawnSync(process.execPath, ['--experimental-strip-types', 'src/plugin/targets/cli/main.ts', ...args], { cwd: root, encoding: 'utf8', timeout: 5000, env: { ...process.env, NODE_NO_WARNINGS: '1' } }); }
   const list = run(['pages', '--json']); assert.equal(list.status, 0, list.stderr);
   const response = JSON.parse(list.stdout); assert.equal(response.pages[0].title, '</script><script>throw 1</script>'); assert.equal(list.stderr, '');
   const show = run(['show', response.pages[0].id]); assert.equal(show.status, 0); assert.match(show.stdout, /Starting scaffold/);
@@ -111,11 +111,11 @@ test('browser readiness is established only after mount, and teardown clears rea
 
 test('every generated browser framework passes strict TypeScript, including the asynchronous mount closure', async () => scratch(async root => {
   const { default: ts } = await import('typescript');
-  await mkdir(join(root, 'src/ui'), { recursive: true });
-  await mkdir(join(root, 'src/targets/preview'), { recursive: true });
-  await writeFile(join(root, 'src/ui/mount.ts'), 'export async function mount(root: HTMLElement): Promise<() => void> { return () => root.replaceChildren(); }');
+  await mkdir(join(root, 'src/plugin/ui'), { recursive: true });
+  await mkdir(join(root, 'src/plugin/targets/preview'), { recursive: true });
+  await writeFile(join(root, 'src/plugin/ui/mount.ts'), 'export async function mount(root: HTMLElement): Promise<() => void> { return () => root.replaceChildren(); }');
   await writeFile(join(root, 'styles.d.ts'), "declare module '*.css';");
-  const entry = join(root, 'src/targets/preview/main.ts');
+  const entry = join(root, 'src/plugin/targets/preview/main.ts');
   const compilerOptions = { strict: true, noEmit: true, skipLibCheck: true, target: ts.ScriptTarget.ES2022,
     module: ts.ModuleKind.ESNext, moduleResolution: ts.ModuleResolutionKind.Bundler,
     allowImportingTsExtensions: true, noUncheckedSideEffectImports: true, types: [] };

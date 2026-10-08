@@ -82,7 +82,7 @@ test('extracted compiled shell contains no starter data; a separate pack enables
   assert.equal(model.code, 0, JSON.stringify(model)); assert.equal(model.result.data.modeled.complete, true);
   const showcase = cli(['new', '../showcase', '--starter', 'feature-showcase', '--yes']);
   assert.equal(showcase.code, 0, JSON.stringify(showcase));
-  assert.ok((await readFile(join(directory, 'showcase/src/generated/presentation/composables/use-visual.ts'), 'utf8')).includes('readJsonControl'));
+  assert.ok((await readFile(join(directory, 'showcase/src/plugin/generated/presentation/composables/use-visual.ts'), 'utf8')).includes('readJsonControl'));
   assert.ok((await readFile(join(directory, 'showcase/docs/concepts/companion/vendor/vue-flow-core.iife.js'))).length > 1000);
   const created = cli(['new', '../product', '--starter', 'webapp', '--yes']); assert.equal(created.code, 0, JSON.stringify(created));
   assert.equal(JSON.parse(await readFile(join(directory, 'product/package.json'))).name, 'product');

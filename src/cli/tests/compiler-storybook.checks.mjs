@@ -4,6 +4,7 @@ import { stripTypeScriptTypes } from 'node:module';
 import { dirname, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
+import ts from 'typescript';
 import { visualNodes, visualRoot } from '#shared/companion/visual/visual-ir.mjs';
 import { compileProject, loadTemplateSnapshot } from '../compiler/index.ts';
 import { validateAuthoringDocument } from '#shared/companion/authoring-contract.ts';
@@ -149,4 +150,19 @@ test('terminal and structured interfaces expose independent switches and reject 
     assert.equal(help.status, 'ok'); assert.notEqual(help.data.commands[0].group, 'other');
     assert.ok(help.data.commands[0].examples.length);
   }
+});
+
+test('optional workspace inherits the generated product compiler context instead of the solution index', async () => {
+  const result = await compile({ enabled: true, generateStories: true });
+  const files = new Map(result.artifacts.map(file => ['/generated/' + file.path, file.content]));
+  const host = { useCaseSensitiveFileNames: true, readDirectory: () => [],
+    fileExists: path => files.has(path), readFile: path => files.get(path) };
+  const parsed = ts.parseJsonConfigFileContent(JSON.parse(get(result, 'storybook/tsconfig.json')), host, '/generated/storybook');
+  assert.deepEqual(parsed.errors, []);
+  assert.equal(parsed.options.strict, true);
+  assert.equal(parsed.options.skipLibCheck, true);
+  assert.equal(parsed.options.moduleResolution, ts.ModuleResolutionKind.Bundler);
+  assert.ok(parsed.options.types.includes('vite/client'));
+  assert.ok(parsed.options.lib.includes('lib.dom.d.ts'));
+  assert.deepEqual(parsed.options.paths['#build/*'], ['../../node_modules/.nuxt-ui/*']);
 });

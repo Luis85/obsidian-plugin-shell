@@ -19,8 +19,8 @@ async function isolatedPath(t, extra = {}) {
   const bin = join(root, 'bin'); await mkdir(bin);
   for (const tool of [...TOOLS, 'sha256sum', 'shasum']) if (lookup(tool)) await symlink(lookup(tool), join(bin, tool));
   for (const [name, body] of Object.entries(extra)) { await writeFile(join(bin, name), `#!/bin/sh\n${body}\n`); await chmod(join(bin, name), 0o755); }
-  const project = join(root, 'project'); await mkdir(join(project, 'scripts/agent'), { recursive: true });
-  await writeFile(join(project, 'package.json'), '{}'); await writeFile(join(project, '.nvmrc'), `${VERSION}\n`); await writeFile(join(project, 'scripts/agent/session-start.mjs'), '');
+  const project = join(root, 'project'); await mkdir(join(project, 'tooling/agent'), { recursive: true });
+  await writeFile(join(project, 'package.json'), '{}'); await writeFile(join(project, '.nvmrc'), `${VERSION}\n`); await writeFile(join(project, 'tooling/agent/session-start.mjs'), '');
   return { root, bin, project };
 }
 const setup = (box, env) => spawnSync('sh', [script], { cwd: box.project, encoding: 'utf8', timeout: 120_000,
@@ -33,14 +33,14 @@ test('[CLOUD-SETUP-01] the script is valid POSIX shell, executable and does noth
   const empty = join(box.root, 'empty'); await mkdir(empty);
   const outside = setup({ ...box, project: empty }, { CLAUDE_PROJECT_DIR: empty });
   assert.equal(outside.status, 0, outside.stderr);
-  assert.match(outside.stdout, /no Workbench checkout in .*\(missing scripts\/agent\/session-start\.mjs\); nothing to do/);
+  assert.match(outside.stdout, /no Workbench checkout in .*\(missing tooling\/agent\/session-start\.mjs\); nothing to do/);
 });
 
 test('[CLOUD-SETUP-02] with a usable Node the script delegates to the session hook in provisioning mode and downloads nothing', { skip: process.platform === 'win32' }, async t => {
   const box = await isolatedPath(t, { node: 'case "$1" in -p) echo 22 ;; *) echo "node ran: $*" ;; esac' });
   const result = setup(box, { XDG_CACHE_HOME: join(box.root, 'cache'), SHELL_NODE_DIST: 'http://127.0.0.1:9' });
   assert.equal(result.status, 0, result.stderr);
-  assert.equal(result.stdout.trim(), 'node ran: scripts/agent/session-start.mjs --provision-only');
+  assert.equal(result.stdout.trim(), 'node ran: tooling/agent/session-start.mjs --provision-only');
   assert.equal(existsSync(join(box.root, 'cache')), false);
   const old = await isolatedPath(t, { node: 'case "$1" in -p) echo 16 ;; *) echo "node ran: $*" ;; esac' });
   const tooOld = setup(old, { XDG_CACHE_HOME: join(old.root, 'cache'), SHELL_NODE_DIST: 'http://127.0.0.1:9' });
@@ -54,12 +54,12 @@ test('[CLOUD-SETUP-03] without any Node the script downloads the verified qualif
   const result = setup(box, { XDG_CACHE_HOME: join(dist.root, 'cache'), SHELL_NODE_DIST: dist.distUrl });
   assert.equal(result.status, 0, result.stderr);
   assert.match(result.stdout, new RegExp(`downloaded ${dist.archive.file} \\(SHA-256 verified\\) to ${join(dist.cache, dist.archive.name).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`));
-  assert.match(result.stdout, /fake-node scripts\/agent\/session-start\.mjs --provision-only/);
+  assert.match(result.stdout, /fake-node tooling\/agent\/session-start\.mjs --provision-only/);
   assert.deepEqual(await readdir(dist.cache), [dist.archive.name], 'no scratch left behind');
   const again = setup(box, { XDG_CACHE_HOME: join(dist.root, 'cache'), SHELL_NODE_DIST: 'http://127.0.0.1:9' });
   assert.equal(again.status, 0);
   assert.doesNotMatch(again.stdout, /downloaded/, 'a cached Node is reused without a network');
-  assert.match(again.stdout, /fake-node scripts\/agent\/session-start\.mjs --provision-only/);
+  assert.match(again.stdout, /fake-node tooling\/agent\/session-start\.mjs --provision-only/);
 });
 
 test('[CLOUD-SETUP-04] a checksum mismatch or an unsupported .nvmrc is refused, reported and still exits 0', { skip }, async t => {

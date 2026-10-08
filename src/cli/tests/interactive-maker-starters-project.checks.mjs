@@ -70,7 +70,7 @@ test('a Companion starter compiles the customized document and binds the compile
   const planned = await plan(context, { starter: 'blank', author: 'Ada', id: 'field-notes' });
   const receipt = JSON.parse(content(planned, receiptFile));
   assert.deepEqual(receipt.values, { id: 'field-notes', name: 'Field Notes', author: 'Ada', description: 'A minimal starting point with an empty workspace and no product requirements.',
-    version: '0.1.0', codebaseFolder: 'src', testsFolder: 'tests' });
+    version: '0.1.0', codebaseFolder: 'src/plugin', testsFolder: 'src/plugin/tests' });
   assert.equal(JSON.parse(content(planned, 'manifest.json')).id, 'field-notes');
   assert.equal(JSON.parse(content(planned, 'manifest.json')).author, 'Ada');
   assert.deepEqual(receipt.files.map(file => file.path), planned.plan.changes.slice(0, -1).map(change => change.path.slice('field-notes/'.length)));

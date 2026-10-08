@@ -40,17 +40,17 @@ test('generated custom-maker and locale checks run in an extracted kit through i
   const made = cli(dir, ['make', 'maker', 'nudge', '--yes']);
   assert.deepEqual(made.data.summary.checks.map(check => [check.id, check.status]),
     [['typecheck', 'passed'], ['tooling-test:custom-nudge', 'passed'], ['events-check', 'passed'], ['entities-check', 'passed']]);
-  const entities = run(dir, ['scripts/makers/entities.mjs', '--check']);
+  const entities = run(dir, ['tooling/makers/entities.mjs', '--check']);
   assert.equal(entities.status, 0, entities.stderr); assert.equal(JSON.parse(entities.stdout).status, 'passed');
-  const recipe = await readFile(join(dir, 'scripts/makers/custom/nudge.mjs'), 'utf8');
+  const recipe = await readFile(join(dir, 'tooling/makers/custom/nudge.mjs'), 'utf8');
   assert.doesNotMatch(recipe, /\bimport\b|existsSync|src\/cli\/adapters|bin\/template/);
   assert.equal(cli(dir, ['make', 'nudge', 'review', '--feature', 'tasks', '--trust-custom', '--yes']).status, 'applied');
-  assert.match(await readFile(join(dir, 'src/features/tasks/review.command.ts'), 'utf8'), /export function tasksReviewCommand/);
-  assert.match(await readFile(join(dir, 'src/bootstrap/authoring.ts'), 'utf8'), /tasksReviewCommand/);
+  assert.match(await readFile(join(dir, 'src/plugin/features/tasks/review.command.ts'), 'utf8'), /export function tasksReviewCommand/);
+  assert.match(await readFile(join(dir, 'src/plugin/bootstrap/authoring.ts'), 'utf8'), /tasksReviewCommand/);
   cli(dir, ['make', 'locale', 'fr', '--yes']);
-  assert.doesNotMatch(await readFile(join(dir, 'tests/tooling/locale-fr.checks.mjs'), 'utf8'), /src\/cli\/adapters|bin\/template|existsSync/);
+  assert.doesNotMatch(await readFile(join(dir, 'src/plugin/tests/tooling/locale-fr.checks.mjs'), 'utf8'), /src\/cli\/adapters|bin\/template|existsSync/);
   assert.deepEqual(cli(dir, ['make', 'locale', 'fr', '--check']).data, { locale: 'fr', missing: [], extra: [], selectable: false });
-  const checks = run(dir, ['--test', '--test-reporter=tap', 'tests/tooling/custom-nudge.checks.mjs', 'tests/tooling/locale-fr.checks.mjs']);
+  const checks = run(dir, ['--test', '--test-reporter=tap', 'tooling/tests/custom-nudge.checks.mjs', 'src/plugin/tests/tooling/locale-fr.checks.mjs']);
   assert.equal(checks.status, 0, checks.stdout + checks.stderr);
   assert.match(checks.stdout, /# pass 2\b/);
 });

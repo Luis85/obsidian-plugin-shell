@@ -425,7 +425,7 @@
     },
     {
       "path": "src/plugin/tests/e2e/design-system.spec.ts",
-      "sha256": "bc14a79325b8b00504d408db4215cdc403fdc5ceaabfd0a345ecf4d4c1976e99"
+      "sha256": "02e6f6c2b49df2a39d26709c8ee6178f1dcb08a6f2b62b3d83e263ea5a40a86a"
     },
     {
       "path": "src/shared/testing/native-recovery-handles.mjs",

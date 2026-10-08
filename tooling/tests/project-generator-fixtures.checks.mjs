@@ -33,8 +33,8 @@ test('malformed and dangling recipes fail generation rather than generating brok
 });
 test('generated kit preserves engine bytes, creates a read-only plan, and applies only approved test-vault notes',async()=>{
  const m=projectModel(seed);const files=new Map();assert.equal(await renderFixtureCode(template,m,(p,c)=>files.set(p,c)),true);
- assert.equal(files.get('scripts/test-data/engine.mjs'),await readFile('docs/concepts/companion/test-kit/engine.mjs','utf8'));
- assert.ok(files.has('tests/project/recipes/authoring-vault-list-requirements.test.mjs'));
+ assert.equal(files.get('tooling/test-data/engine.mjs'),await readFile('docs/concepts/companion/test-kit/engine.mjs','utf8'));
+ assert.ok(files.has('src/plugin/tests/project/recipes/authoring-vault-list-requirements.test.mjs'));
  const scratch=await mkdtemp(join(tmpdir(),'generator-recipes-'));
  try{const manifest=fixtureManifest(m);const plan=await planFixtures(scratch,manifest);assert.ok(plan.changes.length>0);assert.deepEqual(await readdir(scratch),[]);
   await assert.rejects(applyFixtures(scratch,manifest,'0'.repeat(64)));

@@ -65,8 +65,8 @@ test('[GENERATOR-DEVKIT-03] Claude Code, VS Code and agent files are valid, wire
   for (const [hook, script] of [[post.hooks[0], 'post-edit-tests'], [stop.hooks[0], 'stop-check'], [start.hooks[0], 'session-start']]) {
     // One command string: an `args` array is not part of Claude Code's hook schema and would be ignored silently.
     assert.equal(hook.type, 'command'); assert.equal(typeof hook.command, 'string'); assert.ok(!('args' in hook), `${script} must not use args`);
-    assert.equal(hook.command, `node "$CLAUDE_PROJECT_DIR/scripts/agent/${script}.mjs"`);
-    assert.ok(files.has(`scripts/agent/${script}.mjs`), script);
+    assert.equal(hook.command, `node "$CLAUDE_PROJECT_DIR/tooling/agent/${script}.mjs"`);
+    assert.ok(files.has(`tooling/agent/${script}.mjs`), script);
   }
   for (const denied of ['Bash(npm publish *)', 'Bash(npm run release*)', 'Bash(git push --force*)']) assert.ok(settings.permissions.deny.includes(denied), denied);
   for (const skill of productSkills) {
@@ -77,7 +77,7 @@ test('[GENERATOR-DEVKIT-03] Claude Code, VS Code and agent files are valid, wire
   const launch = JSON.parse(text('.vscode/launch.json')).configurations;
   assert.deepEqual(launch.map(item => [item.name, item.type, item.request]), [['Attach to Obsidian (dev:obsidian)', 'chrome', 'attach'], ['Debug current Vitest file', 'node', 'launch']]);
   assert.equal(launch[0].port, 9222);
-  for (const path of ['README.md', 'AGENTS.md', 'CLAUDE.md', '.claude/settings.json', '.vscode/launch.json', '.github/workflows/ci.yml', '.editorconfig', 'configs/testing/vitest.project.config.mjs', 'tests/project/plugin-host.test.ts'])
+  for (const path of ['README.md', 'AGENTS.md', 'CLAUDE.md', '.claude/settings.json', '.vscode/launch.json', '.github/workflows/ci.yml', '.editorconfig', 'configs/testing/vitest.project.config.mjs', 'src/plugin/tests/project/plugin-host.test.ts'])
     assert.equal(files.get(path).ownership, 'extension', path);
   assert.equal(files.get('PROJECT-IMPLEMENTATION.md').ownership, 'managed');
   assert.match(text('PROJECT-IMPLEMENTATION.md'), /\[README\.md\]\(README\.md\)/);
@@ -124,30 +124,30 @@ test('[GENERATOR-DEVKIT-10] the agent kit has a brief, PR template, task templat
 });
 test('[GENERATOR-DEVKIT-04] product tests use the Obsidian test kit and the project keeps the real-Obsidian loop', () => {
   const config = text('configs/testing/vitest.project.config.mjs');
-  assert.match(config, /'@test\/obsidian': fileURLToPath\(new URL\('\.\.\/\.\.\/tests\/support\/obsidian\/index\.ts'/);
+  assert.match(config, /'@test\/obsidian': fileURLToPath\(new URL\('\.\.\/\.\.\/src\/plugin\/tests\/support\/obsidian\/index\.ts'/);
   assert.match(config, /OBSIDIAN_BOUNDARY_REQUIRES_EXPLICIT_TEST_DOUBLE/); assert.doesNotMatch(config, /reporters/);
-  assert.match(config, /include: \["tests\/project\/\*\*\/\*\.test\.\{ts,mjs\}", "tests\/runtime\/generated\/\*\*\/\*\.test\.ts"\]/);
-  assert.ok(JSON.parse(text('configs/types/tsconfig.project.json')).include.includes('../../tests/runtime/generated/**/*.ts'));
-  const example = text('tests/project/plugin-host.test.ts');
-  assert.match(example, /vi\.mock\('obsidian', \(\) => import\('@test\/obsidian'\)\)/); assert.match(example, /from "\.\.\/\.\.\/src\/main\.ts"/);
-  assert.match(example, /join\(import\.meta\.dirname, "\.\.\/obsidian\/vault"\)/);
-  assert.ok(files.has('configs/testing/vitest.obsidian.config.mjs')); assert.ok(files.has('tests/obsidian/plugin-load.obsidian.ts'));
+  assert.match(config, /include: \["src\/plugin\/tests\/project\/\*\*\/\*\.test\.\{ts,mjs\}", "src\/plugin\/tests\/unit\/generated\/\*\*\/\*\.test\.ts"\]/);
+  assert.ok(JSON.parse(text('configs/types/tsconfig.project.json')).include.includes('../../src/plugin/tests/unit/generated/**/*.ts'));
+  const example = text('src/plugin/tests/project/plugin-host.test.ts');
+  assert.match(example, /vi\.mock\('obsidian', \(\) => import\('@test\/obsidian'\)\)/); assert.match(example, /from "\.\.\/\.\.\/main\.ts"/);
+  assert.match(example, /join\(import\.meta\.dirname, "\.\.\/\.\.\/\.\.\/\.\.\/tooling\/tests\/obsidian\/vault"\)/);
+  assert.ok(files.has('configs/testing/vitest.obsidian.config.mjs')); assert.ok(files.has('tooling/tests/obsidian/plugin-load.obsidian.ts'));
   const scripts = JSON.parse(text('package.json')).scripts;
   for (const name of ['check', 'check:fast', 'test', 'test:watch', 'test:tdd', 'test:obsidian', 'dev:obsidian', 'dev:ui', 'typecheck:project', 'verify:project', 'doctor']) assert.ok(scripts[name], name);
-  assert.match(text('src/generated/bootstrap/install.ts'), /createDebugCommands/);
-  assert.match(text('src/generated/bootstrap/install.ts'), /'-view-project-workbench'/);
+  assert.match(text('src/plugin/generated/bootstrap/install.ts'), /createDebugCommands/);
+  assert.match(text('src/plugin/generated/bootstrap/install.ts'), /'-view-project-workbench'/);
 });
 test('[GENERATOR-DEVKIT-07] custom test folders keep the example test, Vitest config and suite manifest aligned', async () => {
   const custom = structuredClone(document); custom.settings = { codebaseFolder: 'product/code', testsFolder: 'verification/specs' };
   const output = new Map((await projectFiles(root, projectModel(custom))).map(entry => [entry.path, entry]));
   assert.ok(output.has('verification/specs/project/plugin-host.test.ts'));
-  assert.match(output.get('verification/specs/project/plugin-host.test.ts').content, /from "\.\.\/\.\.\/\.\.\/src\/main\.ts"/);
+  assert.match(output.get('verification/specs/project/plugin-host.test.ts').content, /from "\.\.\/\.\.\/\.\.\/src\/plugin\/main\.ts"/);
   assert.match(output.get('configs/testing/vitest.project.config.mjs').content, /"verification\/specs\/project\/\*\*\/\*\.test\.\{ts,mjs\}"/);
   const suites = JSON.parse(output.get('tests/suites.json').content);
   assert.ok(suites.roots.some(entry => entry.path === 'verification/specs/project'));
   assert.deepEqual(suites.suites.find(suite => suite.name === 'project').include, ['verification/specs/project/**/*.test.ts', 'verification/specs/project/**/*.test.mjs']);
   assert.ok(!output.get('tests/suites.json').content.includes('"tests/project'));
-  assert.equal(text('tests/suites.json'), await readFile(join(root, 'tests/suites.json'), 'utf8'));
+  assert.equal(text('tests/suites.json'), (await readFile(join(root, 'tests/suites.json'), 'utf8')).replaceAll('"tests/project', '"src/plugin/tests/project'));
 });
 test('[GENERATOR-DEVKIT-05] templates and link rebasing are exact and fail closed', () => {
   assert.equal(renderTemplate('# {{name}} ${{ github.ref }}', { name: 'X' }), '# X ${{ github.ref }}');
@@ -178,14 +178,14 @@ test('[GENERATOR-DEVKIT-06] regeneration keeps an edited README and AGENTS.md; a
   } finally { await rm(vault, { recursive: true, force: true }); }
 });
 test('[GENERATOR-DEVKIT-10] a generated project carries the cloud-session kit and leaves the maintainer handoff tooling behind', () => {
-  for (const path of ['scripts/agent/cloud-setup.sh', 'scripts/agent/session-start.mjs', 'scripts/agent/session-node.mjs', 'scripts/agent/session-node-io.mjs', 'scripts/agent/session-toolchain.mjs',
-    'scripts/agent/session-version.mjs', 'scripts/agent/session-switch.mjs', 'scripts/agent/session-install.mjs', 'scripts/agent/session-browser.mjs', 'scripts/agent/process-group.mjs'])
+  for (const path of ['tooling/agent/cloud-setup.sh', 'tooling/agent/session-start.mjs', 'tooling/agent/session-node.mjs', 'tooling/agent/session-node-io.mjs', 'tooling/agent/session-toolchain.mjs',
+    'tooling/agent/session-version.mjs', 'tooling/agent/session-switch.mjs', 'tooling/agent/session-install.mjs', 'tooling/agent/session-browser.mjs', 'tooling/agent/process-group.mjs'])
     assert.ok(files.has(path), `${path} is imported by a hook or is the setup script`);
-  for (const path of ['scripts/testing/qualify-project-handoff.mjs', 'scripts/testing/handoff-run.mjs', 'scripts/testing/handoff-steps.mjs', 'tests/tooling/agent-project-handoff.checks.mjs'])
+  for (const path of ['tooling/testing/qualify-project-handoff.mjs', 'tooling/testing/handoff-run.mjs', 'tooling/testing/handoff-steps.mjs', 'src/cli/tests/agent-project-handoff.checks.mjs'])
     assert.ok(!files.has(path), `${path} generates projects from framework starters, so it stays in the framework`);
-  for (const path of ['scripts/projects/projects.mjs', 'scripts/projects/workflows.mjs', 'tests/tooling/projects-boundary.checks.mjs', 'docs/framework/workflows/projects-boundary.yml'])
+  for (const path of ['tooling/projects/projects.mjs', 'tooling/projects/workflows.mjs', 'tooling/tests/projects-boundary.checks.mjs', 'docs/framework/workflows/projects-boundary.yml'])
     assert.ok(!files.has(path), `${path} manages the framework checkout's projects/ folder, so it stays in the framework`);
-  for (const path of ['scripts/testing/qualify-site-templates.mjs', 'tests/tooling/site-templates-qualification.checks.mjs', 'docs/framework/workflows/site-templates.yml', 'tests/fixtures/sites/vault/Site/Features.base'])
+  for (const path of ['tooling/testing/qualify-site-templates.mjs', 'tooling/tests/site-templates-qualification.checks.mjs', 'docs/framework/workflows/site-templates.yml', 'tests/fixtures/sites/vault/Site/Features.base'])
     assert.ok(!files.has(path), `${path} qualifies the framework's own site templates, so it stays in the framework`);
   assert.ok(files.has('templates/sites/catalog.json'), 'the site templates ship with the bundled site commands');
   assert.ok(![...files.keys()].some(path => path.includes('projects--')), 'workflows synced from projects/<name> never reach a generated project');
@@ -200,15 +200,15 @@ test('[GENERATOR-DEVKIT-11] project scripts type-check the project config, alway
   for (const output of [files, empty]) {
     const scripts = JSON.parse(output.get('package.json').content).scripts;
     assert.equal(scripts.typecheck, scripts['typecheck:project']); assert.match(scripts.typecheck, /--project configs\/types\/tsconfig\.project\.json$/);
-    assert.match(output.get('tests/project/acceptance/traceability.test.ts').content, /keeps its use case and acceptance test/);
+    assert.match(output.get('src/plugin/tests/project/acceptance/traceability.test.ts').content, /keeps its use case and acceptance test/);
   }
   const visual = JSON.parse(text('package.json')).scripts, plain = JSON.parse(empty.get('package.json').content).scripts;
-  assert.ok([...files.keys()].some(path => path.startsWith('tests/project/ui-effects/')), 'the visual starter emits UI-effect checks');
-  assert.equal(visual['test:ui-effects'], 'node scripts/testing/suites.mjs project:ui-effects', 'a declared visual design requires a non-empty suite');
-  assert.equal(visual['test:project'], 'node scripts/testing/suites.mjs project project:ui-effects');
-  assert.ok(![...empty.keys()].some(path => path.startsWith('tests/project/ui-effects/')), 'blank declares no visual definitions');
+  assert.ok([...files.keys()].some(path => path.startsWith('src/plugin/tests/project/ui-effects/')), 'the visual starter emits UI-effect checks');
+  assert.equal(visual['test:ui-effects'], 'node tooling/testing/suites.mjs project:ui-effects', 'a declared visual design requires a non-empty suite');
+  assert.equal(visual['test:project'], 'node tooling/testing/suites.mjs project project:ui-effects');
+  assert.ok(![...empty.keys()].some(path => path.startsWith('src/plugin/tests/project/ui-effects/')), 'blank declares no visual definitions');
   assert.match(plain['test:ui-effects'], /^node -e "console\.log\('test:ui-effects skipped: this project declares no visual definitions/);
-  assert.equal(plain['test:project'], 'node scripts/testing/suites.mjs project && npm run test:ui-effects');
+  assert.equal(plain['test:project'], 'node tooling/testing/suites.mjs project && npm run test:ui-effects');
   for (const scripts of [visual, plain]) {
     // The full gate is `check` (typecheck, oxlint, ESLint, product and maker tooling tests) plus what CI adds after it.
     assert.equal(scripts['verify:project'], 'npm run check && npm run verify:artifacts');

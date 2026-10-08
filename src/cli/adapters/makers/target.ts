@@ -26,15 +26,27 @@ export async function makerTarget(root: string, kind: SourceKind = 'plugin', nam
   return { ...makerLayout(root), name: project.name, path: project.path, depthToRoot: project.path.split('/').map(() => '..').join('/') };
 }
 
+const sourceTestFolders = [
+  ['tests/runtime/', 'unit'], ['tests/tooling/', 'tooling'], ['tests/fixtures/', 'fixtures'],
+] as const;
+/** Source-owned tests follow their source; project-wide tooling checks follow the tooling folder. */
+function makerTestPath(target: MakerTarget, path: string): string | undefined {
+  if (target.path === 'src') {
+    if (target.tooling === 'tooling' && path.startsWith('tests/tooling/'))
+      return `tooling/tests/${path.slice('tests/tooling/'.length)}`;
+    return undefined;
+  }
+  for (const [prefix, folder] of sourceTestFolders) {
+    if (path.startsWith(prefix)) return `${target.path}/tests/${folder}/${path.slice(prefix.length)}`;
+  }
+  return undefined;
+}
 /** Recipes describe the legacy logical layout. This boundary relocates their outputs and relative imports together. */
 export function makerPath(target: MakerTarget, path: string): string {
   if (/^src\/(?:application|bootstrap|domain|features|infrastructure|locales|presentation|styles)(?:\/|$)/.test(path))
     return target.path + path.slice(3);
-  if (target.path !== 'src') {
-    if (path.startsWith('tests/runtime/')) return `${target.path}/tests/unit/${path.slice('tests/runtime/'.length)}`;
-    if (path.startsWith('tests/tooling/')) return `${target.path}/tests/tooling/${path.slice('tests/tooling/'.length)}`;
-    if (path.startsWith('tests/fixtures/')) return `${target.path}/tests/fixtures/${path.slice('tests/fixtures/'.length)}`;
-  }
+  const testPath = makerTestPath(target, path);
+  if (testPath) return testPath;
   if (path.startsWith('plugins/')) return target.sdk + path.slice(7);
   if (path.startsWith('scripts/')) return target.tooling + path.slice(7);
   return path;

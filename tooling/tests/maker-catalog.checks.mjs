@@ -22,7 +22,7 @@ async function apply(root, args) {
 test('[MAKER-MAINTAINABILITY] generated maintained production passes the complete unchanged metric gate', () => makerFixture(async root => {
   await installMakerFoundation(root);
   await apply(root, ['feature', 'bookmarks', '--entity', 'bookmark']);
-  await mkdir(join(root, 'harness'), { recursive: true });
+  await mkdir(join(root, 'tooling'), { recursive: true });
   await cp(join(makerSourceRoot, 'package-lock.json'), join(root, 'package-lock.json'));
   await writeFile(join(root, '.fallowrc.json'), '{}\n');
   const generated = join(root, 'src/features/bookmarks/bookmark.entity.ts');
@@ -38,8 +38,10 @@ test('[MAKER-MAINTAINABILITY] generated maintained production passes the complet
 test('[MAKER-CATALOG] every integrated recipe generates executable source, real tests, and safe reruns', () => makerFixture(async root => {
   await installMakerFoundation(root); await copyMakerSuite(root);
   await mkdir(join(root, 'src/locales'), { recursive: true });
-  await cp(join(makerSourceRoot, 'src/locales/en.json'), join(root, 'src/locales/en.json'));
-  await cp(join(makerSourceRoot, 'tsconfig.json'), join(root, 'tsconfig.json'));
+  await cp(join(makerSourceRoot, 'src/plugin/locales/en.json'), join(root, 'src/locales/en.json'));
+  await mkdir(join(root, 'configs/types'), { recursive: true });
+  await writeFile(join(root, 'tsconfig.json'), JSON.stringify({ extends: './configs/types/tsconfig.base.json',
+    include: ['src/**/*.ts', 'src/**/*.vue', 'tests/runtime/**/*.ts'], exclude: ['src/cli', 'src/shared'] }));
   await cp(join(makerSourceRoot, 'configs/types/tsconfig.base.json'), join(root, 'configs/types/tsconfig.base.json'));
   await apply(root, ['feature', 'bookmarks', '--entity', 'bookmark']);
   const requests = [

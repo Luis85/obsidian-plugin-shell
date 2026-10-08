@@ -6,6 +6,7 @@
 import { join } from 'node:path';
 import { readdir } from 'node:fs/promises';
 import { exists } from './files.ts';
+import { readSourceState } from '../source-workspace.ts';
 import { lintRoots } from '#shared/platform/project-roots.mjs';
 import { projectConfigPath, projectConfigs } from '#shared/platform/project-configs.mjs';
 import { repositoryScope, toolingFolder } from './repository-scope.ts';
@@ -43,9 +44,19 @@ interface Parts { makers: CheckStep[]; typecheck: CheckStep; fullTest: CheckStep
 const authoringTest = /^(?:custom|locale)-[a-z0-9-]+\.checks\.mjs$/;
 /** Tooling tests the custom-maker and locale recipes write; a node:test file runs its tests when executed directly. */
 async function authoringSteps(root: string): Promise<CheckStep[]> {
-  if (!await exists(join(root, 'tests/tooling'))) return [];
-  const names = (await readdir(join(root, 'tests/tooling'))).filter(name => authoringTest.test(name)).sort();
-  return names.map(name => ({ id: `tooling:${name.slice(0, -'.checks.mjs'.length)}`, display: `node tests/tooling/${name}`, entry: `tests/tooling/${name}`, args: [] }));
+  const { manifest } = await readSourceState(root);
+  const folders = new Set(['tests/tooling', 'tooling/tests', ...manifest.projects.map(project => `${project.path}/tests/tooling`)]);
+  const entries: Array<{ name: string; path: string }> = [];
+  for (const folder of folders) {
+    if (!await exists(join(root, folder))) continue;
+    const files = await readdir(join(root, folder), { withFileTypes: true });
+    for (const file of files.filter(file => file.isFile() && authoringTest.test(file.name)).sort((a, b) => a.name.localeCompare(b.name)))
+      entries.push({ name: file.name.slice(0, -'.checks.mjs'.length), path: `${folder}/${file.name}` });
+  }
+  return entries.map(({ name, path }) => ({
+    id: `tooling:${entries.filter(entry => entry.name === name).length > 1 ? path.slice(0, -'.checks.mjs'.length) : name}`,
+    display: `node ${path}`, entry: path, args: [],
+  }));
 }
 const oxlintEntryFor = (project: boolean): string => `${toolingFolder(project ? 'generated-project' : 'shell-repository')}/quality/lint-source.mjs`;
 /** The same two linters as `npm run lint`: oxlint over owned source, then ESLint over the configured roots. */

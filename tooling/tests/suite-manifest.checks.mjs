@@ -280,7 +280,7 @@ test('tooling checks written by the custom-maker and locale recipes are claimed 
   const { readFile } = await import('node:fs/promises');
   const real = JSON.parse(await readFile(resolve('tests/suites.json'), 'utf8'));
   // Paths mirror src/cli/adapters/makers/extra-recipes.ts, which writes these files into consumer projects.
-  for (const path of ['tests/tooling/custom-reminder.checks.mjs', 'tests/tooling/locale-fr.checks.mjs']) {
+  for (const path of ['tooling/tests/custom-reminder.checks.mjs', 'tooling/tests/locale-fr.checks.mjs', 'tests/tooling/custom-reminder.checks.mjs', 'tests/tooling/locale-fr.checks.mjs']) {
     const owners = real.suites.filter(entry => (entry.include ?? []).some(pattern => globToRegExp(pattern).test(path)));
     assert.deepEqual(owners.map(entry => entry.name), ['makers'], path);
     assert.equal(owners[0].verify, 'tooling');

@@ -164,6 +164,7 @@ test('template snapshots refuse links, fonts and cancellation and expose only te
   await mkdir(join(folder, 'src/__pycache__'), { recursive: true });
   await writeFile(join(folder, 'src/__pycache__/x.pyc'), 'cache');
   await writeFile(join(folder, 'src/data.gz'), Buffer.from([1, 2, 3]));
+  await mkdir(join(folder, 'src/plugin'), { recursive: true });
   await writeFile(join(folder, 'src/plugin/main.ts'), 'export {};\n');
   const snapshot = await loadTemplateSnapshot(folder);
   assert.equal(snapshot.text('src/plugin/main.ts'), 'export {};\n'); assert.ok(Object.isFrozen(snapshot));

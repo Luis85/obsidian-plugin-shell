@@ -17,7 +17,8 @@ export async function compile(document: SketchDocument, root: string, kind: 'cli
   const receipt = generationReceipt(document.project.id, source, compilation.artifacts.map(artifact => ({
     path: artifact.path, hash: hash(Buffer.from(artifact.content, artifact.encoding ?? 'utf8')), ownership: artifact.ownership,
   })));
-  const artifacts = [...compilation.artifacts, { path: '.companion/generation.json', content: JSON.stringify(receipt, null, 2) + '\n' }];
+  // Keep machine-owned provenance compact so generated inputs stay within inventory bounds.
+  const artifacts = [...compilation.artifacts, { path: '.companion/generation.json', content: JSON.stringify(receipt) + '\n' }];
   return { compilation, template, artifacts };
 }
 export async function boilerplatePlan(root: string, frameworkRoot: string, out: string, document: SketchDocument, kind: 'clickdummy' | 'obsidian-plugin' | 'project', signal?: AbortSignal, projectSelection?: ProjectSelection) {

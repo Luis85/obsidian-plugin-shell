@@ -12,7 +12,7 @@ export function uiQualitySpec(surfaces: readonly UiQualitySurface[]): string {
 // accessibility and layout evidence for the generated preview. They are not product acceptance, not a native
 // Obsidian result and keep no screenshot baselines.
 import { test, expect, type Page, type TestInfo } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
+import { AxeBuilder } from '@axe-core/playwright';
 
 interface Surface { id: string; label: string }
 const surfaces: Surface[] = [

@@ -112,11 +112,11 @@ test('[OWN-README-07] a freshly generated blank project plans example removal wi
     const plan = await planProject({ input, vault, target: 'plugin', templateRoot: frameworkRoot }); await applyProject(plan, plan.hash);
     const target = join(vault, 'plugin'), readme = await readFile(join(target, 'README.md'), 'utf8');
     const planned = await planExampleRemoval(target);
-    assert.ok(planned.plan.changes.some(change => change.path === 'src/features/tasks/definition.ts' && change.status === 'delete'));
-    assert.match(planned.plan.changes.find(change => change.path === 'src/bootstrap/features.ts').status, /^update$/);
+    assert.ok(planned.plan.changes.some(change => change.path === 'src/plugin/features/tasks/definition.ts' && change.status === 'delete'));
+    assert.match(planned.plan.changes.find(change => change.path === 'src/plugin/bootstrap/features.ts').status, /^update$/);
     assert.ok(!planned.plan.changes.some(change => change.path === 'README.md'));
     await applyFilePlan(planned.plan);
     assert.equal(await readFile(join(target, 'README.md'), 'utf8'), readme);
-    assert.doesNotMatch(await readFile(join(target, 'src/bootstrap/features.ts'), 'utf8'), /taskFeature|projectFeature|itemFeature/);
+    assert.doesNotMatch(await readFile(join(target, 'src/plugin/bootstrap/features.ts'), 'utf8'), /taskFeature|projectFeature|itemFeature/);
   } finally { await rm(vault, { recursive: true, force: true }); }
 });

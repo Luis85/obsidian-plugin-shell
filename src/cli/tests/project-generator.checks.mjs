@@ -86,7 +86,7 @@ test('fresh plan is read-only; apply and replay produce a complete independent p
   assert.match(await readFile(join(target,'src/plugin/generated/presentation/stores/authoring-vault.ts'),'utf8'),/defineStore/);
   assert.match(await readFile(join(target,'src/plugin/generated/infrastructure/sources/authoring-vault.ts'),'utf8'),/repositories.GRequirement.list/);
   assert.match(await readFile(join(target,'src/plugin/bootstrap/features.ts'),'utf8'),/GRequirement: register\(GRequirement\)/);
-  assert.deepEqual(await readFile(join(target,'harness/styles/vendor/obsidian.css.gz')),await readFile(join(root,'harness/styles/vendor/obsidian.css.gz')));
+  assert.deepEqual(await readFile(join(target,'src/plugin/harness/styles/vendor/obsidian.css.gz')),await readFile(join(root,'src/plugin/harness/styles/vendor/obsidian.css.gz')));
   const trace=JSON.parse(await readFile(join(target,'design/traceability.json'),'utf8')); assert.equal(trace.requirements.length,31);
   assert.ok(trace.requirements.every(r=>r.verification==='todo'));
   assert.deepEqual(trace.visualDesigns,fixture.design.visualDesigns);

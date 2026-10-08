@@ -202,11 +202,11 @@ test('relocated framework configuration preserves defaults, validation and compa
   const config = relocatedDefaults(project);
   assert.equal(config.schemaVersion, 1);
   assert.deepEqual(config.paths, {
-    codebaseFolder: 'src', testsFolder: 'tests', testVaultFolder: '.test-vault', configDirectory: '.obsidian',
+    codebaseFolder: 'src/plugin', testsFolder: 'src/plugin/tests', testVaultFolder: '.test-vault', configDirectory: '.obsidian',
   });
   assert.throws(() => relocatedIdentity({ ...project, id: 'Invalid ID' }), error => error.code === 'INVALID_IDENTITY');
   assert.throws(() => relocatedConfiguration({
-    ...config, paths: { ...config.paths, testsFolder: 'src/tests' },
+    ...config, paths: { ...config.paths, testsFolder: 'src/plugin/arbitrary' },
   }), error => error.code === 'CONFIG_OVERLAP');
 
   const imported = { project: { ...project, name: 'Imported' }, settings: { codebaseFolder: 'app', testsFolder: 'spec' } };

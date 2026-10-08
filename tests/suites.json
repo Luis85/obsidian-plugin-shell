@@ -224,7 +224,10 @@
           "src/cli/tests/interactive-maker-style-export.checks.mjs",
           "src/cli/tests/interactive-maker-terminal-views.checks.mjs",
           "src/tui/tests/interactive-maker-tui-state.checks.mjs",
-          "src/cli/tests/interactive-maker-ui-status-domain.checks.mjs"
+          "src/cli/tests/interactive-maker-ui-status-domain.checks.mjs",
+          "src/cli/tests/source-projects.checks.mjs",
+          "src/cli/tests/source-projects-edit.checks.mjs",
+          "src/cli/tests/source-imports.checks.mjs"
         ],
         "component": [
           "src/cli/tests/interactive-maker-guide.checks.mjs",
@@ -240,7 +243,9 @@
         "src/cli/tests/interactive-maker-*.checks.mjs",
         "src/shared/tests/interactive-maker-*.checks.mjs",
         "src/tui/tests/interactive-maker-*.checks.mjs",
-        "tooling/tests/interactive-maker-*.checks.mjs"
+        "tooling/tests/interactive-maker-*.checks.mjs",
+        "src/cli/tests/source-*.checks.mjs",
+        "src/cli/tests/maker-source-target.checks.mjs"
       ],
       "verify": "own-step",
       "verifyStep": "maker-coverage-run executes every maker file once, under coverage, and maker-coverage-gate gates it; the tooling step leaves them out",
@@ -502,10 +507,7 @@
           "src/cli/tests/framework-documents.checks.mjs",
           "tooling/tests/starter-catalog-docs.checks.mjs",
           "src/cli/tests/starter-submission-identity.checks.mjs",
-          "src/cli/tests/gate-scope.checks.mjs",
-          "src/cli/tests/source-projects.test.mjs",
-          "src/cli/tests/source-projects-edit.test.mjs",
-          "src/cli/tests/source-imports.test.mjs"
+          "src/cli/tests/gate-scope.checks.mjs"
         ]
       },
       "runner": {
@@ -517,7 +519,6 @@
         "tooling/tests/framework-*.checks.mjs",
         "tooling/tests/capability-discovery.checks.mjs",
         "src/cli/tests/gate-scope.checks.mjs",
-        "src/cli/tests/source-*.test.mjs",
         "src/cli/tests/starter-*.checks.mjs",
         "src/shared/tests/starter-*.checks.mjs",
         "tooling/tests/starter-*.checks.mjs"
@@ -900,9 +901,10 @@
       },
       "include": [
         "src/cli/tests/maker-*.checks.mjs",
-        "src/cli/tests/maker-source-target.test.mjs",
         "tooling/tests/maker-*.checks.mjs",
         "tooling/tests/makers.checks.mjs",
+        "tooling/tests/custom-*.checks.mjs",
+        "tooling/tests/locale-*.checks.mjs",
         "tests/tooling/custom-*.checks.mjs",
         "tests/tooling/locale-*.checks.mjs",
         "tooling/tests/event-*.checks.mjs",
@@ -914,6 +916,9 @@
       "npmScript": "test:makers",
       "workflows": [
         "ci"
+      ],
+      "exclude": [
+        "src/cli/tests/maker-source-target.checks.mjs"
       ]
     },
     {

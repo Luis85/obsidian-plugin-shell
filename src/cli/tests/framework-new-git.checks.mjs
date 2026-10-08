@@ -84,8 +84,8 @@ test('new keeps the framework entry points executable in the first commit, so a 
   const cwd = await scratch(t);
   create(cwd, ['modes', '--starter', 'blank']);
   const project = join(cwd, 'modes'), env = bareGit(join(cwd, 'home'));
-  const modes = Object.fromEntries(git(project, ['ls-files', '-s', 'bin/app', 'scripts/agent/cloud-setup.sh', 'package.json'], env).stdout.trim().split('\n').map(line => [line.split('\t')[1], line.slice(0, 6)]));
-  assert.deepEqual(modes, { 'bin/app': '100755', 'scripts/agent/cloud-setup.sh': '100755', 'package.json': '100644' });
+  const modes = Object.fromEntries(git(project, ['ls-files', '-s', 'bin/app', 'tooling/agent/cloud-setup.sh', 'package.json'], env).stdout.trim().split('\n').map(line => [line.split('\t')[1], line.slice(0, 6)]));
+  assert.deepEqual(modes, { 'bin/app': '100755', 'tooling/agent/cloud-setup.sh': '100755', 'package.json': '100644' });
   assert.equal(git(project, ['status', '--porcelain'], env).stdout, '');
   const plain = create(cwd, ['plain-modes', '--starter', 'blank', '--no-git']);
   assert.equal(plain.data.git.status, 'skipped');

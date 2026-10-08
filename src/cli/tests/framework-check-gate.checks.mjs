@@ -205,3 +205,25 @@ test('check without installed tools in a generated project points to the same np
   assert.equal(exit, 1); assert.equal(result.data.scope, 'generated-project');
   assert.equal(result.diagnostics[0].code, 'CHECK_FAILED'); assert.equal(result.diagnostics[0].next, 'npm ci');
 });
+
+
+test('check discovers relocated custom and named-project locale tests without colliding step identities', async t => {
+  const dir = await scratch(t);
+  await writeFile(join(dir, 'workbench.sources.json'), JSON.stringify({ schemaVersion: 1, projects: ['first', 'second'].map(name => ({ name, kind: 'plugin', path: `src/${name}`, references: [] })) }));
+  const tests = ['tooling/tests/custom-reminder.checks.mjs', 'src/first/tests/tooling/locale-fr.checks.mjs', 'src/second/tests/tooling/locale-fr.checks.mjs'];
+  for (const path of tests) {
+    await mkdir(dirname(join(dir, path)), { recursive: true });
+    await writeFile(join(dir, path), path.includes('/second/') ? "throw new Error('SECOND_LOCALE_DRIFT');\n" : "import { test } from 'node:test'; test('authoring check', () => {});\n");
+  }
+  for (const fast of [false, true]) {
+    const plan = await checkSteps(dir, fast, async () => null);
+    const steps = plan.steps.filter(step => step.id.startsWith('tooling:'));
+    assert.deepEqual(steps.map(step => step.entry), tests);
+    assert.equal(new Set(steps.map(step => step.id)).size, tests.length);
+  }
+  const plan = await checkSteps(dir, false);
+  const steps = plan.steps.filter(step => step.id.startsWith('tooling:'));
+  const outcomes = await runCheckSteps(steps, { root: dir, frameworkRoot: root });
+  assert.deepEqual(outcomes.map(item => item.status), ['passed', 'passed', 'failed']);
+  assert.match(outcomes[2].outputTail, /SECOND_LOCALE_DRIFT/);
+});

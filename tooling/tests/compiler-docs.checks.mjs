@@ -19,7 +19,8 @@ test('compiler coverage includes selection and project starter contracts without
   assert.equal(pkg.scripts['test:compiler:coverage'],'node tooling/compiler/coverage.mjs');
   const { compilerCoverageArguments } = await import('../compiler/coverage.mjs');
   const command=compilerCoverageArguments();
+  for (const file of command.filter(token => token.endsWith('.checks.mjs'))) assert.ok((await readFile(join(root, file), 'utf8')).length, file);
   for(const token of ['--test-coverage-lines=95','--test-coverage-branches=90','--test-coverage-functions=90',
-    'tests/tooling/compiler-selection.checks.mjs', 'tests/tooling/interactive-maker-project-starters.checks.mjs', 'tests/tooling/interactive-maker-compiler-core.checks.mjs',
+    'src/cli/tests/compiler-selection.checks.mjs', 'src/cli/tests/interactive-maker-project-starters.checks.mjs', 'src/cli/tests/interactive-maker-compiler-core.checks.mjs',
     '--test-coverage-include=src/cli/compiler/domain/**', '--test-coverage-include=src/cli/compiler/application/**']) assert.ok(command.includes(token),token);
 });

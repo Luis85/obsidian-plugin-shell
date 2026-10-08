@@ -159,7 +159,7 @@ for (const prototype of [false, true]) test(`Angular source plan with prototype=
   const file = path => plan.plan.changes.find(c => c.path === path)?.content;
   assert.equal(JSON.parse(file('apps/product/package.json')).scripts.start, 'npm run build && node scripts/serve.mjs');
   assert.match(file('apps/product/scripts/serve.mjs'), /127\.0\.0\.1/);
-  assert.match(file('apps/product/src/core/project.ts'), /Hello world/);
+  assert.match(file('apps/product/src/plugin/core/project.ts'), /Hello world/);
   assert.equal(plan.data.document.design.nodes[0].entry, true);
   assert.equal(plan.data.document.design.semantic.entities[0].name, 'Order');
   assert.equal(Boolean(file('prototypes/project/execution-prompt.md')), prototype);
@@ -167,7 +167,7 @@ for (const prototype of [false, true]) test(`Angular source plan with prototype=
   await applyPrepared(plan, plan.planHash);
   const redo = await projectSetupPlan(context(root), input); assert.ok(redo.plan.changes.every(c => c.status === 'unchanged'));
   const app = join(root, 'apps/product');
-  const core = spawnSync(process.execPath, ['--experimental-strip-types', '--test', 'tests/scaffold.test.mjs'], { cwd: app, encoding: 'utf8' });
+  const core = spawnSync(process.execPath, ['--experimental-strip-types', '--test', 'src/plugin/tests/scaffold.test.mjs'], { cwd: app, encoding: 'utf8' });
   assert.equal(core.status, 0, core.stdout + core.stderr);
   const syntax = spawnSync(process.execPath, ['--check', 'scripts/serve.mjs'], { cwd: app, encoding: 'utf8' });
   assert.equal(syntax.status, 0, syntax.stderr);

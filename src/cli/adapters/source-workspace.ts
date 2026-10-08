@@ -1,5 +1,5 @@
 /** File-system side of the `source` commands: the manifest, derived JSON files, project files and their imports. */
-import { readdir, stat } from 'node:fs/promises';
+import { lstat, readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { SketchError } from '#shared/contracts/sketch-errors.ts';
 import { sourceManifestFile } from '#shared/platform/source-manifest.mjs';
@@ -61,14 +61,19 @@ export async function repositoryAliases(root: string, manifest: SourceManifest):
 const skipped = new Set(['node_modules', 'dist', 'dist-harness', 'coverage', '.cache', '.vite', 'reports', '.git']);
 export const codeFile = /\.(?:[cm]?[jt]sx?|vue)$/;
 /** Repository-relative files under a folder, bounded; symbolic links and generated folders are not followed. */
-export async function listFiles(root: string, folder: string, limit = 20_000): Promise<string[]> {
+export async function listFiles(root: string, folder: string, { limit = 20_000, rejectLinks = false }: { limit?: number; rejectLinks?: boolean } = {}): Promise<string[]> {
   const found: string[] = [];
+  const refuseLink = (path: string): void => { if (!rejectLinks) return; throw new OperationError('SOURCE_PATH_LINK', `${path} is a symbolic link; the source project was left untouched.`, 'Replace or remove the link before changing the source project.'); };
+  if (rejectLinks && (await lstat(join(root, folder)).catch(error => { if (error.code === 'ENOENT') return null; throw error; }))?.isSymbolicLink()) refuseLink(folder);
   const walk = async (path: string): Promise<void> => {
     let entries;
     try { entries = await readdir(join(root, path), { withFileTypes: true }); } catch { return; }
     for (const entry of entries.sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0)) {
       const child = path ? `${path}/${entry.name}` : entry.name;
-      if (entry.isSymbolicLink()) continue;
+      if (entry.isSymbolicLink()) {
+        refuseLink(child);
+        continue;
+      }
       if (entry.isDirectory()) { if (!skipped.has(entry.name)) await walk(child); }
       else if (entry.isFile()) found.push(child);
       if (found.length > limit) throw new OperationError('SOURCE_SCAN_LIMIT', `More than ${limit} files under ${folder}.`, 'Narrow the source project.');

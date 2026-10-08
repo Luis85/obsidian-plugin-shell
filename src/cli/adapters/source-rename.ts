@@ -90,28 +90,30 @@ function renameOf(current: SourceManifest, manifest: SourceManifest, from: strin
   const before = current.projects.find(item => item.name === from)!, after = manifest.projects.find(item => item.name === to)!;
   return { fromPath: before.path, toPath: after.path, ...(before.kind === 'library' ? { fromAlias: `#${from}/`, toAlias: `#${to}/` } : {}) };
 }
+/** Regenerate only the scaffold-owned test cache filename, keeping custom test configuration intact. */
+async function renameTestsConfig(current: SourceManifest, manifest: SourceManifest, from: string, to: string, { entries, overlay }: Moved): Promise<void> {
+  const before = current.projects.find(item => item.name === from)!, after = manifest.projects.find(item => item.name === to)!;
+  const path = `${after.path}/tests/tsconfig.json`, text = overlay.get(path);
+  if (text === undefined) return;
+  const config = await parseSourceJson(text, path) as TestsConfig | null;
+  if (!config?.compilerOptions || config.compilerOptions.tsBuildInfoFile !== testsBuildInfo(before, current)) return;
+  config.compilerOptions.tsBuildInfoFile = testsBuildInfo(after, manifest);
+  overlay.set(path, json(config));
+  const entry = entries.find(item => item.path === path);
+  if (entry) { entry.content = json(config); delete entry.encoding; }
+}
 export async function sourceRenamePlan(request: Request, context: Context): Promise<SourcePlanned> {
   const [from, to] = request.args;
   requireThat(from && to && request.args.length === 2, 'SOURCE_ARGUMENTS', 'Supply both names: source rename <old> <new>.');
   const current = await declaredManifest(context), manifest = await domain(() => renameProject(current, from, to));
   const rename = renameOf(current, manifest, from, to), root = context.root;
-  requireThat(rename.fromPath === rename.toPath || !(await listFiles(root, rename.toPath)).length, 'SOURCE_PATH_EXISTS', `${rename.toPath} already holds files.`);
-  const project = await listFiles(root, rename.fromPath);
+  requireThat(rename.fromPath === rename.toPath || !(await listFiles(root, rename.toPath, { rejectLinks: true })).length, 'SOURCE_PATH_EXISTS', `${rename.toPath} already holds files.`);
+  const project = await listFiles(root, rename.fromPath, { rejectLinks: true });
   const others = (await Promise.all(scanned.map(folder => listFiles(root, folder)))).flat().filter(path => !within(path, rename.fromPath));
   const { changed, skipped } = await rewrites(root, [...project, ...others], rename, await repositoryAliases(root, current));
   const { entries, overlay } = await movedFiles(root, project, rename, changed);
   for (const [path, text] of changed) if (!within(path, rename.fromPath)) entries.push({ path, content: text });
-  const before = current.projects.find(item => item.name === from)!, after = manifest.projects.find(item => item.name === to)!;
-  const testsPath = `${after.path}/tests/tsconfig.json`, testsText = overlay.get(testsPath);
-  if (testsText !== undefined) {
-    const config = await parseSourceJson(testsText, testsPath) as TestsConfig;
-    if (config.compilerOptions && config.compilerOptions.tsBuildInfoFile === testsBuildInfo(before, current)) {
-      config.compilerOptions.tsBuildInfoFile = testsBuildInfo(after, manifest);
-      overlay.set(testsPath, json(config));
-      const entry = entries.find(item => item.path === testsPath);
-      if (entry) { entry.content = json(config); delete entry.encoding; }
-    }
-  }
+  await renameTestsConfig(current, manifest, from, to, { entries, overlay });
   const users = manifest.projects.filter(item => item.references.includes(to)).map(item => item.path);
   const touched = (path: string) => path === 'tsconfig.json' || path === 'package.json' || [rename.toPath, ...users].some(base => path === `${base}/tsconfig.json` || path === `${base}/tests/tsconfig.json`);
   const changes = selected(await derivedChanges(root, manifest, { overlay, renamed: [[rename.fromPath, rename.toPath]] }), touched);

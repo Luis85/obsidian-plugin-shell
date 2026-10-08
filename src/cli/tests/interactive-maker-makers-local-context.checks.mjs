@@ -72,7 +72,7 @@ async function snapshot(root, folder = '') {
 const check = (root, args, options = {}) => executeOperation({ command: 'make', args, options: { check: true, ...options } }, { root, frameworkRoot: makerSourceRoot });
 async function localeProject(root) {
   await mkdir(join(root, 'src/locales'), { recursive: true });
-  await cp(join(makerSourceRoot, 'src/locales/en.json'), join(root, 'src/locales/en.json'));
+  await cp(join(makerSourceRoot, 'src/plugin/locales/en.json'), join(root, 'src/locales/en.json'));
   await applyFilePlan((await planMaker(root, parseArguments(['locale', 'fr']))).plan);
 }
 

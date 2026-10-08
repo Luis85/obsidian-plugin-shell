@@ -226,7 +226,7 @@ export function solutionTsconfig(manifest: SourceManifest): object;
 export function resolveSourceProject(manifest: SourceManifest, kind: SourceKind, name?: string): SourceProject; // throws SOURCE_AMBIGUOUS / SOURCE_NOT_FOUND listing candidates
 ```
 
-- [ ] **Step 1: Failing domain tests** in `src/cli/tests/source-projects.test.mjs` (Node `node:test`, matching neighboring CLI tests):
+- [ ] **Step 1: Failing domain tests** in `src/cli/tests/source-projects.checks.mjs` (Node `node:test`, matching neighboring CLI tests):
 
 ```js
 import test from 'node:test';
@@ -269,11 +269,11 @@ test('legacy flat src is one implicit plugin project', () => {
 });
 ```
 
-Run `node --test src/cli/tests/source-projects.test.mjs`. Expected: FAIL (module missing).
+Run `node --test src/cli/tests/source-projects.checks.mjs`. Expected: FAIL (module missing).
 
 - [ ] **Step 2: Implement** `src/cli/domain/source-projects.ts` (≤400 code lines; split `source-projects-derive.ts` for tsconfig derivation if needed). Validation uses the existing `object`/`exactKeys`/`requireThat` helpers pattern from `src/cli/adapters/framework/configuration.ts` (move the pure helpers to domain if they are adapter-only today). Names `^[a-z][a-z0-9-]*$`; paths `^src/[a-z][a-z0-9-]*$` or exactly `src` for implicit legacy. Run tests. Expected: PASS.
 
-- [ ] **Step 3: Read commands** `source list|graph|check` in `src/cli/adapters/source-command.ts`, modeled on `hosting show` (`src/cli/adapters/framework/hosting-cli.ts`): `--json` envelope `{ protocolVersion: 1, command, status, data, diagnostics }`. `check` gathers findings: schema; cycles; per project path + tsconfig existence; tsconfig `references` vs manifest; root `package.json` `imports` vs `importAliases`; scan `*.ts|*.mts|*.mjs|*.vue` imports for `#<name>/` or relative paths into another project not in `references`; each project path present in ESLint scope, line-limit roots, coverage includes and fallow entries (read via `src/shared/platform/source-manifest.mjs` consumers). Exit 1 on findings. Integration tests (`src/cli/tests/source-command.test.mjs`) run `node src/cli/app.ts source …` against temp projects: clean repo-like fixture → `ok`; one negative fixture per finding code proving it fires.
+- [ ] **Step 3: Read commands** `source list|graph|check` in `src/cli/adapters/source-command.ts`, modeled on `hosting show` (`src/cli/adapters/framework/hosting-cli.ts`): `--json` envelope `{ protocolVersion: 1, command, status, data, diagnostics }`. `check` gathers findings: schema; cycles; per project path + tsconfig existence; tsconfig `references` vs manifest; root `package.json` `imports` vs `importAliases`; scan `*.ts|*.mts|*.mjs|*.vue` imports for `#<name>/` or relative paths into another project not in `references`; each project path present in ESLint scope, line-limit roots, coverage includes and fallow entries (read via `src/shared/platform/source-manifest.mjs` consumers). Exit 1 on findings. Integration tests (`src/cli/tests/source-command.checks.mjs`) run `node src/cli/app.ts source …` against temp projects: clean repo-like fixture → `ok`; one negative fixture per finding code proving it fires.
 
 - [ ] **Step 4: Write commands** `check --fix`, `add`, `link`, `unlink`, `rename`, `remove`, all building a `FilePlan` via `createFilePlan` (`#shared/platform/file-plan.ts`) and applying only with `--apply <planHash>` or `--yes`, catalog `effect: 'plan'`. `add` renders `templates/sources/<kind>/` (code stub, `tests/` with one passing test, `tsconfig.json`, `tests/tsconfig.json`) and records template hashes in `.workbench/sources/<name>.json`; `remove` deletes only files whose hash still matches, retains and lists others; `rename` uses the same specifier rewrite as Task 2's codemod (reuse by moving its resolver into `src/cli/domain/source-imports.ts` with tests). Tests: preview writes nothing; stale hash fails with no writes; `link` refuses a cycle; `unlink` refuses while imports remain; `remove` refuses while referenced and retains an edited file; `rename` result passes `vue-tsc -b` in a temp project with real `node_modules` symlink.
 
@@ -286,7 +286,7 @@ Run `node --test src/cli/tests/source-projects.test.mjs`. Expected: FAIL (module
 
 **Consumes:** `resolveSourceProject`, `implicitSourceManifest`, `parseSourceManifest` from Task 9.
 
-- [ ] **Step 1:** Failing integration tests `src/cli/tests/maker-source-target.test.mjs`: generate a feature with `make feature` into (a) legacy flat-`src` fixture without manifest, (b) `src/plugin` fixture with manifest, (c) two-plugin fixture with and without `--source`; assert file locations, import depths, and that (c) without `--source` exits 1 naming both candidates; type-check (a) and (b).
+- [ ] **Step 1:** Failing integration tests `src/cli/tests/maker-source-target.checks.mjs`: generate a feature with `make feature` into (a) legacy flat-`src` fixture without manifest, (b) `src/plugin` fixture with manifest, (c) two-plugin fixture with and without `--source`; assert file locations, import depths, and that (c) without `--source` exits 1 naming both candidates; type-check (a) and (b).
 - [ ] **Step 2:** Add `--source <name>` to maker catalog options; one adapter `makerTarget(root, kind, name?)` reading the manifest (or implicit) and returning `{ path, depthToRoot }`; replace every hard-coded `src/features|application|presentation|domain|infrastructure` and `../../../src/` in maker template strings with values derived from it.
 - [ ] **Step 3:** Starters, `new`, `setup`, adopt plans emit `workbench.sources.json` and `src/plugin`; the generated `AGENTS.md` template names the layout.
 - [ ] **Step 4:** Run maker suites (`makers`, `maker`, `cli:journey`, `generator`, `companion:assembly`). Expected: pass with Task 1 counts plus the new tests.

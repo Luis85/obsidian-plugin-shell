@@ -91,7 +91,7 @@ void test('plugin framework adapter compiles a real React project through the pu
   }, {}, { frameworkAdapters: [reactAdapter] });
   assert.equal(result.status, 'ok', JSON.stringify(result.diagnostics));
   const files = new Map(result.artifacts.map(artifact => [artifact.path, artifact.content]));
-  assert.match(files.get('src/ui/mount.ts') ?? '', /react-dom\/client/);
+  assert.match(files.get('src/plugin/ui/mount.ts') ?? '', /react-dom\/client/);
   const pkg = JSON.parse(files.get('package.json') ?? '{}');
   assert.equal(pkg.dependencies.react, '19.3.0');
   assert.equal(pkg.dependencies['react-dom'], '19.3.0');
@@ -119,9 +119,9 @@ void test('plugin framework adapter drives the real project emitter', () => {
   assert.equal(JSON.parse(files.get('configs/react-app-config.json')!).framework, 'react');
   assert.equal(pkg.dependencies.react, '19.3.0');
   assert.equal(pkg.dependencies['react-dom'], '19.3.0');
-  assert.match(files.get('src/ui/mount.ts')!, /react-dom\/client/);
-  assert.ok(files.has('src/targets/webapp/main.ts'));
-  assert.ok(!files.has('src/ui/Starter.vue'));
+  assert.match(files.get('src/plugin/ui/mount.ts')!, /react-dom\/client/);
+  assert.ok(files.has('src/plugin/targets/webapp/main.ts'));
+  assert.ok(!files.has('src/plugin/ui/Starter.vue'));
   assert.throws(() => renderStarterProject(model as never, template as never, selection, { ...reactAdapter, id: 'other' }), /SELECTION_MISMATCH/);
 });
 

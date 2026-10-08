@@ -140,7 +140,7 @@ test('the isolated workspace pins the framework versions and refuses a missing p
     '@storybook/addon-a11y': storybookVersion, '@storybook/builder-vite': storybookVersion, ...Object.fromEntries(['vue', 'vite', '@vitejs/plugin-vue', '@types/node', 'typescript', 'vue-tsc'].map(name => [name, pins[name]])) });
   assert.deepEqual(pkg.scripts, { storybook: 'node ../bin/app storybook dev --root ..', 'build-storybook': 'node ../bin/app storybook build --root ..', typecheck: 'node ../bin/app storybook check --root ..' });
   assert.equal(text('storybook/.gitignore'), 'node_modules/\nstorybook-static/\n*.log\n');
-  assert.deepEqual(JSON.parse(text('storybook/tsconfig.json')), { extends: '../tsconfig.json', compilerOptions: { allowImportingTsExtensions: true },
+  assert.deepEqual(JSON.parse(text('storybook/tsconfig.json')), { extends: '../configs/types/tsconfig.project.json', compilerOptions: { allowImportingTsExtensions: true },
     files: ['generated/pages/a.stories.ts', 'generated/components/b.stories.ts'], include: ['custom/**/*.ts', '.storybook/**/*.ts'] });
   assert.deepEqual(JSON.parse(text('storybook/.storybook/generated.json')), ['../generated/pages/a.stories.ts', '../generated/components/b.stories.ts']);
   assert.match(text('storybook/DEPENDENCIES.md'), new RegExp(`^# Optional Storybook dependencies\n\nStorybook ${storybookVersion.replaceAll('.', '\\.')}, its Docs and Accessibility \\(a11y\\) addons, Vue/Vite`));

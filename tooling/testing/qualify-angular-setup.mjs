@@ -126,7 +126,7 @@ try {
   await writeFile(join(root, 'edit.json'), JSON.stringify({ schemaVersion: 1, operations: [{ op: 'page.rename', id: orders.id, title: 'Updated orders' }] }));
   await approve(['sketch', '--input', 'edit.json']); await approve(['sketch', 'generate']);
   assert.equal(sha(await readFile(join(app, 'package-lock.json'))), sha(lock), 'Regeneration preserves resolved dependency bytes.');
-  assert.match(await readFile(join(app, 'src/core/project.ts'), 'utf8'), /Updated orders/);
+  assert.match(await readFile(join(app, 'src/plugin/core/project.ts'), 'utf8'), /Updated orders/);
   const second = await approve(['first-run', '--input', 'verify.json']); assert.equal(second.report.status, 'passed');
   evidence.regeneration = 'passed';
   if (browserRequired) await browserChecks();

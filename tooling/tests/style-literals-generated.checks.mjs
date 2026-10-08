@@ -12,7 +12,8 @@ const emittedStyles = async (starter) => {
   const definition = parseBrowserStarter(await readFile(new URL(`configs/starters/${starter}.json`, `file://${root}`), 'utf8'));
   const result = await compileProject({ source: JSON.stringify(definition.generator.document), sourceName: starter + '.json', template });
   assert.equal(result.status, 'ok', JSON.stringify(result.diagnostics));
-  return result.artifacts.filter((file) => /^src\/.*\.(?:vue|css)$/.test(file.path)).map(({ path, content }) => ({ path, content }));
+  // Match the repository style gate: the standalone companion and simulated host palette were outside src before the split.
+  return result.artifacts.filter((file) => /^src\/.*\.(?:vue|css)$/.test(file.path) && !file.path.startsWith('src/companion/') && !file.path.startsWith('src/plugin/harness/')).map(({ path, content }) => ({ path, content }));
 };
 for (const starter of ['feature-showcase', 'quick-capture']) {
   test(`[STYLE-10] ${starter}: emitted Vue/CSS has no raw colour outside the declared token and known-gap files`, async () => {

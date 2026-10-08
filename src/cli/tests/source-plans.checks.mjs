@@ -206,3 +206,38 @@ test('remove does not trust a scaffold receipt belonging to another project', as
   assert.deepEqual(removed.result.data.summary.retained, ['src/util/index.ts', 'src/util/tests/index.test.ts']);
   assert.ok(await present(root, '.workbench/sources/util.json'));
 });
+
+
+test('rename and remove refuse links inside a project before changing its files or declaration', async t => {
+  const root = await fixture(t);
+  assert.equal((await source(root, 'add', 'util', '--kind', 'library', '--yes')).status, 0);
+  // A directory junction also works on Windows without symbolic-link privileges.
+  await symlink(join(root, 'src/shared'), join(root, 'src/util/linked'), 'junction');
+  const manifest = await read(root, 'workbench.sources.json');
+  for (const args of [['rename', 'util', 'helpers', '--yes'], ['remove', 'util', '--yes']]) {
+    const rejected = await source(root, ...args);
+    assert.equal(rejected.status, 1);
+    assert.ok(rejected.codes.includes('SOURCE_PATH_LINK'));
+    assert.equal(await read(root, 'workbench.sources.json'), manifest);
+    assert.ok(await present(root, 'src/util/index.ts'));
+    assert.equal(await present(root, 'src/helpers'), false);
+    assert.ok(await present(root, 'src/shared/index.ts'));
+  }
+});
+
+
+test('add and rename refuse destinations containing links without mixing in scaffold files', async t => {
+  const root = await fixture(t);
+  await mkdir(join(root, 'src/linked'));
+  await symlink(join(root, 'src/shared'), join(root, 'src/linked/existing'), 'junction');
+  const manifest = await read(root, 'workbench.sources.json');
+  for (const args of [['rename', 'tui', 'linked', '--yes'], ['add', 'linked', '--kind', 'library', '--yes']]) {
+    const rejected = await source(root, ...args);
+    assert.equal(rejected.status, 1);
+    assert.ok(rejected.codes.includes('SOURCE_PATH_LINK'));
+    assert.equal(await read(root, 'workbench.sources.json'), manifest);
+    assert.equal(await present(root, 'src/linked/index.ts'), false);
+    assert.ok(await present(root, 'src/tui/index.ts'));
+    assert.ok(await present(root, 'src/shared/index.ts'));
+  }
+});

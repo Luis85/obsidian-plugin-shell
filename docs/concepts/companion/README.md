@@ -65,12 +65,14 @@ migrated. The history of the retired formats lives in Git.
 
 The checked-in `index.html` in **this directory** is the schema 6 **build base** that
 `npm run companion:build` mounts the Journey Lens and prototype editors into. It is
-assembled by `scripts/concepts/build-companion.py` from `src/`, the pinned `vendor/`
-and `test-kit/` inputs, and the one project contract (`scripts/concepts/concept-contract.ts`,
-bundled as `CompanionContract`), so the page and the shell validate with the same code.
+assembled by `tooling/concepts/build-companion.py` from `src/companion/app/`, the pinned
+`vendor/` and `test-kit/` inputs beside this document, and the one project contract
+(`tooling/concepts/concept-contract.ts`, bundled as `CompanionContract`), so the page
+and the shell validate with the same code.
 It embeds no project or starter data: the golden self-project and every example are the
 external definitions in `configs/starters`. Do not hand-edit it; rebuild it with
-`python3 scripts/concepts/build-companion.py` and verify with `--check`.
+`python3 -B tooling/concepts/build-companion.py` from the repository root and verify
+with `python3 -B tooling/concepts/build-companion.py --check`.
 
 Earlier increment reviews and verification reports keep their original
 artifact/version boundaries as dated records. The
@@ -81,9 +83,9 @@ identity without requalifying those earlier results.
 
 ## Source and acceptance boundaries
 
-Edit `editor/`, the maintained `src/` modules and the shared authoring domain, not
-generated HTML. The current build uses the existing composition seam and project
-persistence; it does not add a second project database. The integration guide
+Edit `src/companion/editor/`, the maintained `src/companion/app/` modules and the
+shared authoring domain in `src/shared/companion/`, not generated HTML. The current
+build uses the existing composition seam and project persistence; it does not add a second project database. The integration guide
 names the Node and browser regression checks.
 
 No real vault access, plugin activation, deployment or publication occurs in the

@@ -22,10 +22,13 @@ const shellScripts = new Set(['tooling/agent/cloud-setup.sh']);
 // Test and fixture trees: root tests/, tooling/tests/ and each source project's src/<name>/tests/ (all of it was tests/).
 const fixtureTree = /^(?:tests|tooling\/tests|src\/[^/]+\/tests)\//;
 // The production view is the code that lived under src before the split. The former scripts/ code now sits in
-// src/shared and src/cli/tooling (the tooling view, as before); the two modules that were src/cli/domain/errors.ts and
-// templates/companion/runtime/contract.ts keep their production and templates views. src/cli/sdk (the former plugins/ folder,
+// src/shared and src/cli/tooling (the tooling view, as before). The former CLI error/starter modules retain their
+// production view, and templates/companion/runtime/contract.ts retains its templates view. src/cli/sdk (the former plugins/ folder,
 // outside the inventory before) joins the diagnostic tooling view rather than newly gating production.
-const formerSrcShared = new Set(['src/shared/contracts/sketch-errors.ts']);
+const formerSrcShared = new Set(['src/shared/contracts/sketch-errors.ts',
+  'src/shared/companion/starters/browser.ts', 'src/shared/companion/starters/customize.ts',
+  'src/shared/companion/starters/render.ts', 'src/shared/companion/starters/validation.ts',
+  'src/shared/companion/starters/project-generator.ts']);
 const formerTemplates = new Set(['src/shared/companion/runtime-contract.ts']);
 const formerScripts = path => path.startsWith('src/cli/tooling/') || path.startsWith('src/cli/sdk/') || (path.startsWith('src/shared/') && !formerSrcShared.has(path) && !formerTemplates.has(path));
 // The companion concept (the former docs/concepts) keeps its own assembly and verification; it was never inventoried here.

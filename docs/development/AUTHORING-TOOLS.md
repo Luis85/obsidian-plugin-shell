@@ -205,8 +205,10 @@ works in a source checkout and in an extracted kit. The context has no `root`,
 `edit` or `finish`. The runner owns review, formatting, hashes, locking, writes
 and checks.
 
-A generated recipe's test checks this contract with a recording context. The
-framework's own recipe tests prove the composed command and its registrations.
+A generated recipe's test in `tooling/tests/custom-<name>.checks.mjs` checks this
+contract with a recording context. Legacy projects using `scripts/` retain
+`tests/tooling/custom-<name>.checks.mjs`. The framework's own recipe tests prove the
+composed command and its registrations.
 `make locale <name>` writes a test that runs the project's own CLI:
 `node bin/app make locale <name> --check --json`. The `--check` flag is
 read-only. It compares the pending draft keys with the current base keys and
@@ -220,8 +222,10 @@ the obsolete keys. The reviewed refresh path, `make locale <name> --refresh --dr
 and then `--yes`, adds the missing keys (with their English values to translate),
 drops the obsolete keys and updates the key count; every translation of a surviving
 key is kept. `--refresh` refuses a missing or already selectable draft, and a key that
-changed between a message and a group (`LOCALE_DRAFT_SHAPE`) is left for manual review. `node bin/app check` runs every generated
-`tests/tooling/locale-*.checks.mjs` and `custom-*.checks.mjs`.
+changed between a message and a group (`LOCALE_DRAFT_SHAPE`) is left for manual review.
+`node bin/app check` runs generated locale tests in `src/<project>/tests/tooling/`
+and custom recipe tests in `tooling/tests/`; flat legacy layouts keep their
+`tests/tooling/` tests.
 
 Local recipe code is trusted developer code, not a sandbox. There is no remote
 loader, JSON command hook or automatic package installation. Recipes must return

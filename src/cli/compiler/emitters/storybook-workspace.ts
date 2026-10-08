@@ -16,7 +16,7 @@ export function storybookWorkspace(template: TemplateSnapshot, paths: string[]):
       scripts: { storybook: 'node ../bin/app storybook dev --root ..', 'build-storybook': 'node ../bin/app storybook build --root ..',
         typecheck: 'node ../bin/app storybook check --root ..' }, devDependencies: dependencies })),
     add('.gitignore', 'node_modules/\nstorybook-static/\n*.log\n'),
-    add('tsconfig.json', json({ extends: '../tsconfig.json', compilerOptions: { allowImportingTsExtensions: true },
+    add('tsconfig.json', json({ extends: '../configs/types/tsconfig.project.json', compilerOptions: { allowImportingTsExtensions: true },
       files: paths.map(path => path.slice('storybook/'.length)), include: ['custom/**/*.ts', '.storybook/**/*.ts'] })),
     add('.storybook/generated.json', json(paths.map(path => '../' + path.slice('storybook/'.length)))),
     add('.storybook/main.ts', `import type { StorybookConfig } from '@storybook/vue3-vite';

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdtemp, mkdir, readFile, realpath, rm, rmdir, symlink, unlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { ESLint, Linter } from 'eslint';
@@ -80,4 +80,31 @@ test('pure-layer import bans reject framework imports in flat and named source p
       }
     }
   }
+});
+
+
+test('generated named-source tests retain test rules without plugin-only rules', async t => {
+  const root = await project(t, 'generated');
+  for (const path of ['configs/lint/eslint.config.mjs', 'configs/lint/lint-scope.mjs',
+    'src/shared/platform/project-roots.mjs', 'src/shared/platform/project-configs.mjs', 'src/shared/platform/repository-kind.mjs']) {
+    await mkdir(dirname(join(root, path)), { recursive: true });
+    await cp(join(repositoryRoot, path), join(root, path));
+  }
+  await writeFile(join(root, 'package.json'), '{"type":"module"}');
+  await writeFile(join(root, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'ESNext', strict: true }, include: ['src/**/*.ts'] }));
+  await symlink(join(repositoryRoot, 'node_modules'), join(root, 'node_modules'), 'junction');
+  try {
+    const eslint = new ESLint({ cwd: root, overrideConfigFile: join(root, 'configs/lint/eslint.config.mjs') });
+    for (const path of ['src/plugin/tests/unit/entity.test.ts', 'src/plugin/harness/app/main.ts']) {
+      const config = await eslint.calculateConfigForFile(join(root, path));
+      assert.equal(Object.keys(config.rules).some(name => name.startsWith('obsidianmd/')), false, path);
+      assert.equal(config.rules['@typescript-eslint/no-floating-promises'][0], 2, path);
+      const [valid] = await eslint.lintText('export function fixture(_value: unknown) { return 1; }', { filePath: join(root, path) });
+      assert.deepEqual(valid.messages, [], path);
+      const [invalid] = await eslint.lintText('Promise.resolve(1);', { filePath: join(root, path) });
+      assert.ok(invalid.messages.some(item => item.ruleId === '@typescript-eslint/no-floating-promises' && item.severity === 2), path);
+    }
+    const production = await eslint.calculateConfigForFile(join(root, 'src/plugin/main.ts'));
+    assert.ok(Object.keys(production.rules).some(name => name.startsWith('obsidianmd/')), 'product rules remain active');
+  } finally { await unlink(join(root, 'node_modules')).catch(() => rmdir(join(root, 'node_modules'))); }
 });

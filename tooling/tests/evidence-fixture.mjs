@@ -33,6 +33,8 @@ export async function runtimeEvidenceFixture(t, body) {
   const root = await evidenceFixture(t);
   await mkdir(join(root, 'src/plugin/tests/unit'), { recursive: true });
   await symlink(resolve('node_modules'), join(root, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
+  // This isolated probe has no source-project graph; do not retain solution references to uncopied projects.
+  await writeFile(join(root, 'tsconfig.json'), JSON.stringify({ extends: './configs/types/tsconfig.base.json', include: ['src/plugin/tests/unit/**/*.ts'] }));
   await writeFile(join(root, 'configs/testing/vitest.config.mjs'), 'export default { test: { include: ["src/plugin/tests/unit/*.test.ts"], environment: "node", fileParallelism: false } };');
   await writeFile(join(root, 'src/plugin/tests/unit/probe.test.ts'), `import { test, expect } from 'vitest';\n${body}`);
   return root;

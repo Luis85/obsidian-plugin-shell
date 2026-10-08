@@ -9,7 +9,7 @@ function loadCompiler(repositoryRoot, env = process.env) {
   const expected = pkg.devDependencies?.typescript;
   if (!/^6\.\d+\.\d+$/.test(expected ?? '')) throw new Error('JEV_TYPESCRIPT_PIN_INVALID: an exact stable TypeScript 6 pin is required.');
   const lock = json(path.join(repositoryRoot, 'package-lock.json'));
-  const policy = json(path.join(repositoryRoot, 'scripts/security/dependency-policy.json'));
+  const policy = json(path.join(repositoryRoot, 'tooling/security/dependency-policy.json'));
   if (lock.packages?.['']?.devDependencies?.typescript !== expected ||
       lock.packages?.['node_modules/typescript']?.version !== expected || policy.packages?.typescript !== expected) {
     throw new Error('JEV_TYPESCRIPT_PIN_MISMATCH: manifest, lockfile and reviewed policy must agree.');

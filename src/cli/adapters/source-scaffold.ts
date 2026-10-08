@@ -52,7 +52,7 @@ export async function sourceAddPlan(request: Request, context: Context): Promise
   const input = addOptions(request), state = await readSourceState(context.root);
   const manifest = await domain(() => addProject(state.manifest, input));
   const project = manifest.projects.find(item => item.name === input.name)!;
-  requireThat(!(await listFiles(context.root, project.path)).length, 'SOURCE_PATH_EXISTS', `${project.path} already holds files; choose another name or declare it by hand.`);
+  requireThat(!(await listFiles(context.root, project.path, { rejectLinks: true })).length, 'SOURCE_PATH_EXISTS', `${project.path} already holds files; choose another name or declare it by hand.`);
   const files = await templateFiles(context, input.kind, input.name);
   files.set(`${project.path}/tsconfig.json`, json(projectTsconfig(project, manifest)));
   files.set(`${project.path}/tests/tsconfig.json`, json(testsTsconfig(project, manifest)));
@@ -77,7 +77,7 @@ export async function sourceRemovePlan(request: Request, context: Context): Prom
   const project = current.projects.find(item => item.name === name)!, receipt = await readReceipt(context.root, name);
   const derived = new Map([[`${project.path}/tsconfig.json`, projectTsconfig(project, current)], [`${project.path}/tests/tsconfig.json`, testsTsconfig(project, current)]]);
   const removed: string[] = [], retained: string[] = [];
-  for (const path of await listFiles(context.root, project.path)) {
+  for (const path of await listFiles(context.root, project.path, { rejectLinks: true })) {
     const bytes = await readBounded(join(context.root, path), 8_000_000);
     (receipt?.files[path] === hash(bytes) || holds(bytes, derived.get(path)) ? removed : retained).push(path);
   }

@@ -17,7 +17,7 @@ import { selfProject } from '#shared/testing/starter-documents.mjs';
 const root=fileURLToPath(new URL('../../',import.meta.url));
 const original=selfProject();
 function cli(cwd, command, ...args) {
-  const run=spawnSync(process.execPath,['scripts/test-data/'+(command==='verify'?'verify.mjs':'cli.mjs'),...(command==='verify'?[]:[command,...args])],{cwd,encoding:'utf8',timeout:20000,maxBuffer:5_000_000});
+  const run=spawnSync(process.execPath,['tooling/test-data/'+(command==='verify'?'verify.mjs':'cli.mjs'),...(command==='verify'?[]:[command,...args])],{cwd,encoding:'utf8',timeout:20000,maxBuffer:5_000_000});
   assert.equal(run.status,0,run.stderr+'\n'+run.stdout);return JSON.parse(run.stdout);
 }
 async function sandbox(work) {
@@ -83,12 +83,13 @@ test('large unrelated authoring state does not consume the recipe budget, while 
 test('generator emits a typed provider seam, canonical-read tests and dependency-free recipe tools with custom roots',async()=>{
   const p=providerProject(original);p.settings={codebaseFolder:'product/code',testsFolder:'product/specs'};
   const files=new Map((await projectFiles(root,projectModel(p))).map(f=>[f.path,f.content]));
-  const pkg=JSON.parse(files.get('package.json'));assert.equal(pkg.scripts['testdata:plan'],'node scripts/test-data/cli.mjs plan');
+  const pkg=JSON.parse(files.get('package.json'));assert.equal(pkg.scripts['testdata:plan'],'node tooling/test-data/cli.mjs plan');
   assert.match(pkg.scripts['verify:artifacts'],/ && npm run testdata:check$/);assert.match(pkg.scripts['verify:project'],/ && npm run verify:artifacts$/);
   assert.match(files.get('product/code/generated/bootstrap/sources.ts'),/validateSourceOverrides/);
   assert.match(files.get('product/specs/project/fixtures/fixture-api.ts'),/adapter.execute\(.*input, \{signal\}\)/);
   assert.match(files.get('product/specs/project/fixtures/canonical-requirement.test.ts'),/markdownCodec/);
-  assert.ok(![...files].filter(([name])=>name.startsWith('src/')||name.startsWith('product/code/')).some(([,text])=>/from ['"].*test-data\//.test(text)));
+  const runtime = [...files].filter(([name]) => (name.startsWith('src/plugin/') && !/^src\/plugin\/(?:tests|harness)\//.test(name)) || name.startsWith('product/code/'));
+  assert.deepEqual(runtime.filter(([, text]) => /from ['"].*test-data\//.test(text)).map(([name]) => name), []);
 });
 test('real generated CLI reviews, applies, replays and resets only owned seed files',()=>sandbox(async vault=>{
   const input=join(vault,'project.json');await writeFile(input,JSON.stringify(original));
@@ -107,8 +108,8 @@ test('fresh generated typed fixture ports execute real services: stateful save/d
   const input=join(vault,'project.json');await writeFile(input,JSON.stringify(providerProject(original)));
   const plan=await planProject({input,vault,target:'plugin'});await applyProject(plan,plan.hash);const target=join(vault,'plugin');
   for(const kind of ['api','database']) {
-    const factory=await import(pathToFileURL(join(target,'tests/project/fixtures/fixture-'+kind+'.ts')).href);
-    const serviceModule=await import(pathToFileURL(join(target,'src/generated/application/fixture-'+kind+'/service.ts')).href);
+    const factory=await import(pathToFileURL(join(target,'src/plugin/tests/project/fixtures/fixture-'+kind+'.ts')).href);
+    const serviceModule=await import(pathToFileURL(join(target,'src/plugin/generated/application/fixture-'+kind+'/service.ts')).href);
     const name=kind==='api'?'GFixtureApi':'GFixtureDatabase';const fixture=factory['create'+name+'FixturePort']();
     const service=serviceModule['create'+name+'Service'](fixture.port);
     const list=await service['list-records']();assert.equal(list.length,5);

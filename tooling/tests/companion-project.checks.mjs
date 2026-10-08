@@ -48,7 +48,7 @@ test('[COMPANION-SEED] full companion definition has authored coverage, not exec
   assert.equal(document.design.library.length, 54);
   assert.equal(document.design.semantic.entities.length, 11);
   assert.equal(document.design.dataSources.testing.recipes.length, 3);
-  assert.deepEqual(document.settings, { codebaseFolder: 'src', testsFolder: 'tests' });
+  assert.deepEqual(document.settings, { codebaseFolder: 'src/plugin', testsFolder: 'src/plugin/tests' });
   assert.equal(Object.hasOwn(document, 'trusted'), false);
   assert.equal(Object.hasOwn(document.design, 'emitted'), false);
 });

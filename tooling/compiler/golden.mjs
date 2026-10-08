@@ -73,7 +73,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
     const differences = goldenDifferences(await readGolden(root), cases);
     if (differences.length) {
       console.error(differences.join('\n'));
-      throw new Error(`GOLDEN_STALE: ${differences.length} undeclared generated-output difference(s). Review them, then run node scripts/compiler/golden.mjs --write.`);
+      throw new Error(`GOLDEN_STALE: ${differences.length} undeclared generated-output difference(s). Review them, then run node tooling/compiler/golden.mjs --write.`);
     }
     console.log(`Verified ${cases.length} starter baselines against ${GOLDEN_FILE}.`);
   }

@@ -81,7 +81,7 @@ for(const loaded of starters){
     await assert.rejects(port['list-records'](undefined),/HTTP_ORIGIN_NOT_APPROVED/);
    }
   }
-  const replay=await planProject(options);assert.equal(replay.conflicts.length,0);assert.ok(replay.plan.changes.every(c=>c.status==='unchanged'));assert.equal(await readFile(join(vault,'keep.md'),'utf8'),'keep');
+  const replay=await planProject(options);assert.equal(replay.conflicts.length,0);assert.ok(replay.plan.changes.every(c=>c.status==='unchanged'),JSON.stringify(replay.plan.changes.filter(c=>c.status!=='unchanged').map(({path,status})=>({path,status}))));assert.equal(await readFile(join(vault,'keep.md'),'utf8'),'keep');
  }));
 }
 test('import starter is explicitly fixture-first, unauthenticated and never automatic',()=>{
@@ -90,8 +90,14 @@ test('import starter is explicitly fixture-first, unauthenticated and never auto
 });
 for(const [label,fields,pattern] of [
  ['invalid plugin ID',{id:'../other'},/ID|id/],['empty name',{name:''},/name/i],['newline identity',{name:'one\ntwo'},/name/i],['invalid version',{version:'latest'},/version/i],
- ['absolute source',{codebaseFolder:'/tmp/src'},/relative/],['traversal source',{codebaseFolder:'../src'},/relative/],['host folder',{testsFolder:'.obsidian'},/reserved|protected/i],['overlapping paths',{codebaseFolder:'app',testsFolder:'APP/tests'},/overlap/i],['tooling collision',{codebaseFolder:'scripts'},/tooling/i],['unknown choice',{runScript:'evil'},/Unknown configuration/],
+ ['absolute source',{codebaseFolder:'/tmp/src'},/relative/],['traversal source',{codebaseFolder:'../src'},/relative/],['host folder',{testsFolder:'.obsidian'},/reserved|protected/i],['overlapping paths',{codebaseFolder:'app',testsFolder:'APP/specs'},/overlap/i],['tooling collision',{codebaseFolder:'scripts'},/tooling/i],['unknown choice',{runScript:'evil'},/Unknown configuration/],
 ])test('refuses '+label+' without altering the starter',()=>{const before=JSON.stringify(starter('quick-capture').document);assert.throws(()=>customizeStarter(starter('quick-capture'),{...choices,...fields}),pattern);assert.equal(JSON.stringify(starter('quick-capture').document),before);});
+test('a source project keeps its tests in its own tests folder without changing the starter',()=>{
+ const original=JSON.stringify(starter('quick-capture').document);
+ const document=customizeStarter(starter('quick-capture'),{...choices,codebaseFolder:'src/plugin',testsFolder:'src/plugin/tests'});
+ assert.deepEqual(document.settings,{codebaseFolder:'src/plugin',testsFolder:'src/plugin/tests'});
+ assert.equal(JSON.stringify(starter('quick-capture').document),original);
+});
 for(const [label,mutate] of [
  ['catalog version',c=>c.schemaVersion=99],['extra executable field',c=>c.starters[0].script='alert(1)'],['duplicate ID',c=>c.starters[1].id=c.starters[0].id],['invalid name',c=>c.starters[0].name=''],['path traversal',c=>c.starters[0].file='../blank.json'],['future project version',c=>c.starters[0].document.schemaVersion=99],['execution authority',c=>c.starters[0].document.executable=true],['unknown top field',c=>c.install=true],['empty metadata',c=>c.starters[0].implementation=[]],['invalid identity hash',c=>c.starters[0].sha256='pretend'],
 ])test('catalog rejects '+label,()=>{const c=structuredClone(catalog);mutate(c);assert.throws(()=>validateStarterCatalog(c));});
