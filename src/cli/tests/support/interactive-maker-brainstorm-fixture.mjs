@@ -97,7 +97,7 @@ export async function resign(root, out, mutate) {
     const row = receipt.files.find(item => item.path === path);
     row.sha256 = hash(await readFile(join(root, out, 'source', path)));
   }
-  const text = JSON.stringify(receipt, null, 2) + '\n';
+  const text = JSON.stringify(receipt) + '\n';
   await writeFile(join(root, receiptPath), text);
   const definition = await readScratchJson(root, out + '/feature.definition.json');
   definition.generatedSource.receiptSha256 = hash(text);

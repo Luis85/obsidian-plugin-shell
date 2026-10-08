@@ -157,7 +157,7 @@ const lifecycle = createPreviewLifecycle(window, { mount: () => mountFrame(root!
   error: message => { error.value = message; } });
 `);
   add('harness/prototype/clickdummy.css', `/* Original standalone browser host simulation; never imported by the native plugin. */
-@import '../styles/simulated.css';
+@import '../../src/plugin/harness/styles/simulated.css';
 body { margin:0; font-family:var(--font-interface,system-ui,sans-serif); background:var(--background-primary); color:var(--text-normal); }
 .clickdummy-toolbar { display:flex; flex-wrap:wrap; gap:16px; align-items:center; padding:16px; border-bottom:1px solid var(--background-modifier-border); }
 .clickdummy-toolbar h1 { margin:0; font-size:1.15rem; overflow-wrap:anywhere; }

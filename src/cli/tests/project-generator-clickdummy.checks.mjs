@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, dirname } from 'node:path';
+import { join, dirname, posix } from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { projectModel } from '../compiler/emitters/model.ts';
@@ -56,6 +56,18 @@ test('full generator includes the public command, fixed browser entry and native
   const files=new Map((await projectFiles(root,model)).map(f=>[f.path,f]));
   assert.equal(JSON.parse(files.get('package.json').content).scripts['build:clickdummy'],'node bin/app clickdummy build');
   assert.ok(files.has('harness/prototype/clickdummy.ts'));
+  const pending = ['harness/prototype/clickdummy.css'], visited = new Set();
+  while (pending.length) {
+    const path = pending.pop();
+    if (visited.has(path)) continue;
+    visited.add(path);
+    assert.ok(files.has(path), `browser stylesheet dependency exists: ${path}`);
+    for (const [, specifier] of files.get(path).content.matchAll(/@import\s+['"](\.[^'"]+)['"]/g))
+      pending.push(posix.normalize(posix.join(posix.dirname(path), specifier)));
+  }
+  assert.ok(visited.has('src/plugin/harness/styles/simulated.css'));
+  assert.ok(visited.has('src/plugin/harness/styles/obsidian/controls.css'));
+
   assert.match(files.get(`${model.sourceRoot}/presentation/components/ProjectWorkbench.vue`).content,/design-state/);
   const page=[...files].find(([path])=>path.includes('/screens/')&&files.get(path).content.includes('import Detail'));
   assert.ok(page); assert.match(page[1].content,/:design-state="props.designState"/);

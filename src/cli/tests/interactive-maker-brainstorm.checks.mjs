@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, realpath, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, realpath, mkdir, writeFile, readFile, rm, stat } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
@@ -99,6 +99,13 @@ test('verification refuses unowned source and ownership-receipt tampering before
     const out = 'brainstorms/capture-inbox', source = join(options.root, out, 'source');
     const definition = JSON.parse(await readFile(join(options.root, out, 'feature.definition.json'), 'utf8'));
     assert.match(definition.generatedSource.receiptSha256, /^[a-f0-9]{64}$/);
+    const inputs = plan.plan.changes.filter(change => change.path.startsWith(out + '/source/'));
+    const sizes = await Promise.all(inputs.map(async change => (await stat(join(options.root, change.path))).size));
+    assert.ok(sizes.reduce((sum, size) => sum + size, 0) <= 32_000_000, 'actual generated inputs fit the unchanged inventory bound');
+    const receiptText = await readFile(join(source, '.maker/receipt.json'), 'utf8');
+    assert.equal(receiptText, JSON.stringify(JSON.parse(receiptText)) + '\n', 'machine provenance stays compact');
+    assert.equal(hash(receiptText), definition.generatedSource.receiptSha256);
+    assert.ok((await brainstormFeaturePlan(payload, options)).plan.changes.every(change => change.status === 'unchanged'));
     const rogue = join(source, 'rogue.test.mjs');
     await writeFile(rogue, 'throw new Error("unowned test executed");\n');
     await assert.rejects(() => brainstormVerifyPlan(options, out), error => error?.code === 'BRAINSTORM_SOURCE_CHANGED');

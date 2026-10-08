@@ -86,7 +86,8 @@ async function generatedEntries(request: FeatureBrainstorm, result: ReturnType<t
   const compiler = { outputKind: kind, fingerprint: emitted.compilation.fingerprint,
     readiness: emitted.compilation.readiness, artifacts: emitted.artifacts.length };
   const owned = emitted.artifacts.map(item => ({ path: item.path, sha256: hash(artifactBytes(item)) }));
-  const receipt = JSON.stringify({ schemaVersion: 1, files: owned }, null, 2) + '\n';
+  // Machine-owned provenance shares the bounded input inventory with the generated application.
+  const receipt = JSON.stringify({ schemaVersion: 1, files: owned }) + '\n';
   const entries = emitted.artifacts.map(item => artifactEntry(out, item));
   entries.push({ path: sourcePath(out) + '/.maker/receipt.json', content: receipt });
   return { entries, compiler, sourceReceiptSha256: hash(receipt) };
