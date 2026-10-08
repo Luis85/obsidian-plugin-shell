@@ -25,7 +25,7 @@ A plugin owns its complete implementation and tests under `plugins/<plugin-name>
 - `manifest.json` — stable plugin `id`, display `name`, semantic `version` and optional description.
 - `config.json` — project-owned configuration. `enabled: false` disables activation without deleting the plugin.
 
-The plugin must be TypeScript and `src/index.ts` must export a named `PluginObject`. The generated `src/core/plugin-api.ts` is the public compile-time contract.
+The plugin must be TypeScript and `src/index.ts` must export a named `PluginObject`. The generated `src/plugin/core/plugin-api.ts` is the public compile-time contract.
 
 ## PluginObject
 

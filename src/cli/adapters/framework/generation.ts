@@ -21,7 +21,9 @@ async function inPlaceKit(request: Request, context: Context, input: string) {
   const kit = await verifyKit(context.root);
   const { model } = await inspectDesign(context, input);
   const identityMatches = Object.entries(config.project).every(([key, value]) => model.project[key] === value);
-  const pathsMatch = model.sourceRoot === config.paths.codebaseFolder + '/generated' && model.testRoot === config.paths.testsFolder + '/project';
+  // Compare the imported settings themselves: compiler output roots may canonicalize legacy src/tests layouts.
+  const settings = object(model.document.settings);
+  const pathsMatch = settings.codebaseFolder === config.paths.codebaseFolder && settings.testsFolder === config.paths.testsFolder;
   requireThat(identityMatches && pathsMatch, 'IMPORT_CONFIG_DRIFT', 'Re-import and resolve the design/configuration differences before generation.');
   return kit;
 }

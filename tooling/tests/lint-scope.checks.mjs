@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
-import { ESLint } from 'eslint';
+import { ESLint, Linter } from 'eslint';
 import { lintOwnedSource } from '../quality/lint-source.mjs';
 import { lintExcluded, lintExclusionGlobs, shellLintExclusions } from '../../configs/lint/lint-scope.mjs';
 import { isShellRepository } from '../../src/shared/platform/repository-kind.mjs';
@@ -60,5 +60,24 @@ test('oxlint and ESLint share one exclusion list and agree on every path', async
     const text = await readFile(join(repositoryRoot, file), 'utf8');
     assert.match(text, /lint-scope\.mjs/, file);
     assert.doesNotMatch(text, /src\/companion\/\*\*|src\/cli\/tooling\/\*\*|src\/shared\/\*\*/, `${file} must not carry its own copy of the exclusions`);
+  }
+});
+
+
+test('pure-layer import bans reject framework imports in flat and named source projects', async () => {
+  const eslint = new ESLint({ cwd: repositoryRoot, overrideConfigFile: join(repositoryRoot, 'configs/lint/eslint.config.mjs') });
+  const linter = new Linter();
+  for (const folder of ['src', 'src/plugin', 'src/renamed-plugin']) {
+    for (const layer of ['domain', 'application', 'features']) {
+      const path = `${folder}/${layer}/boundary-probe.ts`;
+      const config = await eslint.calculateConfigForFile(join(repositoryRoot, path));
+      const rule = config.rules['no-restricted-imports'];
+      assert.equal(rule[0], 2, path);
+      for (const dependency of ['vue', 'obsidian', 'pinia', '@nuxt/ui', 'node:fs']) {
+        const findings = linter.verify(`import * as forbidden from '${dependency}'; export { forbidden };`,
+          { rules: { 'no-restricted-imports': rule } });
+        assert.equal(findings.filter(item => item.ruleId === 'no-restricted-imports' && item.severity === 2).length, 1, `${path}: ${dependency}`);
+      }
+    }
   }
 });

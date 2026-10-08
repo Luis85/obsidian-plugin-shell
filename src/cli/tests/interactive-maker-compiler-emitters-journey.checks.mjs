@@ -60,7 +60,7 @@ test('the real maintained editor template is copied completely for a custom-root
   assert.ok(!mount.includes('authoring-contract.ts') && !mount.includes("import './ui.css'") && !mount.includes('defaultView!.VueFlowCore'));
   // The extracted kit ships the compiled CLI, not bin/ sources, so the mount must not reach into them.
   assert.ok(!mount.includes('/bin/') && !mount.includes('parseBrowserStarter'), 'the native mount drops the starter bridge');
-  assert.ok(mount.includes("from '../../../../../shared/companion/tooling-contract.ts';"));
+  assert.ok(mount.includes("from '#shared/companion/tooling-contract.ts';"));
   assert.ok(out.files.has('checks/project/journey-generated.test.ts') && out.files.has('application/source/generated/presentation/components/screens/inbox-screen.vue'));
 });
 
@@ -85,14 +85,14 @@ test('native and preview composition roots share one editor and keep disjoint st
   assert.ok(seed.startsWith(prefixText) && seed.endsWith(';\n'));
   assert.deepEqual(JSON.parse(JSON.parse(seed.slice(prefixText.length, -2))), m.document);
   const workspace = out.text(base + 'bootstrap/journey-workspace.ts').split('\n');
-  assert.equal(workspace[2], 'import type { JourneyProjectStore } from "../../../../../shared/companion/journey/project-store.ts";');
+  assert.equal(workspace[2], 'import type { JourneyProjectStore } from "../../../../src/shared/companion/journey/project-store.ts";');
   assert.equal(workspace[12], "  const navigation=useNavigation(pinia),id=\"quick-capture\"+'-journey-'+(++runtime.serial);");
   assert.equal(workspace[14], '    store:runtime.store,seed,mode:runtime.mode,ownerId:"quick-capture",initialPath:runtime.path,');
   const native = out.text(base + 'bootstrap/journey-native.ts').split('\n');
-  assert.deepEqual(native.slice(1, 3), ['import { JourneyProjectStore } from "../../../../../shared/companion/journey/project-store.ts";',
+  assert.deepEqual(native.slice(1, 3), ['import { JourneyProjectStore } from "../../../../src/shared/companion/journey/project-store.ts";',
     'import { journeyVaultFiles } from "../../../../templates/companion/runtime/journey-vault.ts";']);
   const preview = out.text(base + 'bootstrap/journey-preview.ts');
-  assert.ok(preview.startsWith('import { JourneyProjectStore } from "../../../../../shared/companion/journey/project-store.ts";\nimport type { JourneyRuntime } from \'./journey-workspace.ts\';\n'));
+  assert.ok(preview.startsWith('import { JourneyProjectStore } from "../../../../src/shared/companion/journey/project-store.ts";\nimport type { JourneyRuntime } from \'./journey-workspace.ts\';\n'));
   assert.ok(!preview.includes('obsidian') && preview.includes("return {store,mode:'preview',path:'project.companion.json',serial:0,dispose(){store.dispose();files.clear();}};"));
 });
 
@@ -102,6 +102,6 @@ test('the native acceptance suite targets the bound surface view type', async ()
   assert.deepEqual([...out.files.keys()], ['tooling/tests/obsidian/journey-lens.obsidian.ts']);
   const lines = out.text('tooling/tests/obsidian/journey-lens.obsidian.ts').split('\n');
   assert.deepEqual(lines.slice(0, 5), ["import { expect } from 'vitest';", "import { expect as browserExpect } from '@playwright/test';", "import { test } from './support/obsidian-fixture';",
-    'import { seed } from "../../application/source/generated/domain/journey-seed.ts";', 'const suffix = "-view-project-workbench-inbox";']);
+    'import { seed } from "../../../application/source/generated/domain/journey-seed.ts";', 'const suffix = "-view-project-workbench-inbox";']);
   assert.equal(lines.filter(line => line.startsWith('test(')).length, 2);
 });

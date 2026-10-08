@@ -60,10 +60,10 @@ test('a missing root file without a relocated home still fails the snapshot', as
   await rm(join(root, 'package.json'));
   await assert.rejects(loadTemplateSnapshot(root), error => error?.diagnostic?.code === 'COMPILER_TEMPLATE_INVALID'
     && error.diagnostic.message === 'Missing template input: package.json' && !error.diagnostic.message.includes(root));
-  await rm(join(root, 'plugins'), { recursive: true });
+  await rm(join(root, 'src'), { recursive: true });
   await writeFile(join(root, 'package.json'), '{}\n');
-  await assert.rejects(loadTemplateSnapshot(root), error => error?.diagnostic?.message === 'Missing template input: plugins');
-  await mkdir(join(root, 'plugins'));
+  await assert.rejects(loadTemplateSnapshot(root), error => error?.diagnostic?.message === 'Missing template input: src');
+  await mkdir(join(root, 'src'));
   await rm(join(root, 'docs/framework/TEMPLATE-GUIDE.md'));
   const snapshot = await loadTemplateSnapshot(root);
   assert.ok(!snapshot.frameworkFiles.some(file => file.path.endsWith('TEMPLATE-GUIDE.md')));

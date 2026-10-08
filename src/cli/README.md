@@ -264,7 +264,12 @@ files and derived tsconfigs, and lists retained files. It also removes an unchan
 scaffold suite when no tests are retained; customized suites stay for review.
 `rename` moves files through the plan (delete plus create; Git detects the rename),
 updates import literals, suite paths and test build metadata, and lists other
-textual mentions for review. Valid tsconfig comments and trailing commas are
+textual mentions for review. Review `unrewritable`, `review` and `manual` items in
+the plan before applying: computed import expressions and other textual paths may
+still need edits. Removal refuses projects with dependents; unlink them only after
+removing their imports. Files you edited or added are retained when a project is
+removed from the manifest. Run `source check` and the project type check after an
+applied rename or removal. Valid tsconfig comments and trailing commas are
 accepted; unchanged configurations keep their original formatting.
 The repository's project boundary gate (`tooling/quality/check-project-boundaries.mjs`)
 reads the same manifest through `src/shared/platform/source-manifest.mjs`.

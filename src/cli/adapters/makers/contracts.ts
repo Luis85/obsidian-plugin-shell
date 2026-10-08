@@ -12,6 +12,8 @@ export interface RegistryImport { readonly local: string; readonly from: string;
 /** What every recipe, including a trusted local custom recipe, may use: declared outputs only, never direct writes. */
 export interface RecipeContext {
   read(path: string): Promise<string>;
+  /** Explicit repository paths from project configuration bypass logical source relocation, keeping the same read guards. */
+  readRepository?(path: string): Promise<string>;
   add(path: string, content: string): Promise<void>;
   editArray(path: string, name: string, expression: string, imports?: readonly RegistryImport[]): Promise<void>;
   readonly tests: Set<string>;

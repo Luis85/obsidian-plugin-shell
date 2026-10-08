@@ -44,7 +44,7 @@ async function makerBatchPlan(request: Request, context: Context): Promise<Plann
   const input = stringOption(request.options, 'input');
   requireThat(input && request.args.length === 1, 'MAKER_BATCH_INPUT', 'Supply make batch --input <skeleton.json> with { "schemaVersion": 1, "steps": [{ "recipe": "feature", "name": "boards", "bare": true }, ...] }.');
   const { planMakerBatch } = await import('../makers/batch.ts');
-  const planned = await planMakerBatch(context.root, await readJson(resolve(context.root, input)));
+  const planned = await planMakerBatch(context.root, await readJson(resolve(context.root, input)), stringOption(request.options, 'source'));
   return { plan: planned.plan, checks: planned.checks, summary: { maker: planned.maker, steps: planned.steps, checks: pendingChecks(planned.checks), next: planned.next }, conflicts: [] };
 }
 async function makerPlan(request: Request, context: Context): Promise<Planned> {

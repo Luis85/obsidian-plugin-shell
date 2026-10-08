@@ -31,6 +31,6 @@ test('packed compiled CLI and source CLI return equivalent analysis and errors w
     assert.equal(inventory.data.readiness.tests, 'not-run');
     await assert.rejects(readFile(join(destination, 'design/project.json')), { code: 'ENOENT' });
     assert.ok(files.some(file=>file.path==='bin/app.js'));assert.ok(!files.some(file=>file.path.startsWith('bin/scripts/')));
-    assert.ok(files.some(file=>file.path==='bin/template/scripts/compiler/check-architecture.mjs'));
+    assert.ok(files.some(file=>file.path==='bin/template/tooling/compiler/check-architecture.mjs'));
   }finally{await rm(destination,{recursive:true,force:true});}
 });

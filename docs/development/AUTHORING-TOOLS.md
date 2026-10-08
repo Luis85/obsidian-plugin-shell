@@ -45,6 +45,10 @@ its own `tests/` directory. A legacy flat project without a manifest keeps its
 extend repository tooling and the CLI SDK respectively; they do not create an
 Obsidian feature in a source project.
 
+A batch uses the same source selection: `node bin/app make batch --input skeleton.json --source plugin --dry-run` sets the default project for all steps. A step's JSON
+`source` field overrides that default. Feature ownership is scoped to the source
+project, so two plugin projects may each contain a feature with the same name.
+
 ## Recipes and integration
 
 All child recipes take `<name> --feature <existing-owner>` unless stated otherwise.

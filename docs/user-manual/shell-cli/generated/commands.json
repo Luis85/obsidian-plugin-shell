@@ -6663,7 +6663,7 @@
     },
     {
       "id": "source rename",
-      "summary": "Review renaming a project: moves its folder, rewrites the manifest, references, alias, tsconfigs and every import of the old alias or path.",
+      "summary": "Review renaming a project: moves its folder, updates the manifest, aliases, tsconfigs and literal imports; lists other path references for review.",
       "effect": "plan",
       "maxArgs": 2,
       "group": "source",
@@ -6721,7 +6721,7 @@
     },
     {
       "id": "source remove",
-      "summary": "Review removing an unreferenced project: deletes only files that still match their scaffold hash and keeps and lists edited ones.",
+      "summary": "Review removing an unreferenced project: deletes unchanged scaffold files and derived tsconfigs; retains and lists edited or added files.",
       "effect": "plan",
       "maxArgs": 1,
       "group": "source",

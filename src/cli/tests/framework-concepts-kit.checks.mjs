@@ -43,12 +43,12 @@ test('an extracted dependency-free kit imports a feature concept, generates its 
   assert.equal(planned.status,'planned');
   assert.equal(cli(dir,['plan','apply','concept.plan.json','--yes']).status,'applied');
   assert.equal(cli(dir,['generate','--yes']).status,'applied');
-  assert.match(await readFile(join(dir,'src/generated/presentation/components/details/vp-100.vue'),'utf8'),/model.text\('vn-101'\)/);
-  assert.match(await readFile(join(dir,'src/generated/domain/visual/vp-100.ts'),'utf8'),/Capture your idea/);
-  assert.match(await readFile(join(dir,'src/generated/presentation/components/screens/capture-screen.vue'),'utf8'),/vp-100/);
+  assert.match(await readFile(join(dir,'src/plugin/generated/presentation/components/details/vp-100.vue'),'utf8'),/model.text\('vn-101'\)/);
+  assert.match(await readFile(join(dir,'src/plugin/generated/domain/visual/vp-100.ts'),'utf8'),/Capture your idea/);
+  assert.match(await readFile(join(dir,'src/plugin/generated/presentation/components/screens/capture-screen.vue'),'utf8'),/vp-100/);
   assert.equal(cli(dir,['concept','import','--input','docs/concepts/capture/concept.json','--yes']).status,'unchanged');
   assert.equal(cli(dir,['generate','--yes']).status,'unchanged');
-  const extension=join(dir,'src/generated/presentation/components/screens/capture-screen.vue');
+  const extension=join(dir,'src/plugin/generated/presentation/components/screens/capture-screen.vue');
   const edited=(await readFile(extension,'utf8'))+'\n<!-- Consumer extension retained -->\n';await writeFile(extension,edited);
   const after=await readFile(join(dir,'design/project.json')),document=JSON.parse(after);
   const improvement={...concept,id:'capture-improvement',mode:'improvement',baseSha256:hash(after),references:[],changes:[
@@ -58,7 +58,7 @@ test('an extracted dependency-free kit imports a feature concept, generates its 
   assert.equal(cli(dir,['concept','import','--input','docs/concepts/capture/improve.json','--yes']).status,'applied');
   assert.equal(cli(dir,['generate','--yes']).status,'applied');
   assert.equal(await readFile(extension,'utf8'),edited);
-  assert.match(await readFile(join(dir,'src/generated/domain/screens.ts'),'utf8'),/Capture details/);
+  assert.match(await readFile(join(dir,'src/plugin/generated/domain/screens.ts'),'utf8'),/Capture details/);
   const saved=JSON.parse(await readFile(join(dir,'design/project.json'),'utf8'));assert.equal(saved.schemaVersion,6);
   assert.equal(await readFile(join(dir,'docs/concepts/capture/concept.json'),'utf8'),JSON.stringify(concept));
 });

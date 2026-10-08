@@ -12,7 +12,7 @@
     "visual": ["src/shared/companion/visual/**"],
     "airship": ["tooling/airship/**", "src/cli/adapters/framework/airship*.ts"],
     "prototypes": ["src/shared/companion/prototypes/**", "src/cli/adapters/prototype*.ts", "src/cli/adapters/framework/prototype*.ts"],
-    "native": ["tooling/testing/native-*", "tooling/testing/obsidian-*", "tooling/dev/**"],
+    "native": ["src/shared/testing/native-recovery-handles.*", "tooling/testing/native-*", "tooling/testing/obsidian-*", "tooling/dev/**"],
     "setup": ["tooling/setup.mjs", "tooling/setup/**", "src/shared/platform/npm-install.mjs", "tooling/bundling/**"],
     "release": ["tooling/release/**", "src/cli/tooling/release/**", "tooling/security/**", "src/cli/tooling/security/**", "tooling/maintenance/**"],
     "quality": ["tooling/quality/**", "src/cli/tooling/quality/**", "configs/quality/**", "configs/lint/**", "src/cli/tooling/testing/suite-manifest.mjs", "tooling/testing/test-levels.mjs", "tooling/testing/evidence-*"],

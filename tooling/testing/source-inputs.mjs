@@ -44,7 +44,7 @@ async function defaultRoots(root) {
   const roots = [...inputRoots];
   // Optional installed capabilities and their actual reference input must travel
   // with source-only archives and invalidate receipts when their bytes change.
-  for (const extra of ['.agents/skills/companion-prototype-design/SKILL.md']) {
+  for (const extra of ['workbench.sources.json', '.agents/skills/companion-prototype-design/SKILL.md']) {
     if (await optionalInput(root, extra)) roots.push(extra);
   }
   // Each optional folder must be a real directory; one already inside a root (configs/starters under configs) is not listed twice.

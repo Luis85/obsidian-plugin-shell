@@ -93,7 +93,7 @@ test('every project starter compiles through shared v6 validation into actual ta
     const files = new Map(result.artifacts.map(item => [item.path, item.content]));
     assert.deepEqual(JSON.parse(files.get('configs/actual-source-config.json')), selected); assert.ok(!files.has('project.config.json'));
     assert.deepEqual(openDocument(JSON.parse(files.get('design/project.json'))), document);
-    assert.ok(!files.get('src/core/project.ts').includes('</script>'));
+    assert.ok(!files.get('src/plugin/core/project.ts').includes('</script>'));
     assert.match(files.get('README.md'), /NOT a resolved dependency graph/); assert.match(files.get('README.md'), new RegExp('Starter: ' + selected.starter.id));
     const pkg = JSON.parse(files.get('package.json'));
     const tsconfig = JSON.parse(files.get('tsconfig.json'));
@@ -101,33 +101,33 @@ test('every project starter compiles through shared v6 validation into actual ta
     assert.equal(tsconfig.compilerOptions.resolveJsonModule, true);
     assert.ok(tsconfig.include.includes('plugins/**/*.ts'));
     assert.match(pkg.scripts.test, /plugins\/\*\/tests\/\*\.test\.ts/);
-    for (const path of ['src/core/plugin-api.ts', 'src/core/plugin-runtime.ts', 'plugins/registry.ts', 'plugins/starter-extension/manifest.json',
+    for (const path of ['src/plugin/core/plugin-api.ts', 'src/plugin/core/plugin-runtime.ts', 'plugins/registry.ts', 'plugins/starter-extension/manifest.json',
       'plugins/starter-extension/config.json', 'plugins/starter-extension/src/index.ts', 'plugins/starter-extension/tests/plugin.test.ts', 'plugins/README.md'])
       assert.ok(files.has(path), path);
-    assert.match(files.get('src/core/plugin-api.ts'), /interface PluginObject/);
+    assert.match(files.get('src/plugin/core/plugin-api.ts'), /interface PluginObject/);
     assert.match(files.get('plugins/starter-extension/src/index.ts'), /export const PluginObject/);
     assert.equal(JSON.parse(files.get('plugins/starter-extension/manifest.json')).id, 'starter-extension');
     assert.equal(JSON.parse(files.get('plugins/starter-extension/config.json')).enabled, true);
     for (const path of ['configs/types/tsconfig.angular.json', 'configs/types/tsconfig.cli.json']) if (files.has(path)) assert.equal(JSON.parse(files.get(path)).compilerOptions.rewriteRelativeImportExtensions, true, path);
     if (selected.targets.includes('cli')) {
       assert.equal(JSON.parse(files.get('configs/types/tsconfig.cli.json')).compilerOptions.rootDir, '../..');
-      assert.equal(pkg.scripts['start:cli'], 'node dist/cli/src/targets/cli/main.js');
+      assert.equal(pkg.scripts['start:cli'], 'node dist/cli/src/plugin/targets/cli/main.js');
     }
-    for (const target of selected.targets) assert.ok(files.has(`src/targets/${target}/main.ts`));
-    if (selected.framework === 'none') { assert.ok(!files.has('src/ui/mount.ts')); assert.ok(!pkg.devDependencies.vite); assert.ok(!pkg.scripts['build:prototype']); }
-    if (selected.framework === 'vanilla') { assert.deepEqual(pkg.dependencies, {}); assert.match(files.get('src/ui/mount.ts'), /createElement/); }
+    for (const target of selected.targets) assert.ok(files.has(`src/plugin/targets/${target}/main.ts`));
+    if (selected.framework === 'none') { assert.ok(!files.has('src/plugin/ui/mount.ts')); assert.ok(!pkg.devDependencies.vite); assert.ok(!pkg.scripts['build:prototype']); }
+    if (selected.framework === 'vanilla') { assert.deepEqual(pkg.dependencies, {}); assert.match(files.get('src/plugin/ui/mount.ts'), /createElement/); }
     if (selected.framework === 'angular') {
       assert.ok(files.has('scripts/angular-linker.mjs')); assert.equal(pkg.devDependencies['@babel/core'], '7.29.0');
       assert.equal(pkg.dependencies['@angular/core'], selected.angularPins['@angular/core']); assert.equal(pkg.devDependencies['@angular/compiler-cli'], selected.angularPins['@angular/compiler-cli']);
       assert.ok(!pkg.dependencies.vue); assert.ok(!pkg.dependencies['zone.js']);
-      assert.match(files.get('src/ui/mount.ts'), /createApplication/); assert.match(files.get('src/ui/mount.ts'), /app.destroy/);
+      assert.match(files.get('src/plugin/ui/mount.ts'), /createApplication/); assert.match(files.get('src/plugin/ui/mount.ts'), /app.destroy/);
       assert.equal(JSON.parse(files.get('configs/types/tsconfig.angular.json')).angularCompilerOptions.compilationMode, 'full');
     }
     if (selected.framework === 'nuxtui') {
       assert.equal(pkg.dependencies['@nuxt/ui'], '4.11.3'); assert.ok(!pkg.dependencies.nuxt);
-      assert.match(files.get('scripts/bundling/vite-shared.mjs'), /Unqualified Nuxt UI module/);
-      assert.ok(files.has('src/ui/Starter.vue'));
-      for (const [, imported] of files.get('scripts/bundling/vite-shared.mjs').matchAll(/from ['"](\.\/[^'"]+)['"]/g)) assert.ok(files.has('scripts/bundling/' + imported.slice(2)), imported);
+      assert.match(files.get('tooling/bundling/vite-shared.mjs'), /Unqualified Nuxt UI module/);
+      assert.ok(files.has('src/plugin/ui/Starter.vue'));
+      for (const [, imported] of files.get('tooling/bundling/vite-shared.mjs').matchAll(/from ['"](\.\/[^'"]+)['"]/g)) assert.ok(files.has('tooling/bundling/' + imported.slice(2)), imported);
     }
     assert.ok(result.diagnostics.some(item => item.code === 'COMPILER_ADAPTER_REQUIRED'));
   }
@@ -174,7 +174,7 @@ test('project plan has deterministic bytes, default no writes, independent sidec
   const replay = await read('project-request.json'); assert.deepEqual(Object.keys(replay), ['schemaVersion', 'starter', 'interview']);
   assert.equal((await projectRequest(replay, frameworkRoot)).ready, true);
   const unchanged = await projectPlan(options); assert.equal((await applyPrepared(unchanged, unchanged.planHash)).status, 'unchanged');
-  await writeFile(join(root, 'prepared/source/src/core/project.ts'), '// user-owned change\n');
+  await writeFile(join(root, 'prepared/source/src/plugin/core/project.ts'), '// user-owned change\n');
   await assert.rejects(() => projectPlan(options), /modified|edited|conflict|owned/i);
 }));
 test('unapproved, unresolved, stale-guide, legacy-preset and unsafe-directory requests fail without producing source', async () => scratch(async root => {
@@ -234,8 +234,8 @@ test('sketch regeneration respects a saved starter selection and refuses legacy 
   await mkdir(join(root, 'configs')); await writeFile(join(root, 'configs/cli-config.json'), JSON.stringify(selection('cli')));
   const plan = await execute(parseArguments(['sketch', 'generate', '--out', 'code']), context(root));
   assert.equal(plan.outputKind, 'project');
-  assert.ok(plan.changes.some(item => item.path === 'code/src/targets/cli/main.ts'));
-  assert.ok(!plan.changes.some(item => item.path === 'code/src/ui/Starter.vue'));
+  assert.ok(plan.changes.some(item => item.path === 'code/src/plugin/targets/cli/main.ts'));
+  assert.ok(!plan.changes.some(item => item.path === 'code/src/plugin/ui/Starter.vue'));
   assert.equal((await execute(parseArguments(['sketch', 'generate', '--out', 'code', '--apply', plan.planHash]), context(root))).status, 'applied');
   assert.deepEqual(JSON.parse(await readFile(join(root, 'code/configs/cli-config.json'), 'utf8')), selection('cli'));
   await writeFile(join(root, 'configs/cli-config.json'), JSON.stringify({ schemaVersion: 1, catalogVersion: 1, preset: 'cli', projectType: 'cli', framework: 'none', targets: ['cli'] }));

@@ -53,12 +53,14 @@ async function lintScope(root: string): Promise<InScope | null> {
 }
 async function coverageScope(root: string): Promise<InScope | null> {
   const configs = (await listFiles(root, 'configs/testing')).filter(path => /\/vitest[^/]*\.(?:[cm]?[jt]s)$/.test(path));
-  const globs: string[] = [];
+  const scopes: InScope[] = [];
   for (const path of configs) {
     const text = (await readBounded(join(root, path))).toString('utf8');
-    for (const list of await stringArrays(text, path, (property, parent) => property === 'include' && parent === 'coverage')) globs.push(...list);
+    const includes = (await stringArrays(text, path, (property, parent) => property === 'include' && parent === 'coverage')).flat();
+    const excludes = (await stringArrays(text, path, (property, parent) => property === 'exclude' && parent === 'coverage')).flat();
+    if (includes.length) scopes.push(file => includes.some(glob => matches(file, glob)) && !excludes.some(glob => matches(file, glob)));
   }
-  return globs.length ? file => globs.some(glob => matches(file, glob)) : null;
+  return scopes.length ? file => scopes.some(inScope => inScope(file)) : null;
 }
 async function analyzerScope(root: string): Promise<InScope | null> {
   const config = await readJsonFile(root, 'configs/quality/fallow.json') ?? await readJsonFile(root, '.fallowrc.json');

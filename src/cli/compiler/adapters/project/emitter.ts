@@ -35,8 +35,8 @@ function vueFiles(template: TemplateSnapshot): Record<string, string> {
 function tests(cli: boolean): string {
   return `import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { project, findPage } from '../src/plugin/core/project.ts';
-import { activatePlugins } from '../src/plugin/core/plugin-runtime.ts';
+import { project, findPage } from '../core/project.ts';
+import { activatePlugins } from '../core/plugin-runtime.ts';
 test('shared project contains unique stable pages and deterministic lookup', () => {
   assert.ok(project.id); assert.ok(project.pages.length);
   assert.equal(new Set(project.pages.map(page => page.id)).size, project.pages.length);
@@ -48,7 +48,7 @@ test('registered project plugins activate and dispose deterministically', () => 
   assert.equal(typeof close, 'function');
   close(); close();
 });
-${cli ? `import { run } from '../src/plugin/targets/cli/commands.ts';
+${cli ? `import { run } from '../targets/cli/commands.ts';
 test('CLI has headless JSON parity and rejects unsupported commands', () => {
   assert.equal(run(['pages', '--json']).exitCode, 0);
   assert.deepEqual(run(['pages', '--json']).value, run(['pages']).value);
@@ -69,10 +69,11 @@ function sharedFiles(model: Model, template: TemplateSnapshot, selected: Project
     ...packageFiles(template, selected, id, adapter), ...typecheckFiles(selected, adapter),
     [configPath]: json(selected), 'design/project.json': json(model.document),
     'workbench.sources.json': json({ schemaVersion: 1, projects: [{ name: 'plugin', kind: selected.targets.includes('plugin') ? 'plugin' : selected.targets.includes('cli') ? 'cli' : 'companion', path: 'src/plugin', references: [] }] }),
-    'src/plugin/tsconfig.json': json({ extends: '../../tsconfig.json', include: ['**/*.ts', '**/*.vue'] }),
+    'src/plugin/tsconfig.json': json({ extends: '../../tsconfig.json', include: ['**/*.ts', '**/*.vue'], exclude: ['tests/**'] }),
+    'src/plugin/tests/tsconfig.json': json({ extends: '../tsconfig.json', compilerOptions: { allowJs: true, checkJs: false }, include: ['**/*.mjs'], exclude: [] }),
     'src/plugin/core/project.ts': coreSource(model), ...pluginExtensionFiles(), 'scripts/build.mjs': buildSource(configPath),
     'manifest.json': json({ id, name, version: String(project.version ?? '0.1.0'), minAppVersion: '1.13.0', description: String(project.description ?? 'Project prototype'), author: String(project.author ?? 'Your name'), isDesktopOnly: false }),
-    'README.md': starterReadme(selected, configPath), 'tests/scaffold.test.mjs': tests(selected.targets.includes('cli')),
+    'README.md': starterReadme(selected, configPath), 'src/plugin/tests/scaffold.test.mjs': tests(selected.targets.includes('cli')),
     'AGENTS.md': agentGuide(configPath),
     'prototype.acceptance.json': json({ stage: 'not-implemented', targets: selected.targets.map(target => ({ target, build: 'not-run', runtime: 'not-run', businessAcceptance: 'not-run' })),
       remaining: remainingAcceptance }),

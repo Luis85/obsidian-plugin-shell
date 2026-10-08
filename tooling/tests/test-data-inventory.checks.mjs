@@ -83,3 +83,22 @@ test('[PROJECT-FIXTURE-INVENTORY] canonical starter design bytes are transported
   const outside = await scratch(t); await symlink(outside, folder, process.platform === 'win32' ? 'junction' : 'dir');
   await assert.rejects(sourceInputs(root), /SOURCE_SYMLINK/); assert.deepEqual(await readdir(outside), []);
 });
+
+
+test('[SOURCE-MANIFEST-INVENTORY] graph changes invalidate source evidence and redirected manifests fail closed', async t => {
+  const root = await minimal(t), path = join(root, 'workbench.sources.json');
+  await rm(path, { force: true });
+  const absent = await sourceInputs(root);
+  assert.ok(!absent.roots.includes('workbench.sources.json'));
+  await writeFile(path, '{"version":1,"projects":[]}');
+  const first = await sourceInputs(root);
+  assert.equal(first.files.filter(file => file.path === 'workbench.sources.json').length, 1);
+  assert.notEqual(first.digest, absent.digest);
+  await writeFile(path, '{"version":1,"projects":[{"name":"shared","path":"src/shared"}]}');
+  assert.notEqual((await sourceInputs(root)).digest, first.digest);
+  await rm(path);
+  const outside = await scratch(t);
+  await symlink(outside, path, process.platform === 'win32' ? 'junction' : 'dir');
+  await assert.rejects(sourceInputs(root), /SOURCE_SYMLINK/);
+  assert.deepEqual(await readdir(outside), []);
+});

@@ -47,7 +47,7 @@ function packageScripts(selected: ProjectSelection, engine: FrameworkAdapter['en
   const scripts: Pins = {
     build: 'node scripts/build.mjs',
     typecheck: typecheckCommands[engine],
-    test: 'node --experimental-strip-types --test tests/*.test.mjs plugins/*/tests/*.test.ts',
+    test: 'node --experimental-strip-types --test src/plugin/tests/*.test.mjs plugins/*/tests/*.test.ts',
   };
   if (browserTarget(selected)) scripts.start = 'npm run build && node scripts/serve.mjs';
   if (visualTarget(selected)) scripts['build:prototype'] = 'node scripts/build.mjs --prototype';

@@ -1,5 +1,5 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { lstat } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { lstat, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { hasPortableProjectSegments } from '#shared/platform/project-path.ts';
 import type { FilePlan } from '#shared/platform/file-plan.ts';
@@ -7,6 +7,7 @@ import { projectConfigPath } from '#shared/platform/project-configs.mjs';
 import { slug, title, recipeOptions } from './arguments.ts';
 import { makerTarget, makerLayout, makerPath, targetedMakerContext, type MakerTarget } from './target.ts';
 import { dispatchMaker } from './dispatch.ts';
+import { loadTypescript } from './syntax.ts';
 import type { Backend, MakerArguments, MakerInput, MakerOptions, Preset } from './contracts.ts';
 
 /** One planned project check: a Node entry point and its arguments, run after a successful apply. */
@@ -101,27 +102,31 @@ const pluginChecks: readonly MakerCheck[] = [
   { id: 'plugin-tests', command: 'node', args: ['scripts/testing/suites.mjs', 'workbench-plugins'] },
 ];
 /** A root `tsconfig.json` that is a solution (`files: []` plus `references`) checks no file with `--noEmit`. */
-function solutionRoot(root: string): boolean {
-  let config: unknown;
-  try { config = JSON.parse(readFileSync(resolve(root, 'tsconfig.json'), 'utf8')); } catch { return false; }
+async function solutionRoot(root: string): Promise<boolean> {
+  const path = resolve(root, 'tsconfig.json');
+  let text: string;
+  try { text = await readFile(path, 'utf8'); } catch (error) { if (isMissing(error)) return false; throw error; }
+  const ts = await loadTypescript(), parsed = ts.parseConfigFileTextToJson(path, text);
+  if (parsed.error) throw new Error(`TSCONFIG_INVALID: ${ts.flattenDiagnosticMessageText(parsed.error.messageText, ' ')}`);
+  const config = parsed.config as unknown;
   if (config === null || typeof config !== 'object' || Array.isArray(config)) return false;
   const { files, references } = config as { files?: unknown; references?: unknown };
   return Array.isArray(files) && files.length === 0 && Array.isArray(references) && references.length > 0;
 }
 /** Type-check step: a generated project's own config, a solution root in build mode, otherwise the root config. */
-export function makerTypecheck(root: string): MakerCheck {
+export async function makerTypecheck(root: string): Promise<MakerCheck> {
   const tsconfig = projectConfigPath(root, 'typescript');
-  const args = tsconfig ? ['--noEmit', '--project', tsconfig] : solutionRoot(root) ? ['-b'] : ['--noEmit'];
+  const args = tsconfig ? ['--noEmit', '--project', tsconfig] : await solutionRoot(root) ? ['-b'] : ['--noEmit'];
   return { id: 'typecheck', command: 'node', args: ['node_modules/vue-tsc/bin/vue-tsc.js', ...args] };
 }
 /** A generated project checks its own project-scoped TypeScript and Vitest configuration, the same ones `check` uses. */
-export function planChecks(root: string, maker: string, tests: ReadonlySet<string>, target?: MakerTarget): MakerCheck[] {
+export async function planChecks(root: string, maker: string, tests: ReadonlySet<string>, target?: MakerTarget): Promise<MakerCheck[]> {
   const runtimeTests = [...tests].filter((path) => path.endsWith('.test.ts'));
   const toolingTests = [...tests].filter((path) => path.endsWith('.checks.mjs'));
   const vitestConfig = projectConfigPath(root, 'vitest') ?? 'configs/testing/vitest.config.mjs';
   const checks: MakerCheck[] = [
     ...(maker === 'plugin' ? pluginChecks : []),
-    makerTypecheck(root),
+    await makerTypecheck(root),
     ...(runtimeTests.length
       ? [{ id: 'generated-tests', command: 'node' as const, args: ['node_modules/vitest/vitest.mjs', 'run', '--config', vitestConfig, ...runtimeTests] }]
       : []),
@@ -171,7 +176,7 @@ export async function planMaker(root: string, request: MakerArguments, { beforeF
     owner,
     ...planMetadata(input),
     plan,
-    checks: planChecks(root, maker, context.tests, target),
+    checks: await planChecks(root, maker, context.tests, target),
     next: await fullGate(root),
   };
 }

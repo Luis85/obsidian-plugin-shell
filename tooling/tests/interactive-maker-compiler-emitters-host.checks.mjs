@@ -106,7 +106,7 @@ test('the clickdummy composes read-only synthetic sources, scenarios and the jou
   assert.ok(sources.includes('"save-record": async () => { throw new Error(\'NOT_IMPLEMENTED: Clickdummy has no business-write adapter.\'); },\n"touch": async () => { throw new Error('));
   assert.ok(sources.includes('"list-components": async () => { return [{"id":"fixture","type":"component","title":"fixture"}]; }'));
   const entry = lines(rich, 'harness/prototype/clickdummy.ts');
-  assert.equal(entry[3], 'import Preview from "../../generated/presentation/components/ClickdummyPreview.vue";');
+  assert.equal(entry[3], 'import Preview from "../../src/plugin/generated/presentation/components/ClickdummyPreview.vue";');
   assert.equal(entry.find(line => line.startsWith('const owner')), 'const owner = "plugin-companion", name = "Plugin Companion";');
   assert.ok(entry.includes('const routes: ReadonlyArray<{id: string; surface: string; path: string}> = [{"id":"route-1","surface":"node-27","path":"/library"}];'));
   assert.ok(!rich.text('harness/prototype/clickdummy.ts').includes('journey'));
@@ -120,7 +120,7 @@ test('the clickdummy composes read-only synthetic sources, scenarios and the jou
   const preview = journey.text('src/plugin/generated/presentation/components/ClickdummyPreview.vue');
   assert.ok(preview.includes('; ($event.target as HTMLSelectElement).value = model.current()"') && preview.includes(' :disabled="model.editorSurface()"'));
   const composed = journey.text('harness/prototype/clickdummy.ts');
-  assert.ok(composed.includes('import { createJourneyPreview } from "../../generated/bootstrap/journey-preview.ts";\nimport { provideJourney } from "../../generated/bootstrap/journey-workspace.ts";\nimport \'./clickdummy.css\';'));
+  assert.ok(composed.includes('import { createJourneyPreview } from "../../src/plugin/generated/bootstrap/journey-preview.ts";\nimport { provideJourney } from "../../src/plugin/generated/bootstrap/journey-workspace.ts";\nimport \'./clickdummy.css\';'));
   assert.ok(composed.includes('      editorSurface: () => ["node-2"].includes(navigation.current),\n'));
   const blank = run(clickdummyCode, await plain());
   assert.ok(blank.text('src/plugin/generated/bootstrap/clickdummy-sources.ts').endsWith('export function createClickdummySources(): Sources { return {}; }\n'));

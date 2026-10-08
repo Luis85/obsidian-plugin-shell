@@ -126,7 +126,7 @@ test('compiled kit bootstraps, imports and generates without dependencies or Git
   // The extracted CLI must bind inherited framework source even with app/source + spec.
   output = cli(dir, ['setup', 'status', '--json']); assert.equal(output.status, 0, output.stderr + output.stdout);
   const approval = JSON.parse(output.stdout).data;
-  const inherited = join(dir, 'src/main.ts');
+  const inherited = join(dir, 'src/plugin/main.ts');
   await writeFile(inherited, (await readFile(inherited, 'utf8')) + '\n// independent inherited-source edit\n');
   output = cli(dir, ['setup', 'resume', '--stage', 'verify', '--resume-hash', approval.resumeHash, '--yes', '--json']);
   assert.equal(output.status, 1, output.stderr + output.stdout);

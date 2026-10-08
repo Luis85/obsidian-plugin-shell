@@ -174,7 +174,7 @@ test('binding suites read external props and project instance props without inve
   external.props = { mode: { kind: 'literal', value: 1 } }; external.events = [];
   const lifecycle = recorder(); visualRuntimeTests(m, specs, [{ component, node: external, path: 'x/chart.adapter.ts' }], lifecycle.add);
   const adapter = lifecycle.text('src/plugin/tests/project/acceptance/project-json-review-chart.adapter.test.ts');
-  assert.ok(adapter.includes('vi.mock("../../../x/chart.adapter.ts", () => ({ createAdapter: () => ({\n'));
+  assert.ok(adapter.includes('vi.mock("../../../../../x/chart.adapter.ts", () => ({ createAdapter: () => ({\n'));
   assert.ok(adapter.includes('  await flushPromises(); expect(fake.log).toEqual([\'mount\']);\n  wrapper.unmount(); expect(fake.log).toEqual(["mount","destroy"]);\n'));
 });
 

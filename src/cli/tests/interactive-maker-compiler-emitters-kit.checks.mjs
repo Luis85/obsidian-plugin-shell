@@ -37,7 +37,7 @@ test('the developer kit renders every template, follows custom roots and owns it
   const fallback = model(await starterDocument('blank')); fallback.project.name = ' '; delete fallback.project.description;
   const defaults = recorder(); await devkitFiles(template, fallback, defaults.add);
   assert.ok(defaults.text('README.md').startsWith('# my-vault-tool\n\nAn Obsidian plugin.\n'));
-  assert.ok(defaults.text('tests/suites.json').includes('src/plugin/tests/project')); 
+  assert.ok(defaults.text('tests/suites.json').includes('src/plugin/tests/project'));
 });
 
 test('the copied suite manifest classifies emitted journey specs and their helper, and nothing else changes', async () => {
@@ -71,7 +71,7 @@ test('framework documents and maintainer workflows move under docs/framework wit
     ['docs/framework/README.md', 'docs/framework/AGENTS.md', 'docs/framework/workflows/ci.yml', 'docs/a.md', 'README.txt']);
   for (const path of ['configs/starters/blank.json', 'DEVELOPER_GUIDE.md',
     '.github/workflows/starter-distribution.yml', '.github/scripts/run.mjs', 'tooling/tests/qualification-trigger.checks.mjs', 'docs/concepts/sitemap-editor/x.md',
-    'src/cli/tests/project-generator-native-starters.checks.mjs', 'docs/concepts/jev-prompt-editor/a', 'tooling/tests/jev-concept-distribution.checks.mjs',
+    'src/cli/tests/project-generator-native-starters.checks.mjs', 'docs/concepts/jev-prompt-editor/a', 'src/cli/tests/jev-concept-distribution.checks.mjs',
     '.github/workflows/dev.yml', '.github/workflows/release.yml', '.github/workflows/release-cut.yml', '.github/workflows/publish.yml', '.github/workflows/definition-of-ready.yml', '.github/workflows/definition-of-done.yml', '.github/PULL_REQUEST_TEMPLATE/release.md'])
     assert.equal(maintainerOnly(path), true, path);
   // The framework's delivery pipeline stays behind, but the qualification workflows it calls remain inert reference.
@@ -108,7 +108,7 @@ test('model schemas keep supported JSON Schema and refuse silent weakening', () 
   refuse({ type: 'object', properties: Object.fromEntries(Array.from({ length: 41 }, (_, i) => ['p' + i, { type: 'string' }])) }, 'Too many schema properties.');
   let deep = { type: 'string' }; for (let i = 0; i < 7; i++) deep = { type: 'array', items: deep };
   refuse(deep, 'Schema exceeds its complexity limit.'); refuse([], 'Expected object.');
-  assert.equal(symbol('task-list'), 'GTaskList'); assert.equal(literal('<  >'), '"\\u003c\\u2028\\u2029\\u003e"');
+  assert.equal(symbol('task-list'), 'GTaskList'); assert.equal(literal('<\u2028\u2029>'), '"\\u003c\\u2028\\u2029\\u003e"');
   assert.throws(() => text(1), invalid('Expected bounded text.')); assert.throws(() => rows({}), invalid('Expected bounded collection.'));
 });
 

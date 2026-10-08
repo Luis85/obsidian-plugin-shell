@@ -9,7 +9,7 @@ import { APPROVALS_PATH } from '../quality/self-review-approvals.mjs';
 
 // Generated-project template sources live in templates/: the companion runtime copied into generated projects,
 // the developer-kit text templates, the example-removal templates, the adoption skill the kit installs into existing projects
-// and the Claude Design folder templates `design prepare` renders. The shared companion contracts stay in scripts/companion.
+// and the Claude Design folder templates `design prepare` renders. The shared companion contracts stay in src/shared/companion.
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const removed = ['src/shared/companion/runtime', 'src/shared/companion/devkit', 'src/cli/tooling/examples/templates'];
 async function files(folder) {
@@ -32,14 +32,14 @@ test('templates/ holds only the runtime, developer-kit, example-removal, adoptio
   for (const folder of removed) assert.deepEqual(await files(folder), [], `${folder} was removed`);
 });
 
-test('the template snapshot copies every templates/ file except the framework-entry test template, and the contracts stay in scripts/companion', async () => {
+test('the template snapshot copies every templates/ file except the framework-entry test template, and the contracts stay in src/shared/companion', async () => {
   const snapshot = await loadTemplateSnapshot(root);
   const paths = new Set(snapshot.frameworkFiles.map(file => file.path));
   const templates = await files('templates');
   // Only the example-removal template of the framework src/plugin/main.ts entry test stays maintainer-only (a generated project replaces that entry).
   assert.deepEqual(templates.filter(maintainerOnly), ['templates/examples/tests__runtime__shell-entry-lifecycle.test.ts.txt']);
   for (const path of templates) assert.equal(paths.has(path), !maintainerOnly(path), path);
-  assert.match(snapshot.text('templates/companion/runtime/contract.ts'), /export function matches/);
+  assert.match(snapshot.text('src/shared/companion/runtime-contract.ts'), /export function matches/);
   for (const contract of ['src/shared/companion/composition-contract.mjs', 'src/shared/companion/visual/visual-ir.mjs', 'src/shared/companion/journey/project-store.ts']) assert.ok(paths.has(contract), contract);
 });
 

@@ -217,8 +217,8 @@ The tables list options with documented command semantics. Some common flags are
 - [source add](#source-add) — Review scaffolding src/&lt;name&gt; from the kind template (code, one passing test, both tsconfigs) with its manifest entry, solution reference, alias and suite.
 - [source link](#source-link) — Review adding a reference &lt;from&gt; -&gt; &lt;to&gt; and the derived tsconfigs; refuses a cycle.
 - [source unlink](#source-unlink) — Review removing a reference &lt;from&gt; -&gt; &lt;to&gt;; refuses while &lt;from&gt; still imports &lt;to&gt;.
-- [source rename](#source-rename) — Review renaming a project: moves its folder, rewrites the manifest, references, alias, tsconfigs and every import of the old alias or path.
-- [source remove](#source-remove) — Review removing an unreferenced project: deletes only files that still match their scaffold hash and keeps and lists edited ones.
+- [source rename](#source-rename) — Review renaming a project: moves its folder, updates the manifest, aliases, tsconfigs and literal imports; lists other path references for review.
+- [source remove](#source-remove) — Review removing an unreferenced project: deletes unchanged scaffold files and derived tsconfigs; retains and lists edited or added files.
 
 ## Project compiler
 
@@ -3516,7 +3516,7 @@ node bin/app source unlink plugin util --dry-run
 
 ## source rename
 
-Review renaming a project: moves its folder, rewrites the manifest, references, alias, tsconfigs and every import of the old alias or path.
+Review renaming a project: moves its folder, updates the manifest, aliases, tsconfigs and literal imports; lists other path references for review.
 
 ```sh
 node bin/app source rename <old> <new> [--dry-run | --yes | --apply <sha256>] [--json]
@@ -3548,7 +3548,7 @@ node bin/app source rename util helpers --apply <sha256>
 
 ## source remove
 
-Review removing an unreferenced project: deletes only files that still match their scaffold hash and keeps and lists edited ones.
+Review removing an unreferenced project: deletes unchanged scaffold files and derived tsconfigs; retains and lists edited or added files.
 
 ```sh
 node bin/app source remove <name> [--dry-run | --yes | --apply <sha256>] [--json]

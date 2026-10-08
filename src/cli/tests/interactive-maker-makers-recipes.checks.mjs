@@ -1,6 +1,6 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
-import { cp, mkdir, readFile, rm } from 'node:fs/promises';
+import { cp, mkdir, readFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { makerFixture, makerSourceRoot, installMakerFoundation, copyMakerSuite } from './support/maker-fixture.mjs';
@@ -24,7 +24,6 @@ async function authorFixture(root) {
   await installMakerFoundation(root); await copyMakerSuite(root);
   await mkdir(join(root, 'src/locales'), { recursive: true });
   await cp(join(makerSourceRoot, 'src/plugin/locales/en.json'), join(root, 'src/locales/en.json'));
-  await rm(join(root, 'src/cli'), { recursive: true, force: true });
   await mkdir(join(root, 'plugins'), { recursive: true });
   for (const file of ['api.ts', 'runtime.ts', 'registry.ts']) await cp(join(makerSourceRoot, 'src/cli/sdk', file), join(root, 'plugins', file));
   await apply(root, ['feature', 'bookmarks', '--entity', 'bookmark']);

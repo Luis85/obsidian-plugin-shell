@@ -418,7 +418,7 @@ test('declared packages merge into package.json with extension-owned adapters, a
   assert.equal(adapter.content.match(/throw new NotImplementedError\("@tiptap\/vue-3 adapter editor", "(mount|update|destroy)"\)/g).length, 3);
   const lifecycle = get(`src/plugin/tests/project/acceptance/${component.libraryId}-editor.adapter.test.ts`).content;
   assert.match(lifecycle, /it\.todo\("\[[a-z0-9-]+\/editor\] implement the @tiptap\/vue-3 adapter/);
-  assert.ok(lifecycle.includes(`vi.mock("../../../src/plugin/generated/presentation/components/library/${component.libraryId}/editor.adapter.ts"`));
+  assert.ok(lifecycle.includes(`vi.mock("../../../generated/presentation/components/library/${component.libraryId}/editor.adapter.ts"`));
   assert.ok(lifecycle.includes(`fake.emit("update", 'fixture'); await flushPromises();`) && lifecycle.includes(`toContain("${interactionId}");`));
   assert.ok(lifecycle.includes('expect(fake.log).toEqual(["mount","destroy"]);'));
   const notes = get('PROJECT-IMPLEMENTATION.md').content;

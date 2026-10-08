@@ -1,4 +1,4 @@
-import test from 'node:test';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
 import { rm } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -162,4 +162,17 @@ test('a root config compiling explicit files is not rewritten as a solution', as
   assert.equal(checked.result.data.fixable, 0);
   await source(root, 'check', '--fix', '--yes');
   assert.equal(await read(root, 'tsconfig.json'), text);
+});
+
+
+test('coverage scope subtracts exclusions within each config before combining configured coverage runs', async t => {
+  const root = await fixture(t);
+  await write(root, 'configs/testing/vitest.config.mjs', "export default { test: { coverage: { include: ['src/**/*.ts'], exclude: ['src/tui/**'] } } };\n");
+  const excluded = await finds(root, 'SOURCE_GATE_UNCOVERED');
+  const gaps = excluded.result.diagnostics.filter(item => item.code === 'SOURCE_GATE_UNCOVERED');
+  assert.equal(gaps.length, 1);
+  assert.match(gaps[0].message, /src\/tui is outside the test coverage scope/);
+  await write(root, 'configs/testing/vitest.tui.config.mjs', "export default { test: { coverage: { include: ['src/tui/**/*.ts'], exclude: ['src/tui/tests/**'] } } };\n");
+  const covered = await source(root, 'check');
+  assert.equal(covered.status, 0, JSON.stringify(covered.result.diagnostics));
 });

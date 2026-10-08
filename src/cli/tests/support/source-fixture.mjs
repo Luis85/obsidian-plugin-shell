@@ -1,6 +1,8 @@
 /** Temporary source-project repositories and real `node src/cli/app.ts source …` runs for the source command suites. */
 import assert from 'node:assert/strict';
 import { execFile } from 'node:child_process';
+import { Readable } from 'node:stream';
+import { main } from '../../adapters/framework-cli.ts';
 import { cp, mkdir, mkdtemp, readFile, realpath, rm, rmdir, symlink, unlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -19,9 +21,21 @@ export function run(file, args, options = {}) {
     (error, stdout, stderr) => accept({ status: error ? (typeof error.code === 'number' ? error.code : 1) : 0, stdout, stderr })));
   return once().then(first => first.status !== 0 && !first.stdout && transient.test(first.stderr) ? once() : first);
 }
+/** The same CLI composition root runs in-process under coverage; node:test retains executable/process coverage. */
+async function coveredSource(root, args) {
+  let stdout = '', stderr = '';
+  const status = await main(['source', ...args, '--root', root, '--json'], repository, {
+    input: Readable.from([]),
+    output: { isTTY: false, write(text) { stdout += text; return true; } },
+    error: { isTTY: false, write(text) { stderr += text; return true; } },
+    env: process.env,
+  });
+  return { status, stdout, stderr };
+}
 /** `node src/cli/app.ts source <args> --root <root> --json`: exit status and the parsed result. */
 export async function source(root, ...args) {
-  const outcome = await run(process.execPath, [app, 'source', ...args, '--root', root, '--json']);
+  const outcome = process.env.VITEST ? await coveredSource(root, args)
+    : await run(process.execPath, [app, 'source', ...args, '--root', root, '--json']);
   let result;
   try { result = JSON.parse(outcome.stdout); } catch { assert.fail(`source ${args.join(' ')} printed no JSON (exit ${outcome.status}): ${outcome.stderr}${outcome.stdout}`); }
   return { status: outcome.status, result, codes: (result.diagnostics ?? []).map(item => item.code) };
@@ -54,7 +68,7 @@ export const readJson = async (root, path) => JSON.parse(await read(root, path))
 /** A clean four-project repository whose derived files all match its manifest. */
 export async function fixture(t, { manifest = { schemaVersion: 1, projects: projects() }, typecheck = false } = {}) {
   const root = await realpath(await mkdtemp(join(tmpdir(), 'source-command-')));
-  t.after(async () => {
+  (t.after ?? t.onTestFinished).call(t, async () => {
     // Detach the dependency junction first, so removing the fixture can never reach the repository's node_modules.
     await unlink(join(root, 'node_modules')).catch(() => rmdir(join(root, 'node_modules'))).catch(() => {});
     await rm(root, { recursive: true, force: true, maxRetries: 3 });

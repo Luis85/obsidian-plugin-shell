@@ -9,6 +9,6 @@ export const sourceCommands: readonly Command[] = [
   { id: 'source add', summary: 'Review scaffolding src/<name> from the kind template (code, one passing test, both tsconfigs) with its manifest entry, solution reference, alias and suite.', options: values('kind', 'platform', 'references'), maxArgs: 1, effect: 'plan' },
   { id: 'source link', summary: 'Review adding a reference <from> -> <to> and the derived tsconfigs; refuses a cycle.', options: {}, maxArgs: 2, effect: 'plan' },
   { id: 'source unlink', summary: 'Review removing a reference <from> -> <to>; refuses while <from> still imports <to>.', options: {}, maxArgs: 2, effect: 'plan' },
-  { id: 'source rename', summary: 'Review renaming a project: moves its folder, rewrites the manifest, references, alias, tsconfigs and every import of the old alias or path.', options: {}, maxArgs: 2, effect: 'plan' },
-  { id: 'source remove', summary: 'Review removing an unreferenced project: deletes only files that still match their scaffold hash and keeps and lists edited ones.', options: {}, maxArgs: 1, effect: 'plan' },
+  { id: 'source rename', summary: 'Review renaming a project: moves its folder, updates the manifest, aliases, tsconfigs and literal imports; lists other path references for review.', options: {}, maxArgs: 2, effect: 'plan' },
+  { id: 'source remove', summary: 'Review removing an unreferenced project: deletes unchanged scaffold files and derived tsconfigs; retains and lists edited or added files.', options: {}, maxArgs: 1, effect: 'plan' },
 ];

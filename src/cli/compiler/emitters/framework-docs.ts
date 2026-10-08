@@ -22,7 +22,7 @@ export function relocatedPath(path: string): string {
  * still runs there under test:framework. The projects/<name> tooling and the workflows it syncs stay too (they belong to the
  * checkout's standalone projects). */
 const maintainerFiles: ReadonlySet<string> = new Set(['DEVELOPER_GUIDE.md', '.github/workflows/starter-distribution.yml', ...deliveryPipelineFiles,
-  'tooling/tests/qualification-trigger.checks.mjs', 'src/cli/tests/project-generator-native-starters.checks.mjs', 'tooling/tests/jev-concept-distribution.checks.mjs',
+  'tooling/tests/qualification-trigger.checks.mjs', 'src/cli/tests/project-generator-native-starters.checks.mjs', 'src/cli/tests/jev-concept-distribution.checks.mjs',
   'tooling/testing/qualify-project-handoff.mjs', 'src/cli/tests/agent-project-handoff.checks.mjs', 'docs/README.md',
   'src/plugin/tests/unit/shell-entry-lifecycle.test.ts', 'templates/examples/tests__runtime__shell-entry-lifecycle.test.ts.txt', 'src/plugin/tests/unit/obsidian-test-kit-shell-entry.test.ts',
   '.github/workflows/projects-boundary.yml', '.github/workflows/projects-required-checks.yml', 'tooling/tests/projects-boundary.checks.mjs',
@@ -88,7 +88,7 @@ export function relocateFrameworkDocuments(entries: Map<string, Entry>, omitted:
     entries.set(to, { ...entry, path: to, content });
   }
 }
-const exampleOwnership = 'src/cli/tooling/examples/ownership.json';
+const exampleOwnership = 'tooling/examples/ownership.json';
 /** Example removal plans every file its ownership manifest lists, and a listed file that is absent is an edit conflict.
  * A generated project's manifest therefore lists only the example files the project received. */
 export function scopeExampleOwnership(entries: Map<string, Entry>): void {

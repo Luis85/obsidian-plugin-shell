@@ -54,14 +54,14 @@ export function defineDocument<I, V>(entity: EntityDefinition<I, V>, options: {
 }
 
 /** Registration validates the catalog; it never changes vault-wide Properties settings. */
-export function validateDocumentCatalog(recipes: readonly { readonly entity: { readonly key: string; readonly fields: Readonly<Record<string, { readonly kind: string }>> }; readonly mappings: readonly { readonly field: string; readonly property: string }[] }[]): void {
+export function validateDocumentCatalog(recipes: readonly { readonly entity: { readonly key: string; readonly fields: Readonly<Record<string, Pick<Field<unknown>, 'kind'>>> }; readonly mappings: readonly { readonly field: string; readonly property: string }[] }[]): void {
   const entities = new Set<string>();
   const properties = new Map<string, string>();
   for (const recipe of recipes) {
     if (entities.has(recipe.entity.key)) throw new Error('Duplicate document registration');
     entities.add(recipe.entity.key);
     for (const { field, property } of recipe.mappings) {
-      const kind: Field<unknown>['kind'] | undefined = recipe.entity.fields[field]?.kind;
+      const kind = recipe.entity.fields[field]?.kind;
       if (!kind || (properties.has(property) && properties.get(property) !== kind)) throw new Error('Conflicting property types');
       properties.set(property, kind);
     }

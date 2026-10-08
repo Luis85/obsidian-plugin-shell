@@ -83,7 +83,7 @@ test('a reviewed --apply hash creates the quick-capture starter; a stale hash wr
   assert.equal((await json(join(target, 'package.json'))).name, 'capture-inbox');
   const design = await json(join(target, 'design/project.json'));
   assert.equal(design.project.name, 'Capture Inbox'); assert.ok(design.design.semantic.entities.length > 0);
-  assert.ok(existsSync(join(target, 'tests/project')) && existsSync(join(target, 'src/generated')));
+  assert.ok(existsSync(join(target, 'src/plugin/tests/project')) && existsSync(join(target, 'src/plugin/generated')));
 });
 test('refuses unsafe targets and invalid identities without writing', async t => {
   const cwd = await scratch(t);

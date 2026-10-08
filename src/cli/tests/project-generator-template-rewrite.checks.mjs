@@ -15,19 +15,19 @@ const root = fileURLToPath(new URL('../../../', import.meta.url));
 const live = await loadTemplateSnapshot(root);
 // The boundary fixture extends the current (project v6) self-project starter.
 const model = projectModel(boundaryProject(selfProject()));
-const relationshipTests = 'tests/tooling/project-generator-relationships.checks.mjs';
-const httpTests = 'tests/tooling/project-generator-http.checks.mjs';
+const relationshipTests = 'src/cli/tests/project-generator-relationships.checks.mjs';
+const httpTests = 'src/cli/tests/project-generator-http.checks.mjs';
 const nodeTest = "import { test } from 'node:test';";
 const drifts = [
   [relationshipCode, relationshipTests, copiedTemplateMarker],
   [relationshipCode, relationshipTests, nodeTest],
-  [relationshipCode, relationshipTests, '../../templates/companion/runtime/relationships.ts'],
-  [relationshipCode, relationshipTests, '../../templates/companion/runtime/relationship-session.ts'],
+  [relationshipCode, relationshipTests, '../../../templates/companion/runtime/relationships.ts'],
+  [relationshipCode, relationshipTests, '../../../templates/companion/runtime/relationship-session.ts'],
   [relationshipCode, 'templates/companion/runtime/relationship-session.ts', "'./relationships.ts'"],
   [relationshipCode, 'templates/companion/runtime/relationship-session.ts', "'./note-values.ts'"],
   [httpCode, httpTests, copiedTemplateMarker],
   [httpCode, httpTests, nodeTest],
-  [httpCode, httpTests, '../../templates/companion/runtime/json-http.ts'],
+  [httpCode, httpTests, '../../../templates/companion/runtime/json-http.ts'],
   [httpCode, 'templates/companion/runtime/json-http.ts', "'./contract.ts'"],
 ];
 const outputs = {

@@ -118,7 +118,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   add('design/project.json',json(m.document),'managed');
   add('design/traceability.json',json({status:'scaffold-not-accepted',requirements:m.requirements.map(r => ({...r,implementation:`${m.sourceRoot}/application/use-cases/${r.key}.ts`,test:`${m.testRoot}/acceptance/${r.key}.test.ts`,verification:'todo'})),interactions:m.links,flows:m.flows,visualDesigns:((m.document.design as Record<string,unknown>).visualDesigns ?? null),warnings:m.warnings}),'managed');
   add('design/design-system.json',json(m.document.design && (m.document.design as Record<string,unknown>).designSystem || {}),'managed');
-  add(`${m.sourceRoot}/domain/contract.ts`,templateRoot.text('templates/companion/runtime/contract.ts'));
+  add(`${m.sourceRoot}/domain/contract.ts`,templateRoot.text('src/shared/companion/runtime-contract.ts'));
   add(`${m.sourceRoot}/presentation/composables/operation.ts`,templateRoot.text('templates/companion/runtime/operation.ts'));
   add(`${m.sourceRoot}/application/source-overrides.ts`,templateRoot.text('templates/companion/runtime/source-overrides.ts'),'managed');
   await emit('data', () => dataCode(m,add));

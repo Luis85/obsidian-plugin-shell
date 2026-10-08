@@ -11,7 +11,10 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 /** A generated project may keep product code outside src (its codebase folder, named in
  * configs/types/tsconfig.project.json); that code gets the same rules, type-checked through that project file. */
 const shell = isShellRepository(root);
-const productRoots = sourceRoots(root).filter(path => path !== 'src');
+const roots = sourceRoots(root);
+const productRoots = roots.filter(path => path !== 'src');
+// Flat consumers, named source projects and configured product roots share the same pure-layer boundary.
+const pureLayers = [...roots.map(folder => `${folder}/{domain,application,features}/**/*.ts`), 'src/*/{domain,application,features}/**/*.ts'];
 const projectTsconfig = './' + (projectConfigPath(root, 'typescript') ?? projectConfigs.typescript.path);
 const pluginRules = { ...obsidian.ruleConfigs.recommended, ...obsidian.ruleConfigs.recommendedTypeChecked,
   '@typescript-eslint/no-floating-promises': 'error', '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { attributes: false } }],
@@ -23,7 +26,7 @@ export default ts.config(
   { ignores: lintExclusionGlobs(root) },
   ...ts.configs.recommended,
   ...vue.configs['flat/essential'],
-  { files: ['src/plugin/domain/**/*.ts', 'src/plugin/application/**/*.ts', 'src/plugin/features/**/*.ts'], rules: { 'no-restricted-imports': ['error', { patterns: ['obsidian', 'vue', 'pinia', '@nuxt/*', 'node:*'] }] } },
+  { files: pureLayers, rules: { 'no-restricted-imports': ['error', { patterns: ['obsidian', 'vue', 'pinia', '@nuxt/*', 'node:*'] }] } },
   // The plugin-code rules never covered tests or the harness (they lived outside src): those files take only the test block below.
   { files: ['src/**/*.{ts,vue}'], ignores: shell ? ['src/*/tests/**', 'src/plugin/harness/**'] : [], languageOptions: { parserOptions: { parser: ts.parser, projectService: true, extraFileExtensions: ['.vue'], tsconfigRootDir: root } },
     plugins: { obsidianmd: obsidian },

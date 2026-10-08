@@ -108,7 +108,7 @@ test('file and stdin inspection reject a retired v4 project with its version dia
   }
 });
 test('unsafe and overlapping folders fail before writing', () => {
-  for (const source of ['../src', '/tmp/src', 'scripts', 'design', 'docs', 'Docs/site', 'node_modules/x', 'tests/nested']) {
+  for (const source of ['../src', '/tmp/src', 'scripts', 'design', 'docs', 'Docs/site', 'node_modules/x', 'src/plugin/tests/nested']) {
     const config = defaults(identity); config.paths.codebaseFolder = source; assert.throws(() => configuration(config));
   }
   assert.equal(configuration({ ...defaults(identity), paths: { ...defaults(identity).paths, codebaseFolder: 'app/source', testsFolder: 'spec' } }).paths.testsFolder, 'spec');

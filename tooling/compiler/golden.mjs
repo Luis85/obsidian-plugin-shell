@@ -9,11 +9,11 @@ const GOLDEN_FILE = 'tests/fixtures/compiler/starter-golden.json';
 const STARTERS = 'configs/starters';
 const sha256 = value => createHash('sha256').update(value).digest('hex');
 /** Product scope: what the compiler derives from the project. Shell files it carries along verbatim or rewrites
- * (including src/bootstrap/features.ts, the template registry plus generated registrations) are qualified by the
+ * (including src/plugin/bootstrap/features.ts, the template registry plus generated registrations) are qualified by the
  * distribution, template and generator tests, so consumer or shell edits never require a new baseline. */
 export function productPath(model, path) {
   return [model.sourceRoot + '/', model.testRoot + '/', 'harness/prototype/', 'design/'].some(prefix => path.startsWith(prefix)) ||
-    ['src/main.ts', 'PROJECT-IMPLEMENTATION.md'].includes(path);
+    ['src/plugin/main.ts', 'PROJECT-IMPLEMENTATION.md'].includes(path);
 }
 export function artifactDigests(model, artifacts) {
   return Object.fromEntries(artifacts.filter(file => productPath(model, file.path))

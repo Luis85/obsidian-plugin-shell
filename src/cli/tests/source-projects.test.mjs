@@ -1,4 +1,4 @@
-import test from 'node:test';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
 import { parseSourceManifest, findCycle, topologicalOrder, importAliases, resolveSourceProject, unknownReferences, implicitSourceManifest, projectTsconfig, solutionTsconfig } from '../domain/source-projects.ts';
 

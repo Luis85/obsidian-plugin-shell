@@ -118,9 +118,9 @@ test('generator uses the same compiler under custom roots with a separate custom
   const doc=structuredClone(fixture);doc.settings={codebaseFolder:'product/src',testsFolder:'product/tests'};
   const entries=new Map();styleCode(projectModel(doc),(path,content,ownership)=>entries.set(path,{content,ownership}));
   const compiled=compileDesignSystem(doc.design.designSystem,doc.project.id);
-  for(const piece of compiled.pieces)assert.deepEqual(entries.get('product/src/plugin/generated/styles/design-system/'+piece.name+'.css'),{content:piece.css,ownership:'managed'});
-  assert.match(entries.get('product/src/plugin/generated/styles/project.css').content,/design-system\.css/);
-  assert.match(entries.get('product/src/plugin/generated/styles/project.css').content,/custom\.css/);
+  for(const piece of compiled.pieces)assert.deepEqual(entries.get('product/src/generated/styles/design-system/'+piece.name+'.css'),{content:piece.css,ownership:'managed'});
+  assert.match(entries.get('product/src/generated/styles/project.css').content,/design-system\.css/);
+  assert.match(entries.get('product/src/generated/styles/project.css').content,/custom\.css/);
   assert.deepEqual(JSON.parse(entries.get('design/style-manifest.json').content),compiled.manifest);
 });
 test('real plan/apply updates saved palette, preserves custom CSS and clears a removed design system',async()=>{

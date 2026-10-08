@@ -75,9 +75,9 @@ test('the starter emitter refuses mismatched or unsupported adapters and unsafe 
     assert.throws(() => renderStarterProject(model, template(), react, { id: 'react', label: 'React', engine: 'vanilla', files: () => files }), /FRAMEWORK_ADAPTER_FILE_INVALID:react/);
   const contributed = renderStarterProject(model, template(), react, { id: 'react', label: 'React', engine: 'vanilla', files: () => ({ 'src/ui/App.tsx': 'app' }) });
   const paths = contributed.map(file => file.path);
-  assert.equal(contributed.find(file => file.path === 'src/ui/App.tsx').content, 'app');
-  assert.ok(paths.includes('src/ui/mount.ts') && paths.includes('scripts/serve.mjs') && paths.includes('src/plugin/targets/webapp/main.ts'));
+  assert.equal(contributed.find(file => file.path === 'src/plugin/ui/App.tsx').content, 'app');
+  assert.ok(paths.includes('src/plugin/ui/mount.ts') && paths.includes('scripts/serve.mjs') && paths.includes('src/plugin/targets/webapp/main.ts'));
   assert.ok(contributed.find(file => file.path === 'src/plugin/core/project.ts').origins.length === model.screens.length);
   const cli = renderStarterProject(model, template(), selection('none', ['cli'])).map(file => file.path);
-  assert.ok(cli.includes('src/plugin/targets/cli/main.ts') && !cli.includes('src/ui/styles.css') && !cli.includes('scripts/serve.mjs'));
+  assert.ok(cli.includes('src/plugin/targets/cli/main.ts') && !cli.includes('src/plugin/ui/styles.css') && !cli.includes('scripts/serve.mjs'));
 });

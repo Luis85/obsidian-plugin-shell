@@ -40,7 +40,7 @@
   "outputs": [
     {
       "path": "reference.md",
-      "sha256": "dd32c886f709e443335b69662e172c241eb5dfb72bbf7614ddc79fe0879bbd41"
+      "sha256": "f39450c4b1362fa1ac4c8083aa79799a1e666f189eb79a7a95f5d03508719c87"
     },
     {
       "path": "diagnostics.md",
@@ -48,7 +48,7 @@
     },
     {
       "path": "commands.json",
-      "sha256": "33739b64295653946957dc2e9d8200e7decc4827aa20f1156b9326a92dc072f3"
+      "sha256": "18ec007171464e492df97f57419de5004d77c4e3b239c07000fe56a4479605b1"
     }
   ]
 }

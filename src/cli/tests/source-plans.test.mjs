@@ -1,4 +1,4 @@
-import test from 'node:test';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
 import { access, mkdir, readdir, symlink } from 'node:fs/promises';
 import { join } from 'node:path';

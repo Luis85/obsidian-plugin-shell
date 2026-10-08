@@ -82,7 +82,7 @@ test('long suites split into bounded files and an oversized single case is refus
   assert.ok(out.files.size > 2);
   for (const [, entry] of out.files) assert.ok(entry.content.split('\n').length <= 400);
   const second = out.text('src/plugin/tests/project/visual/definitions-2.test.ts');
-  const imported = [...second.matchAll(/^import (Subject\d+) from "\.\.\/\.\.\/\.\.\/src\/generated\/presentation\/components\/details\/vp-copy-\d+\.vue";$/gm)].map(match => match[1]);
+  const imported = [...second.matchAll(/^import (Subject\d+) from "\.\.\/\.\.\/\.\.\/generated\/presentation\/components\/details\/vp-copy-\d+\.vue";$/gm)].map(match => match[1]);
   assert.ok(imported.length > 0 && !imported.includes('Subject0'));
   assert.deepEqual([...new Set([...second.matchAll(/^const Subject = (Subject\d+);$/gm)].map(match => match[1]))], imported);
   const wide = { ...specs[1], scenarios: [], root: [...Array.from({ length: 420 }, (_, i) => nuxt('w' + i, 'u-input', { control: { kind: 'text' } })),

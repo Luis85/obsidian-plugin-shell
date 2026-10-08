@@ -6,7 +6,7 @@ const identity = JSON.parse(readFileSync('manifest.json','utf8')) as {id:string}
 const scope = `[data-plugin-ui="${identity.id}"].ps--${identity.id}`;
 // Invoke the actual shared compiler, not a hand-maintained CSS facsimile.
 function stylesheet(policy: 'host' | 'declared'): string {
-  const source = `import {existsSync,readFileSync} from 'node:fs';import {compileDesignSystem} from './scripts/companion/design-system-css.mjs';
+  const source = `import {existsSync,readFileSync} from 'node:fs';import {compileDesignSystem} from './src/shared/companion/design-system-css.mjs';
 // A generated workspace carries its own design; the maintainer checkout uses the current self-project starter.
 const d=existsSync('design/project.json')?JSON.parse(readFileSync('design/project.json','utf8')):JSON.parse(readFileSync('configs/starters/companion-plugin.json','utf8')).generator.document;const id=JSON.parse(readFileSync('manifest.json','utf8')).id;
 d.design.designSystem.frontend={schema:1,target:'nuxt-ui',colorPolicy:process.argv[1],bindings:{}};

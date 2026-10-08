@@ -35,7 +35,7 @@ test('generated source reads return detached schema-valid fixtures and writes fa
   source.operations.push({...structuredClone(operation), id:'write-fixture',slug:'write-fixture',direction:'write'});
   const {dataCode}=await import('../compiler/emitters/data-code.ts');
   const files=emitted(m); dataCode(m,(path,content)=>files.set(path,{content}));
-  files.set(`${m.sourceRoot}/domain/contract.ts`,{content:await readFile(join(root,'templates/companion/runtime/contract.ts'),'utf8')});
+  files.set(`${m.sourceRoot}/domain/contract.ts`,{content:await readFile(join(root,'src/shared/companion/runtime-contract.ts'),'utf8')});
   for (const [path,file] of files) if(path.endsWith('.ts') && /(?:application\/|domain\/contract|clickdummy-sources)/.test(path)) {
     await mkdir(dirname(join(dir,path)),{recursive:true}); await writeFile(join(dir,path),file.content);
   }

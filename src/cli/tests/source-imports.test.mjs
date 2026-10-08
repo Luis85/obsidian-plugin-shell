@@ -1,4 +1,4 @@
-import test from 'node:test';
+const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
 import { aliasPrefixes, normalizePath, projectForPath, renamedSpecifier, resolveSpecifier } from '../domain/source-imports.ts';
 import { loadSpecifierParsers, moduleSpecifiers } from '../adapters/module-specifiers.ts';

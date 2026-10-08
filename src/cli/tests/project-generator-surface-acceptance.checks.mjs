@@ -55,7 +55,7 @@ test('traceability carries the resolved block, covering test ids and an empty ev
 });
 test('every titled test id that names a generated file refers to a title the generated file contains', async () => {
   const files = await render(await starter('feature-showcase')), trace = traceOf(files);
-  const ids = [...trace.surfaces, ...trace.interactions].flatMap(entry => entry.testIds).filter(id => id.startsWith('vitest:tests/'));
+  const ids = [...trace.surfaces, ...trace.interactions].flatMap(entry => entry.testIds).filter(id => id.startsWith('vitest:src/plugin/tests/'));
   assert.ok(ids.length > 40);
   for (const id of ids) {
     const [path, title] = id.slice('vitest:'.length).split('#');
@@ -78,7 +78,7 @@ test('adding a block changes only the block-bearing outputs; unrelated generated
   surface.acceptance = { states: ['empty'], keyboardPath: ['Add'] };
   const [before, after] = [await render(bare), await render(declared)];
   // Only project-specific outputs are compared: framework files are shared with concurrent kit changes.
-  const own = path => /^(tests\/project|src\/generated|design)\//.test(path);
+  const own = path => /^(src\/plugin\/tests\/project|src\/plugin\/generated|design)\//.test(path);
   const changed = [...after.keys()].filter(path => own(path) && before.get(path) !== after.get(path)).sort();
   assert.deepEqual(changed, ['design/project.json', 'design/visual-traceability.json', `src/plugin/tests/project/ux-acceptance/${surface.slug}.test.ts`]);
   assert.deepEqual([...before.keys()].filter(path => own(path) && !after.has(path)), []);
