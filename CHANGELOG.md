@@ -46,6 +46,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - CI runs fewer duplicate gates. "Template authoring / example removal" replaces its two complete verify runs with a cheap gate after removal and one targeted verify plus the `native`, `makers` and `generator` suites after the new feature, and drops the runtime evidence session that coverage evidence repeats; "source archive" defers setup's verify to the archive-relevant steps; an `e2e` label run builds only what the browser steps serve; a push to `main` skips the template-authoring jobs and the Ubuntu showcase leg; the Windows Node 24.15.0 / npm 12 setup-compatibility leg runs targeted gates and the `setup` suite instead of the complete verify (the Ubuntu leg keeps it). Installing jobs restore the npm download cache (never `node_modules`; fresh-install qualification, install-policy rows and release workflows stay cold), and four more opted-in Chromium installs use the shared browser cache.
 - `npm run setup` asks its identity, MCP and hosting-platform questions from `configs/forms/setup-identity.json` (shared form format) through a dependency-free reader, `scripts/setup/form.mjs`. Only `text`/`confirm` fields whose ids match the unchanged `--answers` keys are accepted; any other kind, key or id stops setup before a question is asked. Prompts now show human labels and help, e.g. `Plugin ID (id) [plugin-shell]: `.
 - `npm run verify` and the interactive-maker workflow run the 174 maker test files once, under coverage (`maker-coverage-run`), instead of a second time in the node --test tooling step; the `maker` suite now uses Vitest, and `suites.mjs --check` fails if a tooling file stops running in verify.
+- Develop the Workbench CLI under src/cli and build a portable standalone bin distribution.
 
 ### Fixed
 
@@ -62,6 +63,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - The companion project's Real Obsidian workflow runs the host from a bind mount of the project at `/wc`, so its singleton socket fits the Linux 107-byte path budget inside the shell repository (124 bytes before); temporary data stays in the project.
 - Prepared clickdummy prototype packages no longer tell agents to read `source/.claude/skills/companion-prototype-design` or run its `prototype.mjs`; generated source never ships that skill. The prompt and package README now point at `source/AGENTS.md` and the shipped offline builder `source/scripts/clickdummy/lib/build-worker.mjs`.
 - `node bin/app check` no longer times out its node --test suite steps (`maker-tests` and fast-mode `suites`) at the 10-minute step default; they get a 60-minute budget. An explicit `--timeout` still bounds every step.
+- Reconcile dependency checks and disposed Vue settings actions after the main merge.
 
 ### Security
 

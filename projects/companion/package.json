@@ -10,7 +10,7 @@
     "@axe-core/playwright": "4.13.0",
     "@iconify-json/lucide": "1.2.139",
     "@playwright/test": "1.63.0",
-    "@types/node": "26.6.3",
+    "@types/node": "26.6.4",
     "@vitejs/plugin-vue": "6.0.9",
     "@vitest/coverage-v8": "5.0.3",
     "@vue/test-utils": "2.5.1",
@@ -29,15 +29,15 @@
     "tailwindcss": "4.3.3",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.0",
-    "vite": "8.3.1",
+    "vite": "8.3.2",
     "vitest": "5.0.3",
-    "vue-tsc": "3.3.11"
+    "vue-tsc": "3.3.12"
   },
   "dependencies": {
-    "@nuxt/ui": "4.11.2",
+    "@nuxt/ui": "4.11.3",
     "pinia": "4.0.3",
     "vue": "3.5.43",
-    "vue-i18n": "11.4.12",
+    "vue-i18n": "11.4.13",
     "yaml": "2.9.1"
   },
   "description": "Developer workbench for declarative UI authoring, project setup, source generation and fixture-backed review.",

@@ -4,7 +4,7 @@
   "platform": "github",
   "repository": "Luis85/obsidian-plugin-shell",
   "number": 96,
-  "remoteRevision": "52f7d172f5dad74896c6e16975c2ee77ecbc1f400ef297c595e1a13d4faf70a5",
+  "remoteRevision": "9098de30eb93651a7806677a4901e3237fb1746f538dc33b66c478dc3204e2ab",
   "bodySha256": "4e3e4ab1c5069055aecaa9569f2891458c1c9de6d616c84ffd9c6c7fb37860ff",
   "derived": "311ec2ef9431a1d0382db7b7c6e71b7012f682951a2b4cdd7ba55a770896ed29",
   "title": "8dd0b9c0a6a1983d55ead2f6c570c2261979a2405423a881612b94f84fc9f2a9",
@@ -24,8 +24,8 @@
     "T-1"
   ],
   "amendments": {},
-  "state": "Draft",
+  "state": "Merged",
   "head": "pr/main-reconciliation/main-reconciliation-1",
   "base": "increment/main-reconciliation",
-  "syncedAt": "2026-10-06T16:01:19Z"
+  "syncedAt": "2026-10-06T21:38:36Z"
 }
