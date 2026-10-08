@@ -101,7 +101,7 @@ test('first-run completion reports unwritten plans, runs reviewed processes and 
   const outcome = (planned, status = 'applied') => result('new', { summary: planned.summary, planHash: 'h' }, status);
   const first = await generated(context, { run: 'hello', yes: true, 'trust-processes': true }), done = outcome(first.planned);
   const unwritten = await completeDefinition(outcome(first.planned, 'planned'), request('new', [], {}), context);
-  assert.deepEqual(unwritten.data, { summary: first.planned.summary, planHash: 'h', written: false, next: 'No files or processes changed. Review and apply the plan to create the project.' });
+  assert.deepEqual(unwritten.data, { summary: first.planned.summary, planHash: 'h', written: false, next: 'No files or processes changed. Review the plan, then rerun the same command with --apply h (or --yes) to create the project.' });
   assert.equal(await code(completeDefinition(done, request('new', [], {}), context)), 'STARTER_TRUST');
   const completed = await completeDefinition(done, request('new', [], { 'trust-processes': true }), context);
   assert.deepEqual([completed.data.written, completed.data.processes.completed.map(step => step.process), completed.data.nextSteps], [true, ['hello'], ['Open Product']]);

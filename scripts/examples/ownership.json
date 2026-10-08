@@ -132,7 +132,7 @@
     },
     {
       "path": "src/bootstrap/mount-ui.ts",
-      "sha256": "4d87bba85ae8e116f102ce1549b674582bdc429b2a9638a82c7111118e137e6f",
+      "sha256": "3895a9acf2fd62487dbdcc502551e1a11d24b3b01ed63e7b26c65b624bf9f254",
       "template": "src__bootstrap__mount-ui.ts.txt"
     },
     {

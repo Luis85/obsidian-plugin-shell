@@ -4,8 +4,12 @@ import {
   type NativeFileDefinition,
   type NativeMenuDefinition,
 } from '../../domain/native-integrations';
-import { customFileViewClass, type CustomFileView } from './custom-file-view';
+import { customFileViewClass, type CustomFileView, type MountNativeFileEditor } from './custom-file-view';
 import { CreateCustomFileModal } from './create-custom-file';
+import { nativeFileOperations } from './native-file-operations';
+
+/** File-type id → editor mount. A file type without an entry keeps the raw text editor. */
+export type NativeFileEditorMounts = ReadonlyMap<string, MountNativeFileEditor>;
 
 /** All host registrations are plugin-owned. Disposing only releases our callbacks, views and dialogs. */
 export function bindNativeIntegrations(
@@ -13,14 +17,18 @@ export function bindNativeIntegrations(
   files: readonly NativeFileDefinition[],
   menus: readonly NativeMenuDefinition[],
   report: (code: string) => void,
+  editors: NativeFileEditorMounts = new Map(),
 ): () => void {
   validateNativeDefinitions(files, menus);
+  for (const id of editors.keys())
+    if (!files.some((file) => file.id === id)) throw new Error('NATIVE_EDITOR_UNKNOWN_FILE_TYPE');
   if (!files.length && !menus.length) return () => {};
   let disposed = false;
   let stopMenu = () => {};
   const commandIds: string[] = [];
   const views = new Set<CustomFileView>();
   const modals = new Set<Modal>();
+  const operations = nativeFileOperations(plugin, () => !disposed);
   const fail = (code: string) => {
     report(code);
     if (!disposed) new Notice('Native file action failed. No replacement or retry was performed.');
@@ -81,8 +89,8 @@ export function bindNativeIntegrations(
   const invoke = async (definition: NativeMenuDefinition, file: TFile) => {
     if (disposed || !definition.extensions.includes(file.extension.toLowerCase())) return;
     try {
-      const result = await definition.run({ path: file.path, name: file.name, extension: file.extension });
-      if (disposed) return;
+      const result = await definition.run({ path: file.path, name: file.name, extension: file.extension }, operations);
+      if (disposed || result === null) return;
       const modal = new Modal(plugin.app);
       modal.setTitle(result.title);
       modal.contentEl.createEl('p', { text: result.message });
@@ -99,7 +107,7 @@ export function bindNativeIntegrations(
   try {
     for (const definition of files) {
       const type = plugin.manifest.id + '-file-' + definition.id;
-      const View = customFileViewClass(definition, type);
+      const View = customFileViewClass(definition, type, editors.get(definition.id));
       plugin.registerView(type, (leaf) => {
         const view = new View(leaf, fail);
         views.add(view);
@@ -142,7 +150,7 @@ export function bindNativeIntegrations(
               menu.addItem((item) =>
                 item
                   .setTitle(definition.name)
-                  .setIcon('file-search')
+                  .setIcon(definition.icon ?? 'file-search')
                   .onClick(() => {
                     void invoke(definition, file);
                   }),

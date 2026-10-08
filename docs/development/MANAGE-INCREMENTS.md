@@ -217,3 +217,115 @@ organization:
 
 Azure Repos has no pull request labels: the `e2e` opt-in uses the pipeline's
 `runE2E` parameter instead (see [Hosting platforms](HOSTING-PLATFORMS.md)).
+
+## Plan, commit and review an iteration
+
+An iteration uses the existing **Increment** record. `iteration` is a CLI alias
+for `increment`; both operate on the same frontmatter and Markdown, with linked
+Issue and PullRequest records. Set `paths.increments`, `paths.issues` and
+`paths.pullRequests` using `node bin/app settings`, and use `settings migrate`
+when moving existing records so the delivery globs stay in sync.
+
+Start the planning meeting without creating a branch:
+
+```sh
+node bin/app iteration plan next --title "Next iteration" --owner Luis --yes
+node bin/app increment edit next --input meeting-scope.md --yes
+node bin/app issue new next --title "Export notes" --yes
+node bin/app increment ref add next "[[docs/prds/export]]" --yes
+node bin/app increment check next
+```
+
+The meeting scope is the increment's Summary, Outcome, Scope, Acceptance criteria,
+Dependencies and Open questions. `--input` accepts a Markdown fragment with those
+headings. The generated frontmatter lists its issues and kick-off PR; the Markdown
+lists contain navigable links. Use `issue ac add <issue> AC-n` to connect a work
+item to the agreed acceptance criteria. Planning remains editable until readiness
+passes and the team commits to the scope.
+
+Check out the configured base branch (normally `main`) and commit to the iteration:
+
+```sh
+node bin/app iteration commit next --branch --dry-run
+node bin/app iteration commit next --branch --apply <planHash>
+```
+
+This checks the Definition of Ready again, creates and switches to
+`increment/next`, saves an **Iteration commitment** section and commits only the
+increment, its linked PR/issue records and its acceptance stubs. Existing staged
+changes block the command. Other files, such as a meeting-input scratch file,
+remain untouched. The Git identity must already be configured. If a Git hook or
+commit fails, inspect `git status`: the branch and saved records may already
+exist, and the command will not discard them. Commit those records manually
+before publishing. If the iteration branch already exists, check it out before
+committing the plan. `--no-branch` records a local-only commitment without a Git
+commit or any hosted PR.
+
+In an interactive terminal, commitment asks whether to create the branch. After a
+successful branch/record commit, GitHub or Azure hosting offers draft publication,
+then shows the publication plan for a separate approval. Declining leaves the
+local iteration intact. `tooling.hosting.platform: none` disables the hosted offer.
+Noninteractive callers explicitly run the publication step:
+
+```sh
+node bin/app pr publish next-kickoff --dry-run
+node bin/app pr publish next-kickoff --apply <planHash>
+```
+
+The publish command pushes the iteration branch, creates a draft, and records its
+number and URL in the PR record and the iteration's generated links. Commit and
+push the resulting binding records. Work directly on the iteration branch, or use
+`pr new next --title "Export command" --switch` to branch from it. A committed
+iteration rejects change PRs targeting a different base.
+
+At the end, update the issue, task and acceptance-criterion checkboxes, merge/sync
+any child PRs, pass `increment complete`, and save the presentation:
+
+```sh
+node bin/app increment complete next --yes
+node bin/app iteration present next --yes
+```
+
+**Iteration review** records delivered criteria with evidence, unfinished criteria,
+work-item statuses and PR links in the increment Markdown file. Present these
+results to the reviewers. Commit and push all records and work before the next
+step; review and merge require a clean checkout of the PR's published source
+commit, the Definition of Done and, for the kick-off, its presentation.
+
+```sh
+node bin/app pr review next-kickoff --dry-run
+node bin/app pr review next-kickoff --apply <planHash>
+# Commit and push the updated local PR status record, then obtain human review.
+node bin/app pr merge next-kickoff --dry-run
+node bin/app pr merge next-kickoff --apply <planHash>
+```
+
+`pr review` removes draft status. `pr merge` requests a merge commit, pins the
+reviewed source commit and respects hosting branch policies; it never bypasses
+policies, forces a push or deletes the branch. The commands verify the remote
+result before updating the local records. A pending Azure completion, lost
+response or failed local write exits 2: inspect the remote and take a fresh
+preview instead of repeating the old approval. A fresh preview recognizes an
+already-completed transition and repairs the local record without repeating it.
+These actions leave the existing body-sync baseline intact; `pr sync` still
+reconciles any independent body edits.
+
+If review rejects the iteration, close/sync any child PRs first, then close the
+kick-off and carry the unfinished issues into a new planning iteration:
+
+```sh
+node bin/app pr close next-kickoff --yes
+node bin/app iteration plan following --title "Following iteration" --yes
+node bin/app iteration carry-over next following --dry-run
+node bin/app iteration carry-over next following --apply <planHash>
+```
+
+Closing the kick-off records the iteration as Cancelled. Carry-over requires a
+finished/cancelled source (or a synced closed/merged kick-off), no open hosted
+child PRs, and a target still New or Refining. It copies issues other than Done or
+Cancelled into new Issue records, links both directions, preserves the original
+history and authored fields, clears old PR assignments and resets the copies to
+New. Referenced acceptance criteria receive new IDs and stubs in the target;
+issue-owned criteria keep their IDs and checkboxes. Repeating carry-over skips
+existing copies, so it does not duplicate work. Refine and commit the next plan
+before starting its implementation.

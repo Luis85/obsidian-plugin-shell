@@ -207,6 +207,13 @@
       "id": "increments",
       "title": "Increments, issues and pull requests",
       "commands": [
+        "increment plan",
+        "increment commit",
+        "increment present",
+        "increment carry-over",
+        "pr review",
+        "pr close",
+        "pr merge",
         "increment new",
         "increment list",
         "increment show",
@@ -3456,6 +3463,456 @@
         }
       ],
       "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
+      "id": "increment plan",
+      "summary": "Start an iteration planning meeting: create linked Markdown records without creating a branch.",
+      "effect": "plan",
+      "maxArgs": 1,
+      "group": "increments",
+      "usage": "node bin/app increment plan <id> --title <title> [--owner <name>] [--input <md|->] [--dry-run | --yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app increment plan next --title \"Next iteration\" --dry-run"
+      ],
+      "options": [
+        {
+          "name": "title",
+          "kind": "value",
+          "description": "Site title for the page header, README and workbench.project.json (1 to 80 characters).",
+          "default": "the project name in title case"
+        },
+        {
+          "name": "owner",
+          "kind": "value",
+          "description": "Owner of the increment (a name or handle)."
+        },
+        {
+          "name": "size",
+          "kind": "value",
+          "description": "Increment size; sets the acceptance-criteria and affected-area budgets.",
+          "values": [
+            "S",
+            "M",
+            "L"
+          ],
+          "default": "M"
+        },
+        {
+          "name": "e2e",
+          "kind": "value",
+          "description": "End-to-end test decision of the increment.",
+          "values": [
+            "none",
+            "optional",
+            "required"
+          ],
+          "default": "optional"
+        },
+        {
+          "name": "from",
+          "kind": "value",
+          "description": "Extracted replacement kit folder."
+        },
+        {
+          "name": "input",
+          "kind": "value",
+          "description": "Markdown fragment with ## sections (use - for stdin)."
+        },
+        {
+          "name": "issue",
+          "kind": "flag",
+          "description": "Also create the corresponding Issue document (the default)."
+        },
+        {
+          "name": "no-issue",
+          "kind": "flag",
+          "description": "Do not create an Issue document."
+        },
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
+      "id": "increment commit",
+      "summary": "Commit to the scoped iteration after readiness passes; --branch creates its branch and commits the planning records.",
+      "effect": "plan",
+      "maxArgs": 1,
+      "group": "increments",
+      "usage": "node bin/app increment commit <id> [--branch | --no-branch] [--dry-run | --yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app increment commit next --branch --dry-run"
+      ],
+      "options": [
+        {
+          "name": "branch",
+          "kind": "flag",
+          "description": "Create and switch to the iteration branch, then commit only its reviewed planning records."
+        },
+        {
+          "name": "no-branch",
+          "kind": "flag",
+          "description": "Record local-only scope commitment without a branch, Git commit or hosted PR."
+        },
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
+      "id": "increment present",
+      "summary": "Save a Markdown review presentation of delivered criteria, evidence, pull requests and open items.",
+      "effect": "plan",
+      "maxArgs": 1,
+      "group": "increments",
+      "usage": "node bin/app increment present <id> [--dry-run | --yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app increment present next --dry-run"
+      ],
+      "options": [
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
+      "id": "increment carry-over",
+      "summary": "Copy unfinished issues into a planning iteration, preserving source history and mapping acceptance criteria.",
+      "effect": "plan",
+      "maxArgs": 2,
+      "group": "increments",
+      "usage": "node bin/app increment carry-over <source> <next> [--dry-run | --yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app increment carry-over previous next --dry-run"
+      ],
+      "options": [
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
+      "id": "pr review",
+      "summary": "Mark a published draft ready for review after its Definition of Done passes.",
+      "effect": "remote",
+      "maxArgs": 1,
+      "group": "increments",
+      "usage": "node bin/app pr review <pr> [--dry-run | --yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app pr review next-kickoff --dry-run"
+      ],
+      "options": [
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "plan-out",
+        "timeout"
+      ]
+    },
+    {
+      "id": "pr close",
+      "summary": "Close a published pull request without merging; preview and approval required.",
+      "effect": "remote",
+      "maxArgs": 1,
+      "group": "increments",
+      "usage": "node bin/app pr close <pr> [--dry-run | --yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app pr close next-kickoff --dry-run"
+      ],
+      "options": [
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "plan-out",
+        "timeout"
+      ]
+    },
+    {
+      "id": "pr merge",
+      "summary": "Merge a reviewed pull request with a merge commit after its Definition of Done passes.",
+      "effect": "remote",
+      "maxArgs": 1,
+      "group": "increments",
+      "usage": "node bin/app pr merge <pr> [--dry-run | --yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app pr merge next-kickoff --dry-run"
+      ],
+      "options": [
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "plan-out",
         "timeout"
       ]
     },
@@ -8721,11 +9178,13 @@
       "effect": "plan",
       "maxArgs": 2,
       "group": "develop",
-      "usage": "node bin/app make <recipe> <name> [options] | make list | make describe <recipe>",
+      "usage": "node bin/app make <recipe> <name> [options] | make batch --input <skeleton.json> | make list | make describe <recipe>",
       "examples": [
         "node bin/app make list",
-        "node bin/app make file-extension board --feature documents --extension board",
+        "node bin/app make file-extension board --feature documents --extension board --editor vue",
+        "node bin/app make file-editor board --feature documents --file-type documents-board",
         "node bin/app make context-menu inspect --feature documents --extensions md,board",
+        "node bin/app make batch --input skeleton.json",
         "node bin/app make feature bookmarks --entity bookmark --dry-run"
       ],
       "options": [
@@ -8802,9 +9261,34 @@
           "description": "Comma-separated lowercase, dotless file-menu filters, for example md,txt."
         },
         {
+          "name": "editor",
+          "kind": "value",
+          "description": "Dedicated file view UI: raw text editor, or a generated Vue editor (composable, component, test).",
+          "values": [
+            "text",
+            "vue"
+          ],
+          "default": "text"
+        },
+        {
+          "name": "file-type",
+          "kind": "value",
+          "description": "Registered custom file type id that receives the editor, for example documents-board (make file-extension prints it)."
+        },
+        {
+          "name": "input",
+          "kind": "value",
+          "description": "Input JSON file (use - for stdin where supported)."
+        },
+        {
           "name": "document",
           "kind": "flag",
           "description": "Note-backed entity (requires the markdown backend)."
+        },
+        {
+          "name": "bare",
+          "kind": "flag",
+          "description": "make feature: create only the feature folder (README), without the example entity, workspace and command."
         },
         {
           "name": "list",

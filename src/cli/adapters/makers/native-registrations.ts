@@ -3,7 +3,7 @@ import type TS from 'typescript';
 import { hasSyntaxErrors, loadTypescript, namedImports, parseTypescript, variableNamed, type NamedImport, type Typescript } from './syntax.ts';
 import type { RecipeContext } from './contracts.ts';
 
-interface Registered { readonly source: string; readonly id: string | undefined; readonly extension: string | undefined }
+interface Registered { readonly source: string; readonly id: string | undefined; readonly extension: string | undefined; readonly format: string | undefined }
 interface Candidate { readonly id: string; readonly extension?: string | undefined }
 /** Static native-registry inspection: explicit imports and literal declarations only, never executed while planning. */
 interface Scan { readonly ts: Typescript; readonly context: RecipeContext }
@@ -38,7 +38,7 @@ function localExportName(ts: Typescript, sourceAst: TS.SourceFile, imported: str
 }
 function readField(ts: Typescript, property: TS.ObjectLiteralElementLike, source: string, fields: Map<string, string>): void {
   if (!ts.isPropertyAssignment(property) || !(ts.isIdentifier(property.name) || ts.isStringLiteral(property.name))) return;
-  if (!['id', 'extension'].includes(property.name.text)) return;
+  if (!['id', 'extension', 'format'].includes(property.name.text)) return;
   const field = literal(ts, property.initializer);
   if (!field || !ts.isStringLiteral(field)) throw review('nonliteral ' + property.name.text + ' in ' + source);
   fields.set(property.name.text, field.text);
@@ -64,7 +64,7 @@ async function registeredEntry(scan: Scan, registry: string, imports: Imports, n
   const fields = readFields(ts, value, source, new Map());
   if (!fields.has('id') || (name.endsWith('FileTypes') && !fields.has('extension')))
     throw review('missing static identity in ' + source);
-  return { source, id: fields.get('id'), extension: fields.get('extension') };
+  return { source, id: fields.get('id'), extension: fields.get('extension'), format: fields.get('format') };
 }
 async function registrations(scan: Scan, registry: string, names: readonly string[]): Promise<Registered[]> {
   const { ts } = scan;
@@ -102,9 +102,22 @@ function checkConflict(candidate: Candidate, source: string, entry: Registered):
   if (candidate.extension && entry.extension === candidate.extension)
     throw new Error('NATIVE_EXTENSION_CONFLICT: .' + candidate.extension + ' is already registered by ' + String(entry.id));
 }
-export async function checkNativeRegistration(context: RecipeContext, candidate: Candidate, source: string): Promise<void> {
+async function allRegistrations(context: RecipeContext): Promise<Registered[]> {
   const scan = { ts: await loadTypescript(), context };
   const existing = await registrations(scan, 'src/bootstrap/native-integrations.ts', ['nativeFileTypes', 'nativeContextMenus']);
   existing.push(...(await projectRegistrations(scan)));
-  for (const entry of existing) checkConflict(candidate, source, entry);
+  return existing;
+}
+export async function checkNativeRegistration(context: RecipeContext, candidate: Candidate, source: string): Promise<void> {
+  for (const entry of await allRegistrations(context)) checkConflict(candidate, source, entry);
+}
+/** A registered custom file type (maker or project generated), found statically by its id. */
+export async function registeredFileType(context: RecipeContext, id: string): Promise<{ id: string; format: 'json' | 'text' }> {
+  const fileTypes = (await allRegistrations(context)).filter(entry => entry.extension !== undefined);
+  const match = fileTypes.find(entry => entry.id === id);
+  if (!match) {
+    const known = fileTypes.map(entry => entry.id).filter(Boolean).join(', ') || 'none';
+    throw new Error(`NATIVE_FILE_TYPE_UNKNOWN: ${id}; registered file types: ${known}. Create one with make file-extension.`);
+  }
+  return { id, format: match.format === 'text' ? 'text' : 'json' };
 }

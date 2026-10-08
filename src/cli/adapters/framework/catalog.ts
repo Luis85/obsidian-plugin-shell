@@ -93,7 +93,7 @@ export const commands: readonly Command[] = [
   { id: 'generate', summary: 'Plan generation for the configured project in place.', options: values('storybook', 'storybook-stories', 'input', 'output-kind', 'scope'), maxArgs: 0, effect: 'plan' },
   { id: 'entities check', summary: 'Validate the explicitly registered entity definitions with the installed Vite toolchain; writes nothing.', options: {}, maxArgs: 0, effect: 'read' },
   { id: 'entities catalog', summary: 'Print the source-derived entity catalog (backend, schema, fields, defaults, Markdown mappings); writes nothing.', options: {}, maxArgs: 0, effect: 'read' },
-  { id: 'make', summary: 'Use the shared maker registry and file planner.', options: { ...values('feature', 'entity', 'folder', 'preset', 'backend', 'event', 'view', 'preference', 'extension', 'format', 'extensions'), document: 'flag', list: 'flag', 'trust-custom': 'flag', check: 'flag', refresh: 'flag' }, maxArgs: 2, effect: 'plan' },
+  { id: 'make', summary: 'Use the shared maker registry and file planner.', options: { ...values('feature', 'entity', 'folder', 'preset', 'backend', 'event', 'view', 'preference', 'extension', 'format', 'extensions', 'editor', 'file-type', 'input'), document: 'flag', bare: 'flag', list: 'flag', 'trust-custom': 'flag', check: 'flag', refresh: 'flag' }, maxArgs: 2, effect: 'plan' },
   { id: 'plan inspect', summary: 'Rebuild and compare a saved request plan; never execute it.', options: {}, maxArgs: 1, effect: 'read' },
   { id: 'plan apply', summary: 'Rebuild a saved request and apply only its matching reviewed plan.', options: {}, maxArgs: 1, effect: 'plan' },
   { id: 'install', summary: 'Explicit exact-lock npm ci; reviewed lifecycle hooks may run.', options: {}, maxArgs: 0, effect: 'process' },
@@ -177,6 +177,7 @@ export function parseCliArguments(argv: string[]): Request {
   if (argv[0] === '--version') argv = ['version', ...argv.slice(1)];
   requireThat(argv.length <= 100 && argv.every(safeArgument), 'ARGUMENT_LIMIT', 'Too many or oversized arguments.');
   const { positional, options } = scanArguments(argv);
+  if (positional[0] === 'iteration') positional[0] = 'increment';
   const bareGroup = positional.length === 1 && !commands.some(item => item.id === positional[0]) && commandGroup(positional[0]!).length > 0;
   const name = bareGroup ? 'help' : commandName(positional);
   const entry = descriptor(name), args = bareGroup ? positional : positional.slice(name === 'help' && positional.length === 0 ? 0 : name.split(' ').length);

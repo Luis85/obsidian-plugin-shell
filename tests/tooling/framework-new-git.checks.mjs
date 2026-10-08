@@ -76,6 +76,8 @@ test('initializeRepository reports each skip and failure honestly without throwi
   const configured = [];
   const ok = await initializeRepository('/p', 'quick-capture', runner([['rev-parse', { code: 128, stdout: '' }], ['config', { code: 0, stdout: 'x\n' }]], configured));
   assert.deepEqual(ok, { status: 'initialized', committer: 'configured', message: 'chore: generate project from quick-capture' });
+  assert.ok(configured.indexOf('config --local core.longpaths true') > configured.indexOf('init'), 'long paths are enabled in the new repository only, before staging');
+  assert.ok(configured.indexOf('config --local core.longpaths true') < configured.indexOf('add --all'));
   assert.ok(configured.at(-1).startsWith('commit '), 'no -c identity override when one is configured');
 });
 test('new keeps the framework entry points executable in the first commit, so a clone can run them', { skip: process.platform === 'win32' ? 'file modes need a POSIX file system' : false }, async t => {

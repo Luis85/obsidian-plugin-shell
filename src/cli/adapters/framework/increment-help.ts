@@ -10,6 +10,14 @@ const plan = '[--dry-run | --yes | --apply <sha256>] [--json]';
 const branchFlags = '[--branch | --no-branch] [--switch] [--fetch]';
 export const incrementGroup = { id: 'increments', title: 'Increments, issues and pull requests', commands: incrementCommands.map(command => command.id) };
 export const incrementUsage: Record<string, string> = {
+  'increment plan': `${app} increment plan <id> --title <title> [--owner <name>] [--input <md|->] ${plan}`,
+  'increment commit': `${app} increment commit <id> [--branch | --no-branch] ${plan}`,
+  'increment present': `${app} increment present <id> ${plan}`,
+  'increment carry-over': `${app} increment carry-over <source> <next> ${plan}`,
+  'pr review': `${app} pr review <pr> ${plan}`,
+  'pr close': `${app} pr close <pr> ${plan}`,
+  'pr merge': `${app} pr merge <pr> ${plan}`,
+
   'increment new': `${app} increment new <id> --title <title> [--owner <name>] [--size S|M|L] [--e2e none|optional|required] [--from <path>] [--input <md|->] [--issue | --no-issue] ${branchFlags} ${plan}`,
   'increment list': `${app} increment list [--status <status>] [--json]`,
   'increment show': `${app} increment show <id> [--json]`,
@@ -49,6 +57,14 @@ export const incrementUsage: Record<string, string> = {
   'issue ac set': `${app} issue ac set <issue> <AC-n|IC-n> [--status open|done] [--text <text>] ${plan}`,
 };
 export const incrementExamples: Record<string, string[]> = {
+  'increment plan': [`${app} increment plan next --title "Next iteration" --dry-run`],
+  'increment commit': [`${app} increment commit next --branch --dry-run`],
+  'increment present': [`${app} increment present next --dry-run`],
+  'increment carry-over': [`${app} increment carry-over previous next --dry-run`],
+  'pr review': [`${app} pr review next-kickoff --dry-run`],
+  'pr close': [`${app} pr close next-kickoff --dry-run`],
+  'pr merge': [`${app} pr merge next-kickoff --dry-run`],
+
   'increment new': [`${app} increment new delivery-pipeline --title "Delivery pipeline" --owner Luis --dry-run`, `${app} increment new delivery-pipeline --title "Delivery pipeline" --no-branch --yes`],
   'increment list': [`${app} increment list`, `${app} increment list --status Ready --json`],
   'increment show': [`${app} increment show delivery-pipeline --json`],
@@ -115,6 +131,8 @@ const family = (prefix: string, ...names: string[]) => (id: string, name: string
 const one = (command: string, name: string) => (id: string, option: string) => id === command && option === name;
 const set = (fields: OptionHelp) => (doc: OptionHelp) => { delete doc.values; delete doc.default; Object.assign(doc, fields); };
 export const incrementOptionOverrides: OptionOverride[] = [
+  [one('increment commit', 'branch'), set({ description: 'Create and switch to the iteration branch, then commit only its reviewed planning records.' })],
+  [one('increment commit', 'no-branch'), set({ description: 'Record local-only scope commitment without a branch, Git commit or hosted PR.' })],
   [family('increment ', 'status'), set({ description: 'Only list increments with this status.', values: ['New', 'Refining', 'Ready', 'In progress', 'Done', 'Cancelled'] })],
   [family('pr ', 'status'), set({ description: 'Only list pull requests with this status.', values: ['New', 'Draft', 'Ready', 'Merged', 'Closed'] })],
   [family('issue ', 'status'), set({ description: 'Only list issues with this status.', values: ['New', 'Ready', 'In progress', 'Done', 'Cancelled'] })],

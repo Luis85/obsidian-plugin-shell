@@ -7,6 +7,11 @@
 export interface GitPort {
   /** git is installed and the project root is inside a work tree. */
   available(): Promise<boolean>;
+  currentBranch(): Promise<string | null>;
+  contains(ancestor: string, descendant: string): Promise<boolean>;
+  clean(): Promise<boolean>;
+  indexClean(): Promise<boolean>;
+  commitPaths(paths: readonly string[], message: string): Promise<void>;
   /** The commit a ref names, or null. */
   resolve(ref: string): Promise<string | null>;
   /** A local branch `refs/heads/<name>` exists. */

@@ -22,6 +22,8 @@ export interface RemotePullRequest {
   base: string;
   /** sha256 of the canonical title, body, state, head and base (domain `remoteRevision`). */
   revision: string;
+  /** Latest source commit, required for reviewed lifecycle writes. */
+  headCommit?: string;
 }
 export interface RemoteDiagnostic { code: string; message: string; next?: string }
 export interface RemoteReadiness {
@@ -37,11 +39,13 @@ export interface RemoteReadiness {
 }
 export interface RemoteFailure { uncertain: boolean; step: 'read' | 'create' | 'update'; status?: number }
 export interface CreatePullRequest { title: string; body: string; head: string; base: string }
+export type PullRequestAction = 'review' | 'close' | 'merge';
 export interface HostingRemote {
   readonly platform: HostingPlatform;
   /** Display identity, as in RemoteReadiness.repository. */
   readonly repository: string;
   readiness(): Promise<RemoteReadiness>;
+  transition(number: number, action: PullRequestAction, headCommit: string): Promise<void>;
   /** Where published wikilinks point for a ref (normally the pull request head). */
   linkTarget(ref: string): LinkTarget;
   /** Whether the head branch exists on the hosted repository (read-only). The CLI never pushes from an adapter:

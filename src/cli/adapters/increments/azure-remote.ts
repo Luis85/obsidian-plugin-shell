@@ -49,6 +49,10 @@ function requireText(title: string, body: string | undefined, step: Step): void 
   if (size && !size.fits) throw definite('PR_BODY_TOO_LARGE', `The description has ${size.size} characters; Azure DevOps accepts at most ${size.limit}. It is never truncated.`, step);
 }
 
+function sourceCommit(value: unknown): string | undefined {
+  return isObject(value) && typeof value.commitId === 'string' ? value.commitId : undefined;
+}
+
 export function createAzureRemote(options: AzureRemoteOptions): HostingRemote {
   const { organization, project, repository } = options, run = options.run ?? commandRunner, windows = options.windows ?? process.platform === 'win32';
   try { validateHosting({ platform: 'azure-devops', azureDevOps: { organization, project, repository } }); }
@@ -81,7 +85,8 @@ export function createAzureRemote(options: AzureRemoteOptions): HostingRemote {
     const state = azureRemoteState({ status: value.status, isDraft: value.isDraft });
     const head = branchOf(value.sourceRefName), base = branchOf(value.targetRefName), description = value.description ?? '';
     if (!Number.isSafeInteger(value.pullRequestId) || state === null || head === null || base === null || typeof value.title !== 'string' || typeof description !== 'string') throw invalid(step);
-    return pullRequest({ number: value.pullRequestId as number, url: `${web}/pullrequest/${value.pullRequestId}`, title: value.title, body: description, state, head, base });
+    const headCommit = sourceCommit(value.lastMergeSourceCommit);
+    return { ...(headCommit ? { headCommit } : {}), ...pullRequest({ number: value.pullRequestId as number, url: `${web}/pullrequest/${value.pullRequestId}`, title: value.title, body: description, state, head, base }) };
   }
   const get = async (number: number) => toPullRequest(await json(['repos', 'pr', 'show', '--id', String(requireNumber(number)), ...scope], 'read'), 'read');
   async function readiness(): Promise<RemoteReadiness> {
@@ -101,6 +106,23 @@ export function createAzureRemote(options: AzureRemoteOptions): HostingRemote {
   }
   return {
     platform: 'azure-devops', repository: display, readiness, get,
+    async transition(number, action, headCommit) {
+      requireNumber(number);
+      if (!/^[0-9a-f]{40,64}$/.test(headCommit)) throw definite('PR_REMOTE_ARGUMENT_UNSAFE', 'A reviewed source commit is required.', 'read');
+      if (action !== 'merge') {
+        await json(['repos', 'pr', 'update', '--id', String(number), ...scope,
+          ...(action === 'review' ? ['--draft', 'false'] : ['--status', 'abandoned'])], 'update');
+        return;
+      }
+      // The REST completion contract pins the source commit and preserves platform policies.
+      const body = JSON.stringify({ status: 'completed', lastMergeSourceCommit: { commitId: headCommit },
+        completionOptions: { mergeStrategy: 'noFastForward', deleteSourceBranch: false, bypassPolicy: false } });
+      await withFiles({ body }, async paths => {
+        await json(['devops', 'invoke', '--area', 'git', '--resource', 'pullRequests', '--route-parameters',
+          `project=${project}`, `repositoryId=${repository}`, `pullRequestId=${number}`, '--http-method', 'PATCH',
+          '--api-version', '7.1', '--in-file', paths.body!, ...scope.slice(2)], 'update');
+      });
+    },
     linkTarget: (ref: string): LinkTarget => ({ platform: 'azure-devops', web, ref }),
     async headExists(branch) {
       const refs = await json(['repos', 'ref', 'list', ...inRepository, '--filter', `heads/${requireBranch(branch)}`], 'read');

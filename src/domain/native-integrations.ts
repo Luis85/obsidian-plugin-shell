@@ -17,11 +17,24 @@ export interface NativeMenuResult {
   readonly title: string;
   readonly message: string;
 }
+/** `null` shows nothing: the action reported its own outcome (for example by opening a file). */
+export type NativeMenuOutcome = NativeMenuResult | null;
+/**
+ * Vault file operations a menu action may use. Paths are vault-relative and validated;
+ * `create` never replaces an existing file and reports `exists` instead.
+ */
+export interface NativeFileOperations {
+  read(path: string): Promise<string>;
+  create(path: string, content: string): Promise<'created' | 'exists'>;
+  open(path: string): Promise<void>;
+}
 export interface NativeMenuDefinition {
   readonly id: string;
   readonly name: string;
   readonly extensions: readonly string[];
-  readonly run: (context: NativeFileContext) => NativeMenuResult | Promise<NativeMenuResult>;
+  /** Lucide icon name for the menu item; defaults to `file-search`. */
+  readonly icon?: string;
+  readonly run: (context: NativeFileContext, files: NativeFileOperations) => NativeMenuOutcome | Promise<NativeMenuOutcome>;
 }
 /** Built-in file handlers must not be replaced by a generated custom extension. */
 export const reservedFileExtensions: readonly string[] = [
@@ -92,6 +105,7 @@ function validateMenu(menu: NativeMenuDefinition): void {
     menu.extensions.length > 16 ||
     menu.extensions.some((extension) => !validFileExtension(extension)) ||
     new Set(menu.extensions).size !== menu.extensions.length ||
+    (menu.icon !== undefined && !/^[a-z][a-z0-9-]{0,63}$/.test(menu.icon)) ||
     typeof menu.run !== 'function'
   )
     throw new Error('NATIVE_MENU_INVALID');
@@ -124,6 +138,13 @@ export function customFileBasename(value: string): string | null {
   return name;
 }
 
+/** A vault-relative file path a menu action may touch: no traversal, hidden segments, drive or control characters. */
+export function safeVaultFilePath(value: string): string | null {
+  if (typeof value !== 'string' || value.length > 400 || value.startsWith('/') || value.includes('\\')) return null;
+  const segments = value.split('/');
+  if (!segments.every((segment) => customFileBasename(segment) === segment)) return null;
+  return value;
+}
 /** Join a trusted vault-folder path and a validated single user-entered basename. */
 export function nativeFilePath(folder: string, input: string, extension: string): string | null {
   const basename = customFileBasename(input);
