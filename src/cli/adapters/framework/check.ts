@@ -9,7 +9,7 @@ import { exists } from './files.ts';
 import { readSourceState } from '../source-workspace.ts';
 import { lintRoots } from '#shared/platform/project-roots.mjs';
 import { projectConfigPath, projectConfigs } from '#shared/platform/project-configs.mjs';
-import { repositoryScope, toolingFolder } from './repository-scope.ts';
+import { repositoryScope, toolingPath } from './repository-scope.ts';
 import { runNode } from './process.ts';
 import { OperationError, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { changedFiles, runGit, type Changes, type Git } from './check-changes.ts';
@@ -58,10 +58,10 @@ async function authoringSteps(root: string): Promise<CheckStep[]> {
     display: `node ${path}`, entry: path, args: [],
   }));
 }
-const oxlintEntryFor = (project: boolean): string => `${toolingFolder(project ? 'generated-project' : 'shell-repository')}/quality/lint-source.mjs`;
+const oxlintEntryFor = (root: string): string => toolingPath(root, 'quality/lint-source.mjs');
 /** The same two linters as `npm run lint`: oxlint over owned source, then ESLint over the configured roots. */
 function stepParts(root: string, project: boolean, makers: CheckStep[], config: string[], extra: { oxlint: boolean; authoring: CheckStep[] }): Parts {
-  const oxlintEntry = oxlintEntryFor(project);
+  const oxlintEntry = oxlintEntryFor(root);
   const lint: CheckStep | null = extra.oxlint ? { id: 'lint', display: `node ${oxlintEntry}`, entry: oxlintEntry, args: [] } : null;
   // A generated project also lints its configured product roots (for example <codebaseFolder>/generated).
   const eslintRoots = project ? lintRoots(root) : ['src'];
@@ -76,7 +76,7 @@ export async function checkSteps(root: string, fast: boolean, git: Git = runGit,
   const scope = repositoryScope(root), project = scope === 'generated-project';
   const makers = await makerSteps(root, project), config = vitestConfig(root, project);
   // A generated project without the shell's oxlint wrapper keeps ESLint only; the shell always runs both.
-  const oxlint = !project || await exists(join(root, oxlintEntryFor(project)));
+  const oxlint = !project || await exists(join(root, oxlintEntryFor(root)));
   const parts = stepParts(root, project, makers, config, { oxlint, authoring: await authoringSteps(root) });
   if (!fast) return { scope, steps: fullSteps(parts) };
   const changes = await changedFiles(root, git, base);

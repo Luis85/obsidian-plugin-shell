@@ -89,7 +89,8 @@ assert.equal(savedSelection.starter.id, 'plugin-vanilla');
 assert.deepEqual(JSON.parse(await readFile(join(projectPackage, 'source/configs/issue-desk-config.json'), 'utf8')), savedSelection);
 for (const folder of [starterKit, projectPackage, join(projectPackage, 'source')]) assert.equal((await readdir(folder)).includes('project.config.json'), false, 'the retired root file is not written');
 const sourceLayout = (await readdir(join(projectPackage, 'source'))).sort();
-for (const entry of ['configs', 'src', 'tests', 'package.json', 'README.md']) assert.ok(sourceLayout.includes(entry), 'generated source lacks ' + entry);
+for (const entry of ['configs', 'src', 'workbench.sources.json', 'package.json', 'README.md']) assert.ok(sourceLayout.includes(entry), 'generated source lacks ' + entry);
+assert.ok((await readdir(join(projectPackage, 'source/src/plugin/tests'))).includes('scaffold.test.mjs'), 'generated source owns its scaffold test');
 // docs/ is not asserted: only Nuxt UI sources carry it (licence notices); see the distribution-plan gap note.
 const kitLayout = (await readdir(starterKit)).sort();
 assert.deepEqual(kitLayout, ['LICENSE', 'README.md', 'bin', 'configs', 'package.json', 'projects'], 'the starter writes only its package under projects/');
@@ -111,7 +112,7 @@ for (const group of ['dependencies', 'devDependencies', 'optionalDependencies'])
 }
 assert.equal((await readdir(starterConsumer)).includes('node_modules'), false,
   'starter must not install dependencies before explicit npm approval');
-const pinCheck = spawnSync(process.execPath, [join(starterConsumer, 'scripts/security/dependency-pins.mjs')], {
+const pinCheck = spawnSync(process.execPath, [join(starterConsumer, 'tooling/security/dependency-pins.mjs')], {
   cwd: starterConsumer, encoding: 'utf8', timeout: 30000, maxBuffer: 4_000_000,
 });
 checks.push({ name: 'blank-starter-dependency-pins', exitCode: pinCheck.status, error: pinCheck.error?.message, scope: 'offline release dependency gate before install' });

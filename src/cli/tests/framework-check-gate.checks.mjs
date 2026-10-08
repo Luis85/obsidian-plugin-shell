@@ -227,3 +227,14 @@ test('check discovers relocated custom and named-project locale tests without co
   assert.deepEqual(outcomes.map(item => item.status), ['passed', 'passed', 'failed']);
   assert.match(outcomes[2].outputTail, /SECOND_LOCALE_DRIFT/);
 });
+
+test('current generated projects include their shipped tooling linter even when legacy scripts coexist', async t => {
+  const dir = await scratch(t);
+  for (const path of ['.companion/generation.json', 'configs/types/tsconfig.project.json', 'configs/testing/vitest.project.config.mjs', 'tooling/quality/lint-source.mjs', 'scripts/quality/lint-source.mjs']) {
+    await mkdir(dirname(join(dir, path)), { recursive: true });
+    await writeFile(join(dir, path), '{}');
+  }
+  const plan = await checkSteps(dir, false);
+  assert.equal(plan.scope, 'generated-project');
+  assert.equal(stepOf(plan, 'lint').entry, 'tooling/quality/lint-source.mjs');
+});

@@ -6,7 +6,7 @@ import { exists, readBounded } from './files.ts';
 import { packKit } from './kit.ts';
 import { npmEntry, runNode } from './process.ts';
 import { projectConfigs } from '#shared/platform/project-configs.mjs';
-import { repositoryScope, toolingFolder } from './repository-scope.ts';
+import { toolingPath } from './repository-scope.ts';
 
 export interface ProcessOperationDependencies {
   dependencyReadiness?: typeof dependencyReadiness;
@@ -56,8 +56,8 @@ async function installInvocation(request: Request, context: Context, host: Host)
   } };
   return { entry: await host.npm(), args: ['ci', '--no-fund'] };
 }
-/** Repository tooling path: tooling/ in the shell repository, scripts/ in a generated project (one scope rule, repository-scope.ts). */
-const tool = (context: Context, path: string): string => `${toolingFolder(repositoryScope(context.root))}/${path}`;
+/** Repository tooling path: tooling/ in current projects, scripts/ in older generated consumers (one scope rule, repository-scope.ts). */
+const tool = (context: Context, path: string): string => toolingPath(context.root, path);
 /** `driver` entries name a test driver under the repository tooling folder. */
 const testEntries: Record<string, { entry: string; args?: string[]; driver?: boolean }> = {
   native: { entry: 'testing/check-native.mjs', driver: true },
@@ -75,7 +75,7 @@ async function testInvocation(request: Request, context: Context, host: Host, pr
 async function verifyInvocation(request: Request, context: Context, host: Host, profile: string | undefined): Promise<Invocation> {
   acceptProfile(request.command, profile);
   if (profile === 'project') return { entry: await host.npm(), args: ['run', 'verify:project'] };
-  // The shell repository verifies through tooling/quality; a generated project carries its own copy under scripts/quality.
+  // Resolve the project's shipped quality driver, including older generated consumers.
   return { entry: tool(context, 'quality/verify.mjs') };
 }
 const devEntries: Record<string, { entry: string; args: string[]; tool?: boolean }> = {

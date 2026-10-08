@@ -186,15 +186,15 @@ test('help for new documents --from as a companion project export, not the kit-u
   const upgrade = cli(['help', 'framework upgrade'], { NO_COLOR: '1' });
   assert.match(upgrade.stdout, /--from <value>\s+Extracted replacement kit folder\./);
 });
-test('the obsidian profiles run the real-Obsidian test suite and dev loop scripts of the project', async t => {
+for (const tooling of ['tooling', 'scripts']) test(`the obsidian profiles run the project's ${tooling} test and dev drivers`, async t => {
   const dir = await scratch(t);
-  // A generated project (its generation record and project tsconfig) keeps its repository tooling under scripts/.
+  // Current and legacy generated projects route to their own shipped tooling.
   await mkdir(join(dir, '.companion')); await writeFile(join(dir, '.companion/generation.json'), '{}');
   await mkdir(join(dir, 'configs/types'), { recursive: true }); await writeFile(join(dir, 'configs/types/tsconfig.project.json'), '{}');
-  await mkdir(join(dir, 'scripts/testing'), { recursive: true }); await mkdir(join(dir, 'scripts/dev'), { recursive: true });
+  await mkdir(join(dir, `${tooling}/testing`), { recursive: true }); await mkdir(join(dir, `${tooling}/dev`), { recursive: true });
   const fake = name => `console.log(${JSON.stringify(name)} + ' ran with [' + process.argv.slice(2).join(' ') + ']');\n`;
-  await writeFile(join(dir, 'scripts/testing/run-obsidian-tests.mjs'), fake('real-obsidian tests'));
-  await writeFile(join(dir, 'scripts/dev/obsidian-dev.mjs'), fake('real-obsidian dev loop'));
+  await writeFile(join(dir, `${tooling}/testing/run-obsidian-tests.mjs`), fake('real-obsidian tests'));
+  await writeFile(join(dir, `${tooling}/dev/obsidian-dev.mjs`), fake('real-obsidian dev loop'));
   const tests = machine(['test', '--profile', 'obsidian', '--root', dir]);
   assert.equal(tests.exit, 0); assert.equal(tests.result.data.profile, 'obsidian');
   assert.match(tests.result.data.execution.stdout, /^real-obsidian tests ran with \[\]$/m);

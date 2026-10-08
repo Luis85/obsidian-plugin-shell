@@ -1,10 +1,10 @@
 import { galleryOptions, type GalleryOptions } from '../../tooling/ui/gallery-options.ts';
 import { result, requireThat, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { runNode } from './process.ts';
-import { repositoryScope, toolingFolder } from './repository-scope.ts';
+import { toolingPath } from './repository-scope.ts';
 
-/** The capture script: tooling/ in the shell repository, scripts/ in a generated project (repository-scope.ts). */
-const entry = (root: string): string => `${toolingFolder(repositoryScope(root))}/ui/review-gallery.mjs`;
+/** The capture script: tooling/ in current projects, scripts/ in older generated consumers (repository-scope.ts). */
+const entry = (root: string): string => toolingPath(root, 'ui/review-gallery.mjs');
 const NOTICE = 'Evidence for human review — not acceptance, not a baseline';
 
 /** Validates the shared option rules; only these four options reach the capture script. */
