@@ -5,7 +5,7 @@
  "shared": {
   "design/compiler-readiness.json": "28988e2850cd33145b31d72b14e1e230bc847249492d40aec7c7e458273d738b",
   "harness/prototype/clickdummy-host.ts": "f857126acb89ac0ffcf5b390271f045b090c73d96420b7433dd563607c0ab755",
-  "harness/prototype/clickdummy.css": "57ff01ee30d96065bfce45f3afa58de25e3d29efeedb8849ed309d53f4afb478",
+  "harness/prototype/clickdummy.css": "e4b84fcf11de8a6281c9597255b11ea150d408cb7f9854e15a0dec78e569b709",
   "src/plugin/generated/application/source-overrides.ts": "8432767e52f2d843ce40378005b1ab6ab1e662511aa4d2bcfcbf19a8ee311a23",
   "src/plugin/generated/bootstrap/source-providers.ts": "374dda80e472fda06144bd117b94641d093a13dd9c697efd65ccb796fa35a43c",
   "src/plugin/generated/domain/composition-contract.d.mts": "46ebd53f37f9aaaa033983579ab52f04d7eb90661e98b46e47bcfc27ffc42dcb",
