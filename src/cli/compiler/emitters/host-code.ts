@@ -10,7 +10,8 @@ export function hostCode(m: Model, add: Add): void {
   add(init,`import { Modal, PluginSettingTab, type Plugin } from 'obsidian';
 import { createServices } from ${ref('src/bootstrap/services.ts')};
 import { bindNativeIntegrations } from ${ref('src/infrastructure/obsidian/native-integrations.ts')};
-import { nativeFileTypes, nativeContextMenus } from ${ref('src/bootstrap/native-integrations.ts')};
+import { nativeFileTypes, nativeContextMenus, nativeFileEditors } from ${ref('src/bootstrap/native-integrations.ts')};
+import { nativeFileEditorMounts } from ${ref('src/bootstrap/mount-file-editor.ts')};
 import { projectFileTypes, projectContextMenus } from './native-integrations.ts';
 import { nativeAdapters } from ${ref('src/infrastructure/obsidian/adapters.ts')};
 import { nativeViewClass, type ShowcaseView } from ${ref('src/infrastructure/obsidian/showcase-view.ts')};
@@ -61,7 +62,7 @@ export async function initializeProject(plugin: Plugin) {
     await leaf.setViewState({type,active:true}); await plugin.app.workspace.revealLeaf(leaf);
   }
   try {
-    stopNative = bindNativeIntegrations(plugin, [...nativeFileTypes, ...projectFileTypes], [...nativeContextMenus, ...projectContextMenus], code => shell.diagnostics.report(code, 'native.integration'));
+    stopNative = bindNativeIntegrations(plugin, [...nativeFileTypes, ...projectFileTypes], [...nativeContextMenus, ...projectContextMenus], code => shell.diagnostics.report(code, 'native.integration'), nativeFileEditorMounts(shell, nativeFileEditors));
     providers = configureSourceProviders(shell); sources = createSources(shell,providers.ports);
     const definitions = [{id:undefined as string | undefined,type:viewType,label:plugin.manifest.name}, ...screens.filter(s => !['modal','group','action'].includes(s.kind)).map(s => ({id:s.id,type:viewType+'-'+s.slug,label:s.label}))];
     for (const definition of definitions) {

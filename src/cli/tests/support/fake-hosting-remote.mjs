@@ -72,6 +72,10 @@ export function createFakeHostingRemote(options = {}) {
   }
   const remote = {
     platform, repository,
+    async transition(number, action, headCommit) {
+      calls.push(['transition', number, action, headCommit]);
+      return write('transition', 'update', () => Object.assign(existing(number), { state: { review: 'open', close: 'closed', merge: 'merged' }[action] }));
+    },
     async readiness() {
       calls.push(['readiness']); read('readiness');
       const ready = options.readiness ?? { cli: 'ok', auth: 'ok', diagnostics: [] };

@@ -21,12 +21,16 @@ it("declares board without host objects or side effects", async () => {
 `);
 });
 
-test('a context-menu declaration gets a side-effect-free inspect action and a matching test', () => {
+test('a context-menu declaration gets a read-only inspect action through the file operations port and a matching test', () => {
   assert.equal(nativeDeclarationSource('context-menu', menu, '../../domain/native-integrations'),
-    `import type { NativeMenuDefinition, NativeFileContext, NativeMenuResult } from "../../domain/native-integrations";
-/** Developer-owned action. Receive a file snapshot, not mutable host objects. No IO by default. */
-export function inspectFile(file: NativeFileContext): NativeMenuResult {
-  return { title: "Inspect file", message: 'File: ' + file.name + '\\nExtension: .' + file.extension + '\\nVault path: ' + file.path };
+    `import type { NativeMenuDefinition, NativeFileContext, NativeFileOperations, NativeMenuOutcome } from "../../domain/native-integrations";
+/**
+ * Developer-owned action. \`file\` is a plain snapshot, never a host object; \`files\` reads,
+ * creates (never overwrites) and opens vault files. Return null to show nothing.
+ */
+export async function inspectFile(file: NativeFileContext, files: NativeFileOperations): Promise<NativeMenuOutcome> {
+  const text = await files.read(file.path);
+  return { title: "Inspect file", message: 'File: ' + file.name + '\\nExtension: .' + file.extension + '\\nVault path: ' + file.path + '\\nCharacters: ' + text.length };
 }
 export const definition: NativeMenuDefinition = { id: "inspect-file", name: "Inspect file", extensions: ["md","board"], run: inspectFile };
 `);
@@ -35,7 +39,8 @@ import { definition } from "./inspect-file.context-menu";
 it("declares inspect-file without host objects or side effects", async () => {
   expect(definition.id).toBe("inspect-file");
   expect(definition.extensions).toEqual(["md","board"]);
-  expect(await definition.run({ path: 'Notes/Example.md', name: 'Example.md', extension: 'md' })).toEqual({ title: "Inspect file", message: 'File: Example.md\\nExtension: .md\\nVault path: Notes/Example.md' });
+  const files = { read: async () => '# Example', create: async () => 'created' as const, open: async () => undefined };
+  expect(await definition.run({ path: 'Notes/Example.md', name: 'Example.md', extension: 'md' }, files)).toEqual({ title: "Inspect file", message: 'File: Example.md\\nExtension: .md\\nVault path: Notes/Example.md\\nCharacters: 9' });
 });
 `);
 });

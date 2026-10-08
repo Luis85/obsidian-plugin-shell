@@ -10,6 +10,8 @@ import { collectionCommand } from './collection-command.ts';
 import { candidateCommand } from './release-candidate-command.ts';
 import { setupCommand, configuredArguments } from './setup-command.ts';
 import { descriptor, parameterKinds } from './framework/catalog.ts';
+import { commandHelp } from './framework/help-text.ts';
+import { helpText } from '../presentation/terminal/terminal-help.ts';
 import { newProjectCommand } from './project-command.ts';
 import { savedProjectSelection } from './project-selection.ts';
 import { projectConfigPattern } from '../compiler/domain/project-config.ts';
@@ -256,12 +258,19 @@ async function prototype(args: Arguments, context: CommandContext): Promise<Reco
   const plan = await prototypePlan({ ...context, guide, input, out: option(args, 'out', 'prototypes/prepared-prototype'), baseline: snapshot.document, selection });
   return applyPrepared(plan, option(args, 'apply') || undefined, context.signal);
 }
+/** `new --help`: the directory-creation page first, then only the project-starter forms of `new`. */
+function newHelp(entry: ReturnType<typeof descriptor>): string {
+  const page = helpText({ color: false, unicode: false }, { scope: 'command', goldenPath: [], groups: [],
+    commands: [{ ...entry, options: parameterKinds(entry), ...commandHelp(entry) }] });
+  const starters = makerHelp.split('\n').filter(line => line.includes('node bin/app new') || line.includes('node bin/app help new'));
+  return `${page}\nProject starters (no <dir>)\n${starters.join('\n')}\n\nAll maker commands: node bin/app --help\n`;
+}
 function helpResult(args: Arguments, extensions: readonly PluginCliCommand[]): Record<string, unknown> {
     const newCommand = args.command === 'new' ? descriptor('new') : undefined;
     const pluginHelp = extensions.length
       ? '\nPlugin commands:\n' + extensions.map(item => `  node bin/app ${item.id} — ${item.summary}`).join('\n') + '\n'
       : '';
-    return { help: makerHelp + pluginHelp, commands: newCommand ? [{ ...newCommand, options: parameterKinds(newCommand) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', 'fake-data', 'learn', 'process', 'candidate', 'workflow', ...Object.keys(collectionCommandRoots), ...extensions.map(item => item.id)],
+    return { help: (newCommand ? newHelp(newCommand) : makerHelp) + pluginHelp, commands: newCommand ? [{ ...newCommand, options: parameterKinds(newCommand) }] : ['new', 'sketch', 'brainstorm', 'prototype', 'design', 'settings', 'project-setup', 'first-run', 'wizard', 'form', 'fake-data', 'learn', 'process', 'candidate', 'workflow', ...Object.keys(collectionCommandRoots), ...extensions.map(item => item.id)],
       pluginCommands: extensions.map(item => ({ id: item.id, summary: item.summary, options: item.options ?? {} })),
       ...(newCommand ? { makerCommands: ['new', 'brainstorm', 'sketch', 'prototype', 'settings', 'project-setup', 'first-run'] } : {}), interactive: false };
 

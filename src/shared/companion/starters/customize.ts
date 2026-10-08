@@ -13,7 +13,27 @@ function single(value: unknown, key: string): Record<string, unknown> | null {
   const only: unknown = Array.isArray(list) && list.length === 1 ? list[0] : undefined;
   return record(only) ? only : null;
 }
-/** Only identity, folders and one native extension choice are configurable; the design itself is copied unchanged. */
+function rewriteStrings(value: unknown, rewrite: (text: string) => string): void {
+  if (!record(value) && !Array.isArray(value)) return;
+  const node = value as Record<string, unknown>;
+  for (const [key, item] of Object.entries(node)) {
+    if (typeof item === 'string') node[key] = rewrite(item);
+    else rewriteStrings(item, rewrite);
+  }
+}
+/** A new extension renames the sample format wherever it is named (`.folio`, `Folio`, a matching file type id), never inside other words. */
+function renameFormat(document: AuthoringDocument, fileType: Record<string, unknown>, extension: string): void {
+  const previous = String(fileType.extension);
+  if (fileType.id === previous) fileType.id = extension;
+  fileType.extension = extension;
+  if (previous === extension || !/^[a-z][a-z0-9]*$/.test(previous)) return;
+  const title = (word: string): string => word.charAt(0).toUpperCase() + word.slice(1);
+  const dotted = new RegExp(`\\.${previous}\\b`, 'g'), named = new RegExp(`\\b${title(previous)}\\b`, 'g');
+  const rewrite = (text: string): string => text.replace(dotted, () => '.' + extension).replace(named, () => title(extension));
+  rewriteStrings(document.design, rewrite);
+  rewriteStrings(document.notes, rewrite);
+}
+/** Only identity, folders and one native extension choice are configurable; the rest of the design is copied unchanged. */
 export function customizeStarter(source: StarterSource, fields: Record<string, string>): AuthoringDocument {
   const { definition, sha256 } = source;
   starterAssert(definition.generator.kind === 'companion', 'This starter does not declare an editable Companion model.');
@@ -27,7 +47,7 @@ export function customizeStarter(source: StarterSource, fields: Record<string, s
   if (fields.extension !== undefined) {
     const fileType = single(document.design.nativeIntegrations, 'fileTypes');
     starterAssert(fileType, '--extension requires a starter with exactly one custom file type.');
-    fileType.extension = fields.extension;
+    renameFormat(document, fileType, fields.extension);
   }
   if (fields.extensions !== undefined) {
     const menu = single(document.design.nativeIntegrations, 'contextMenus');

@@ -3,6 +3,7 @@ import { checkNativeRegistration } from './native-registrations.ts';
 import { makerSymbol as symbol, title } from './arguments.ts';
 import { nativeDeclarationSource, nativeDeclarationTest } from '../../compiler/emitters/native-boilerplate.ts';
 import { validateNativeIntegrations } from '#shared/companion/native-contract.mjs';
+import { fileEditorRecipe } from './file-editor.ts';
 import type { MakerContext, OwnedInput } from './contracts.ts';
 
 const relative = (from: string, to: string): string => {
@@ -38,4 +39,11 @@ export async function nativeRecipe(context: MakerContext, input: OwnedInput): Pr
   const test = `tests/runtime/generated/${owner}-${name}-${kind}.test.ts`;
   await context.add(test, nativeDeclarationTest(kind, declared, relative(test, source).replace(/\.ts$/, '')));
   context.tests.add(test);
+  if (kind === 'file-extension' && editorChoice(input) === 'vue') await fileEditorRecipe(context, { owner, name, fileType: declared.id });
+}
+/** `--editor vue` composes a dedicated Vue editor; the default keeps the raw text editor. */
+function editorChoice({ options }: OwnedInput): 'vue' | 'text' {
+  const editor = options['--editor'] ?? 'text';
+  if (editor !== 'vue' && editor !== 'text') throw new Error('Unknown editor; select vue or text');
+  return editor;
 }

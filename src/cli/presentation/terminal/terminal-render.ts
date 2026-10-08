@@ -11,7 +11,7 @@ import { uiStatusView } from './ui-status-view.ts';
 import { isSourceView, sourceView } from './source-view.ts';
 import { isMakerResult, makerChecksView } from './maker-view.ts';
 import { deliveryPlanDetails, incrementCheckView, incrementReadView, isDeliveryPlan } from './increment-view.ts';
-import { publishView, pullRequestReadView, syncView, uncertainView } from './pull-request-view.ts';
+import { lifecycleView, publishView, pullRequestReadView, syncView, uncertainView } from './pull-request-view.ts';
 import type { UiStatusReport } from '../../domain/ui-status.ts';
 import { bold, duration, marker, nextLine, rows, runnable, type Mark, type Style } from './terminal-style.ts';
 export interface Rendered { text: string; diagnosticsShown: boolean }
@@ -201,6 +201,7 @@ const views: Array<[View, boolean]> = [
   [(style, value) => value.command === 'increment check' ? incrementCheckView(style, value) : undefined, true],
   [(style, value) => incrementReadView(style, value) ?? pullRequestReadView(style, value), false],
   [(style, value, data) => value.command === 'pr publish' && typeof data.planHash === 'string' ? publishView(style, value) : undefined, false],
+  [(style, value, data) => ['pr review', 'pr close', 'pr merge'].includes(value.command) && typeof data.planHash === 'string' ? lifecycleView(style, value) : undefined, false],
   [(style, value, data) => value.command === 'pr sync' && typeof data.planHash === 'string' ? syncView(style, value) : undefined, true],
   [(style, value) => isDeliveryPlan(value) ? planView(style, value, deliveryPlanDetails(style, value)) : undefined, false],
   [(style, value, data) => isMakerResult(value) && typeof data.planHash === 'string' ? planView(style, value, makerChecksView(style, value)) : undefined, false],

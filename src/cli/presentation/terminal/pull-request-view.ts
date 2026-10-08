@@ -116,3 +116,16 @@ export function pullRequestReadView(style: Style, value: Result): string | undef
   const view = readViews[value.command];
   return view ? view(style, record(value.data)) : undefined;
 }
+
+/** Reviewable hosted state changes must identify the remote action before asking for approval. */
+export function lifecycleView(style: Style, value: Result): string {
+  const data = record(value.data), remote = record(data.remote);
+  const actions: Record<string, string> = { review: 'Mark ready for review', close: 'Close without merging', merge: 'Merge using a merge commit' };
+  const action = data.completed ? 'Record the already-completed remote transition' : actions[text(data.action)] ?? text(data.action);
+  return rows([['Action', action], ['Platform', `${text(remote.platform)} ${text(remote.repository)}`],
+    ['Pull request', remoteLabel(remote.number, remote.url)], ['Branches', branches(remote.head, remote.base)],
+    ['Source commit', text(remote.headCommit)], ['State', `${text(remote.before)} → ${text(remote.after)}`],
+    ['Plan hash', text(data.planHash)], ['Remote verified', value.status === 'applied' ? 'yes' : null]])
+    + section(style, 'Local records', list(data.changes).map(change => `  ${text(change.path)}\n`).join(''))
+    + nextLine(style, value.status === 'planned' ? `rerun the same command with --apply ${text(data.planHash)} to approve this remote action` : text(data.next));
+}

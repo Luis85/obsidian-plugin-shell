@@ -27,6 +27,8 @@ const surfaces = ['feature', 'view', 'store', 'component'];
 const isMissing = (error: unknown): boolean => error instanceof Error && 'code' in error && error.code === 'ENOENT';
 
 function checkRecipeOptions(maker: string, options: MakerOptions): void {
+  if (maker === 'feature' && options['--bare'] && ['--entity', '--backend', '--document', '--folder', '--preset'].some(option => Object.hasOwn(options, option)))
+    throw new Error('--bare creates only the feature folder; drop the entity options or --bare');
   if (maker === 'feature' && options['--feature'] !== undefined)
     throw new Error('--feature belongs to child recipes; feature uses its positional group name');
   if (maker === 'entity' && options['--entity'] !== undefined)
@@ -70,7 +72,7 @@ function resolveDocument(options: MakerOptions, owner: string | undefined, name:
   if (unsafeFolder(folder)) throw new Error('Unsafe document folder');
   return { preset, folder };
 }
-async function ownerDirectoryExists(root: string, owner: string): Promise<boolean> {
+export async function ownerDirectoryExists(root: string, owner: string): Promise<boolean> {
   try {
     const entry = await lstat(resolve(root, 'src/features', owner));
     if (!entry.isDirectory() || entry.isSymbolicLink()) throw new Error('Feature owner must be a real directory');
@@ -113,7 +115,7 @@ export function makerTypecheck(root: string): MakerCheck {
   return { id: 'typecheck', command: 'node', args: ['node_modules/vue-tsc/bin/vue-tsc.js', ...args] };
 }
 /** A generated project checks its own project-scoped TypeScript and Vitest configuration, the same ones `check` uses. */
-function planChecks(root: string, maker: string, tests: ReadonlySet<string>): MakerCheck[] {
+export function planChecks(root: string, maker: string, tests: ReadonlySet<string>): MakerCheck[] {
   const runtimeTests = [...tests].filter((path) => path.endsWith('.test.ts'));
   const toolingTests = [...tests].filter((path) => path.endsWith('.checks.mjs'));
   const vitestConfig = projectConfigPath(root, 'vitest') ?? 'configs/testing/vitest.config.mjs';
@@ -129,7 +131,7 @@ function planChecks(root: string, maker: string, tests: ReadonlySet<string>): Ma
     { id: 'entities-check', command: 'node', args: ['scripts/makers/entities.mjs', '--check'] },
   ];
 }
-async function fullGate(root: string): Promise<string> {
+export async function fullGate(root: string): Promise<string> {
   try {
     await lstat(resolve(root, '.companion/generation.json'));
     return 'npm run verify:project';
@@ -139,7 +141,7 @@ async function fullGate(root: string): Promise<string> {
   }
 }
 /** Validation order is part of the contract: earlier problems are reported first. */
-function resolveRequest(request: MakerArguments): MakerInput {
+export function resolveRequest(request: MakerArguments): MakerInput {
   const maker = slug(request.maker, 'recipe name');
   const name = slug(request.name, 'maker name');
   const { options } = request;
