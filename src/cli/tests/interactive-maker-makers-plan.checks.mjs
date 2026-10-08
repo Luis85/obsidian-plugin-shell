@@ -168,6 +168,13 @@ test('the maker type check builds a solution root, checks a plain root and keeps
     assert.deepEqual(await args(), ['-b'], 'comments and trailing commas must not silently skip referenced projects');
     await writeFile(join(root, 'tsconfig.json'), '{ "files": [], "references": [ }');
     await assert.rejects(makerTypecheck(root), /TSCONFIG_INVALID/);
+    // Backslashes are real directory characters on POSIX and separators on Windows: both exercise the parser filename.
+    const windowsRoot = join(root, 'windows\\source');
+    await mkdir(windowsRoot, { recursive: true });
+    await writeFile(join(windowsRoot, 'tsconfig.json'), '{ "files": [], "references": [ }');
+    await assert.rejects(makerTypecheck(windowsRoot), /TSCONFIG_INVALID/, 'Windows-style parser filenames retain normal malformed JSON diagnostics');
+    await writeFile(join(windowsRoot, 'tsconfig.json'), '// JSONC solution\n{ "files": [], "references": [{ "path": "./src/plugin", }], }');
+    assert.deepEqual((await makerTypecheck(windowsRoot)).args.slice(1), ['-b']);
     await mkdir(join(root, 'configs/types'), { recursive: true });
     await writeFile(join(root, 'configs/types/tsconfig.project.json'), '{}');
     assert.deepEqual(await args(), ['--noEmit', '--project', 'configs/types/tsconfig.project.json']);

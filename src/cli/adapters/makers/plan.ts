@@ -106,7 +106,8 @@ async function solutionRoot(root: string): Promise<boolean> {
   const path = resolve(root, 'tsconfig.json');
   let text: string;
   try { text = await readFile(path, 'utf8'); } catch (error) { if (isMissing(error)) return false; throw error; }
-  const ts = await loadTypescript(), parsed = ts.parseConfigFileTextToJson(path, text);
+  // TypeScript requires slash-normalized diagnostic filenames, even when reading a native Windows path.
+  const ts = await loadTypescript(), parsed = ts.parseConfigFileTextToJson(path.replaceAll('\\', '/'), text);
   if (parsed.error) throw new Error(`TSCONFIG_INVALID: ${ts.flattenDiagnosticMessageText(parsed.error.messageText, ' ')}`);
   const config = parsed.config as unknown;
   if (config === null || typeof config !== 'object' || Array.isArray(config)) return false;
