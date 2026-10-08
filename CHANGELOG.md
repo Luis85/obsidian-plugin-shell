@@ -8,6 +8,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ### Added
 
+- Source projects: `workbench.sources.json` declares the TypeScript projects under `src/` (name, kind, path, references), and `node bin/app source list|graph|check [--fix]|add|link|unlink|rename|remove` manages them through reviewed plans. `source check` reports schema errors, cycles, missing paths, tsconfig and `#alias` drift, imports into unreferenced projects and projects outside the lint, coverage or analyzer gates.
 - Tiered delivery pipeline: a fast Dev tier for every pull request including drafts, an Integration tier for pull requests marked ready for review and a Release tier that runs every check with full matrices on a `release/X.Y.Z` branch.
 - Release cut and publish automation: `release:cut` creates the release branch from `main`, prepares version metadata, commits and opens a draft release pull request; `release:publish` merges the tested release head, creates the bare `X.Y.Z` tag and the GitHub release with the qualified candidate assets, then deletes the release branch. Both default to a dry-run plan and are idempotent on rerun.
 - `release:changelog` validates this changelog and extracts one version's notes; release preparation promotes the Unreleased section into the new version.
@@ -36,6 +37,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ### Changed
 
+- Repository layout by concern: `src/` holds five self-contained TypeScript projects (`shared`, `tui`, `cli`, `companion`, `plugin`), each with its own `tsconfig.json` and `tests/`, joined by project references and `#shared/*`/`#tui/*` imports; repository tooling moved from `scripts/` to `tooling/`, the plugin runtime to `src/plugin` (with the harness), the Workbench extension SDK from `plugins/` to `src/cli/sdk`, and the companion editor and app sources to `src/companion`. Root `tests/` keeps only cross-project suites. A project boundary gate enforces the dependency graph (`shared` ← `tui` ← `cli`; `shared` ← `companion`, `plugin`; no project imports `tooling/` or root `tests/`).
 - Move Workbench CLI development to `src/cli`; `npm run build:cli` creates the portable `bin` product with compiled authoring tools, templates, plugin defaults, notices and verified inventories.
 - Group companion Vitest updates with their coverage provider and synchronize Actions updates across project workflow directories.
 - Test files now run 4 at a time where it was measured safe: the maker suite (Vitest, 47-57 min serial to 14-15 min on Windows) and nine node --test tooling suites through a new per-suite `runner.concurrency` in `tests/suites.json` (for example generator 1723 to 936 s). Suites still run one after another, and suites that write into the shared checkout or time out under load stay serial.
