@@ -1,6 +1,6 @@
 import { renderStarterProject } from './adapters/project/emitter.ts';
-import type { ProjectSelection } from './domain/project-starter.ts';
-import { validateProjectSelection } from './adapters/project/selection.ts';
+import type { CompilerProjectSelection as ProjectSelection } from './domain/project-starter.ts';
+import { validateCompilerProjectSelection as validateProjectSelection } from './adapters/project/selection.ts';
 import { CompilerError, diagnostic } from './domain/diagnostics.ts';
 /** Dedicated compiler API. Loading a template, compiling, planning and applying are distinct operations. */
 import { createHash } from 'node:crypto';

@@ -1,7 +1,11 @@
 import { loadEventCatalog } from './load-catalog.mjs';
 async function main() {
   const args = process.argv.slice(2);
-  if (args.some((arg) => !['--check', '--json', '--help'].includes(arg)))
+  const sourceAt = args.indexOf('--source');
+  const source = sourceAt < 0 ? undefined : args[sourceAt + 1];
+  if (sourceAt >= 0 && (!source || source.startsWith('--') || args.lastIndexOf('--source') !== sourceAt)) throw new Error('Expected one --source <name>');
+  const flags = args.filter((_, index) => sourceAt < 0 || index !== sourceAt && index !== sourceAt + 1);
+  if (flags.some((arg) => !['--check', '--json', '--help'].includes(arg)))
     throw new Error('Unknown event catalog option');
   if (args.includes('--help')) {
     console.log(
@@ -9,7 +13,7 @@ async function main() {
     );
     return;
   }
-  const report = await loadEventCatalog();
+  const report = await loadEventCatalog(process.cwd(), source);
   if (args.includes('--json') || args.includes('--check')) {
     console.log(JSON.stringify(report, null, 2));
     return;

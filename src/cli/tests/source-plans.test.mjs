@@ -194,3 +194,15 @@ test('rename refuses an occupied destination and linked output ancestors without
   assert.equal(await read(root, 'workbench.sources.json'), manifest);
   assert.ok(await present(root, 'src/tui/index.ts'));
 });
+
+
+test('remove does not trust a scaffold receipt belonging to another project', async t => {
+  const root = await fixture(t);
+  assert.equal((await source(root, 'add', 'util', '--kind', 'library', '--yes')).status, 0);
+  const receipt = await readJson(root, '.workbench/sources/util.json');
+  await write(root, '.workbench/sources/util.json', JSON.stringify({ ...receipt, project: 'another-project' }));
+  const removed = await source(root, 'remove', 'util', '--yes');
+  assert.equal(removed.status, 0, JSON.stringify(removed.result.diagnostics));
+  assert.deepEqual(removed.result.data.summary.retained, ['src/util/index.ts', 'src/util/tests/index.test.ts']);
+  assert.ok(await present(root, '.workbench/sources/util.json'));
+});

@@ -31,7 +31,7 @@ test('an authored component story carries synthetic props, actions, slots, varia
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import { h } from 'vue';
 import { action } from 'storybook/actions';
-import Subject from "../../../generated/presentation/components/library/project-json-review.vue";
+import Subject from "../../../src/plugin/generated/presentation/components/library/project-json-review.vue";
 import { withProject } from '../with-project.ts';
 const meta = {
   title: "Components/ProjectJsonReview (project-json-review)",
@@ -69,7 +69,7 @@ test('placeholder components and pages keep one default story and record their i
     entityId: 'component-record-card', stories: ['Default'], syntheticProps: [] });
   assert.equal(file.content, `// Generated from project JSON. Put custom stories in storybook/custom, not this managed file.
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
-import Subject from "../../../generated/presentation/components/library/record-card.vue";
+import Subject from "../../../src/plugin/generated/presentation/components/library/record-card.vue";
 import { withProject } from '../with-project.ts';
 const meta = {
   title: "Components/RecordCard (record-card)",
@@ -120,7 +120,7 @@ test('the story host imports every generated context module relative to its own 
     "import { provideVisualContext } from \"../../app/code/generated/presentation/composables/use-visual.ts\";",
     "import { useNavigation } from \"../../app/code/generated/presentation/stores/navigation.ts\";",
     "import { screens } from \"../../app/code/generated/domain/screens.ts\";",
-    "import '../../harness/styles/simulated.css';"]);
+    "import '../../src/plugin/harness/styles/simulated.css';"]);
   assert.equal(lines[16], 'import "../../app/code/generated/presentation/detail-layout.css";');
   assert.equal(lines[17], 'const owner = "plugin-companion";');
   assert.equal(lines.at(-1), ''); assert.equal(lines.at(-2), '};');

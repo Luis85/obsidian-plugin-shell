@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { Readable, Writable } from 'node:stream';
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import { projectStarters, projectStarter, projectGuide, projectRequest, projectPlan } from '../adapters/projects.ts';
-import { readProjectGenerator, projectSelection, validateProjectSelection, angularPackages } from '../compiler/adapters/project/selection.ts';
+import { readCompilerProjectGenerator as readProjectGenerator, compilerProjectSelection as projectSelection, validateCompilerProjectSelection as validateProjectSelection, angularPackages } from '../compiler/adapters/project/selection.ts';
 import { compileProject, loadTemplateSnapshot } from '../compiler/index.ts';
 import { newDocument, documentText, openDocument } from '../domain/document.ts';
 import { runOperations } from '../application/operations.ts';

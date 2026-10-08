@@ -98,7 +98,7 @@ async function makerCheck(request: Request, context: Context): Promise<Result> {
 /** The registered entity catalog, bundled from checked-in definitions; the same handler serves source checkouts and kits. */
 async function entityCatalog(request: Request, context: Context): Promise<Result> {
   const { loadCatalog } = await import('../makers/load-catalog.ts');
-  return result(request.command, await loadCatalog(context.root));
+  return result(request.command, await loadCatalog(context.root, typeof request.options.source === 'string' ? request.options.source : undefined));
 }
 async function newProject(request: Request, context: Context): Promise<Result> {
   if (request.options.list) return starterListing(context);

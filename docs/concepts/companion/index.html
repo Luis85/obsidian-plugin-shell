@@ -16452,7 +16452,25 @@ Edge: ${id2}`,
 		const only = Array.isArray(list) && list.length === 1 ? list[0] : void 0;
 		return record$2(only) ? only : null;
 	}
-	/** Only identity, folders and one native extension choice are configurable; the design itself is copied unchanged. */
+	function rewriteStrings(value, rewrite) {
+		if (!record$2(value) && !Array.isArray(value)) return;
+		const node = value;
+		for (const [key, item] of Object.entries(node)) if (typeof item === "string") node[key] = rewrite(item);
+		else rewriteStrings(item, rewrite);
+	}
+	/** A new extension renames the sample format wherever it is named (`.folio`, `Folio`, a matching file type id), never inside other words. */
+	function renameFormat(document, fileType, extension) {
+		const previous = String(fileType.extension);
+		if (fileType.id === previous) fileType.id = extension;
+		fileType.extension = extension;
+		if (previous === extension || !/^[a-z][a-z0-9]*$/.test(previous)) return;
+		const title = (word) => word.charAt(0).toUpperCase() + word.slice(1);
+		const dotted = new RegExp(`\\.${previous}\\b`, "g"), named = new RegExp(`\\b${title(previous)}\\b`, "g");
+		const rewrite = (text) => text.replace(dotted, () => "." + extension).replace(named, () => title(extension));
+		rewriteStrings(document.design, rewrite);
+		rewriteStrings(document.notes, rewrite);
+	}
+	/** Only identity, folders and one native extension choice are configurable; the rest of the design is copied unchanged. */
 	function customizeStarter(source, fields) {
 		const { definition, sha256 } = source;
 		starterAssert(definition.generator.kind === "companion", "This starter does not declare an editable Companion model.");
@@ -16474,7 +16492,7 @@ Edge: ${id2}`,
 		if (fields.extension !== void 0) {
 			const fileType = single(document.design.nativeIntegrations, "fileTypes");
 			starterAssert(fileType, "--extension requires a starter with exactly one custom file type.");
-			fileType.extension = fields.extension;
+			renameFormat(document, fileType, fields.extension);
 		}
 		if (fields.extensions !== void 0) {
 			const menu = single(document.design.nativeIntegrations, "contextMenus");

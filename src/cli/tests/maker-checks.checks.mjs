@@ -13,7 +13,7 @@ import { OperationError } from '../adapters/framework/contracts.ts';
 const make = (root, args, options = {}) => executeOperation({ command: 'make', args, options }, { root, frameworkRoot: makerSourceRoot });
 async function prepare(root) {
   await installMakerFoundation(root); await copyMakerSuite(root);
-  await writeFile(join(root, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'ESNext', moduleResolution: 'Bundler', strict: true, noUncheckedIndexedAccess: true, skipLibCheck: true, noEmit: true, types: ['node'], esModuleInterop: true }, include: ['src/**/*.ts', 'src/**/*.vue', 'tests/runtime/**/*.ts'] }));
+  await writeFile(join(root, 'tsconfig.json'), JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'ESNext', moduleResolution: 'Bundler', strict: true, noUncheckedIndexedAccess: true, skipLibCheck: true, noEmit: true, types: ['node'], esModuleInterop: true }, include: ['src/**/*.ts', 'src/**/*.vue', 'tests/runtime/**/*.ts'], exclude: ['src/cli/**'] }));
   await mkdir(join(root, 'src/locales'), { recursive: true });
   await cp(join(makerSourceRoot, 'src/plugin/locales/en.json'), join(root, 'src/locales/en.json'));
   await applyFilePlan((await planMaker(root, parseArguments(['feature', 'bookmarks', '--entity', 'bookmark']))).plan);

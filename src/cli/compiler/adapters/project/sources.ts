@@ -1,5 +1,5 @@
 import { literal, type Model } from '../../emitters/model.ts';
-import type { ProjectSelection } from '../../domain/project-starter.ts';
+import type { CompilerProjectSelection as ProjectSelection } from '../../domain/project-starter.ts';
 /** All user-authored content is data, never interpolated into identifiers or markup. */
 export function coreSource(model: Model): string {
   const pages = model.screens.filter(page => !['group', 'action'].includes(page.kind)).map(page => ({

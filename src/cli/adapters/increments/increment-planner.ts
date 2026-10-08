@@ -122,6 +122,7 @@ async function attachPlan(request: Request, context: Context): Promise<SessionPl
 
 export const incrementDocumentPlanners: Record<string, Planner> = {
   'increment new': newIncrement,
+  'increment plan': (request, context) => newIncrement({ ...request, options: { ...request.options, 'no-branch': true } }, context),
   'increment edit': editIncrementPlan,
   'increment status': statusPlan,
   'increment scope add': scopePlan('in'),

@@ -1,5 +1,5 @@
 import { success, failure, type Result } from '../domain/outcome';
-import type { EntityDefinition } from '../domain/entity';
+import type { EntityDefinition, Field } from '../domain/entity';
 import type { DocumentDefinition, Frontmatter } from './document-service';
 interface Mapping<V> { readonly field: keyof V & string; readonly property: string }
 export interface DocumentRecipe<I, V> extends DocumentDefinition<I> {
@@ -61,7 +61,7 @@ export function validateDocumentCatalog(recipes: readonly { readonly entity: { r
     if (entities.has(recipe.entity.key)) throw new Error('Duplicate document registration');
     entities.add(recipe.entity.key);
     for (const { field, property } of recipe.mappings) {
-      const kind = recipe.entity.fields[field]?.kind;
+      const kind: Field<unknown>['kind'] | undefined = recipe.entity.fields[field]?.kind;
       if (!kind || (properties.has(property) && properties.get(property) !== kind)) throw new Error('Conflicting property types');
       properties.set(property, kind);
     }

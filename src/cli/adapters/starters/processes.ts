@@ -83,9 +83,9 @@ export async function starterProcessOperation(request: Request, context: Context
   return result(request.command, { ...await runProcesses(context, directory, process.split(','), reviewed ?? plan.planHash), review }, 'applied');
 }
 export async function completeDefinition(outcome: Result, request: Request, context: Context): Promise<Result> {
-  const data = outcome.data as { summary: { directory: string; recipe: { receiptSha256: string; nextSteps: string[]; run: string[] } } };
+  const data = outcome.data as { planHash?: unknown; summary: { directory: string; recipe: { receiptSha256: string; nextSteps: string[]; run: string[] } } };
   const { directory, recipe } = data.summary;
-  if (outcome.status !== 'applied') return { ...outcome, data: { ...data, written: false, next: 'No files or processes changed. Review and apply the plan to create the project.' } };
+  if (outcome.status !== 'applied') return { ...outcome, data: { ...data, written: false, next: `No files or processes changed. Review the plan, then rerun the same command with --apply ${String(data.planHash)} (or --yes) to create the project.` } };
   if (!recipe.run.length) return { ...outcome, data: { ...data, written: true, nextSteps: recipe.nextSteps } };
   requireThat(request.options['trust-processes'] === true, 'STARTER_TRUST', 'Files were created; processes were not run. Review them and use starters run with --yes --trust-processes.');
   const plan = await processPlan(directory, recipe.run);

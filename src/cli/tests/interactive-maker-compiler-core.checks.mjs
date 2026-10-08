@@ -7,7 +7,7 @@ import { diagnostic, diagnosticCatalog, CompilerError, CompilationFailure, order
 import { referenceDiagnostics } from '../compiler/domain/references.ts';
 import { sourceReferenceDiagnostics } from '../compiler/domain/source-references.ts';
 import { parseSelection, selectionClosure, SelectionError } from '../compiler/domain/selection.ts';
-import { readProjectGenerator, projectSelection, validateProjectSelection, angularPackages } from '../compiler/adapters/project/selection.ts';
+import { readCompilerProjectGenerator as readProjectGenerator, compilerProjectSelection as projectSelection, validateCompilerProjectSelection as validateProjectSelection, angularPackages } from '../compiler/adapters/project/selection.ts';
 import { frameworkAdapter } from '../compiler/adapters/project/framework-registry.ts';
 
 // Drives the inward-only compiler core (src/cli/compiler/{domain,application}) to the maker core floors.

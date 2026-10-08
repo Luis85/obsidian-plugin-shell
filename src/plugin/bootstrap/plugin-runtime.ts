@@ -1,5 +1,6 @@
 import { bindNativeIntegrations } from '../infrastructure/obsidian/native-integrations';
-import { nativeFileTypes, nativeContextMenus } from './native-integrations';
+import { nativeFileTypes, nativeContextMenus, nativeFileEditors } from './native-integrations';
+import { nativeFileEditorMounts } from './mount-file-editor';
 import { Notice, type Plugin } from 'obsidian';
 import { createServices } from './services';
 import { mountShowcase } from './mount-ui';
@@ -44,7 +45,7 @@ export async function initializePlugin(plugin: Plugin) {
       .catch(() => services.diagnostics.report('header.toggle', 'view.header'));
   };
   try {
-    stopNative = bindNativeIntegrations(plugin, nativeFileTypes, nativeContextMenus, code => services.diagnostics.report(code, 'native.integration'));
+    stopNative = bindNativeIntegrations(plugin, nativeFileTypes, nativeContextMenus, code => services.diagnostics.report(code, 'native.integration'), nativeFileEditorMounts(services, nativeFileEditors));
     const definitions = [{ id: undefined, type: SHOWCASE_VIEW, title: () => services.identity.name },
       ...authoringViewDefinitions(authoringPanels).map(panel => ({ ...panel, title: () => text(panel.titleKey) }))];
     for (const definition of definitions) {

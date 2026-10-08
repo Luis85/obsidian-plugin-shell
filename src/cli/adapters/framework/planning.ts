@@ -30,8 +30,8 @@ import { didYouMean, suggestions } from './suggest.ts';
 import type { MakerCheck } from '../makers/plan.ts';
 import { incrementPlanners } from '../increments/planners.ts';
 import { sourcePlanners } from '../source-command.ts';
-/** `steps` are reviewed non-file steps bound into the plan hash; `prepare` runs them right before the file write. */
-interface Planned { plan: FilePlan; summary: unknown; conflicts: string[]; hash?: string; checks?: readonly MakerCheck[]; steps?: readonly unknown[]; prepare?: () => Promise<unknown> }
+/** `steps` are reviewed non-file steps bound into the plan hash; `prepare` runs before saving and `finalize` runs after saving (for example, a reviewed Git commit). */
+interface Planned { plan: FilePlan; summary: unknown; conflicts: string[]; hash?: string; checks?: readonly MakerCheck[]; steps?: readonly unknown[]; prepare?: () => Promise<unknown>; finalize?: () => Promise<unknown> }
 /** Built-in and registered custom recipes are resolved before trust: only a real custom recipe needs --trust-custom. */
 async function resolveRecipe(request: Request, context: Context, recipe: string): Promise<void> {
   if (builtinRecipes.includes(recipe)) return;
@@ -39,7 +39,17 @@ async function resolveRecipe(request: Request, context: Context, recipe: string)
   if (!custom.includes(recipe)) throw new OperationError('MAKER_UNKNOWN', `Unknown recipe: ${recipe}.${didYouMean(suggestions(recipe, [...builtinRecipes, ...custom]), value => `"${value}"`)}`, 'node bin/app make list');
   requireThat(request.options['trust-custom'] === true, 'CUSTOM_TRUST_REQUIRED', `${recipe} is a local custom recipe that executes trusted project code; review ${makerLayout(context.root).tooling}/makers/custom/${recipe}.mjs, then pass --trust-custom.`);
 }
+/** `make batch --input skeleton.json`: every step in one reviewed plan with one check run. */
+async function makerBatchPlan(request: Request, context: Context): Promise<Planned> {
+  const input = stringOption(request.options, 'input');
+  requireThat(input && request.args.length === 1, 'MAKER_BATCH_INPUT', 'Supply make batch --input <skeleton.json> with { "schemaVersion": 1, "steps": [{ "recipe": "feature", "name": "boards", "bare": true }, ...] }.');
+  const { planMakerBatch } = await import('../makers/batch.ts');
+  const planned = await planMakerBatch(context.root, await readJson(resolve(context.root, input)));
+  return { plan: planned.plan, checks: planned.checks, summary: { maker: planned.maker, steps: planned.steps, checks: pendingChecks(planned.checks), next: planned.next }, conflicts: [] };
+}
 async function makerPlan(request: Request, context: Context): Promise<Planned> {
+  if (request.args[0] === 'batch') return makerBatchPlan(request, context);
+  requireThat(request.options.input === undefined, 'MAKER_INPUT_UNSUPPORTED', '--input belongs to make batch.');
   const [recipe, name] = request.args;
   requireThat(recipe && name, 'MAKER_INPUT_REQUIRED', 'Supply a recipe and name; use make list for discovery.');
   await resolveRecipe(request, context, recipe);
@@ -133,7 +143,8 @@ export async function applyOperation(planned: Awaited<ReturnType<typeof planOper
     requireThat(!context.signal?.aborted, 'CANCELLED', 'Operation cancelled; preserve the recovery outcome.');
     await journal?.();
   } });
-  return { ...report, ...prepared };
+  const finalized = fresh.finalize ? { finalized: await fresh.finalize() } : {};
+  return { ...report, ...prepared, ...finalized };
 }
 export async function saveOperationPlan(context: Context, planned: Awaited<ReturnType<typeof planOperation>>, output: string) {
   requireThat(planned.request.options.input !== '-', 'STDIN_PLAN_NOT_REPLAYABLE', 'Save the input to a file before exporting a replayable plan.');

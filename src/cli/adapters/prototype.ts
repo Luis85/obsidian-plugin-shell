@@ -1,4 +1,4 @@
-import type { ProjectSelection } from '../compiler/domain/project-starter.ts';
+import type { CompilerProjectSelection as ProjectSelection } from '../compiler/domain/project-starter.ts';
 import { projectConfigPath } from '../compiler/domain/project-config.ts';
 import { spawnSync } from 'node:child_process';
 import { hash } from './framework/files.ts';

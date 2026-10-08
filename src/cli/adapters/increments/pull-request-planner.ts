@@ -12,6 +12,7 @@ import { acceptanceStubPath, pullRequestSections } from '../../domain/increments
 import { insistDelivery } from '../../domain/increments/errors.ts';
 import type { EditSummary } from '../../domain/increments/increment-document.ts';
 import { planBranch, runBranch } from '../../application/increments/git-port.ts';
+import { requireIterationBranch } from './iteration-branch.ts';
 import { Session, type SessionPlan } from './session.ts';
 import { branchRequest, branchStep, checkedOption, commaList, flag, fragmentInput, inputRaw, option, requireBranchPlan } from './inputs.ts';
 
@@ -41,6 +42,7 @@ async function newPullRequest(request: Request, context: Context): Promise<Sessi
   insistDelivery(title, 'PR_DOCUMENT_INVALID', 'Supply --title (or a # title in --input).');
   const owner = { id: increment.id, branch: increment.model.branch, base: increment.model.base };
   const { head, base } = branchesOf(session, request, owner, id), delivers = delivered(request, increment.model.acceptance, increment.id);
+  await requireIterationBranch(session, increment.id, increment.model, { kind: 'change', head, base });
   const summary = option(request, 'summary');
   session.write(ws.path('pullRequest', id), renderPullRequest({ id, title, increment: { ...owner, title: increment.model.title, path: increment.path }, kind: 'change', head, base,
     branches: schema.branches, delivers, ...(summary ? { summary } : {}), fragment }, schema));
@@ -58,6 +60,8 @@ async function editPlan(request: Request, context: Context, ops: (session: Sessi
   let text = doc.text;
   const edits: EditSummary[] = [];
   for (const op of await ops(session)) { const result = editPullRequest(text, op, await session.ws.files()); text = result.text; edits.push(...result.edits); }
+  const updated = parsePullRequest(text), increment = await session.get('increment', doc.model.increment);
+  await requireIterationBranch(session, increment.id, increment.model, updated);
   session.write(doc.path, text); session.touch(doc.model.increment);
   return session.plan({ document: document(session, doc.id), statusBefore: doc.model.status, statusAfter: doc.model.status, edits });
 }

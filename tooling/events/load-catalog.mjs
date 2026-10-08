@@ -1,12 +1,14 @@
+import { makerTarget } from '../../src/cli/adapters/makers/target.ts';
 import { mkdtemp, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { resolve, join } from 'node:path';
 
 /** Reads only explicit source registrations; payload contracts come from TypeScript. */
-export async function loadEventCatalog(root = process.cwd()) {
+export async function loadEventCatalog(root = process.cwd(), sourceName) {
+  const target = await makerTarget(root, 'plugin', sourceName);
   const ts = await import('typescript');
-  const sourcePath = resolve(root, 'src/plugin/bootstrap/event-catalog.ts');
-  const program = ts.createProgram([sourcePath, resolve(root, 'src/plugin/bootstrap/events.ts')], {
+  const sourcePath = resolve(root, `${target.path}/bootstrap/event-catalog.ts`);
+  const program = ts.createProgram([sourcePath, resolve(root, `${target.path}/bootstrap/events.ts`)], {
     strict: true,
     skipLibCheck: true,
     target: ts.ScriptTarget.ES2022,
@@ -21,7 +23,7 @@ export async function loadEventCatalog(root = process.cwd()) {
         diagnostics.map((item) => ts.flattenDiagnosticMessageText(item.messageText, '\n')).join('; '),
     );
   const checker = program.getTypeChecker();
-  const contracts = program.getSourceFile(resolve(root, 'src/plugin/application/events.ts'));
+  const contracts = program.getSourceFile(resolve(root, `${target.path}/application/events.ts`));
   const shell = contracts?.statements.find(
     (node) => ts.isInterfaceDeclaration(node) && node.name.text === 'ShellEvents',
   );
@@ -67,7 +69,7 @@ export async function loadEventCatalog(root = process.cwd()) {
     const specifier = (path) => JSON.stringify(resolve(root, path).replaceAll('\\', '/'));
     await writeFile(
       entry,
-      `export { runtimeEventDefinitions } from ${specifier('src/plugin/bootstrap/events.ts')};\nexport { eventCatalog } from ${specifier('src/plugin/bootstrap/event-catalog.ts')};\n`,
+      `export { runtimeEventDefinitions } from ${specifier(`${target.path}/bootstrap/events.ts`)};\nexport { eventCatalog } from ${specifier(`${target.path}/bootstrap/event-catalog.ts`)};\n`,
     );
     const { build } = await import('vite');
     const output = await build({

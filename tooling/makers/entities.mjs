@@ -2,8 +2,8 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 // The project's own CLI owns the catalog loader, so the script works in a source checkout and an extracted kit alike.
 const app = fileURLToPath(new URL('../../bin/app', import.meta.url));
-function loadCatalog() {
-  const run = spawnSync(process.execPath, [app, 'entities', 'catalog', '--root', process.cwd(), '--json'], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, stdio: ['ignore', 'pipe', 'inherit'] });
+function loadCatalog(source) {
+  const run = spawnSync(process.execPath, [app, 'entities', 'catalog', '--root', process.cwd(), '--json', ...(source ? ['--source', source] : [])], { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, stdio: ['ignore', 'pipe', 'inherit'] });
   if (run.error) throw run.error;
   const result = JSON.parse(run.stdout);
   if (result.status !== 'ok') throw new Error(result.diagnostics.map(item => `${item.code}: ${item.message}`).join('; '));
@@ -21,9 +21,13 @@ function printCatalog(report) {
   }
 }
 async function main() {
-  if (args.some(arg => !['--check', '--json', '--help'].includes(arg))) throw new Error('Unknown entity catalog option');
+  const sourceAt = args.indexOf('--source');
+  const source = sourceAt < 0 ? undefined : args[sourceAt + 1];
+  if (sourceAt >= 0 && (!source || source.startsWith('--') || args.lastIndexOf('--source') !== sourceAt)) throw new Error('Expected one --source <name>');
+  const flags = args.filter((_, index) => index !== sourceAt && index !== sourceAt + 1 || sourceAt < 0);
+  if (flags.some(arg => !['--check', '--json', '--help'].includes(arg))) throw new Error('Unknown entity catalog option');
   if (args.includes('--help')) { console.log('entities:check validates actual registered definitions; entities:catalog [--json] prints derived schemas. No output files or user notes are written.'); return; }
-  const report = loadCatalog();
+  const report = loadCatalog(source);
   if (args.includes('--json') || args.includes('--check')) console.log(JSON.stringify(report, null, 2));
   else printCatalog(report);
 }

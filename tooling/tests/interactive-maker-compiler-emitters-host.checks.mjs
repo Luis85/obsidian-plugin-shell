@@ -19,9 +19,9 @@ test('the plugin host wires the journey runtime and relationship integrity only 
   assert.deepEqual([...blank.files.keys()], ['src/plugin/generated/bootstrap/install.ts', 'src/plugin/generated/bootstrap/source-providers.ts', 'src/plugin/generated/bootstrap/mount.ts', 'src/plugin/main.ts', 'src/plugin/generated/styles/layout.css']);
   const install = 'src/plugin/generated/bootstrap/install.ts', mount = 'src/plugin/generated/bootstrap/mount.ts';
   assert.deepEqual(lines(blank, install).slice(1, 3), ['import { createServices } from "../../bootstrap/services.ts";', 'import { bindNativeIntegrations } from "../../infrastructure/obsidian/native-integrations.ts";']);
-  assert.equal(lines(blank, install)[13], ''); assert.equal(lines(data, install)[13], "import { disposeRelationshipIntegrity } from './relationships.ts';");
-  assert.equal(lines(data, install)[28], '    disposeRelationshipIntegrity(shell);'); assert.equal(lines(blank, install)[28], '    ');
-  assert.deepEqual(lines(journey, install).slice(15, 20), ["import { mountProject } from './mount.ts';", "import { createJourneyNative } from './journey-native.ts';",
+  assert.equal(lines(blank, install)[14], ''); assert.equal(lines(data, install)[14], "import { disposeRelationshipIntegrity } from './relationships.ts';");
+  assert.equal(lines(data, install)[29], '    disposeRelationshipIntegrity(shell);'); assert.equal(lines(blank, install)[29], '    ');
+  assert.deepEqual(lines(journey, install).slice(16, 21), ["import { mountProject } from './mount.ts';", "import { createJourneyNative } from './journey-native.ts';",
     'export async function initializeProject(plugin: Plugin) {', '  const shell = await createServices(nativeAdapters(plugin));',
     "  const journey = createJourneyNative(plugin.app.vault, () => shell.diagnostics.report('journey.storage', 'project.file'));"]);
   for (const [out, suffix] of [[blank, ''], [journey, ',journey']]) {

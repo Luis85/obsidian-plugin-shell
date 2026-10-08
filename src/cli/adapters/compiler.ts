@@ -1,4 +1,4 @@
-import type { ProjectSelection } from '../compiler/domain/project-starter.ts';
+import type { CompilerProjectSelection as ProjectSelection } from '../compiler/domain/project-starter.ts';
 import { hash } from './framework/files.ts';
 import { resolveTemplateRoot } from './template-root.ts';
 import { compileProject, loadTemplateSnapshot } from '../compiler/index.ts';

@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import type { ProjectSelection } from '../../compiler/domain/project-starter.ts';
+import type { CompilerProjectSelection as ProjectSelection } from '../../compiler/domain/project-starter.ts';
 import { frameworkAdapter } from '../../compiler/adapters/project/framework-registry.ts';
 import { pluginFrameworkAdapters } from '../../sdk/runtime.ts';
 import { projectGuide, projectPlan, projectStarters } from '../../adapters/projects.ts';

@@ -156,7 +156,7 @@ test('HTTPS sources get a typed provider, a provider test and the copied runtime
   assert.ok(tests.includes('transport:async()=>{calls++;return new Response(JSON.stringify({"status":"ready"}));}});'));
   assert.ok(tests.includes('transport:async()=>{calls++;return new Response(null);}});\n try{const service=createGStatusApiService(provider.port);expect(await service["ping"]({"count":1})).toEqual(undefined);'));
   const suite = out.text('src/plugin/tests/project/http.test.mjs');
-  assert.ok(suite.startsWith("import { test } from 'vitest';") && suite.includes('../src/plugin/generated/infrastructure/json-http.ts') && !suite.includes('templates/companion/runtime'));
+  assert.ok(suite.startsWith("import { test } from 'vitest';") && suite.includes('../../generated/infrastructure/json-http.ts') && !suite.includes('templates/companion/runtime'));
   const none = recorder(); await httpCode(template, model(await starterDocument('tasks-projects')), none.add); assert.equal(none.files.size, 0);
   const unsafe = model(await dataDocument()); unsafe.sources[2].contract.locator = 'http://example.invalid';
   assert.throws(() => httpCode(template, unsafe, recorder().add));
@@ -167,7 +167,7 @@ test('fixture-note checks cover every native and relationship-scoped entity', as
   assert.deepEqual([...out.files].map(([path, entry]) => [path, entry.ownership]), [['src/plugin/tests/project/fixtures/canonical-starter-task.test.ts', 'managed'],
     ['src/plugin/tests/project/fixtures/canonical-starter-project.test.ts', 'managed']]);
   const text = out.text('src/plugin/tests/project/fixtures/canonical-starter-project.test.ts').split('\n');
-  assert.equal(text[1], 'import { createFixtureEngine } from "../../../tooling/test-data/engine.mjs";');
+  assert.equal(text[1], 'import { createFixtureEngine } from "../../../../../tooling/test-data/engine.mjs";');
   assert.equal(text[7], "it('seeded starter-project Markdown is readable by the canonical repository without a fake codec', async () => {");
   assert.equal(text[9], '  const notes=generated.files.filter(file=>file.path.startsWith("Starter/Project/") && file.path.endsWith(\'.md\'));');
   const none = recorder(); fixtureNoteTests(model(await starterDocument('blank')), none.add); assert.equal(none.files.size, 0);

@@ -940,36 +940,6 @@
       ]
     }
   ],
-  "ignoreExports": [
-    {
-      "file": "src/plugin/domain/entity.ts",
-      "exports": [
-        "Field"
-      ]
-    },
-    {
-      "file": "src/shared/companion/concepts/apply.ts",
-      "exports": [
-        "ConceptDelta"
-      ]
-    },
-    {
-      "file": "src/cli/compiler/domain/project-starter.ts",
-      "exports": [
-        "ProjectFramework",
-        "ProjectGenerator",
-        "ProjectSelection"
-      ]
-    },
-    {
-      "file": "src/cli/compiler/adapters/project/selection.ts",
-      "exports": [
-        "readProjectGenerator",
-        "projectSelection",
-        "validateProjectSelection"
-      ]
-    }
-  ],
   "failOnParseError": true,
   "rules": {
     "policy-violation": "off",

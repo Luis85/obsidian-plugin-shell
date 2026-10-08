@@ -32,6 +32,8 @@ export async function initializeRepository(directory: string, source: string, ru
   const skipped = await skipReason(run, directory);
   if (skipped) return { status: 'skipped', reason: skipped };
   if ((await run(directory, ['init'])).code !== 0) return { status: 'failed', reason: 'git init failed' };
+  // Repository-local only: generated kits nest deep paths that exceed Windows' 260-character limit; elsewhere a no-op.
+  await run(directory, ['config', '--local', 'core.longpaths', 'true']);
   const author = await committer(run, directory), message = `chore: generate project from ${source}`;
   const identity = author === 'neutral' ? neutralIdentity : [];
   if ((await run(directory, ['add', '--all'])).code !== 0) return { status: 'failed', reason: 'git add failed; the repository is initialized without a commit' };

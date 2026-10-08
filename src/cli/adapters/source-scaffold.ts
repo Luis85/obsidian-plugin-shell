@@ -9,6 +9,7 @@ import { createFilePlan, type FilePlanEntry } from '#shared/platform/file-plan.t
 import { serializeJson as json } from '#shared/contracts/serialization.ts';
 import { SOURCE_KINDS, projectTsconfig, testsTsconfig, type SourceKind, type SourcePlatform } from '../domain/source-projects.ts';
 import { addProject, removeProject } from '../domain/source-projects-edit.ts';
+import { normalizePath } from '../domain/source-imports.ts';
 import { renderTemplate } from '../compiler/emitters/devkit-files.ts';
 import { resolveTemplateRoot } from './template-root.ts';
 import { hash, readBounded } from './framework/files.ts';
@@ -23,7 +24,11 @@ export interface SourceReceipt { schemaVersion: 1; project: string; kind: Source
 export async function readReceipt(root: string, name: string): Promise<SourceReceipt | null> {
   const file = await readJsonFile(root, receiptPath(name)).catch(() => null);
   const value = file?.value as Partial<SourceReceipt> | undefined;
-  return value?.schemaVersion === 1 && value.files && typeof value.files === 'object' ? value as SourceReceipt : null;
+  if (value?.schemaVersion !== 1 || value.project !== name || !SOURCE_KINDS.includes(value.kind as SourceKind) ||
+      !value.files || typeof value.files !== 'object' || Array.isArray(value.files)) return null;
+  const valid = Object.entries(value.files).every(([path, digest]) => path.startsWith(`src/${name}/`) && normalizePath(path) === path &&
+    typeof digest === 'string' && /^[a-f0-9]{64}$/.test(digest));
+  return valid ? value as SourceReceipt : null;
 }
 async function templateFiles(context: Context, kind: SourceKind, name: string): Promise<Map<string, string>> {
   const folder = `templates/sources/${kind}`, templateRoot = await resolveTemplateRoot(context.frameworkRoot);

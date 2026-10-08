@@ -37,14 +37,14 @@ test('the developer kit renders every template, follows custom roots and owns it
   const fallback = model(await starterDocument('blank')); fallback.project.name = ' '; delete fallback.project.description;
   const defaults = recorder(); await devkitFiles(template, fallback, defaults.add);
   assert.ok(defaults.text('README.md').startsWith('# my-vault-tool\n\nAn Obsidian plugin.\n'));
-  assert.ok(!defaults.files.has('tests/suites.json'));
+  assert.ok(defaults.text('tests/suites.json').includes('src/plugin/tests/project')); 
 });
 
 test('the copied suite manifest classifies emitted journey specs and their helper, and nothing else changes', async () => {
   const out = recorder(); await devkitFiles(template, model(await starterDocument('feature-showcase')), out.add);
   const original = await template.text('tests/suites.json');
-  assert.equal(out.text('tests/suites.json'), original.replace('"tests/e2e/*.spec.ts"', '"tests/e2e/*.spec.ts",\n        "tests/e2e/journeys/*.spec.ts"')
-    .replace('"tests/e2e/control-metrics.ts"', '"tests/e2e/control-metrics.ts",\n        "tests/e2e/journeys/journey-support.ts"'));
+  assert.equal(out.text('tests/suites.json'), original.replace('"src/plugin/tests/e2e/*.spec.ts"', '"src/plugin/tests/e2e/*.spec.ts",\n        "tests/e2e/journeys/*.spec.ts"')
+    .replace('"src/plugin/tests/e2e/control-metrics.ts"', '"src/plugin/tests/e2e/control-metrics.ts",\n        "tests/e2e/journeys/journey-support.ts"').replaceAll('"tests/project', '"src/plugin/tests/project'));
   const suites = JSON.parse(out.text('tests/suites.json'));
   assert.ok(suites.suites.find(suite => suite.name === 'e2e').include.includes('tests/e2e/journeys/*.spec.ts'));
   assert.ok(suites.helpers.some(helper => helper.include.includes('tests/e2e/journeys/journey-support.ts')));
@@ -70,8 +70,8 @@ test('framework documents and maintainer workflows move under docs/framework wit
   assert.deepEqual(['README.md', 'AGENTS.md', '.github/workflows/ci.yml', 'docs/a.md', 'README.txt'].map(relocatedPath),
     ['docs/framework/README.md', 'docs/framework/AGENTS.md', 'docs/framework/workflows/ci.yml', 'docs/a.md', 'README.txt']);
   for (const path of ['configs/starters/blank.json', 'DEVELOPER_GUIDE.md',
-    '.github/workflows/starter-distribution.yml', '.github/scripts/run.mjs', 'tests/tooling/qualification-trigger.checks.mjs', 'docs/concepts/sitemap-editor/x.md',
-    'tests/tooling/project-generator-native-starters.checks.mjs', 'docs/concepts/jev-prompt-editor/a', 'tests/tooling/jev-concept-distribution.checks.mjs',
+    '.github/workflows/starter-distribution.yml', '.github/scripts/run.mjs', 'tooling/tests/qualification-trigger.checks.mjs', 'docs/concepts/sitemap-editor/x.md',
+    'src/cli/tests/project-generator-native-starters.checks.mjs', 'docs/concepts/jev-prompt-editor/a', 'tooling/tests/jev-concept-distribution.checks.mjs',
     '.github/workflows/dev.yml', '.github/workflows/release.yml', '.github/workflows/release-cut.yml', '.github/workflows/publish.yml', '.github/workflows/definition-of-ready.yml', '.github/workflows/definition-of-done.yml', '.github/PULL_REQUEST_TEMPLATE/release.md'])
     assert.equal(maintainerOnly(path), true, path);
   // The framework's delivery pipeline stays behind, but the qualification workflows it calls remain inert reference.
