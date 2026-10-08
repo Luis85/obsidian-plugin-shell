@@ -112,7 +112,7 @@ for (const group of ['dependencies', 'devDependencies', 'optionalDependencies'])
 }
 assert.equal((await readdir(starterConsumer)).includes('node_modules'), false,
   'starter must not install dependencies before explicit npm approval');
-const pinCheck = spawnSync(process.execPath, [join(starterConsumer, 'tooling/security/dependency-pins.mjs')], {
+const pinCheck = spawnSync(process.execPath, [join(starterConsumer, 'src/cli/tooling/security/dependency-pins.mjs')], {
   cwd: starterConsumer, encoding: 'utf8', timeout: 30000, maxBuffer: 4_000_000,
 });
 checks.push({ name: 'blank-starter-dependency-pins', exitCode: pinCheck.status, error: pinCheck.error?.message, scope: 'offline release dependency gate before install' });
