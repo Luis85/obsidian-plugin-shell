@@ -39,7 +39,8 @@ export async function outputs(base = root) {
   ]);
   const pkg = JSON.parse(await readFile(join(base, 'package.json'), 'utf8'));
   const model = buildModel(commands, commandHelp, parameterKinds, groups, pkg.version, diagnosticCatalog);
-  const files = { 'reference.md': renderReference(model), 'diagnostics.md': renderDiagnostics(model), 'commands.json': json(model) };
+  // The machine catalog is vendored into generated projects; compact JSON preserves every field without padding their bounded inputs.
+  const files = { 'reference.md': renderReference(model), 'diagnostics.md': renderDiagnostics(model), 'commands.json': JSON.stringify(model) + '\n' };
   const sources = await Promise.all(inputs.map(async path => ({ path, sha256: hash(await readFile(join(base, path))) })));
   sources.unshift({ path: 'package.json', selector: '/version', sha256: hash(json(pkg.version)) });
   files['manifest.json'] = json({ schemaVersion: 2, frameworkVersion: pkg.version, commandCount: model.commands.length, sources,

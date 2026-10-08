@@ -1,6 +1,7 @@
 /** Dependency-free documentation contract and writer safety tests. */
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { mkdtemp, mkdir, readFile, writeFile, readdir, rm, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -127,6 +128,12 @@ test('manual provenance tracks package version while dependency-only updates lea
   const packagePath = join(base, 'package.json');
   await writeFile(packagePath, JSON.stringify({ type: 'module', version: '1.0.0', dependencies: { vue: '3.5.42' } }));
   const initial = await outputs(base);
+  const expected = buildModel([command], () => help, item => ({ ...item.options, json: 'flag', yes: 'flag' }), groups, '1.0.0', { EXAMPLE: 'Example.' });
+  assert.deepEqual(JSON.parse(initial['commands.json']), expected, 'compact serialization retains the complete command model');
+  assert.equal(initial['commands.json'], JSON.stringify(expected) + '\n');
+  const manifest = JSON.parse(initial['manifest.json']);
+  assert.equal(manifest.outputs.find(output => output.path === 'commands.json').sha256,
+    createHash('sha256').update(initial['commands.json']).digest('hex'), 'provenance hashes the exact compact bytes');
   await synchronize(initial, { base });
   await writeFile(packagePath, JSON.stringify({ type: 'module', version: '1.0.0', dependencies: { vue: '3.5.43' } }));
   assert.deepEqual(await outputs(base), initial);
