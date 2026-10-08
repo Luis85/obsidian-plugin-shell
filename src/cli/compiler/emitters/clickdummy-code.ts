@@ -76,7 +76,7 @@ import type { VisualState } from ${from('domain/visual-runtime.ts')};
 import { createDialogHost, createPreviewLifecycle } from './clickdummy-host.ts';
 import { scenariosForSurface, resolveScenario, type PreviewScenario } from './clickdummy-scenarios.ts';
 ${journey ? `import { createJourneyPreview } from ${from('bootstrap/journey-preview.ts')};\nimport { provideJourney } from ${from('bootstrap/journey-workspace.ts')};\n` : ''}import './clickdummy.css';
-import '../../src/styles/app.css';
+import '../../src/plugin/styles/app.css';
 import ${from('styles/project.css')};
 import ${from('presentation/detail-layout.css')};
 const root = document.getElementById('prototype-app');

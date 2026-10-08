@@ -26,7 +26,7 @@ test('packed compiled CLI and source CLI return equivalent analysis and errors w
     const inventory = JSON.parse(inspected.stdout);
     assert.equal(inventory.status, 'ok');
     assert.ok(inventory.data.inventory.some(file => file.path === 'design/project.json'));
-    assert.ok(inventory.data.inventory.some(file => file.path === 'src/main.ts'));
+    assert.ok(inventory.data.inventory.some(file => file.path === 'src/plugin/main.ts'));
     assert.equal(inventory.data.readiness.bundle, 'not-run');
     assert.equal(inventory.data.readiness.tests, 'not-run');
     await assert.rejects(readFile(join(destination, 'design/project.json')), { code: 'ENOENT' });

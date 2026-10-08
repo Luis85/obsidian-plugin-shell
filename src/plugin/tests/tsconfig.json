@@ -11,9 +11,6 @@
     "paths": {
       "@test/obsidian": [
         "./support/obsidian/index.ts"
-      ],
-      "@test/obsidian-host": [
-        "../../../tooling/testing/obsidian-harness.d.mts"
       ]
     }
   },

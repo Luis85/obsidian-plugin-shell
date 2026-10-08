@@ -64,14 +64,14 @@
       "label": "Source folder",
       "type": "string",
       "required": true,
-      "default": "src"
+      "default": "src/plugin"
     },
     {
       "id": "testsFolder",
       "label": "Tests folder",
       "type": "string",
       "required": true,
-      "default": "tests"
+      "default": "src/plugin/tests"
     }
   ],
   "generator": {
@@ -88,8 +88,8 @@
         "description": "Present note-backed results in a calm overview and drill-down list."
       },
       "settings": {
-        "codebaseFolder": "src",
-        "testsFolder": "tests"
+        "codebaseFolder": "src/plugin",
+        "testsFolder": "src/plugin/tests"
       },
       "design": {
         "schema": 6,

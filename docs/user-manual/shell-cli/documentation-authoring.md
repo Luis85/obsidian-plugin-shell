@@ -9,7 +9,7 @@ The manual deliberately separates executable command facts, explanations close t
 | Commands, accepted option kinds, positional bounds, effects | `src/cli/adapters/framework/catalog.ts` | Generated command reference and JSON |
 | Option meanings, profiles/defaults, usages, examples, groups | `src/cli/adapters/framework/help-text.ts` | Terminal help and the same generated reference |
 | Stable compiler diagnostic recovery hints | `src/cli/compiler/domain/diagnostics.ts` | Generated diagnostic guide |
-| Public interfaces and their docblocks | Explicit TypeDoc entry points in `scripts/documentation/typedoc.json` | Source/API appendix |
+| Public interfaces and their docblocks | Explicit TypeDoc entry points in `tooling/documentation/typedoc.json` | Source/API appendix |
 | Tutorials, workflows, safety explanations and troubleshooting | Markdown beside this page | Handbook documents |
 
 Do not duplicate command tables in authored Markdown. Link readers to generated reference material and explain the decisions, sequence and expected outcome instead. A changed flag belongs in the catalog and help metadata; it should not require manually editing several copies of a command reference.
@@ -19,10 +19,10 @@ Do not duplicate command tables in authored Markdown. Link readers to generated 
 Run from the trusted framework source checkout:
 
 ```sh
-node --test tests/tooling/framework-manual.checks.mjs
-node --experimental-strip-types scripts/documentation/manual.mjs
-node --experimental-strip-types scripts/documentation/manual.mjs --check
-node --experimental-strip-types scripts/documentation/audit.mjs
+node --test tooling/tests/framework-manual.checks.mjs
+node --experimental-strip-types tooling/documentation/manual.mjs
+node --experimental-strip-types tooling/documentation/manual.mjs --check
+node --experimental-strip-types tooling/documentation/audit.mjs
 ```
 
 The generator produces four owned files below `docs/user-manual/shell-cli/generated/`: reference Markdown, diagnostics Markdown, structured command JSON and a fingerprint manifest. It does not invoke CLI handlers, install packages, access a vault or run the handbook examples.

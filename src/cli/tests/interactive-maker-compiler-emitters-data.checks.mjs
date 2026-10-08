@@ -11,19 +11,19 @@ const emitData = async document => { const out = recorder(); dataCode(model(docu
 
 test('data emission writes entity, contract, service, adapter, store, test and design files per source', async () => {
   const out = await emitData();
-  const app = 'src/generated/application/', source = slug => [`${app}${slug}/contracts.ts`, `${app}${slug}/service.ts`, `src/generated/infrastructure/sources/${slug}.ts`,
-    `src/generated/presentation/stores/${slug}.ts`, `tests/project/sources/${slug}.test.ts`, `design/sources/${slug}.json`];
+  const app = 'src/plugin/generated/application/', source = slug => [`${app}${slug}/contracts.ts`, `${app}${slug}/service.ts`, `src/plugin/generated/infrastructure/sources/${slug}.ts`,
+    `src/plugin/generated/presentation/stores/${slug}.ts`, `src/plugin/tests/project/sources/${slug}.test.ts`, `design/sources/${slug}.json`];
   const requirements = ['req-4216938b1425', 'req-300aff4335cc', 'req-0513070d46bd', 'req-01d57c9fdd4b', 'req-57f947f394a7'];
-  assert.deepEqual([...out.files.keys()], ['src/generated/domain/entities/starter-task.ts', 'tests/project/entities/starter-task.test.ts',
-    'src/generated/domain/entities/starter-project.ts', 'tests/project/entities/starter-project.test.ts', ...source('starter-records'), ...source('task-notes'), ...source('status-api'),
-    `${app}sources.ts`, 'src/generated/bootstrap/sources.ts', ...requirements.flatMap(key => [`${app}use-cases/${key}.ts`, `tests/project/acceptance/${key}.test.ts`])]);
+  assert.deepEqual([...out.files.keys()], ['src/plugin/generated/domain/entities/starter-task.ts', 'src/plugin/tests/project/entities/starter-task.test.ts',
+    'src/plugin/generated/domain/entities/starter-project.ts', 'src/plugin/tests/project/entities/starter-project.test.ts', ...source('starter-records'), ...source('task-notes'), ...source('status-api'),
+    `${app}sources.ts`, 'src/plugin/generated/bootstrap/sources.ts', ...requirements.flatMap(key => [`${app}use-cases/${key}.ts`, `src/plugin/tests/project/acceptance/${key}.test.ts`])]);
   assert.deepEqual([...out.files].filter(([, entry]) => entry.ownership === 'managed').map(([path]) => path),
-    ['design/sources/starter-records.json', 'design/sources/task-notes.json', 'design/sources/status-api.json', `${app}sources.ts`, 'src/generated/bootstrap/sources.ts']);
-  assert.equal(out.text('tests/project/entities/starter-task.test.ts'), `import { it, expect } from 'vitest';
-import { isGStarterTask } from "../../../src/generated/domain/entities/starter-task.ts";
+    ['design/sources/starter-records.json', 'design/sources/task-notes.json', 'design/sources/status-api.json', `${app}sources.ts`, 'src/plugin/generated/bootstrap/sources.ts']);
+  assert.equal(out.text('src/plugin/tests/project/entities/starter-task.test.ts'), `import { it, expect } from 'vitest';
+import { isGStarterTask } from "../../../generated/domain/entities/starter-task.ts";
 it("starter-task validates its declared fields", () => { expect(isGStarterTask({"id":"fixture","type":"starter-task","title":"fixture"})).toBe(true); expect(isGStarterTask(null)).toBe(false); expect(isGStarterTask({})).toBe(false); });
 `);
-  const entity = out.text('src/generated/domain/entities/starter-task.ts').split('\n');
+  const entity = out.text('src/plugin/generated/domain/entities/starter-task.ts').split('\n');
   assert.equal(entity[1], 'export type GStarterTask = { "id": string; "type": "starter-task"; "title": string; "status"?: string; "due_date"?: string; "project_ref"?: string; "parent_ref"?: string; };');
   assert.equal(entity.at(-2), 'export const definition = {"id":"er-entity-1","slug":"starter-task","name":"Task","folder":"Starter/Task"};');
   const contracts = out.text(`${app}starter-records/contracts.ts`).split('\n');
@@ -33,7 +33,7 @@ it("starter-task validates its declared fields", () => { expect(isGStarterTask({
     'export interface GStarterRecordsPort {', '  "list-records"(input: GListRecordsInput, signal?: AbortSignal): Promise<unknown>;', '  "archive"(input: GArchiveInput, signal?: AbortSignal): Promise<unknown>;', '}', '']);
   assert.equal(out.text(`${app}status-api/service.ts`).split('\n')[0],
     "import { type GStatusInput, type GStatusOutput, isGStatusInput, isGStatusOutput, type GPingInput, type GPingOutput, isGPingInput, isGPingOutput, type GStatusApiPort } from './contracts.ts';");
-  assert.equal(out.text('src/generated/presentation/stores/status-api.ts'), `import { defineStore } from 'pinia';
+  assert.equal(out.text('src/plugin/generated/presentation/stores/status-api.ts'), `import { defineStore } from 'pinia';
 import { operation } from '../composables/operation.ts';
 import type { GStatusApiService } from '../../application/status-api/service.ts';
 export function defineGStatusApiStore(service: GStatusApiService) {
@@ -43,7 +43,7 @@ export function defineGStatusApiStore(service: GStatusApiService) {
   }));
 }
 `);
-  const sourceTest = out.text('tests/project/sources/status-api.test.ts');
+  const sourceTest = out.text('src/plugin/tests/project/sources/status-api.test.ts');
   assert.ok(sourceTest.includes('const fixture = (): GStatusApiPort => ({"status": async () => ({"status":"ready"}),\n"ping": async () => (undefined)});\n'));
   assert.ok(sourceTest.includes('    expect((await state["ping"].execute({"count":1})).ok).toBe(false);\n'));
   assert.deepEqual(JSON.parse(out.text('design/sources/status-api.json')).operations.map(op => op.id), ['ds-operation-31', 'ds-operation-32']);
@@ -51,7 +51,7 @@ export function defineGStatusApiStore(service: GStatusApiService) {
 
 test('adapters declare only the parameters their generated bodies read', async () => {
   const out = await emitData();
-  assert.equal(out.text('src/generated/infrastructure/sources/starter-records.ts'), `import type { GStarterRecordsPort } from '../../application/starter-records/contracts.ts';
+  assert.equal(out.text('src/plugin/generated/infrastructure/sources/starter-records.ts'), `import type { GStarterRecordsPort } from '../../application/starter-records/contracts.ts';
 import type { Services } from "../../../bootstrap/services.ts";
 import { NotImplementedError } from '../../domain/contract.ts';
 
@@ -69,7 +69,7 @@ export const createGStarterRecordsAdapter: (shell: Services, integrity: Relation
   };
 };
 `);
-  assert.equal(out.text('src/generated/infrastructure/sources/task-notes.ts'), `import type { GTaskNotesPort } from '../../application/task-notes/contracts.ts';
+  assert.equal(out.text('src/plugin/generated/infrastructure/sources/task-notes.ts'), `import type { GTaskNotesPort } from '../../application/task-notes/contracts.ts';
 import type { Services } from "../../../bootstrap/services.ts";
 
 import { noteOperations } from '../../application/note-operations.ts';
@@ -89,7 +89,7 @@ export const createGTaskNotesAdapter: (shell: Services, integrity: RelationshipS
   };
 };
 `);
-  assert.equal(out.text('src/generated/infrastructure/sources/status-api.ts'), `import type { GStatusApiPort } from '../../application/status-api/contracts.ts';
+  assert.equal(out.text('src/plugin/generated/infrastructure/sources/status-api.ts'), `import type { GStatusApiPort } from '../../application/status-api/contracts.ts';
 import type { Services } from "../../../bootstrap/services.ts";
 
 
@@ -111,7 +111,7 @@ export const createGStatusApiAdapter: (shell: Services, integrity: RelationshipS
 
 test('the source registry and bootstrap compose every source with the shared relationship integrity', async () => {
   const out = await emitData();
-  assert.equal(out.text('src/generated/application/sources.ts'), `import type { GStarterRecordsService } from './starter-records/service.ts';
+  assert.equal(out.text('src/plugin/generated/application/sources.ts'), `import type { GStarterRecordsService } from './starter-records/service.ts';
 import type { GTaskNotesService } from './task-notes/service.ts';
 import type { GStatusApiService } from './status-api/service.ts';
 import type { GStarterRecordsPort } from './starter-records/contracts.ts';
@@ -124,22 +124,22 @@ export interface SourcePorts { "starter-records": GStarterRecordsPort;
 "task-notes": GTaskNotesPort;
 "status-api": GStatusApiPort; }
 `);
-  const bootstrap = out.text('src/generated/bootstrap/sources.ts').split('\n');
+  const bootstrap = out.text('src/plugin/generated/bootstrap/sources.ts').split('\n');
   assert.deepEqual(bootstrap.slice(6, 14), ["import { createRelationshipIntegrity } from './relationships.ts';", 'import type { Services } from "../../bootstrap/services.ts";',
     "import type { Sources, SourcePorts } from '../application/sources.ts';", "import { validateSourceOverrides } from '../application/source-overrides.ts';",
     'export function createSources(shell: Services, overrides: Partial<SourcePorts> = {}): Sources {',
     ' validateSourceOverrides(overrides,{"starter-records":["list-records","archive"],"task-notes":["list-tasks","create-tasks","update-tasks","delete-tasks"],"status-api":["status","ping"]});',
     ' const integrity=createRelationshipIntegrity(shell);', ' return {"starter-records": createGStarterRecordsService(overrides["starter-records"] ?? createGStarterRecordsAdapter(shell, integrity)),']);
-  assert.equal(out.text('src/generated/application/use-cases/req-01d57c9fdd4b.ts').split('\n').at(-3), '  throw new NotImplementedError("starter-requirements","starter-4");');
-  assert.match(out.text('tests/project/acceptance/req-01d57c9fdd4b.test.ts'), /^import \{ it \} from 'vitest';\n\/\/ Implement a failing behavioral assertion against application\/use-cases\/req-01d57c9fdd4b\.ts first\.\n[^\n]+\nit\.todo\("\[starter-4\] [^\n]+"\);\n$/);
+  assert.equal(out.text('src/plugin/generated/application/use-cases/req-01d57c9fdd4b.ts').split('\n').at(-3), '  throw new NotImplementedError("starter-requirements","starter-4");');
+  assert.match(out.text('src/plugin/tests/project/acceptance/req-01d57c9fdd4b.test.ts'), /^import \{ it \} from 'vitest';\n\/\/ Implement a failing behavioral assertion against application\/use-cases\/req-01d57c9fdd4b\.ts first\.\n[^\n]+\nit\.todo\("\[starter-4\] [^\n]+"\);\n$/);
 });
 
 test('a project without sources or relationships emits empty registries and no integrity session', async () => {
   const document = await starterDocument('blank'); document.design.prds = [];
   const out = await emitData(document);
-  assert.deepEqual([...out.files.keys()], ['src/generated/application/sources.ts', 'src/generated/bootstrap/sources.ts']);
-  assert.equal(out.text('src/generated/application/sources.ts'), '\n\nexport type Sources = Record<string, never>;\nexport type SourcePorts = Record<string, never>;\n');
-  assert.equal(out.text('src/generated/bootstrap/sources.ts'), `
+  assert.deepEqual([...out.files.keys()], ['src/plugin/generated/application/sources.ts', 'src/plugin/generated/bootstrap/sources.ts']);
+  assert.equal(out.text('src/plugin/generated/application/sources.ts'), '\n\nexport type Sources = Record<string, never>;\nexport type SourcePorts = Record<string, never>;\n');
+  assert.equal(out.text('src/plugin/generated/bootstrap/sources.ts'), `
 
 import type { Services } from "../../bootstrap/services.ts";
 import type { Sources, SourcePorts } from '../application/sources.ts';

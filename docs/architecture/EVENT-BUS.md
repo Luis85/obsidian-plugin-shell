@@ -97,7 +97,7 @@ Names use feature/category prefixes and describe completed facts, for example `e
 ### Current descriptor authoring and catalog commands
 
 `defineEvent(literalName, payloadTypeGuard)` creates the compact immutable runtime
-contract. Add it to `featureEvents` in `src/bootstrap/events.ts`; core, host and
+contract. Add it to `featureEvents` in `src/plugin/bootstrap/events.ts`; core, host and
 removable example descriptors are composed separately. Duplicate names fail even
 when their guards or payload shapes match. Generated facts require no augmentation
 of `ShellEvents` and no changes to the bus algorithm.

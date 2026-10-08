@@ -15,7 +15,7 @@ const byEntity = (rendered, id) => {
 test('an authored component story carries synthetic props, actions, slots, variants and scenarios exactly', () => {
   const { file, inventory } = byEntity(storybookStories(model(richComponentDocument())), 'vc-1');
   assert.deepEqual(inventory, { path: 'storybook/generated/components/project-json-review.stories.ts',
-    source: 'src/generated/presentation/components/library/project-json-review.vue', entityId: 'vc-1',
+    source: 'src/plugin/generated/presentation/components/library/project-json-review.vue', entityId: 'vc-1',
     stories: ['Default', 'Loading', 'Empty', 'Error', 'Disabled', 'Variant64656661756c74', 'Variant636f6d70616374', 'Scenario6e6172726f772d726576696577'],
     syntheticProps: ['count', 'open'] });
   assert.equal(file.path, inventory.path); assert.equal(file.ownership, 'managed'); assert.equal(file.producer, 'storybook');
@@ -31,14 +31,14 @@ test('an authored component story carries synthetic props, actions, slots, varia
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
 import { h } from 'vue';
 import { action } from 'storybook/actions';
-import Subject from "../../../src/generated/presentation/components/library/project-json-review.vue";
+import Subject from "../../../generated/presentation/components/library/project-json-review.vue";
 import { withProject } from '../with-project.ts';
 const meta = {
   title: "Components/ProjectJsonReview (project-json-review)",
   id: "generated-component-project-json-review",
   tags: ["autodocs"],
   argTypes: ${argTypes},
-  parameters: {"shell":{"projectId":"plugin-companion","entityId":"vc-1","source":"src/generated/presentation/components/library/project-json-review.vue","jsonPointer":"/design/visualDesigns/components/0","implementation":"authored-visual-definition","syntheticProps":["count","open"],"businessAcceptance":"not-inferred"}},
+  parameters: {"shell":{"projectId":"plugin-companion","entityId":"vc-1","source":"src/plugin/generated/presentation/components/library/project-json-review.vue","jsonPointer":"/design/visualDesigns/components/0","implementation":"authored-visual-definition","syntheticProps":["count","open"],"businessAcceptance":"not-inferred"}},
   component: Subject,
   decorators: [withProject],
   args: { ...{"count":0,"label":"Hello","open":false}, "onSelect": action("select"), "onCancel": action("cancel") },
@@ -65,18 +65,18 @@ export const Scenario6e6172726f772d726576696577: Story = {
 test('placeholder components and pages keep one default story and record their implementation status', () => {
   const rendered = storybookStories(model(detailDocument()));
   const { file, inventory } = byEntity(rendered, 'component-record-card');
-  assert.deepEqual(inventory, { path: 'storybook/generated/components/record-card.stories.ts', source: 'src/generated/presentation/components/library/record-card.vue',
+  assert.deepEqual(inventory, { path: 'storybook/generated/components/record-card.stories.ts', source: 'src/plugin/generated/presentation/components/library/record-card.vue',
     entityId: 'component-record-card', stories: ['Default'], syntheticProps: [] });
   assert.equal(file.content, `// Generated from project JSON. Put custom stories in storybook/custom, not this managed file.
 import type { Meta, StoryObj } from '@storybook/vue3-vite';
-import Subject from "../../../src/generated/presentation/components/library/record-card.vue";
+import Subject from "../../../generated/presentation/components/library/record-card.vue";
 import { withProject } from '../with-project.ts';
 const meta = {
   title: "Components/RecordCard (record-card)",
   id: "generated-component-record-card",
   tags: ["autodocs"],
   argTypes: {},
-  parameters: {"shell":{"projectId":"plugin-companion","entityId":"component-record-card","source":"src/generated/presentation/components/library/record-card.vue","jsonPointer":"/design/library/0","implementation":"implementation-placeholder","syntheticProps":[],"businessAcceptance":"not-inferred"}},
+  parameters: {"shell":{"projectId":"plugin-companion","entityId":"component-record-card","source":"src/plugin/generated/presentation/components/library/record-card.vue","jsonPointer":"/design/library/0","implementation":"implementation-placeholder","syntheticProps":[],"businessAcceptance":"not-inferred"}},
   component: Subject,
   decorators: [withProject],
   args: { ...{} },
@@ -89,11 +89,11 @@ ${'  '}
 `);
   const page = byEntity(rendered, 'vp-8');
   assert.deepEqual(page.inventory.stories, ['Default', 'Loading', 'Empty', 'Error', 'Disabled']);
-  assert.equal(page.inventory.source, 'src/generated/presentation/components/details/vp-8.vue');
+  assert.equal(page.inventory.source, 'src/plugin/generated/presentation/components/details/vp-8.vue');
   assert.ok(page.file.content.includes('  argTypes: {"designState":{"control":"select","options":["default","loading","empty","error","disabled"]},"designScenario":{"control":"select","options":[""]}},\n'));
   assert.ok(page.file.content.includes('"jsonPointer":"/design/visualDesigns/pages/0","surface":"node-48","implementation":"authored-visual-definition"'));
   const screen = byEntity(rendered, 'page-overview');
-  assert.deepEqual(screen.inventory, { path: 'storybook/generated/pages/overview-screen.stories.ts', source: 'src/generated/presentation/components/screens/overview-screen.vue',
+  assert.deepEqual(screen.inventory, { path: 'storybook/generated/pages/overview-screen.stories.ts', source: 'src/plugin/generated/presentation/components/screens/overview-screen.vue',
     entityId: 'page-overview', stories: ['Default'], syntheticProps: [] });
   assert.ok(screen.file.content.includes('"jsonPointer":"/design/nodes/1","surface":"node-3","implementation":"implementation-placeholder"'));
   // Group and action surfaces host no page; modal/settings surfaces do.

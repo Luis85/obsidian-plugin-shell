@@ -43,7 +43,7 @@ function withNonPageSurfaces() {
 
 test('the three managed files are emitted, parse as TypeScript and name each other consistently', () => {
   const files = emit(showcase);
-  assert.deepEqual([...files.keys()].sort(), ['playwright.config.ts', 'scripts/e2e/serve-clickdummy.mjs', 'tests/e2e/ui-quality.spec.ts']);
+  assert.deepEqual([...files.keys()].sort(), ['playwright.config.ts', 'tooling/e2e/serve-clickdummy.mjs', 'tests/e2e/ui-quality.spec.ts']);
   for (const file of files.values()) assert.equal(file.ownership, 'managed');
   const config = files.get('playwright.config.ts').content;
   parse(config, 'playwright.config.ts');
@@ -52,7 +52,7 @@ test('the three managed files are emitted, parse as TypeScript and name each oth
   assert.match(config, /\['json', \{ outputFile: 'reports\/e2e\/results\.json' \}\], \['html', \{ outputFolder: 'reports\/e2e\/html', open: 'never' \}\]/);
   assert.match(config, /process\.env\.SHELL_CHROMIUM \? \{ executablePath: process\.env\.SHELL_CHROMIUM \} : \{\}/);
   assert.match(config, /scripts\/e2e\/serve-clickdummy\.mjs/);
-  const port = /const port = (\d+);/.exec(config)[1], server = files.get('scripts/e2e/serve-clickdummy.mjs').content;
+  const port = /const port = (\d+);/.exec(config)[1], server = files.get('tooling/e2e/serve-clickdummy.mjs').content;
   assert.match(server, new RegExp(`process\\.argv\\[2\\] \\?\\? ${port}`));
   assert.match(server, /server\.listen\(port, '127\.0\.0\.1'/);
   assert.match(server, /\['bin\/app', 'clickdummy', 'build', '--replace'\]/);
@@ -96,7 +96,7 @@ test('hostile ids and labels reach the spec only as escaped JSON data', () => {
 test('output is deterministic and identical across emissions', () => {
   const first = [...emit(showcase)].map(([path, file]) => [path, file.content]), second = [...emit(structuredClone(showcase))].map(([path, file]) => [path, file.content]);
   assert.deepEqual(first, second);
-  assert.deepEqual(first.map(([path]) => path), ['playwright.config.ts', 'scripts/e2e/serve-clickdummy.mjs', 'tests/e2e/ui-quality.spec.ts']);
+  assert.deepEqual(first.map(([path]) => path), ['playwright.config.ts', 'tooling/e2e/serve-clickdummy.mjs', 'tests/e2e/ui-quality.spec.ts']);
 });
 
 test('test:e2e runs the project specs and the framework harness specs keep a separate script', () => {
@@ -121,7 +121,7 @@ test('generated projects wire the scripts, the exact framework pins and a Vitest
     assert.equal(lock.packages[''].devDependencies[name], pkg.devDependencies[name]);
     assert.equal(lock.packages[`node_modules/${name}`].version, pkg.devDependencies[name]);
   }
-  for (const path of ['playwright.config.ts', 'scripts/e2e/serve-clickdummy.mjs', 'tests/e2e/ui-quality.spec.ts']) assert.equal(entries.get(path)?.ownership, 'managed', path);
+  for (const path of ['playwright.config.ts', 'tooling/e2e/serve-clickdummy.mjs', 'tests/e2e/ui-quality.spec.ts']) assert.equal(entries.get(path)?.ownership, 'managed', path);
   const vitest = entries.get('configs/testing/vitest.project.config.mjs').content;
   assert.match(vitest, /exclude: \[\.\.\.configDefaults\.exclude, 'tests\/e2e\/\*\*'\]/);
   assert.match(vitest, /import \{ configDefaults, defineConfig \} from 'vitest\/config'/);

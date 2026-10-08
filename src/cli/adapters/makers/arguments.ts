@@ -5,7 +5,7 @@ const flags = new Set<string>(flagOptions);
 const values = new Set<string>(valueOptions);
 const isFlag = (arg: string): arg is FlagOption => flags.has(arg);
 const isValue = (arg: string): arg is ValueOption => values.has(arg);
-const defaultOptions = ['--dry-run', '--yes', '--no-interaction', '--json', '--help', '--list', '--feature'];
+const defaultOptions = ['--dry-run', '--yes', '--no-interaction', '--json', '--help', '--list', '--feature', '--source'];
 export const builtinRecipes: readonly string[] = Object.freeze(recipes.map(recipe => recipe.id));
 export function recipeOptions(maker: string): readonly string[] {
   return recipes.find(recipe => recipe.id === maker)?.options ?? defaultOptions;

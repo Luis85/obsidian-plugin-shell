@@ -1,6 +1,7 @@
 const { test } = await (process.env.VITEST ? import('vitest') : import('node:test'));
 import assert from 'node:assert/strict';
 import { STARTER_MAX_BYTES, parseBrowserStarter, starterProjection, configureBrowserStarter, exportBrowserStarter } from '#shared/companion/starters/browser.ts';
+import { failure, OperationError } from '../adapters/framework/contracts.ts';
 import { validateDefinition } from '#shared/companion/starters/validation.ts';
 import { fileStarter, shipped } from './support/starters-fixture.mjs';
 
@@ -48,4 +49,20 @@ test('export keeps the reviewed recipe and takes defaults from identity, setting
   assert.deepEqual(exported.processes, validateDefinition(blank).processes);
   assert.deepEqual(exported.generator, { kind: 'companion', document: validateDefinition({ ...definition, generator: { kind: 'companion', document: project } }).generator.document });
   refusal(() => exportBrowserStarter(fileStarter(), sha, project, {}), 'STARTER_KIND', 'This file-only starter can be generated through the CLI, but does not declare an editable Companion model.');
+});
+
+
+test('shared starter refusals retain the CLI operation diagnostic code and message', () => {
+  for (const [run, code, message] of [
+    [() => parseBrowserStarter(42), 'STARTER_LIMIT', 'Choose a starter JSON no larger than 4 MB.'],
+    [() => starterProjection(blank, 'invalid'), 'STARTER_HASH', 'Expected the SHA-256 of the actual imported bytes.'],
+    [() => configureBrowserStarter(blank, sha, { name: 'Missing ID' }), 'STARTER_INPUT', 'Supply the required input id.'],
+    [() => validateDefinition({ ...blank, generator: { kind: 'project', projectType: 'invalid' } }), 'STARTER_INVALID', 'Unknown project type.'],
+  ]) {
+    assert.throws(run, error => {
+      assert.ok(error instanceof OperationError);
+      assert.deepEqual(failure('new', error).diagnostics, [{ code, message }]);
+      return true;
+    });
+  }
 });

@@ -9,7 +9,7 @@ import { serializeJson as json } from '#shared/contracts/serialization.ts';
 import { importAliases, projectTsconfig, testsTsconfig, type SourceFindingCode, type SourceManifest, type SourceProject } from '../domain/source-projects.ts';
 import { reconcileImports, reconcileSolution, solutionDrift, solutionRequirements } from '../domain/source-projects-edit.ts';
 import { normalizePath } from '../domain/source-imports.ts';
-import { isDirectory, readJsonFile } from './source-workspace.ts';
+import { isDirectory, parseSourceJson, readJsonFile } from './source-workspace.ts';
 
 /** A drifted derived file: `content` is the regenerated text, null when only a person can repair it. */
 export interface DerivedChange { path: string; code: SourceFindingCode; project?: string; message: string; content: string | null }
@@ -29,7 +29,7 @@ function reader(root: string, overlay?: ReadonlyMap<string, string>): Read {
   return async path => {
     try {
       const text = overlay?.get(path);
-      return text === undefined ? await readJsonFile(root, path) : { value: JSON.parse(text) as unknown };
+      return text === undefined ? await readJsonFile(root, path) : { value: await parseSourceJson(text, path) };
     } catch { return 'invalid'; }
   };
 }
@@ -78,7 +78,7 @@ async function solutionChange(read: Read, required: string[], renamed: DerivedOp
   if (!actual) return { path, code: 'SOURCE_TSCONFIG_DRIFT', content: json(reconcileSolution(null, required)), message: 'The root solution tsconfig.json is missing.' };
   const value = withRenames(actual.value, renamed), drift = solutionDrift(value, required);
   if (!drift.solution) return { path, code: 'SOURCE_TSCONFIG_DRIFT', content: null,
-    message: 'The root tsconfig.json is not a solution file (it has include or compilerOptions); convert it to references by hand.' };
+    message: 'The root tsconfig.json is not a solution file (it must have files: [] and references, without include or compilerOptions); convert it to references by hand.' };
   const next = reconcileSolution(value, required);
   if (isDeepStrictEqual(actual.value, next)) return null;
   return { path, code: 'SOURCE_TSCONFIG_DRIFT', content: json(next), message: `The root solution tsconfig.json references drift: ${driftDetail(drift)}.` };

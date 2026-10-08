@@ -41,8 +41,9 @@ Cloud and agent sessions provision the qualified Node automatically. See
 1. **Clone the repository and open it in a terminal.** Keep the checkout
    outside any Obsidian vault and use a short path.
 2. **Check your toolchain.** Run `node --version`, which should print
-   `v24.21.0`, and `npm --version`, which should print `11.19.1`. Then run
-   `node bin/app doctor`. It is read-only and works before `node_modules` exists.
+   `v24.21.0`, and `npm --version`, which should print `11.19.1`. The
+   standalone CLI is generated; a fresh source checkout must install dependencies
+   and build it before running `node bin/app` commands.
 3. **Review the setup plan.** Run `npm run setup -- --dry-run`. The dry run
    uses no dependencies and makes no writes, network calls or child processes.
    It prints the identity, the file changes with their hashes, and the stages
@@ -59,7 +60,8 @@ Cloud and agent sessions provision the qualified Node automatically. See
    - `--provision-browser` downloads the pinned Chromium.
    - `--skip-install`, `--defer-verify` and `--resume` handle partial reruns.
    - `--mcp` / `--no-mcp` opt in to or out of the project-local agent MCP.
-5. **Build and test.** Run `npm run build:cli` for the standalone CLI. Run `npm run build`, which writes `dist/`, then `npm test`
+5. **Build and test.** Run `npm run build:cli` for the standalone CLI, then
+   `node bin/app doctor` to inspect the environment. Run `npm run build`, which writes `dist/`, then `npm test`
    (the runtime Vitest suite) and `node bin/app check`.
 6. **Develop.** Use one of these:
    - `npm run dev:ui` opens a browser harness with the real components and
@@ -155,6 +157,11 @@ Full recipe: [Build a feature](docs/development/BUILD-A-FEATURE.md). See also
 5. Custom recipes: `make maker <name>` creates a trusted local recipe in
    `tooling/makers/custom`. Running it requires `--trust-custom`, and only after
    you have reviewed its code.
+
+Plugin recipes select the only plugin project automatically. If the manifest
+contains several, add `--source <project-name>`; use `node bin/app source list`
+to find its name. For example, `npm run make -- feature bookmarks --entity bookmark --source plugin --dry-run`
+previews files in this checkout's `src/plugin/` project.
 
 Details: [Authoring tools](docs/development/AUTHORING-TOOLS.md).
 

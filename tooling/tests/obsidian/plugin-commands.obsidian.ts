@@ -1,6 +1,6 @@
 import { describe, expect } from 'vitest';
-import { test } from './support/obsidian-fixture';
-import { writeEvidence } from './support/evidence';
+import { test } from './support/obsidian-fixture.ts';
+import { writeEvidence } from './support/evidence.ts';
 
 describe('plugin commands in real Obsidian', () => {
   test('registers commands and the command palette lists every currently available one', async ({ obsidian }) => {

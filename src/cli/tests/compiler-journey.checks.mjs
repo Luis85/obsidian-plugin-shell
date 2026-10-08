@@ -39,7 +39,7 @@ for(const custom of [false,true])test('closed binding emits the actual editor wi
   const actual=[...files].filter(([path,file])=>path.includes('/screens/')&&file.content.includes('JourneyWorkspace'));
   assert.equal(actual.length,1);assert.ok(actual[0][1].content.includes(JSON.stringify(screen.label)));
   assert.ok(files.has('design/journey-lens.json'));assert.ok(files.has('JOURNEY-LENS.md'));
-  const nativeTest=files.get('tests/obsidian/journey-lens.obsidian.ts').content;
+  const nativeTest=files.get('tooling/tests/obsidian/journey-lens.obsidian.ts').content;
   assert.doesNotThrow(()=>stripTypeScriptTypes(nativeTest,{mode:'strip'}));
   assert.match(nativeTest,/Another view or an external edit changed this project/);
   assert.match(nativeTest,/\.first\(\)\.locator\('\.jl-workspace'\)/);
@@ -70,7 +70,7 @@ entry.forEach(visit);console.log(JSON.stringify([...seen]));`;
     entry:[result.model.sourceRoot+'/bootstrap/journey-preview.ts',result.model.sourceRoot+'/bootstrap/journey-workspace.ts']});
   const check=spawnSync(process.execPath,['--experimental-vm-modules','--input-type=module','-e',script],{input,encoding:'utf8',timeout:30000,maxBuffer:2_000_000});
   assert.equal(check.status,0,check.stderr);const visited=JSON.parse(check.stdout);
-  assert.ok(visited.includes('scripts/companion/journey/project-store.ts'));assert.ok(!visited.some(p=>p.endsWith('journey-vault.ts')));
+  assert.ok(visited.includes('src/shared/companion/journey/project-store.ts'));assert.ok(!visited.some(p=>p.endsWith('journey-vault.ts')));
 });
 test('binding remains opt-in and unsupported code-like bindings fail before emission',async()=>{
   const plain=await compile(structuredClone(seed));assert.equal(plain.files.has('design/journey-lens.json'),false);
@@ -126,8 +126,8 @@ import {stripTypeScriptTypes} from 'node:module';import {pathToFileURL} from 'no
 let input='';for await(const chunk of process.stdin)input+=chunk;
 const {root,source,seed}=JSON.parse(input),cases=[];
 const dependencies={vitest:{it:(name,run)=>cases.push({name,run}),expect:value=>({toBe:expected=>assert.equal(value,expected),toEqual:expected=>assert.deepEqual(value,expected)})},
- 'project-store.ts':await import(pathToFileURL(join(root,'scripts/companion/journey/project-store.ts')).href),
- 'session.ts':await import(pathToFileURL(join(root,'scripts/companion/sitemap/session.ts')).href),'journey-seed.ts':{seed}};
+ 'project-store.ts':await import(pathToFileURL(join(root,'src/shared/companion/journey/project-store.ts')).href),
+ 'session.ts':await import(pathToFileURL(join(root,'src/shared/companion/sitemap/session.ts')).href),'journey-seed.ts':{seed}};
 const module=new vm.SourceTextModule(stripTypeScriptTypes(source,{mode:'strip'}));
 await module.link(async name=>{const dependency=dependencies[name]??dependencies[name.split('/').at(-1)];assert.ok(dependency,name);
  return new vm.SyntheticModule(Object.keys(dependency),function(){for(const [key,value] of Object.entries(dependency))this.setExport(key,value);});});

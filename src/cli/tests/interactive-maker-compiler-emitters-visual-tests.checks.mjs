@@ -14,14 +14,14 @@ const click = (id, actions) => [{ id, event: 'click', label: 'Run ' + id, notes:
 
 test('every definition gets per-state visibility, scenario and natively dispatched interaction cases', () => {
   const { m, specs } = rich(), out = generate(m, specs);
-  assert.deepEqual([...out.files.keys()], ['tests/project/visual/definitions.test.ts']);
-  const text = out.text('tests/project/visual/definitions.test.ts'), cases = blocks(text);
+  assert.deepEqual([...out.files.keys()], ['src/plugin/tests/project/visual/definitions.test.ts']);
+  const text = out.text('src/plugin/tests/project/visual/definitions.test.ts'), cases = blocks(text);
   // The generated suite opts into the DOM environment on its first line (a docblock this check must not repeat verbatim).
   assert.match(text.split('\n')[0], /^\/\/ @vitest-[a-z]+ happy-dom$/);
   assert.deepEqual(text.split('\n').slice(1, 8), ["import { describe, it, expect, vi } from 'vitest';", "import { mount, flushPromises } from '@vue/test-utils';",
-    'import Subject0 from "../../../src/generated/presentation/components/details/vp-8.vue";', 'import Subject1 from "../../../src/generated/presentation/components/details/vp-15.vue";',
-    'import Subject2 from "../../../src/generated/presentation/components/library/project-json-review.vue";',
-    'import { visualKey, type VisualContext } from "../../../src/generated/presentation/composables/use-visual.ts";', 'import type { VisualRequest } from "../../../src/generated/domain/visual-runtime.ts";']);
+    'import Subject0 from "../../../generated/presentation/components/details/vp-8.vue";', 'import Subject1 from "../../../generated/presentation/components/details/vp-15.vue";',
+    'import Subject2 from "../../../generated/presentation/components/library/project-json-review.vue";',
+    'import { visualKey, type VisualContext } from "../../../generated/presentation/composables/use-visual.ts";', 'import type { VisualRequest } from "../../../generated/domain/visual-runtime.ts";']);
   assert.ok(text.includes('  const runs = Array.from({ length: 5 }, () => vi.fn(async (_input?: unknown) => ({ ok: true })));\n'));
   assert.deepEqual(cases.map(block => block.split('\n')[2].replace(/", (async )?\(\) => \{$/, '').replace('it("', '')), [
     ...['default', 'loading', 'empty', 'error', 'disabled'].map(state => `renders declared ${state} visibility including hidden ancestors`), '[vi-14] dispatches the designed change interaction',
@@ -67,7 +67,7 @@ test('control fixtures mirror typed raw input and skip values the control would 
     nuxt('c8', 'u-input', { control: { kind: 'number', maxBytes: 1 } })];
   const button = nuxt('b1', 'u-button', { events: click('vi-1', [{ kind: 'source', sourceId: 'ds-source-60', operationId: 'ds-operation-61', input: { kind: 'object', fields: { title: { kind: 'draft', nodeId: 'c1' }, origin: { kind: 'event' } } } }]) });
   const spec = { ...page, scenarios: [], root: [...controls, button] };
-  const text = generate(m, [spec]).text('tests/project/visual/definitions.test.ts');
+  const text = generate(m, [spec]).text('src/plugin/tests/project/visual/definitions.test.ts');
   for (const line of ['"c1", "2026-01-01"', '"c2", "2026-01-01T12:30"', '"c3", "{\\"fixture\\":true}"', '"c5", "fixture"', '"c6", "fixture"', '"c7", true'])
     assert.ok(text.includes(line + ');'), line);
   assert.ok(text.includes('"c8", "0");') && !text.includes('"c4", '));
@@ -78,10 +78,10 @@ test('long suites split into bounded files and an oversized single case is refus
   const { m, specs } = rich();
   const many = Array.from({ length: 12 }, (_, i) => ({ ...specs[1], id: 'vp-copy-' + i }));
   const out = generate(m, many);
-  assert.deepEqual([...out.files.keys()], ['tests/project/visual/definitions.test.ts', ...Array.from({ length: out.files.size - 1 }, (_, i) => `tests/project/visual/definitions-${i + 2}.test.ts`)]);
+  assert.deepEqual([...out.files.keys()], ['src/plugin/tests/project/visual/definitions.test.ts', ...Array.from({ length: out.files.size - 1 }, (_, i) => `src/plugin/tests/project/visual/definitions-${i + 2}.test.ts`)]);
   assert.ok(out.files.size > 2);
   for (const [, entry] of out.files) assert.ok(entry.content.split('\n').length <= 400);
-  const second = out.text('tests/project/visual/definitions-2.test.ts');
+  const second = out.text('src/plugin/tests/project/visual/definitions-2.test.ts');
   const imported = [...second.matchAll(/^import (Subject\d+) from "\.\.\/\.\.\/\.\.\/src\/generated\/presentation\/components\/details\/vp-copy-\d+\.vue";$/gm)].map(match => match[1]);
   assert.ok(imported.length > 0 && !imported.includes('Subject0'));
   assert.deepEqual([...new Set([...second.matchAll(/^const Subject = (Subject\d+);$/gm)].map(match => match[1]))], imported);

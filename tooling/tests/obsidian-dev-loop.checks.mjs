@@ -13,9 +13,9 @@ import { openPluginView, reloadPlugin } from '../testing/obsidian-plugin-control
 
 async function workspace(t) {
   const root = await mkdtemp(join(tmpdir(), 'obsidian dev ü-')); t.after(() => rm(root, { recursive: true, force: true }));
-  await mkdir(join(root, 'src/plugin/tests/obsidian/vault/Notes'), { recursive: true });
-  await writeFile(join(root, 'src/plugin/tests/obsidian/vault/Welcome.md'), '# Welcome\n');
-  await writeFile(join(root, 'src/plugin/tests/obsidian/vault/Notes/Example.md'), '# Example\n');
+  await mkdir(join(root, 'tooling/tests/obsidian/vault/Notes'), { recursive: true });
+  await writeFile(join(root, 'tooling/tests/obsidian/vault/Welcome.md'), '# Welcome\n');
+  await writeFile(join(root, 'tooling/tests/obsidian/vault/Notes/Example.md'), '# Example\n');
   return root;
 }
 const linkType = process.platform === 'win32' ? 'junction' : 'dir';
@@ -47,7 +47,7 @@ test('[OBSIDIAN-DEV-02] the sandbox is seeded once and existing vault data is pr
   assert.equal(await readFile(join(root, '.obsidian-sandbox/vault/Notes/Example.md'), 'utf8'), '# Example\n');
   await writeFile(join(root, '.obsidian-sandbox/vault/Welcome.md'), 'edited by the developer\n');
   await writeFile(join(root, '.obsidian-sandbox/vault/Mine.md'), 'mine\n');
-  await writeFile(join(root, 'src/plugin/tests/obsidian/vault/New.md'), 'new fixture\n');
+  await writeFile(join(root, 'tooling/tests/obsidian/vault/New.md'), 'new fixture\n');
   const second = await seedSandbox({ root });
   assert.equal(second.seeded, false);
   assert.equal(await readFile(join(root, '.obsidian-sandbox/vault/Welcome.md'), 'utf8'), 'edited by the developer\n');
@@ -56,10 +56,10 @@ test('[OBSIDIAN-DEV-02] the sandbox is seeded once and existing vault data is pr
 });
 test('[OBSIDIAN-DEV-03] seeding refuses symlinks, escapes and reserved locations without partial vaults', async t => {
   const root = await workspace(t); const outside = await mkdtemp(join(tmpdir(), 'obsidian outside-')); t.after(() => rm(outside, { recursive: true, force: true }));
-  await symlink(outside, join(root, 'src/plugin/tests/obsidian/vault/Linked'), linkType);
+  await symlink(outside, join(root, 'tooling/tests/obsidian/vault/Linked'), linkType);
   await assert.rejects(seedSandbox({ root }), /VAULT_SOURCE_SYMLINK: Linked/);
   assert.deepEqual(await readdir(join(root, '.obsidian-sandbox')), ['logs']);
-  await rm(join(root, 'src/plugin/tests/obsidian/vault/Linked'));
+  await rm(join(root, 'tooling/tests/obsidian/vault/Linked'));
   await assert.rejects(seedSandbox({ root, source: '../outside' }), /SANDBOX_PATH_ESCAPE/);
   await assert.rejects(seedSandbox({ root, sandbox: '.dev-vault' }), /SANDBOX_NAME_INVALID/);
   await symlink(outside, join(root, '.obsidian-sandbox-linked'), linkType);
@@ -68,7 +68,7 @@ test('[OBSIDIAN-DEV-03] seeding refuses symlinks, escapes and reserved locations
   await mkdir(join(root, '.obsidian-sandbox-file')); await writeFile(join(root, '.obsidian-sandbox-file/vault'), 'not a vault');
   await assert.rejects(seedSandbox({ root, sandbox: '.obsidian-sandbox-file' }), /SANDBOX_VAULT_INVALID/);
   await assert.rejects(assertContained(root, root), /SANDBOX_PATH_ESCAPE/);
-  await assert.rejects(copyVaultTree(join(root, 'src/plugin/tests/obsidian/vault'), join(root, 'src/plugin/tests/obsidian/vault')), /VAULT_TARGET_EXISTS/);
+  await assert.rejects(copyVaultTree(join(root, 'tooling/tests/obsidian/vault'), join(root, 'tooling/tests/obsidian/vault')), /VAULT_TARGET_EXISTS/);
 });
 test('[OBSIDIAN-DEV-04] enabling the plugin touches only this vault list, keeps other plugins and preserves corrupt data', async t => {
   const root = await workspace(t); const { vault } = await seedSandbox({ root });

@@ -21,6 +21,7 @@
     "tests/browser-specimen/specimen.checks.mjs",
     "src/companion/tests/concepts/*.browser.mjs",
     "tests/browser-workflows/*.browser.mjs",
-    "src/*/tests/**/*.ts"
+    "src/*/tests/**/*.ts",
+    "tooling/tests/**/*.ts"
   ]
 }

@@ -200,18 +200,18 @@ test('projects without visual designs have an empty store and no specs', async (
   const m = model(document);
   assert.deepEqual(visualDefinitions(m).pages, []); assert.deepEqual(visualSpecs(m), []); assert.deepEqual(visualSources(m), []);
   const out = recorder(); visualPorts(m, out.add);
-  assert.ok(out.text('src/generated/bootstrap/visual-context.ts').startsWith("\nimport type { Pinia } from 'pinia';\n"));
-  assert.ok(out.text('src/generated/bootstrap/visual-context.ts').includes('return { ports: [], handle:'));
+  assert.ok(out.text('src/plugin/generated/bootstrap/visual-context.ts').startsWith("\nimport type { Pinia } from 'pinia';\n"));
+  assert.ok(out.text('src/plugin/generated/bootstrap/visual-context.ts').includes('return { ports: [], handle:'));
 });
 
 test('visual ports bind one Pinia-backed port per referenced source operation', () => {
   const { m } = rich(), out = recorder(); visualPorts(m, out.add);
-  const lines = out.text('src/generated/bootstrap/visual-context.ts').split('\n');
+  const lines = out.text('src/plugin/generated/bootstrap/visual-context.ts').split('\n');
   assert.deepEqual(lines.slice(0, 4), ["import { defineGAuthoringVaultStore } from '../presentation/stores/authoring-vault.ts';", "import * as GAuthoringVaultContracts from '../application/authoring-vault/contracts.ts';",
     "import { defineGRecordWriterStore } from '../presentation/stores/record-writer.ts';", "import * as GRecordWriterContracts from '../application/record-writer/contracts.ts';"]);
   assert.deepEqual(lines.slice(11, 13), ['const GAuthoringVault = defineGAuthoringVaultStore(sources["authoring-vault"])(pinia);', 'const GRecordWriter = defineGRecordWriterStore(sources["record-writer"])(pinia);']);
   assert.equal(lines[14], 'return { ports: [{ sourceId: "ds-source-1", operationId: "ds-operation-6", direction: "read", requiresInput: false,');
   assert.equal(lines[19], `async run(input) { if (!GRecordWriterContracts.isGSaveRecordInput(input)) throw new Error('INVALID_INPUT'); return GRecordWriter["save-record"].execute(input); } },`);
-  assert.equal(out.files.get('src/generated/bootstrap/visual-context.ts').ownership, 'managed');
+  assert.equal(out.files.get('src/plugin/generated/bootstrap/visual-context.ts').ownership, 'managed');
   assert.deepEqual(visualSources(m).map(use => use.operation.id), ['ds-operation-6', 'ds-operation-61', 'ds-operation-62']);
 });

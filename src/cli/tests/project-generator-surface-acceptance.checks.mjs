@@ -10,14 +10,14 @@ const root = fileURLToPath(new URL('../../../', import.meta.url));
 const starter = async name => JSON.parse(await readFile(new URL(`../../../configs/starters/${name}.json`, import.meta.url), 'utf8')).generator.document;
 const render = async document => new Map((await projectFiles(root, projectModel(document))).map(entry => [entry.path, entry.content]));
 const traceOf = files => JSON.parse(files.get('design/visual-traceability.json'));
-const ux = files => [...files.keys()].filter(path => path.startsWith('tests/project/ux-acceptance/'));
+const ux = files => [...files.keys()].filter(path => path.startsWith('src/plugin/tests/project/ux-acceptance/'));
 
 test('surfaces with an acceptance block get one countable it.todo per state, keyboard step, focus return and width', async () => {
   const files = await render(await starter('feature-showcase'));
-  assert.deepEqual(ux(files), ['tests/project/ux-acceptance/forms.test.ts', 'tests/project/ux-acceptance/overlays.test.ts']);
+  assert.deepEqual(ux(files), ['src/plugin/tests/project/ux-acceptance/forms.test.ts', 'src/plugin/tests/project/ux-acceptance/overlays.test.ts']);
   const lines = path => files.get(path).split('\n').filter(line => line.startsWith('it.todo('));
-  assert.equal(lines('tests/project/ux-acceptance/forms.test.ts').length, 5 + 6 + 1);
-  assert.deepEqual(lines('tests/project/ux-acceptance/overlays.test.ts'), [
+  assert.equal(lines('src/plugin/tests/project/ux-acceptance/forms.test.ts').length, 5 + 6 + 1);
+  assert.deepEqual(lines('src/plugin/tests/project/ux-acceptance/overlays.test.ts'), [
     'it.todo("[node-6] Dialogs and drawers: renders the default state");',
     'it.todo("[node-6] Dialogs and drawers: keyboard step 1 reaches Open Example dialog");',
     'it.todo("[node-6] Dialogs and drawers: keyboard step 2 reaches Close Example dialog");',
@@ -26,8 +26,8 @@ test('surfaces with an acceptance block get one countable it.todo per state, key
     'it.todo("[node-6] Dialogs and drawers: returns focus to the invoking control on close");',
     'it.todo("[node-6] Dialogs and drawers: stays usable at 360px width");',
   ]);
-  assert.match(files.get('tests/project/ux-acceptance/forms.test.ts'), /reaches vn-36"\);/);
-  assert.match(files.get('tests/project/ux-acceptance/forms.test.ts'), /stays usable at 360px width/);
+  assert.match(files.get('src/plugin/tests/project/ux-acceptance/forms.test.ts'), /reaches vn-36"\);/);
+  assert.match(files.get('src/plugin/tests/project/ux-acceptance/forms.test.ts'), /stays usable at 360px width/);
 });
 test('traceability carries the resolved block, covering test ids and an empty evidence placeholder per surface and interaction', async () => {
   const trace = traceOf(await render(await starter('feature-showcase')));
@@ -40,17 +40,17 @@ test('traceability carries the resolved block, covering test ids and an empty ev
     assert.ok(Array.isArray(entry.testIds) && new Set(entry.testIds).size === entry.testIds.length);
   }
   assert.deepEqual(overlays.definitionIds, ['vp-6']);
-  assert.ok(overlays.testIds.includes('vitest:tests/project/ux-acceptance/overlays.test.ts#[node-6] Dialogs and drawers: returns focus to the invoking control on close'));
-  assert.ok(overlays.testIds.includes('vitest:tests/project/navigation.test.ts#[edge-15] Open Dialogs and drawers'));
+  assert.ok(overlays.testIds.includes('vitest:src/plugin/tests/project/ux-acceptance/overlays.test.ts#[node-6] Dialogs and drawers: returns focus to the invoking control on close'));
+  assert.ok(overlays.testIds.includes('vitest:src/plugin/tests/project/navigation.test.ts#[edge-15] Open Dialogs and drawers'));
   assert.ok(overlays.testIds.includes('vitest:visual-definitions:vp-6 Dialogs and drawers > renders declared loading visibility including hidden ancestors'));
   assert.deepEqual(overlays.testIds.filter(id => id.startsWith('ui-quality:')), ['ui-quality:node-6:light', 'ui-quality:node-6:dark']);
   const journeyIds = trace.surfaces.flatMap(s => s.testIds.filter(id => id.startsWith('journey:')));
   assert.ok(journeyIds.length > 0 && journeyIds.every(id => /^journey:[^/]+\/[^/]+$/.test(id)), JSON.stringify(journeyIds));
   const navigation = trace.interactions.find(i => i.id === 'vi-12');
   assert.deepEqual(navigation.testIds, [
-    'vitest:tests/project/acceptance/vi-12.test.ts#[vi-12] Form controls — The configured UI effect is observable without a backend.',
+    'vitest:src/plugin/tests/project/acceptance/vi-12.test.ts#[vi-12] Form controls — The configured UI effect is observable without a backend.',
     'vitest:visual-definitions:vp-1 Feature showcase > [vi-12] dispatches the designed click interaction',
-    'vitest:tests/project/navigation.test.ts#[edge-11] Open Form controls',
+    'vitest:src/plugin/tests/project/navigation.test.ts#[edge-11] Open Form controls',
   ]);
 });
 test('every titled test id that names a generated file refers to a title the generated file contains', async () => {
@@ -80,7 +80,7 @@ test('adding a block changes only the block-bearing outputs; unrelated generated
   // Only project-specific outputs are compared: framework files are shared with concurrent kit changes.
   const own = path => /^(tests\/project|src\/generated|design)\//.test(path);
   const changed = [...after.keys()].filter(path => own(path) && before.get(path) !== after.get(path)).sort();
-  assert.deepEqual(changed, ['design/project.json', 'design/visual-traceability.json', `tests/project/ux-acceptance/${surface.slug}.test.ts`]);
+  assert.deepEqual(changed, ['design/project.json', 'design/visual-traceability.json', `src/plugin/tests/project/ux-acceptance/${surface.slug}.test.ts`]);
   assert.deepEqual([...before.keys()].filter(path => own(path) && !after.has(path)), []);
   assert.equal(traceOf(after).surfaces.find(s => s.id === surface.id).acceptance.minWidth, 360);
 });

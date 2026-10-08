@@ -12,7 +12,7 @@ test('this maintainer regression reads the starter pack and is not copied into k
   const path = 'src/cli/tests/project-generator-native-starters.checks.mjs';
   assert.equal(included(path), false);
   assert.equal(maintainerOnly(path), true);
-  for (const path of ['src/domain/native-integrations.ts', 'docs/development/native-file-integrations.md']) {
+  for (const path of ['src/plugin/domain/native-integrations.ts', 'docs/development/native-file-integrations.md']) {
     assert.equal(included(path), true, path);
     assert.equal(maintainerOnly(path), false, path);
   }
@@ -20,7 +20,7 @@ test('this maintainer regression reads the starter pack and is not copied into k
 
 test('the real template loader keeps the active native implementation; native starters travel only in the pack', async () => {
   const paths = (await loadTemplateSnapshot(repository)).frameworkFiles.map(file => file.path);
-  for (const path of ['src/domain/native-integrations.ts', 'docs/development/native-file-integrations.md']) assert.ok(paths.includes(path), path);
+  for (const path of ['src/plugin/domain/native-integrations.ts', 'docs/development/native-file-integrations.md']) assert.ok(paths.includes(path), path);
   // Native starter definitions moved to the separate pack: never template input, yet still carried and valid there.
   for (const path of ['configs/starters/custom-file-view.json', 'configs/starters/context-menu.json']) assert.ok(!paths.includes(path), path);
   const pack = await assembleStarterPack({ root: repository, frameworkRoot: repository });

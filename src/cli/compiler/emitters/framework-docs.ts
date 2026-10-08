@@ -17,19 +17,19 @@ export function relocatedPath(path: string): string {
 /** The maintainer runner script, the policy test for maintainer CI triggers, the project handoff qualification (it generates
  * projects from the framework's starters), the framework's delivery pipeline, the framework docs index, the standalone design
  * prototypes (their own apps and retained evidence) and the framework checkout's DEVELOPER_GUIDE.md are not copied. Neither are
- * the runtime tests of the shell's own src/main.ts entry (and the example-removal template of one): a generated project replaces
- * src/main.ts with its generated entry, whose registrations those tests cannot see, while every other shipped framework test
+ * the runtime tests of the shell's own src/plugin/main.ts entry (and the example-removal template of one): a generated project replaces
+ * src/plugin/main.ts with its generated entry, whose registrations those tests cannot see, while every other shipped framework test
  * still runs there under test:framework. The projects/<name> tooling and the workflows it syncs stay too (they belong to the
  * checkout's standalone projects). */
 const maintainerFiles: ReadonlySet<string> = new Set(['DEVELOPER_GUIDE.md', '.github/workflows/starter-distribution.yml', ...deliveryPipelineFiles,
-  'tests/tooling/qualification-trigger.checks.mjs', 'tests/tooling/project-generator-native-starters.checks.mjs', 'tests/tooling/jev-concept-distribution.checks.mjs',
-  'scripts/testing/qualify-project-handoff.mjs', 'tests/tooling/agent-project-handoff.checks.mjs', 'docs/README.md',
-  'tests/runtime/shell-entry-lifecycle.test.ts', 'templates/examples/tests__runtime__shell-entry-lifecycle.test.ts.txt', 'tests/runtime/obsidian-test-kit-shell-entry.test.ts',
-  '.github/workflows/projects-boundary.yml', '.github/workflows/projects-required-checks.yml', 'tests/tooling/projects-boundary.checks.mjs',
+  'tooling/tests/qualification-trigger.checks.mjs', 'src/cli/tests/project-generator-native-starters.checks.mjs', 'tooling/tests/jev-concept-distribution.checks.mjs',
+  'tooling/testing/qualify-project-handoff.mjs', 'src/cli/tests/agent-project-handoff.checks.mjs', 'docs/README.md',
+  'src/plugin/tests/unit/shell-entry-lifecycle.test.ts', 'templates/examples/tests__runtime__shell-entry-lifecycle.test.ts.txt', 'src/plugin/tests/unit/obsidian-test-kit-shell-entry.test.ts',
+  '.github/workflows/projects-boundary.yml', '.github/workflows/projects-required-checks.yml', 'tooling/tests/projects-boundary.checks.mjs',
   // Site template qualification builds the framework's own templates/sites from a maintainer fixture vault.
-  '.github/workflows/site-templates.yml', 'scripts/testing/qualify-site-templates.mjs', 'tests/tooling/site-templates-qualification.checks.mjs']);
-const maintainerPrefixes = ['configs/starters/', '.github/scripts/', deliveryPipelineFolder, '.github/workflows/projects--', 'scripts/projects/',
-  'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'docs/concepts/agents-prototype-0.15/', 'scripts/testing/handoff-', 'tests/fixtures/sites/'];
+  '.github/workflows/site-templates.yml', 'tooling/testing/qualify-site-templates.mjs', 'tooling/tests/site-templates-qualification.checks.mjs']);
+const maintainerPrefixes = ['configs/starters/', '.github/scripts/', deliveryPipelineFolder, '.github/workflows/projects--', 'tooling/projects/',
+  'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'docs/concepts/agents-prototype-0.15/', 'tooling/testing/handoff-', 'tests/fixtures/sites/'];
 export function maintainerOnly(path: string): boolean {
   return frameworkOnlyPath(path) || maintainerFiles.has(path) || maintainerPrefixes.some(prefix => path.startsWith(prefix));
 }
@@ -88,7 +88,7 @@ export function relocateFrameworkDocuments(entries: Map<string, Entry>, omitted:
     entries.set(to, { ...entry, path: to, content });
   }
 }
-const exampleOwnership = 'scripts/examples/ownership.json';
+const exampleOwnership = 'src/cli/tooling/examples/ownership.json';
 /** Example removal plans every file its ownership manifest lists, and a listed file that is absent is an edit conflict.
  * A generated project's manifest therefore lists only the example files the project received. */
 export function scopeExampleOwnership(entries: Map<string, Entry>): void {

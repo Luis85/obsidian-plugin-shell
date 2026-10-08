@@ -63,9 +63,10 @@ test('import bounds apply to exact UTF-8 input including whitespace', () => {
   assert.throws(() => parseAuthoringDocument(' '.repeat(4_000_001)), /limit|bound|4 MB/i);
   assert.throws(() => parseAuthoringDocument('null'));
 });
-test('folders are portable, contained and non-overlapping', () => {
+test('folders are portable and contained, allowing only the owned tests subfolder', () => {
+  assert.deepEqual(validateCompanionFolders({ codebaseFolder: 'src/plugin', testsFolder: 'src/plugin/tests' }), { codebaseFolder: 'src/plugin', testsFolder: 'src/plugin/tests' });
   assert.deepEqual(validateCompanionFolders({ codebaseFolder: 'product/code', testsFolder: 'product/specs' }), { codebaseFolder: 'product/code', testsFolder: 'product/specs' });
-  for (const settings of [{ codebaseFolder: 'src', testsFolder: 'src/tests' }, { codebaseFolder: 'src', testsFolder: 'src' }, { codebaseFolder: '.obsidian', testsFolder: 'tests' }, { codebaseFolder: 'src' }])
+  for (const settings of [{ codebaseFolder: 'src', testsFolder: 'src/arbitrary' }, { codebaseFolder: 'src', testsFolder: 'src' }, { codebaseFolder: '.obsidian', testsFolder: 'tests' }, { codebaseFolder: 'src' }])
     assert.throws(() => validateCompanionFolders(settings), /COMPANION_INVALID/);
   assert.equal(companionRelativeFolder('.', true), true); assert.equal(companionRelativeFolder('.'), false);
   for (const value of ['con', 'a/../b', 'trailing.', 'node_modules', 42]) assert.equal(companionRelativeFolder(value), false, String(value));

@@ -59,11 +59,11 @@ function documentFile(m: Model, entity: Entity, props: [string, Schema][], add: 
   const file = `${m.sourceRoot}/application/documents/${entity.slug}.ts`;
   const fields = props.map(([key],index) => `${literal(key)}: ${entity.schema.required?.includes(key) ? 'f'+index : `fields.optional(f${index})`}`).join(',\n');
   const validators = props.map(([,schema],index) => field(schema,index)).join('\n');
-  add(file, `import { defineEntity${fields.includes('fields.optional(') ? ', fields' : ''} } from ${literal(relativeImport(file, 'src/domain/entity.ts'))};
+  add(file, `import { defineEntity${fields.includes('fields.optional(') ? ', fields' : ''} } from ${literal(relativeImport(file, 'src/plugin/domain/entity.ts'))};
 import { matches } from '../../domain/contract.ts';
-import { success, failure } from ${literal(relativeImport(file, 'src/domain/outcome.ts'))};
-import { defineDocument, heading } from ${literal(relativeImport(file, 'src/application/document-definition.ts'))};
-import { defineNoteFeature } from ${literal(relativeImport(file, 'src/application/note-feature.ts'))};
+import { success, failure } from ${literal(relativeImport(file, 'src/plugin/domain/outcome.ts'))};
+import { defineDocument, heading } from ${literal(relativeImport(file, 'src/plugin/application/document-definition.ts'))};
+import { defineNoteFeature } from ${literal(relativeImport(file, 'src/plugin/application/note-feature.ts'))};
 ${validators}
 export const entity = defineEntity(${literal(entity.slug)},1,{${fields}});
 export const document = defineDocument(entity,{mappings:${literal(props.map(([key]) => ({field:key,property:key})))},title: values => String(values.title ?? ''),body: values => '# ' + heading(String(values.title ?? '')) + '\\n'});
@@ -75,9 +75,9 @@ function persistenceTest(m: Model, entity: Entity, props: [string, Schema][], fi
   const test = `${m.testRoot}/persistence/${entity.slug}.test.ts`;
   const input: Schema = {...entity.schema, properties:Object.fromEntries(props), required:props.map(([key])=>key), additionalProperties:false};
   add(test, `import { it, expect } from 'vitest';
-import { NoteRepository } from ${literal(relativeImport(test,'src/application/note-repository.ts'))};
-import { markdownCodec } from ${literal(relativeImport(test,'src/infrastructure/markdown.ts'))};
-import { success, failure } from ${literal(relativeImport(test,'src/domain/outcome.ts'))};
+import { NoteRepository } from ${literal(relativeImport(test,'src/plugin/application/note-repository.ts'))};
+import { markdownCodec } from ${literal(relativeImport(test,'src/plugin/infrastructure/markdown.ts'))};
+import { success, failure } from ${literal(relativeImport(test,'src/plugin/domain/outcome.ts'))};
 import { document as recipe } from ${literal(relativeImport(test,file))};
 it('persists every ${entity.slug} field, rejects stale edits and preserves unrelated Markdown', async () => {
   const files = new Map<string,string>(); let writes = 0;
@@ -107,11 +107,11 @@ it('persists every ${entity.slug} field, rejects stale edits and preserves unrel
 function registryTest(m: Model, selected: Map<string, Entity>, add: Add): void {
   const registryTest = `${m.testRoot}/persistence/registry.test.ts`;
   add(registryTest, `import { it, expect } from 'vitest';
-import { createFeatures } from ${literal(relativeImport(registryTest,'src/bootstrap/features.ts'))};
-import { PluginDataStore } from ${literal(relativeImport(registryTest,'src/application/plugin-data-store.ts'))};
-import { PreferenceService } from ${literal(relativeImport(registryTest,'src/application/preference-service.ts'))};
-import { markdownCodec } from ${literal(relativeImport(registryTest,'src/infrastructure/markdown.ts'))};
-import { success, failure } from ${literal(relativeImport(registryTest,'src/domain/outcome.ts'))};
+import { createFeatures } from ${literal(relativeImport(registryTest,'src/plugin/bootstrap/features.ts'))};
+import { PluginDataStore } from ${literal(relativeImport(registryTest,'src/plugin/application/plugin-data-store.ts'))};
+import { PreferenceService } from ${literal(relativeImport(registryTest,'src/plugin/application/preference-service.ts'))};
+import { markdownCodec } from ${literal(relativeImport(registryTest,'src/plugin/infrastructure/markdown.ts'))};
+import { success, failure } from ${literal(relativeImport(registryTest,'src/plugin/domain/outcome.ts'))};
 it('composes every generated repository with the actual retained framework registry', async () => {
   const errors={report:()=>{}}; const events={publish:()=>{}};
   const data=new PluginDataStore({load:async()=>null,save:async()=>{}},errors);
@@ -136,12 +136,12 @@ export function persistenceCode(templateRoot: TemplateSnapshot, m: Model, add: A
   const imports: string[] = []; const registrations: string[] = [];
   for (const entity of selected.values()) {
     const props = nativeProperties(entity), name = symbol(entity.slug), file = documentFile(m, entity, props, add);
-    imports.push(`import { feature as ${name} } from ${literal(relativeImport('src/bootstrap/features.ts', file))};`);
+    imports.push(`import { feature as ${name} } from ${literal(relativeImport('src/plugin/bootstrap/features.ts', file))};`);
     registrations.push(name);
     persistenceTest(m, entity, props, file, add);
   }
-  const original = templateRoot.text('src/bootstrap/features.ts');
-  add('src/bootstrap/features.ts', imports.join('\n')+'\n'+registerFeatures(original, registrations));
+  const original = templateRoot.text('src/plugin/bootstrap/features.ts');
+  add('src/plugin/bootstrap/features.ts', imports.join('\n')+'\n'+registerFeatures(original, registrations));
   registryTest(m, selected, add);
   const sourceFile = `${m.sourceRoot}/application/note-operations.ts`;
   add(sourceFile, templateRoot.text('templates/companion/runtime/note-operations.ts'));

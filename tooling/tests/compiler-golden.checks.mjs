@@ -26,10 +26,10 @@ test('the product scope covers generated source, tests, preview, design records 
   const result = await compileProject({ source: starterDocumentText('quick-capture'), template });
   assert.equal(result.status, 'ok', JSON.stringify(result.diagnostics));
   const model = result.model, scoped = result.artifacts.filter(file => productPath(model, file.path)).map(file => file.path);
-  for (const path of ['src/main.ts', 'design/project.json', 'PROJECT-IMPLEMENTATION.md', 'harness/prototype/clickdummy.ts'])
+  for (const path of ['src/plugin/main.ts', 'design/project.json', 'PROJECT-IMPLEMENTATION.md', 'harness/prototype/clickdummy.ts'])
     assert.ok(scoped.includes(path), path);
   // The registry is the consumer's template file plus generated registrations; renamed or removed examples change it.
-  assert.ok(!scoped.includes('src/bootstrap/features.ts'));
+  assert.ok(!scoped.includes('src/plugin/bootstrap/features.ts'));
   assert.ok(scoped.some(path => path.startsWith(model.sourceRoot + '/')) && scoped.some(path => path.startsWith(model.testRoot + '/')));
   assert.ok(!scoped.includes('package.json') && !scoped.includes('README.md') && !scoped.some(path => path.startsWith('.claude/')));
   assert.equal(JSON.parse(result.artifacts.find(file => file.path === 'design/project.json').content).schemaVersion, 6);
@@ -47,7 +47,7 @@ test('a missing generated file fails the baseline', () => {
   assert.deepEqual(differences, ['daily-journal: missing ' + path]);
 });
 test('an extra, undeclared generated file fails the baseline', () => {
-  const extra = 'src/generated/application/unreviewed.ts';
+  const extra = 'src/plugin/generated/application/unreviewed.ts';
   const differences = goldenDifferences(golden, variant(item => { item.files[extra] = digest('export {};\n'); return item; }));
   assert.deepEqual(differences, ['daily-journal: undeclared ' + extra]);
 });
@@ -78,13 +78,13 @@ test('the same template snapshot stays deterministic while telemetry changes', a
   assert.deepEqual([...new Set(events.map(event => event.phase))], ['parse', 'validate', 'resolve', 'lower', 'emit']);
 });
 test('the live consumer registry reaches generated output', async () => {
-  const source = starterDocumentText('blank'), registry = template.text('src/bootstrap/features.ts');
+  const source = starterDocumentText('blank'), registry = template.text('src/plugin/bootstrap/features.ts');
   const retained = '// consumer-owned registration context\n' + registry;
-  const files = template.frameworkFiles.map(file => file.path === 'src/bootstrap/features.ts' ? { ...file, content: retained } : file);
+  const files = template.frameworkFiles.map(file => file.path === 'src/plugin/bootstrap/features.ts' ? { ...file, content: retained } : file);
   const texts = new Map(files.map(file => [file.path, file.content]));
   const edited = { ...template, frameworkFiles: files, fingerprint: digest(JSON.stringify(files)), text: name => texts.has(name) ? texts.get(name) : template.text(name) };
   const result = await compileProject({ source, template: edited });
   assert.equal(result.status, 'ok', JSON.stringify(result.diagnostics));
-  assert.ok(result.artifacts.find(file => file.path === 'src/bootstrap/features.ts').content.startsWith('// consumer-owned registration context\n'));
+  assert.ok(result.artifacts.find(file => file.path === 'src/plugin/bootstrap/features.ts').content.startsWith('// consumer-owned registration context\n'));
   assert.notEqual(result.fingerprint, (await compileProject({ source, template })).fingerprint);
 });

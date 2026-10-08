@@ -75,20 +75,20 @@ test('native adapters, typed controls, slot content and mapped handlers are gene
  for(const kind of ['number','checkbox','select','date','datetime-local','json-editor','json-file','markdown-editor','textarea'])assert.ok(spec.includes(`"control":{"kind":"${kind}"`),kind);
  assert.equal((code.match(/data-design-node="vn-6007"/g)||[]).length,1);
  assert.match([...files].filter(([path]) => /^product\/specs\/project\/visual\/definitions(?:-\d+)?\.test\.ts$/.test(path)).map(([, text]) => text).join("\n"),/toHaveBeenCalledWith\(\{"requestId":"boundary-request-1","values":\{"title":"Boundary note","amount":0,"enabled":true,"category":"first","due":"2026-01-01","body":"fixture"\}\}\)/);
- assert.match(files.get('src/bootstrap/features.ts'),/GBoundaryRecord: register\(GBoundaryRecord\)/);
+ assert.match(files.get('src/plugin/bootstrap/features.ts'),/GBoundaryRecord: register\(GBoundaryRecord\)/);
  assert.match(files.get('product/code/generated/infrastructure/sources/boundary-records.ts'),/noteOperations/);
  assert.ok(!files.get('product/code/generated/infrastructure/sources/boundary-records.ts').includes('NotImplementedError'));
  assert.ok(![...files.keys()].some(path=>path.startsWith('product/code/generated/application/interactions/')&&files.get(path).includes('"nodeId":"vn-6004"')));
  assert.ok(files.has('product/specs/project/persistence/boundary-record.test.ts'));
 });
-// Exact src/bootstrap/features.ts that examples:remove writes; fixed so the check holds in every consumer state.
+// Exact src/plugin/bootstrap/features.ts that examples:remove writes; fixed so the check holds in every consumer state.
 const removedRegistry="import { createNoteFeatures } from '../application/note-feature';\n\n\n\nimport type { PreferenceService } from '../application/preference-service';\n\n/** Add one explicit registration per feature. Ports are provided once by runtime bootstrap. */\nexport function createFeatures(services: Parameters<typeof createNoteFeatures>[0], preferences: PreferenceService) {\n  void preferences;\n  return createNoteFeatures(services, () => ({\n    \n    \n    \n  }));\n}\n";
 test('native repositories extend example-removed and maker-extended registries and refuse other layouts',async()=>{
  const {readRegistry,extendRegistry}=await import('../adapters/makers/registry.ts');
  const consumer=extendRegistry(await readRegistry(root,removedRegistry),{key:'bookmark',local:'bookmarkFeature',from:'../features/bookmarks/bookmark.definition'});
  const template=await realpath(await mkdtemp(join(tmpdir(),'generator-registry-')));
  const skipped=new Set(['.git','node_modules','dist','dist-harness','reports','.fallow','.qualification']);
- const generate=async source=>{await writeFile(join(template,'src/bootstrap/features.ts'),source);return new Map((await projectFiles(template,projectModel(fixture()))).map(e=>[e.path,e.content])).get('src/bootstrap/features.ts');};
+ const generate=async source=>{await writeFile(join(template,'src/plugin/bootstrap/features.ts'),source);return new Map((await projectFiles(template,projectModel(fixture()))).map(e=>[e.path,e.content])).get('src/plugin/bootstrap/features.ts');};
  try{
   await cp(root,template,{recursive:true,filter:path=>{const parts=relative(root,path).split(sep);return !skipped.has(parts[0])&&!parts.includes('__pycache__');}});
   for(const source of [removedRegistry,consumer]){

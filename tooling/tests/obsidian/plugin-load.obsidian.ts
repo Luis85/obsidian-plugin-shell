@@ -1,5 +1,5 @@
 import { describe, expect } from 'vitest';
-import { test } from './support/obsidian-fixture';
+import { test } from './support/obsidian-fixture.ts';
 
 describe('built plugin in real Obsidian', () => {
   test('loads from the copied vault without uncaught or plugin console errors', async ({ obsidian }) => {

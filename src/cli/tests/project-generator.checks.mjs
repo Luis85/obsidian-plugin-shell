@@ -82,10 +82,10 @@ test('fresh plan is read-only; apply and replay produce a complete independent p
   await assert.rejects(applyProject(first,'wrong-hash'),/stale/);
   const applied=await applyProject(first,first.hash); assert.equal(applied.written.length,first.plan.changes.filter(change=>change.status!=='unchanged').length); assert.ok(applied.written.length>100);
   const target=join(options.vault,options.target);
-  assert.match(await readFile(join(target,'src/main.ts'),'utf8'),/initializeProject/);
-  assert.match(await readFile(join(target,'src/generated/presentation/stores/authoring-vault.ts'),'utf8'),/defineStore/);
-  assert.match(await readFile(join(target,'src/generated/infrastructure/sources/authoring-vault.ts'),'utf8'),/repositories.GRequirement.list/);
-  assert.match(await readFile(join(target,'src/bootstrap/features.ts'),'utf8'),/GRequirement: register\(GRequirement\)/);
+  assert.match(await readFile(join(target,'src/plugin/main.ts'),'utf8'),/initializeProject/);
+  assert.match(await readFile(join(target,'src/plugin/generated/presentation/stores/authoring-vault.ts'),'utf8'),/defineStore/);
+  assert.match(await readFile(join(target,'src/plugin/generated/infrastructure/sources/authoring-vault.ts'),'utf8'),/repositories.GRequirement.list/);
+  assert.match(await readFile(join(target,'src/plugin/bootstrap/features.ts'),'utf8'),/GRequirement: register\(GRequirement\)/);
   assert.deepEqual(await readFile(join(target,'harness/styles/vendor/obsidian.css.gz')),await readFile(join(root,'harness/styles/vendor/obsidian.css.gz')));
   const trace=JSON.parse(await readFile(join(target,'design/traceability.json'),'utf8')); assert.equal(trace.requirements.length,31);
   assert.ok(trace.requirements.every(r=>r.verification==='todo'));
@@ -101,7 +101,7 @@ test('fresh plan is read-only; apply and replay produce a complete independent p
 }));
 test('regeneration preserves consumer business logic and refuses conflicting rewrites',()=>sandbox(async options=>{
   const first=await planProject(options); await applyProject(first,first.hash);
-  const path='src/generated/infrastructure/sources/authoring-vault.ts'; const absolute=join(options.vault,options.target,path);
+  const path='src/plugin/generated/infrastructure/sources/authoring-vault.ts'; const absolute=join(options.vault,options.target,path);
   await writeFile(absolute,(await readFile(absolute,'utf8'))+'\n// consumer implementation\n');
   const preserve=await planProject(options); assert.deepEqual(preserve.conflicts,[]); assert.ok(preserve.preserved.includes(path));
   await applyProject(preserve,preserve.hash); assert.match(await readFile(absolute,'utf8'),/consumer implementation/);
@@ -119,7 +119,7 @@ test('existing unowned, manually changed managed, and removed owned files never 
   const first=await planProject(options); await applyProject(first,first.hash);
   const path=join(options.vault,options.target,'design/traceability.json'); await writeFile(path,'{}');
   assert.ok((await planProject(options)).conflicts.some(c=>c.startsWith('design/traceability.json')));
-  await rm(join(options.vault,options.target,'src/main.ts')); assert.ok((await planProject(options)).conflicts.some(c=>c.includes('was removed')));
+  await rm(join(options.vault,options.target,'src/plugin/main.ts')); assert.ok((await planProject(options)).conflicts.some(c=>c.includes('was removed')));
   await rm(join(options.vault,options.target,'.companion/generation.json'));
   assert.ok((await planProject(options)).conflicts.some(c=>c.includes('unowned')));
 }));
@@ -137,7 +137,7 @@ test('custom folders and additive declarations retain configuration and traceabi
   await writeFile(options.input,JSON.stringify(next)); const plan=await planProject(options);
   assert.ok(plan.plan.changes.some(c=>c.path==='plugin/product/code/generated/presentation/components/screens/new-screen.vue'));
   assert.ok(plan.plan.changes.some(c=>c.path==='plugin/verification/specs/project/workbench.test.ts'));
-  const main=plan.plan.changes.find(c=>c.path==='plugin/src/main.ts').content; assert.match(main,/\.\.\/product\/code\/generated\/bootstrap\/install.ts/);
+  const main=plan.plan.changes.find(c=>c.path==='plugin/src/plugin/main.ts').content; assert.match(main,/\.\.\/product\/code\/generated\/bootstrap\/install.ts/);
 }));
 test('unsafe vault targets and target symlinks are rejected without writes',()=>sandbox(async options=>{
   for (const target of ['../escape','.obsidian/plugins/unsafe','absolute\\path','CON','/absolute']) await assert.rejects(planProject({...options,target}));

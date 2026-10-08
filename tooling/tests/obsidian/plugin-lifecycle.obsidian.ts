@@ -1,6 +1,6 @@
 import { describe, expect } from 'vitest';
-import { test } from './support/obsidian-fixture';
-import { writeEvidence } from './support/evidence';
+import { test } from './support/obsidian-fixture.ts';
+import { writeEvidence } from './support/evidence.ts';
 
 describe('plugin unload and reload in real Obsidian', () => {
   test('disabling removes commands, views and plugin DOM; re-enabling restores the same leaves without errors', async ({ obsidian }) => {

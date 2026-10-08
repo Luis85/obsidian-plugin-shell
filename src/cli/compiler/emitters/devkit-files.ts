@@ -48,7 +48,7 @@ export function renderTemplate(text: string, values: Readonly<Record<string, str
   });
 }
 /** Where the framework makers put the tests of generated features; product checks run them too. */
-export const makerTests = 'tests/runtime/generated';
+export const makerTests = 'src/plugin/tests/unit/generated';
 const oneLine = (value: unknown) => String(value ?? '').replace(/\s+/g, ' ').trim();
 export function devkitFiles(templateRoot: TemplateSnapshot, m: Model, add: Add): void {
   const hosting = hostingProfile(projectHosting(m.document));
@@ -75,7 +75,7 @@ init(addIcon);
 `, 'managed');
   projectSuites(templateRoot, m, add);
   const example = `${m.testRoot}/plugin-host.test.ts`;
-  add(example, pluginHostTest(example, posix.relative(posix.dirname(example), 'tests/obsidian/vault')), 'extension');
+  add(example, pluginHostTest(example, posix.relative(posix.dirname(example), 'tooling/tests/obsidian/vault')), 'extension');
 }
 /** The copied suite manifest classifies product tests under tests/project (follow a custom tests folder) and must
  * classify emitted journey specs, or every suite run fails UNCLASSIFIED_TEST_FILE. An unchanged manifest is not re-emitted. */
@@ -89,7 +89,7 @@ function projectSuites(templateRoot: TemplateSnapshot, m: Model, add: Add): void
 function projectVitestConfig(m: Model): string {
   return `import { fileURLToPath } from 'node:url';
 import { configDefaults, defineConfig } from 'vitest/config';
-import { sharedConfig } from '../../scripts/bundling/vite-shared.mjs';
+import { sharedConfig } from '../../tooling/bundling/vite-shared.mjs';
 const shared = sharedConfig();
 // Product tests. A bare \`obsidian\` import throws on purpose: each test file opts in to the
 // in-memory host with \`vi.mock('obsidian', () => import('@test/obsidian'))\` (docs/testing/OBSIDIAN-TEST-KIT.md).
@@ -97,7 +97,7 @@ const hostBoundary = { name: 'vitest-obsidian-boundary',
   resolveId(id) { if (id === 'obsidian') return '\\0obsidian-host-boundary'; },
   load(id) { if (id === '\\0obsidian-host-boundary') return 'throw new Error("OBSIDIAN_BOUNDARY_REQUIRES_EXPLICIT_TEST_DOUBLE")'; },
 };
-const testKit = { '@test/obsidian': fileURLToPath(new URL('../../tests/support/obsidian/index.ts', import.meta.url)) };
+const testKit = { '@test/obsidian': fileURLToPath(new URL('../../src/plugin/tests/support/obsidian/index.ts', import.meta.url)) };
 // DOM tests (views, settings, Vue components) start with \`// @vitest-environment happy-dom\`.
 // Reporters are left at Vitest's defaults so coding agents automatically get the concise \`agent\` reporter.
 // \`npm run make\` writes the tests of the features it creates to ${makerTests}.
@@ -119,7 +119,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 vi.mock('obsidian', () => import('@test/obsidian'));
 import { App } from 'obsidian';
 import { createTestApp, loadVaultFixtures } from '@test/obsidian';
-import GeneratedPlugin from ${literal(relativeImport(path, 'src/main.ts'))};
+import GeneratedPlugin from ${literal(relativeImport(path, 'src/plugin/main.ts'))};
 import manifest from ${literal(relativeImport(path, 'manifest.json'))};
 
 afterEach(() => { document.body.replaceChildren(); });

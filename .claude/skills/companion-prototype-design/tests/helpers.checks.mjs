@@ -128,6 +128,25 @@ test('repository inspection reports declared/locked mismatch without executing s
   assert.ok(report.files.some(file => file.error));
 });
 
+test('repository inspection prefers current source layout over generated-kit fallbacks', t => {
+  const root = scratch(t);
+  for (const [file, text] of Object.entries({
+    'package.json': '{}', 'package-lock.json': '{"packages":{}}',
+    'src/shared/companion/authoring-contract.ts': 'export const AUTHORING_VERSION = 6;\nexport const COMPANION_MAX_BYTES = 4_000_000;',
+    'scripts/companion/authoring-contract.ts': 'export const AUTHORING_VERSION = 5;',
+    'src/shared/companion/visual/visual-validate.mjs': 'export {};',
+    'tooling/companion-tools/generate.mjs': 'throw new Error("inspection must not run this");',
+  })) {
+    fs.mkdirSync(path.dirname(path.join(root, file)), { recursive: true });
+    fs.writeFileSync(path.join(root, file), text);
+  }
+  const report = inspectRepository(root);
+  assert.deepEqual(report.contract, { version: 6, maxBytes: 4000000 });
+  for (const file of ['src/shared/companion/authoring-contract.ts', 'src/shared/companion/visual/visual-validate.mjs', 'tooling/companion-tools/generate.mjs']) {
+    assert.deepEqual(report.files.find(entry => entry.path === file), { path: file, sha256: sha256(fs.readFileSync(path.join(root, file))) });
+  }
+});
+
 test('inline assembler rejects HTML comment parser state ambiguity', () => {
   assert.throws(() => assemble({ ...configuration, javascript: 'const text="<!--<script>";' }), /HTML comment/);
 });

@@ -152,8 +152,8 @@ function stepJourneys(m: Model): SitemapJourney[] {
 /** The copied suite manifest classifies the emitted journey specs (Playwright, under tests/e2e) and their helper module. */
 export function journeySuitePairs(m: Model): ReadonlyArray<readonly [string, string]> {
   if (stepJourneys(m).length === 0) return [];
-  return [['"tests/e2e/*.spec.ts"', `"tests/e2e/*.spec.ts",\n        "${journeySpecRoot}/*.spec.ts"`],
-    ['"tests/e2e/control-metrics.ts"', `"tests/e2e/control-metrics.ts",\n        "${supportFile}"`]];
+  return [['"src/plugin/tests/e2e/*.spec.ts"', `"src/plugin/tests/e2e/*.spec.ts",\n        "${journeySpecRoot}/*.spec.ts"`],
+    ['"src/plugin/tests/e2e/control-metrics.ts"', `"src/plugin/tests/e2e/control-metrics.ts",\n        "${supportFile}"`]];
 }
 /** Emits one spec per authored journey that has steps, plus shared helpers. A project without journeys gets nothing. */
 export function authoredJourneyCode(m: Model, add: Add): void {

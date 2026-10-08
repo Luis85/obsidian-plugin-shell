@@ -26,7 +26,7 @@ const nuxt = (id, entryId, events = []) => ({ id, kind: 'component', ref: { kind
 const act = (id, event, actions) => ({ id, event, label: 'Interaction ' + id, notes: '', acceptance: '', actions });
 
 test('compiler emits layouts, slots, typed props, source ports, hooks and traceable interaction tests', async () => {
-  const entries = await files(fixture), code = 'src/generated/';
+  const entries = await files(fixture), code = 'src/plugin/generated/';
   const page = entries.get(code + 'presentation/components/details/vp-8.vue');
   assert.match(page, /data-design-node="vn-9" v-if="model\.visible\('vn-9'\)" :style="model\.style\('vn-9'\)"/);
   assert.match(page, /<ProjectJsonReview data-design-node="vn-11"[^>]*v-bind="model\.props\('vn-11'\)"/);
@@ -41,8 +41,8 @@ test('compiler emits layouts, slots, typed props, source ports, hooks and tracea
   assert.match(entries.get(code + 'application/visual-interactions.ts'), /case "vi-14": return E0\(request, sources\);/);
   assert.match(entries.get(code + 'presentation/components/screens/import-project.vue'), /import Detail from '\.\.\/details\/vp-8\.vue';/);
   assert.match(generatedVisualTests(entries), /f\.navigate\.mock\.calls\.map\(\(\[target\]\) => target\)\)\.toEqual\(\["node-17"\]\)/);
-  assert.match(entries.get('tests/project/acceptance/vi-14.test.ts'), /it\.todo\("\[vi-14\] Review selected file/);
-  assert.match(entries.get('tests/project/ui-effects/vp-15.checks.mjs'), /Generated executable model tests/);
+  assert.match(entries.get('src/plugin/tests/project/acceptance/vi-14.test.ts'), /it\.todo\("\[vi-14\] Review selected file/);
+  assert.match(entries.get('src/plugin/tests/project/ui-effects/vp-15.checks.mjs'), /Generated executable model tests/);
   const trace = JSON.parse(entries.get('design/visual-traceability.json'));
   assert.deepEqual(trace.definitions.map(d => [d.id, d.kind, d.ownerId ?? d.libraryId]), [['vp-8', 'page', 'node-48'], ['vp-15', 'page', 'node-27'], ['vc-1', 'component', 'project-json-review']]);
   assert.deepEqual(trace.interactions.map(i => [i.id, i.verification, Boolean(i.implementation), Boolean(i.test)]), [['vi-14', 'business-todo', true, true], ['vi-19', 'navigation', false, false], ['vi-7', 'business-todo', true, true]]);
@@ -63,8 +63,8 @@ test('elements and Nuxt UI components without form semantics bind designed liste
   store(d).pages[0].root[0].events.push(act('vi-40', 'click', [{ kind: 'set-state', state: 'empty' }]));
   libraryPage(d).children.push(...kinds.map((entry, i) => nuxt('vn-' + (41 + i), entry, [act('vi-' + (51 + i), 'click', [{ kind: 'toggle', nodeId: 'vn-17' }])])));
   store(d).nextId = 60;
-  const entries = await files(d), vue = entries.get('src/generated/presentation/components/details/vp-15.vue');
-  assert.match(entries.get('src/generated/presentation/components/details/vp-8.vue'), /data-design-node="vn-9"[^>]*v-on="model\.on\('vn-9'\)"/);
+  const entries = await files(d), vue = entries.get('src/plugin/generated/presentation/components/details/vp-15.vue');
+  assert.match(entries.get('src/plugin/generated/presentation/components/details/vp-8.vue'), /data-design-node="vn-9"[^>]*v-on="model\.on\('vn-9'\)"/);
   for (let i = 0; i < kinds.length; i++) assert.match(vue, new RegExp(`data-design-node="vn-${41 + i}"[^>]*v-on="model\\.on\\('vn-${41 + i}'\\)"`), kinds[i]);
   const tabs = structuredClone(d); libraryPage(tabs).children.find(n => n.id === 'vn-42').events[0].event = 'dblclick';
   assert.throws(() => visualDefinitions(projectModel(tabs)), /event "dblclick" is not declared by this element/);
@@ -111,21 +111,21 @@ test('single-word library and screen names get the shared multi-word component f
   library.id = 'review'; review(d).libraryId = 'review'; review(d).dependencies = [{ package: 'editor-lib', version: '1.0.0', purpose: 'Editing' }];
   review(d).template.push({ id: 'vn-40', kind: 'external', package: 'editor-lib', adapter: 'editor', props: {}, events: [] }); store(d).nextId = 41;
   for (const node of d.design.nodes) node.components = (node.components ?? []).map(c => (c.id === 'project-json-review' ? { ...c, id: 'review' } : c));
-  const entries = await files(d), code = 'src/generated/presentation/components/';
+  const entries = await files(d), code = 'src/plugin/generated/presentation/components/';
   assert.ok(entries.has(code + 'library/review-component.vue')); assert.ok(!entries.has(code + 'library/review.vue'));
   assert.ok(entries.has(code + 'library/review-component/editor.adapter.ts'));
   assert.ok(entries.has(code + 'screens/components-screen.vue')); assert.match(entries.get(code + 'screens/components-screen.vue'), /import Detail from '\.\.\/details\/vp-15\.vue';/);
   assert.match(entries.get(code + 'details/vp-8.vue'), /import ProjectJsonReview from "\.\.\/library\/review-component\.vue";/);
   assert.match(entries.get(code + 'library/review-component.vue'), /from "\.\/review-component\/editor\.adapter\.ts"/);
-  assert.match(entries.get('src/generated/domain/components/contracts/review.ts'), /export interface ComponentProps/);
+  assert.match(entries.get('src/plugin/generated/domain/components/contracts/review.ts'), /export interface ComponentProps/);
 });
 test('emit switches and the interaction dispatcher declare only parameters they read', async () => {
   const d = clone(); review(d).emits = []; confirm(d).events[0].actions = [{ kind: 'navigate', surfaceId: 'node-17' }];
   store(d).pages[0].root[0].children.find(n => n.id === 'vn-10').events[0].actions = [{ kind: 'set-state', state: 'empty' }];
   const entries = await files(d);
-  assert.match(entries.get('src/generated/presentation/components/library/project-json-review.vue'), /request => emit\('interaction', request\), \(name\) => \{/);
-  assert.equal(entries.get('src/generated/application/visual-interactions.ts'), "import type { VisualRequest } from '../domain/visual-runtime.ts';\nimport type { Sources } from './sources.ts';\nexport const handleVisualInteraction: (request: VisualRequest, sources: Sources) => Promise<unknown> = async () => { throw new Error('VISUAL_INTERACTION_UNKNOWN'); };\n");
-  assert.match((await files(fixture)).get('src/generated/application/interactions/vi-14.ts'), /export const execute: \(request: VisualRequest, sources: Sources\) => Promise<unknown> = async \(\) => \{ throw new NotImplementedError\("vp-8", "vi-14"\); \};/);
+  assert.match(entries.get('src/plugin/generated/presentation/components/library/project-json-review.vue'), /request => emit\('interaction', request\), \(name\) => \{/);
+  assert.equal(entries.get('src/plugin/generated/application/visual-interactions.ts'), "import type { VisualRequest } from '../domain/visual-runtime.ts';\nimport type { Sources } from './sources.ts';\nexport const handleVisualInteraction: (request: VisualRequest, sources: Sources) => Promise<unknown> = async () => { throw new Error('VISUAL_INTERACTION_UNKNOWN'); };\n");
+  assert.match((await files(fixture)).get('src/plugin/generated/application/interactions/vi-14.ts'), /export const execute: \(request: VisualRequest, sources: Sources\) => Promise<unknown> = async \(\) => \{ throw new NotImplementedError\("vp-8", "vi-14"\); \};/);
 });
 
 test('large visual models generate bounded test modules without dropping cases', async () => {

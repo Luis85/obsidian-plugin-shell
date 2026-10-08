@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access, readdir } from 'node:fs/promises';
+import { access, mkdir, readdir, symlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { validateManifest } from '../tooling/testing/suite-manifest.mjs';
 import { fixture, read, readJson, run, source, typecheck, write } from './support/source-fixture.mjs';
@@ -94,6 +94,7 @@ test('remove refuses a referenced project; otherwise it deletes scaffold files, 
   assert.deepEqual(removed.result.data.summary.removed.sort(), ['src/util/tests/index.test.ts', 'src/util/tests/tsconfig.json', 'src/util/tsconfig.json']);
   assert.deepEqual(await files(root, 'src/util'), ['index.ts']);
   assert.equal(await present(root, '.workbench/sources/util.json'), false);
+  assert.ok(!(await readJson(root, 'tests/suites.json')).suites.some(item => item.name === 'source:util'));
   assert.equal((await readJson(root, 'package.json')).imports['#util/*'], undefined);
   assert.ok(!(await readJson(root, 'workbench.sources.json')).projects.some(item => item.name === 'util'));
   assert.ok(!(await readJson(root, 'tsconfig.json')).references.some(item => item.path.startsWith('./src/util')));
@@ -123,9 +124,73 @@ test('rename moves the project, rewrites aliases, references and imports everywh
   assert.deepEqual((await readJson(root, 'src/cli/tsconfig.json')).references, [{ path: '../shared' }, { path: '../tui' }, { path: '../helpers' }]);
   assert.equal((await readJson(root, 'src/helpers/tsconfig.json')).compilerOptions.declarationDir, '../../.cache/tsbuild/helpers');
   assert.ok(await present(root, '.workbench/sources/helpers.json'));
-  assert.ok(renamed.result.data.summary.review.includes('tests/suites.json'), 'textual mentions are listed for review');
+  assert.equal((await readJson(root, 'src/helpers/tests/tsconfig.json')).compilerOptions.tsBuildInfoFile, '../../../.cache/tsbuild/helpers-tests.tsbuildinfo');
+  const suites = (await readJson(root, 'tests/suites.json')).suites;
+  assert.ok(!suites.some(item => item.name === 'source:util'));
+  assert.deepEqual(suites.find(item => item.name === 'source:helpers').include, ['src/helpers/tests/**/*.test.ts']);
+  const ran = await run(process.execPath, ['--test', 'src/helpers/tests/index.test.ts'], { cwd: root });
+  assert.equal(ran.status, 0, ran.stdout + ran.stderr);
   const checked = await source(root, 'check');
   assert.equal(checked.status, 0, JSON.stringify(checked.result.diagnostics));
   const after = await typecheck(root);
   assert.equal(after.status, 0, after.stdout + after.stderr);
+});
+
+
+test('rename and remove preserve edited scaffold tests and their customized suite', async t => {
+  const root = await fixture(t);
+  assert.equal((await source(root, 'add', 'util', '--kind', 'library', '--yes')).status, 0);
+  await write(root, 'src/util/tests/index.test.ts', (await read(root, 'src/util/tests/index.test.ts')) + '// Keep my custom test notes.\n');
+  const suites = await readJson(root, 'tests/suites.json');
+  suites.suites.at(-1).purpose = 'Custom verification';
+  await write(root, 'tests/suites.json', JSON.stringify(suites));
+  assert.equal((await source(root, 'rename', 'util', 'helpers', '--yes')).status, 0);
+  const removed = await source(root, 'remove', 'helpers', '--yes');
+  assert.equal(removed.status, 0, JSON.stringify(removed.result.diagnostics));
+  assert.deepEqual(removed.result.data.summary.retained, ['src/helpers/tests/index.test.ts']);
+  assert.equal((await readJson(root, 'tests/suites.json')).suites.at(-1).purpose, 'Custom verification');
+  assert.ok(removed.result.data.summary.manual.some(item => item.includes('retained tests')));
+});
+
+test('an unchanged renamed scaffold is fully removable with its suite', async t => {
+  const root = await fixture(t);
+  assert.equal((await source(root, 'add', 'util', '--kind', 'library', '--yes')).status, 0);
+  assert.equal((await source(root, 'rename', 'util', 'helpers', '--yes')).status, 0);
+  const removed = await source(root, 'remove', 'helpers', '--yes');
+  assert.equal(removed.status, 0, JSON.stringify(removed.result.diagnostics));
+  assert.deepEqual(removed.result.data.summary.retained, []);
+  assert.deepEqual(await files(root, 'src/helpers'), []);
+  assert.ok(!(await readJson(root, 'tests/suites.json')).suites.some(item => item.name === 'source:helpers'));
+});
+
+
+test('rename rewrites escaped module literals without truncating or corrupting their contents', async t => {
+  const root = await fixture(t);
+  assert.equal((await source(root, 'add', 'util', '--kind', 'library', '--yes')).status, 0);
+  await write(root, 'tooling/escaped.mjs', [
+    "import { projectName } from '#util/\\u0069ndex.ts';",
+    'export { projectName } from "#util/\\u0069ndex.ts";',
+    'export const load = () => import(`#util/\\u0069ndex.ts`);',
+  ].join('\n'));
+  const renamed = await source(root, 'rename', 'util', 'helpers', '--yes');
+  assert.equal(renamed.status, 0, JSON.stringify(renamed.result.diagnostics));
+  assert.deepEqual(renamed.result.data.summary.unrewritable, []);
+  const text = await read(root, 'tooling/escaped.mjs');
+  assert.equal((text.match(/#helpers\/index\.ts/g) ?? []).length, 3);
+  const ran = await run(process.execPath, ['tooling/escaped.mjs'], { cwd: root });
+  assert.equal(ran.status, 0, ran.stdout + ran.stderr);
+});
+
+test('rename refuses an occupied destination and linked output ancestors without changing the manifest', async t => {
+  const root = await fixture(t), outside = await fixture(t);
+  const manifest = await read(root, 'workbench.sources.json');
+  await write(root, 'src/taken/mine.txt', 'Keep this file.');
+  assert.equal((await source(root, 'rename', 'tui', 'taken', '--yes')).result.diagnostics[0].code, 'SOURCE_PATH_EXISTS');
+  assert.equal(await read(root, 'src/taken/mine.txt'), 'Keep this file.');
+  await mkdir(join(outside, 'empty'));
+  await symlink(join(outside, 'empty'), join(root, 'src/linked'), 'junction');
+  const rejected = await source(root, 'rename', 'tui', 'linked', '--yes');
+  assert.equal(rejected.status, 1);
+  assert.equal(await read(root, 'workbench.sources.json'), manifest);
+  assert.ok(await present(root, 'src/tui/index.ts'));
 });

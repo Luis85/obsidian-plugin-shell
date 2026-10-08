@@ -164,9 +164,9 @@ test('template snapshots refuse links, fonts and cancellation and expose only te
   await mkdir(join(folder, 'src/__pycache__'), { recursive: true });
   await writeFile(join(folder, 'src/__pycache__/x.pyc'), 'cache');
   await writeFile(join(folder, 'src/data.gz'), Buffer.from([1, 2, 3]));
-  await writeFile(join(folder, 'src/main.ts'), 'export {};\n');
+  await writeFile(join(folder, 'src/plugin/main.ts'), 'export {};\n');
   const snapshot = await loadTemplateSnapshot(folder);
-  assert.equal(snapshot.text('src/main.ts'), 'export {};\n'); assert.ok(Object.isFrozen(snapshot));
+  assert.equal(snapshot.text('src/plugin/main.ts'), 'export {};\n'); assert.ok(Object.isFrozen(snapshot));
   assert.ok(!snapshot.frameworkFiles.some(file => file.path.includes('__pycache__')));
   assert.equal(snapshot.frameworkFiles.find(file => file.path === 'src/data.gz').encoding, 'base64');
   assert.throws(() => snapshot.text('src/data.gz'), failsWith('COMPILER_TEMPLATE_INVALID'));
@@ -176,6 +176,6 @@ test('template snapshots refuse links, fonts and cancellation and expose only te
   await writeFile(join(folder, 'src/font.woff2'), 'font');
   await assert.rejects(loadTemplateSnapshot(folder), failsWith('COMPILER_TEMPLATE_INVALID'));
   await rm(join(folder, 'src/font.woff2'));
-  if (!await fileSymlink(t, join(folder, 'src/main.ts'), join(folder, 'src/link.ts'))) return;
+  if (!await fileSymlink(t, join(folder, 'src/plugin/main.ts'), join(folder, 'src/link.ts'))) return;
   await assert.rejects(loadTemplateSnapshot(folder), error => failsWith('COMPILER_TEMPLATE_INVALID')(error) && /GENERATOR_TEMPLATE_LINK/.test(error.diagnostic.message));
 });

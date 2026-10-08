@@ -49,7 +49,7 @@ export const builtinHandlers: Readonly<Record<string, Handler>> = Object.freeze(
   'file-extension': (context, input) => nativeRecipe(context, owned(input)), 'context-menu': (context, input) => nativeRecipe(context, owned(input)),
   feature, entity: async (context, input) => { await entityRecipe(context, withEntity(input)); }, view: surface, component: surface, store: surface,
   usecase: primitive, command: primitive, modal: primitive, setting, event: primitive, listener: primitive, style,
-  locale: (context, { name, options }) => localeRecipe(context, name, options['--refresh'] === true),
+  locale: (context, { name, options }) => localeRecipe(context, name, options['--refresh'] === true, options['--source']),
   maker: (context, { name }) => customMaker(context, name),
   plugin: (context, { name }) => pluginRecipe(context, name),
 } satisfies Record<string, Handler>);

@@ -1,0 +1,53 @@
+// source-project-split AC-1: real reviewed plans preserve graph and filesystem boundaries.
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { access, mkdir, symlink } from 'node:fs/promises';
+import { join } from 'node:path';
+import { fixture, read, readJson, run, source, write } from '../../../src/cli/tests/support/source-fixture.mjs';
+
+const exists = (root, path) => access(join(root, path)).then(() => true, () => false);
+
+test('source-project-split AC-1: approved source plans maintain runnable dependencies and reject stale or unsafe changes', async t => {
+  const root = await fixture(t), outside = await fixture(t);
+  const added = await source(root, 'add', 'util', '--kind', 'library', '--references', 'shared');
+  assert.equal(added.result.status, 'planned');
+  assert.equal(await exists(root, 'src/util'), false, 'a preview must not create project files');
+  assert.equal((await source(root, 'add', 'util', '--kind', 'library', '--references', 'shared', '--apply', added.result.data.planHash)).status, 0);
+  assert.equal((await source(root, 'link', 'plugin', 'util', '--yes')).status, 0);
+  await write(root, 'src/plugin/uses.ts', "export { projectName } from '#util/index.ts';\n");
+  const before = await read(root, 'workbench.sources.json');
+  const cycle = await source(root, 'link', 'shared', 'plugin', '--yes');
+  assert.equal(cycle.status, 1);
+  assert.ok(cycle.codes.includes('SOURCE_CYCLE'));
+  const unlink = await source(root, 'unlink', 'plugin', 'util', '--yes');
+  assert.equal(unlink.status, 1);
+  assert.ok(unlink.codes.includes('SOURCE_IMPORTS_REMAIN'));
+  const preview = await source(root, 'rename', 'util', 'helpers');
+  assert.equal(preview.result.status, 'planned');
+  const edited = (await read(root, 'src/util/index.ts')) + 'export const userEdit = true;\n';
+  await write(root, 'src/util/index.ts', edited);
+  const stale = await source(root, 'rename', 'util', 'helpers', '--apply', preview.result.data.planHash);
+  assert.equal(stale.status, 1);
+  assert.ok(stale.codes.includes('PLAN_STALE'));
+  assert.equal(await read(root, 'workbench.sources.json'), before);
+  assert.equal(await read(root, 'src/util/index.ts'), edited);
+  assert.equal(await exists(root, 'src/helpers'), false);
+  await mkdir(join(outside, 'empty'));
+  await symlink(join(outside, 'empty'), join(root, 'src/linked'), 'junction');
+  const linked = await source(root, 'rename', 'util', 'linked', '--yes');
+  assert.equal(linked.status, 1, 'a project must not be written through a directory link');
+  assert.equal(await exists(outside, 'empty/index.ts'), false);
+  const unsafe = await source(root, 'rename', 'util', '../outside', '--yes');
+  assert.equal(unsafe.status, 1);
+  assert.equal(await read(root, 'workbench.sources.json'), before);
+  const renamed = await source(root, 'rename', 'util', 'helpers', '--yes');
+  assert.equal(renamed.status, 0, JSON.stringify(renamed.result.diagnostics));
+  assert.match(await read(root, 'src/plugin/uses.ts'), /#helpers\/index\.ts/);
+  assert.equal(await read(root, 'src/helpers/index.ts'), edited);
+  const manifest = await readJson(root, 'workbench.sources.json');
+  assert.ok(manifest.projects.find(item => item.name === 'plugin').references.includes('helpers'));
+  const checked = await source(root, 'check');
+  assert.equal(checked.status, 0, JSON.stringify(checked.result.diagnostics));
+  const executed = await run(process.execPath, ['--test', 'src/helpers/tests/index.test.ts'], { cwd: root });
+  assert.equal(executed.status, 0, executed.stdout + executed.stderr);
+});

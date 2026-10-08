@@ -97,7 +97,7 @@ automatic migrations and whole-vault indexing remain excluded. Task is an exampl
 consumer; shared services must support another entity without special cases.
 
 The extension path is a first-class template capability: feature authors work in
-`src/features/<name>`, import a small public authoring API, and add one explicit
+`src/plugin/features/<name>`, import a small public authoring API, and add one explicit
 registration. Shared dependencies/lifecycle are wired once. Business modules must
 not be buried in adapters or require editing generic repository/service code.
 

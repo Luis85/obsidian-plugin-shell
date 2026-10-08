@@ -156,7 +156,7 @@ stages:
               SOURCE_COMMIT: $(Build.SourceVersion)
           - script: |
               mkdir -p reports/obsidian
-              node scripts/dev/obsidian-dev.mjs --json > reports/obsidian/dev-once.json
+              node tooling/dev/obsidian-dev.mjs --json > reports/obsidian/dev-once.json
             displayName: Agent loop smoke (build, launch, reload once, JSON summary)
             condition: always()
             env:

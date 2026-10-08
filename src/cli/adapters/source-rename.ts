@@ -8,19 +8,29 @@ import { join } from 'node:path';
 import { createFilePlan, type FilePlanEntry } from '#shared/platform/file-plan.ts';
 import { serializeJson as json } from '#shared/contracts/serialization.ts';
 import { renameProject } from '../domain/source-projects-edit.ts';
-import type { SourceManifest } from '../domain/source-projects.ts';
-import { renamedSpecifier, type AliasPrefixes, type ProjectRename } from '../domain/source-imports.ts';
-import { readBounded } from './framework/files.ts';
+import { testsTsconfig, type SourceManifest, type SourceProject } from '../domain/source-projects.ts';
+import { normalizePath, renamedSpecifier, type AliasPrefixes, type ProjectRename } from '../domain/source-imports.ts';
+import { hash, readBounded } from './framework/files.ts';
 import { requireThat, type Context, type Request } from './framework/contracts.ts';
 import { derivedChanges } from './source-derived.ts';
 import { declaredManifest, manifestEntry, selected, type SourcePlanned } from './source-plan-support.ts';
-import { codeFile, domain, listFiles, repositoryAliases, scanImports } from './source-workspace.ts';
+import { codeFile, domain, listFiles, parseSourceJson, repositoryAliases, scanImports } from './source-workspace.ts';
 import { readReceipt, receiptPath } from './source-scaffold.ts';
+import { renameSuite } from './source-suites.ts';
+
+type TestsConfig = { compilerOptions?: { tsBuildInfoFile?: string } };
+const testsBuildInfo = (project: SourceProject, manifest: SourceManifest): string | undefined => (testsTsconfig(project, manifest) as TestsConfig).compilerOptions?.tsBuildInfoFile;
 
 const scanned = ['src', 'tooling', 'tests', 'configs'];
 const within = (path: string, base: string): boolean => path === base || path.startsWith(`${base}/`);
 const moved = (path: string, rename: ProjectRename): string => within(path, rename.fromPath) ? rename.toPath + path.slice(rename.fromPath.length) : path;
 
+/** Encode the decoded replacement in the original literal's quote style. */
+function encodedSpecifier(value: string, quote: string | undefined): string {
+  const text = JSON.stringify(value).slice(1, -1);
+  if (quote === "'") return text.replace(/'/g, "\\'");
+  return quote === '`' ? text.replace(/`|\$\{/g, match => `\\${match}`) : text;
+}
 /** Every code file whose specifiers change, with its rewritten text. */
 async function rewrites(root: string, files: readonly string[], rename: ProjectRename, aliases: AliasPrefixes) {
   const changed = new Map<string, string>(), skipped: string[] = [];
@@ -29,8 +39,8 @@ async function rewrites(root: string, files: readonly string[], rename: ProjectR
     for (const item of [...specifiers].sort((a, b) => b.start - a.start)) {
       const replacement = renamedSpecifier(file, item.specifier, rename, aliases);
       if (replacement === null) continue;
-      if (text.slice(item.start, item.end) !== item.specifier) { skipped.push(`${file}:${item.line}`); continue; }
-      next = next.slice(0, item.start) + replacement + next.slice(item.end);
+      const encoded = encodedSpecifier(replacement, text[item.start - 1]);
+      next = next.slice(0, item.start) + encoded + next.slice(item.end);
     }
     if (next !== text) changed.set(file, next);
   }
@@ -64,10 +74,16 @@ function merged(entries: FilePlanEntry[], derived: readonly FilePlanEntry[]): Fi
   const paths = new Set(derived.map(entry => entry.path));
   return [...entries.filter(entry => !paths.has(entry.path)), ...derived];
 }
-async function receiptEntries(root: string, from: string, to: string, rename: ProjectRename): Promise<FilePlanEntry[]> {
+async function receiptEntries(root: string, from: string, to: string, rename: ProjectRename, entries: readonly FilePlanEntry[]): Promise<FilePlanEntry[]> {
   const receipt = await readReceipt(root, from);
   if (!receipt) return [];
-  const files = Object.fromEntries(Object.entries(receipt.files).map(([path, digest]) => [moved(path, rename), digest]));
+  const files: Record<string, string> = {};
+  for (const [path, digest] of Object.entries(receipt.files)) {
+    const target = moved(path, rename), entry = entries.find(item => item.path === target && item.content !== null);
+    const original = normalizePath(path) === path && within(path, rename.fromPath) ? await readBounded(join(root, path), 8_000_000).catch(() => null) : null;
+    files[target] = entry && original && hash(original) === digest
+      ? hash(entry.encoding === 'base64' ? Buffer.from(entry.content!, 'base64') : entry.content!) : digest;
+  }
   return [{ path: receiptPath(from), content: null }, { path: receiptPath(to), content: json({ ...receipt, project: to, files }) }];
 }
 function renameOf(current: SourceManifest, manifest: SourceManifest, from: string, to: string): ProjectRename {
@@ -85,12 +101,24 @@ export async function sourceRenamePlan(request: Request, context: Context): Prom
   const { changed, skipped } = await rewrites(root, [...project, ...others], rename, await repositoryAliases(root, current));
   const { entries, overlay } = await movedFiles(root, project, rename, changed);
   for (const [path, text] of changed) if (!within(path, rename.fromPath)) entries.push({ path, content: text });
+  const before = current.projects.find(item => item.name === from)!, after = manifest.projects.find(item => item.name === to)!;
+  const testsPath = `${after.path}/tests/tsconfig.json`, testsText = overlay.get(testsPath);
+  if (testsText !== undefined) {
+    const config = await parseSourceJson(testsText, testsPath) as TestsConfig;
+    if (config.compilerOptions && config.compilerOptions.tsBuildInfoFile === testsBuildInfo(before, current)) {
+      config.compilerOptions.tsBuildInfoFile = testsBuildInfo(after, manifest);
+      overlay.set(testsPath, json(config));
+      const entry = entries.find(item => item.path === testsPath);
+      if (entry) { entry.content = json(config); delete entry.encoding; }
+    }
+  }
   const users = manifest.projects.filter(item => item.references.includes(to)).map(item => item.path);
   const touched = (path: string) => path === 'tsconfig.json' || path === 'package.json' || [rename.toPath, ...users].some(base => path === `${base}/tsconfig.json` || path === `${base}/tests/tsconfig.json`);
   const changes = selected(await derivedChanges(root, manifest, { overlay, renamed: [[rename.fromPath, rename.toPath]] }), touched);
-  const plan = [...merged(entries, changes.entries), ...await receiptEntries(root, from, to, rename), manifestEntry(manifest)];
+  const files = merged(entries, changes.entries), suites = await renameSuite(root, from, to, rename.fromPath, rename.toPath);
+  const plan = [...files, ...suites.entries, ...await receiptEntries(root, from, to, rename, files), manifestEntry(manifest)];
   return { plan: await createFilePlan(root, plan), conflicts: [],
     summary: { rename: { from, to, path: rename.toPath, alias: rename.toAlias ? `${rename.toAlias}*` : null }, moved: project.length, rewrittenImports: [...changed.keys()],
-      unrewritable: skipped, review: await mentions(root, others, rename.fromPath), manual: changes.manual, otherDrift: changes.otherDrift,
+      unrewritable: skipped, review: await mentions(root, others, rename.fromPath), manual: [...changes.manual, ...suites.manual], otherDrift: changes.otherDrift,
       next: 'source check, then run the project type check (npm run typecheck)' } };
 }

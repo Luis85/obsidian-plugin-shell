@@ -32,8 +32,8 @@ test('the developer kit renders every template, follows custom roots and owns it
   assert.equal(out.text('checks/project/ui-bootstrap.mjs'), "// Install the actual locally bundled icons, not a mock or a remote provider.\nimport { addIcon } from '@iconify/vue';\nimport { init } from 'virtual:nuxt-ui-icons';\ninit(addIcon);\n");
   assert.equal(out.text('tests/suites.json'), (await template.text('tests/suites.json')).replaceAll('"tests/project', '"checks/project'));
   const host = out.text('checks/project/plugin-host.test.ts');
-  assert.ok(host.includes('import GeneratedPlugin from "../../src/main.ts";\nimport manifest from "../../manifest.json";\n'));
-  assert.ok(host.includes('  const files = loadVaultFixtures(join(import.meta.dirname, "../../tests/obsidian/vault"));\n'));
+  assert.ok(host.includes('import GeneratedPlugin from "../../src/plugin/main.ts";\nimport manifest from "../../manifest.json";\n'));
+  assert.ok(host.includes('  const files = loadVaultFixtures(join(import.meta.dirname, "../../tooling/tests/obsidian/vault"));\n'));
   const fallback = model(await starterDocument('blank')); fallback.project.name = ' '; delete fallback.project.description;
   const defaults = recorder(); await devkitFiles(template, fallback, defaults.add);
   assert.ok(defaults.text('README.md').startsWith('# my-vault-tool\n\nAn Obsidian plugin.\n'));

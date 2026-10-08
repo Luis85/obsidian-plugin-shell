@@ -160,21 +160,21 @@ test('[GENERATOR-SCOPE-08] click-dummy build runs the skill worker in the framew
   assert.deepEqual(await run(true), ['.claude/skills/companion-prototype-design/scripts/lib/build-worker.mjs']);
   assert.deepEqual(await run(false), ['scripts/clickdummy/lib/build-worker.mjs']);
 });
-test('[GENERATOR-SCOPE-09] shipped framework tests never drive the shell entry a generated src/main.ts replaces; example removal lists only shipped files', async t => {
+test('[GENERATOR-SCOPE-09] shipped framework tests never drive the shell entry a generated src/plugin/main.ts replaces; example removal lists only shipped files', async t => {
   if (await reviewedExamplesRemoved(root)) { t.skip('The framework entry tests and example ownership exist only while the reviewed example sources are present.'); return; }
   const drivesEntry = /\.onload\(|\.onunload\(|loadPlugin\(/, importsEntry = /from '(?:\.\.\/)+src\/main'/;
   const shipped = paths.filter(path => /^tests\/.*\.test\.ts$/.test(path) && importsEntry.test(text(path)));
   assert.ok(shipped.length >= 2, 'framework runtime tests still use the entry as a plain plugin instance');
-  for (const path of shipped) assert.doesNotMatch(text(path), drivesEntry, `${path} drives the framework src/main.ts lifecycle`);
-  assert.doesNotMatch(text('src/main.ts'), /ShellPlugin|registerView/);
+  for (const path of shipped) assert.doesNotMatch(text(path), drivesEntry, `${path} drives the framework src/plugin/main.ts lifecycle`);
+  assert.doesNotMatch(text('src/plugin/main.ts'), /ShellPlugin|registerView/);
   // The framework checkout keeps running its entry tests; the generator excludes exactly those files.
   const entryTests = ['tests/runtime/shell-entry-lifecycle.test.ts', 'tests/runtime/obsidian-test-kit-shell-entry.test.ts'];
   for (const path of entryTests) {
     assert.match(await readFile(join(root, path), 'utf8'), drivesEntry, path);
     assert.ok(!files.has(path), path); assert.equal(maintainerOnly(path), true, path);
   }
-  const framework = JSON.parse(await readFile(join(root, 'scripts/examples/ownership.json'), 'utf8')).files.map(file => file.path);
-  const ownership = JSON.parse(text('scripts/examples/ownership.json')).files;
+  const framework = JSON.parse(await readFile(join(root, 'src/cli/tooling/examples/ownership.json'), 'utf8')).files.map(file => file.path);
+  const ownership = JSON.parse(text('src/cli/tooling/examples/ownership.json')).files;
   for (const path of entryTests) assert.ok(framework.includes(path), path);
   assert.deepEqual(ownership.map(file => file.path), framework.filter(path => !maintainerOnly(path)));
   // A listed file that is absent would make examples:remove report an edit conflict in every fresh project.

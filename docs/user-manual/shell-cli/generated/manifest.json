@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "frameworkVersion": "0.4.0",
-  "commandCount": 173,
+  "commandCount": 181,
   "sources": [
     {
       "path": "package.json",
@@ -10,11 +10,11 @@
     },
     {
       "path": "src/cli/adapters/framework/catalog.ts",
-      "sha256": "19a41e1358c604c30334bbb4ba68f12ccd05a70a8370defeecc4fe24ed822cd7"
+      "sha256": "411a28eda2a643d9c63e8820b942240b9e4f26e668e23213c3a061c51a6f9a55"
     },
     {
       "path": "src/cli/adapters/framework/help-text.ts",
-      "sha256": "3c779211fff3dd3ca098d2697b05a0b01b628faa609ea3e76b6e452c5eee8fce"
+      "sha256": "dfa87ef8d504a5368128e00e46d77c5b2274785342d1c2e31808999237ded98c"
     },
     {
       "path": "src/cli/adapters/framework/increment-catalog.ts",
@@ -29,26 +29,26 @@
       "sha256": "8cf40898f461b38aa39a7d5399a1e4108e65279611c6067831236270e9e364b6"
     },
     {
-      "path": "scripts/documentation/render.mjs",
-      "sha256": "1a0ec13785ff7dc640be5747d166f1d3cab35a7e009bcb2955b77b5e698703fc"
+      "path": "tooling/documentation/render.mjs",
+      "sha256": "edc2746a9b5bf7bb47d115798a5777222ef7c9a2b7230e5fc7a9f5ba0e605b86"
     },
     {
-      "path": "scripts/documentation/manual.mjs",
-      "sha256": "6eb7decc69eeb9b64ee4d31f0f1527fd465e1dad296b986845f63758fa430ab1"
+      "path": "tooling/documentation/manual.mjs",
+      "sha256": "dd4b4cf112425a7303e6e373514df174ba7a1475be7928268bad2a921ba91310"
     }
   ],
   "outputs": [
     {
       "path": "reference.md",
-      "sha256": "a9ef65a7ff56c41de5e0fd37a2ed352af11190328f7e25db543fa547d2819dab"
+      "sha256": "a76d5013dcfaf8c1207e0b33d0b3c90ab36fcc412b24925c80ad73315d5661db"
     },
     {
       "path": "diagnostics.md",
-      "sha256": "6be5f78b74ad5d3f02260870d34bdf3acfeec3f9464dd1e78d505ac8d7929c03"
+      "sha256": "fcfdc2c5cf997d0651a3026ed6e91f78f8bcf5f3153f29c448a69c886e3070cf"
     },
     {
       "path": "commands.json",
-      "sha256": "b40e9845aa14320ca53475844d90d87263bee0896488dd5617dba71efac2bbd4"
+      "sha256": "2d43bd0f3d1d4d023c3eb58a1bd98ca2a54370d062be0e86822b1c823cbae7ba"
     }
   ]
 }

@@ -63,13 +63,13 @@ for(const loaded of starters){
   const options={input,vault,target:'plugin',templateRoot:root},plan=await planProject(options);assert.equal(plan.conflicts.length,0);assert.deepEqual((await readdir(vault)).sort(),['keep.md','project.json']);
   await assert.rejects(applyProject(plan,'not-a-reviewed-hash'),/stale/);await applyProject(plan,plan.hash);
   const target=join(vault,'plugin'),pkg=JSON.parse(await readFile(join(target,'package.json'),'utf8'));
-  assert.equal(pkg.name,'my-new-plugin');assert.ok(pkg.scripts['verify:project']);assert.match(await readFile(join(target,'src/main.ts'),'utf8'),/initializeProject/);
+  assert.equal(pkg.name,'my-new-plugin');assert.ok(pkg.scripts['verify:project']);assert.match(await readFile(join(target,'src/plugin/main.ts'),'utf8'),/initializeProject/);
   assert.deepEqual(JSON.parse(await readFile(join(target,'design/project.json'),'utf8')),document);
   const trace=JSON.parse(await readFile(join(target,'design/traceability.json'),'utf8'));assert.ok(trace.requirements.every(r=>r.verification==='todo'));
   if(!['blank','agent-ready'].includes(entry.id))assert.ok(trace.requirements.length>=4);
   if(entry.document.design.dataSources.sources.length){
-   assert.match(await readFile(join(target,'src/generated/presentation/stores/starter-records.ts'),'utf8'),/defineStore/);
-   const source=document.design.dataSources.sources[0],module=await import(pathToFileURL(join(target,'src/generated/infrastructure/sources/starter-records.ts')).href);
+   assert.match(await readFile(join(target,'src/plugin/generated/presentation/stores/starter-records.ts'),'utf8'),/defineStore/);
+   const source=document.design.dataSources.sources[0],module=await import(pathToFileURL(join(target,'src/plugin/generated/infrastructure/sources/starter-records.ts')).href);
    const create=module.createGStarterRecordsAdapter;
    if(source.kind==='vault'){
     const entity=document.design.semantic.entities.find(e=>e.id===source.operations[0].output.entity);let reads=0;

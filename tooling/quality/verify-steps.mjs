@@ -36,8 +36,7 @@ export function verifySteps(env = process.env) {
     script('maker-types', 'node_modules/typescript/bin/tsc', ['--noEmit', '--project', 'configs/types/tsconfig.maker.json']),
     script('maker-coverage-run', vitest, ['run', '--coverage', '--config', 'configs/testing/vitest.maker.config.mjs']),
     script('maker-coverage-gate', 'tooling/quality/maker-coverage.mjs', [], ['maker-coverage-run']),
-    // Every pattern must match: add 'tooling/tests/**/*.ts' here (and to the test block of the ESLint config) once a .ts test exists there.
-    script('eslint-tests', eslint, ['-c', 'configs/lint/eslint.config.mjs', '--no-ignore', 'src/*/tests/**/*.ts', 'src/*/tests/support/**/*.{ts,mjs}', 'tooling/tests/support/**/*.{ts,mjs}', 'src/shared/testing', 'src/plugin/harness/app', '--max-warnings', '0'], ['build']),
+    script('eslint-tests', eslint, ['-c', 'configs/lint/eslint.config.mjs', '--no-ignore', 'src/*/tests/**/*.ts', 'tooling/tests/**/*.ts', 'src/*/tests/support/**/*.{ts,mjs}', 'tooling/tests/support/**/*.{ts,mjs}', 'src/shared/testing', 'src/plugin/harness/app', '--max-warnings', '0'], ['build']),
     script('test-quality', 'tooling/quality/check-test-quality.mjs'),
     script('repository', 'tooling/quality/check-repository.mjs'),
     script('projects', 'tooling/projects/projects.mjs', ['check']),

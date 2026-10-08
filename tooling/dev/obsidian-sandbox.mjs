@@ -46,7 +46,7 @@ export async function copyVaultTree(source, target) {
   return files;
 }
 /** Seed once; an existing sandbox vault is preserved byte-for-byte. */
-export async function seedSandbox({ root = process.cwd(), source = 'src/plugin/tests/obsidian/vault', sandbox = '.obsidian-sandbox' } = {}) {
+export async function seedSandbox({ root = process.cwd(), source = 'tooling/tests/obsidian/vault', sandbox = '.obsidian-sandbox' } = {}) {
   root = resolve(root);
   const base = await assertContained(root, join(root, sandboxDirectory(sandbox)));
   const vault = await assertContained(root, join(base, 'vault'));

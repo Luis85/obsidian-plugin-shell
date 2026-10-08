@@ -129,8 +129,8 @@
     },
     {
       "path": "scripts/README.md",
-      "bytes": 6254,
-      "sha256": "0e78349c12fb137939b14b9b36e57bff89b2474260f99a5f1cb074a9ca7afbb1"
+      "bytes": 6302,
+      "sha256": "2d283a10c62514ac1bf88d18addc3b5af5b409da30db64c8e41eb3cdf5dc1ab5"
     },
     {
       "path": "scripts/build-prototype.mjs",
@@ -214,8 +214,8 @@
     },
     {
       "path": "tests/helpers.checks.mjs",
-      "bytes": 8000,
-      "sha256": "3458c415eecef46c943bcae414f29e50c45d42d86f78215e548405978cb4c38a"
+      "bytes": 9189,
+      "sha256": "4f13ed236730a01ecef0a12dbc905d002068bb28b4ef4fe98e2c80c4c9412e1c"
     },
     {
       "path": "tests/integration.checks.mjs",

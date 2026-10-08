@@ -15,7 +15,7 @@ const artifact = (path, content = 'safe', extra = {}) => ({ path, content, owner
 const template = Object.freeze({ fingerprint: 'fixture', frameworkFiles: [], skillFiles: [], text() { throw new Error('unexpected template read'); } });
 const hash = (value, encoding) => createHash('sha256').update(value, encoding === 'base64' ? 'base64' : 'utf8').digest('hex');
 const ports = overrides => ({ validate: value => value, resolve: () => {},
-  lower: () => [], emit: async () => [artifact('src/main.ts')], dependencies: () => ({ ready: true, diagnostics: [] }), hash, ...overrides });
+  lower: () => [], emit: async () => [artifact('src/plugin/main.ts')], dependencies: () => ({ ready: true, diagnostics: [] }), hash, ...overrides });
 const codes = values => values.map(value => value.code);
 const pointers = values => values.map(value => value.source?.jsonPointer);
 

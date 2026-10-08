@@ -16,7 +16,7 @@ import { requireThat, stringOption, type Context, type Request } from './framewo
 import { derivedChanges } from './source-derived.ts';
 import { declaredManifest, manifestEntry, selected, type SourcePlanned } from './source-plan-support.ts';
 import { domain, listFiles, readJsonFile, readSourceState } from './source-workspace.ts';
-import { withSuite } from './source-suites.ts';
+import { removeSuite, withSuite } from './source-suites.ts';
 
 export const receiptPath = (name: string): string => `.workbench/sources/${name}.json`;
 export interface SourceReceipt { schemaVersion: 1; project: string; kind: SourceKind; files: Record<string, string> }
@@ -77,10 +77,10 @@ export async function sourceRemovePlan(request: Request, context: Context): Prom
     (receipt?.files[path] === hash(bytes) || holds(bytes, derived.get(path)) ? removed : retained).push(path);
   }
   const changes = selected(await derivedChanges(context.root, manifest), path => path === 'tsconfig.json' || path === 'package.json');
-  const entries: FilePlanEntry[] = [...removed.map(path => ({ path, content: null })), manifestEntry(manifest), ...changes.entries,
+  const suites = retained.some(path => path.startsWith(`${project.path}/tests/`)) ? { entries: [], manual: [`Review the source:${name} suite in tests/suites.json for the retained tests.`] } : await removeSuite(context.root, name);
+  const entries: FilePlanEntry[] = [...suites.entries, ...removed.map(path => ({ path, content: null })), manifestEntry(manifest), ...changes.entries,
     ...(receipt ? [{ path: receiptPath(name), content: null }] : [])];
   return { plan: await createFilePlan(context.root, entries), conflicts: [],
     summary: { project: name, removed, retained, receipt: receipt ? receiptPath(name) : 'none (files not scaffolded by source add are always kept)',
-      manual: [...changes.manual, ...(retained.length ? [`${project.path} keeps ${retained.length} edited or unrecorded files; move or delete them yourself (the boundary gate reports code outside declared projects).`] : []),
-        `Remove the source:${name} suite from tests/suites.json if source add created it.`], next: 'source check' } };
+      manual: [...changes.manual, ...suites.manual, ...(retained.length ? [`${project.path} keeps ${retained.length} edited or unrecorded files; move or delete them yourself (the boundary gate reports code outside declared projects).`] : [])], next: 'source check' } };
 }

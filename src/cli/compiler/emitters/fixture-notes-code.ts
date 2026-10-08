@@ -10,11 +10,11 @@ export function fixtureNoteTests(m: Model, add: Add): void {
     const file = `${m.testRoot}/fixtures/canonical-${entity.slug}.test.ts`;
     const relative = (path: string) => literal(relativeImport(file,path));
     add(file, `import { it, expect } from 'vitest';
-import { createFixtureEngine } from ${relative('scripts/test-data/engine.mjs')};
-import manifest from ${relative('scripts/test-data/manifest.json')};
-import { NoteRepository } from ${relative('src/application/note-repository.ts')};
-import { markdownCodec } from ${relative('src/infrastructure/markdown.ts')};
-import { success, failure } from ${relative('src/domain/outcome.ts')};
+import { createFixtureEngine } from ${relative('tooling/test-data/engine.mjs')};
+import manifest from ${relative('tooling/test-data/manifest.json')};
+import { NoteRepository } from ${relative('src/plugin/application/note-repository.ts')};
+import { markdownCodec } from ${relative('src/plugin/infrastructure/markdown.ts')};
+import { success, failure } from ${relative('src/plugin/domain/outcome.ts')};
 import { document } from ${relative(`${m.sourceRoot}/application/documents/${entity.slug}.ts`)};
 it('seeded ${entity.slug} Markdown is readable by the canonical repository without a fake codec', async () => {
   const generated=createFixtureEngine().generate(manifest);

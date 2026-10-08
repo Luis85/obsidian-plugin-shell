@@ -1,7 +1,7 @@
 import type { FilePlan } from '#shared/platform/file-plan.ts';
 
 export const flagOptions = ['--dry-run', '--yes', '--no-interaction', '--json', '--help', '--list', '--document', '--refresh'] as const;
-export const valueOptions = ['--feature', '--entity', '--folder', '--preset', '--backend', '--event', '--view', '--preference', '--extension', '--format', '--extensions'] as const;
+export const valueOptions = ['--source', '--feature', '--entity', '--folder', '--preset', '--backend', '--event', '--view', '--preference', '--extension', '--format', '--extensions'] as const;
 export type FlagOption = typeof flagOptions[number];
 export type ValueOption = typeof valueOptions[number];
 /** Parsed maker options: flags are `true`, value options carry their string. */

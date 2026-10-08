@@ -14,7 +14,7 @@ export function clickdummyFiles(model: Model, template: TemplateSnapshot, files:
   const add = (path: string, content: string): Artifact => ({ path, content, ownership: 'managed', producer: 'clickdummy' });
   const pkgFile = files.find(file => file.path === 'package.json')!;
   const pkg = JSON.parse(pkgFile.content);
-  pkg.scripts['build:clickdummy'] = 'node scripts/compiler/build-clickdummy.mjs';
+  pkg.scripts['build:clickdummy'] = 'node tooling/compiler/build-clickdummy.mjs';
   pkg.scripts['typecheck:clickdummy'] = 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project configs/types/tsconfig.clickdummy.json';
   return [...files.filter(file => file.path !== 'package.json'), { ...pkgFile, content: json(pkg) },
     add('configs/types/tsconfig.clickdummy.json', json({ extends: './tsconfig.project.json', include: [
@@ -36,7 +36,7 @@ Use the labelled Authored scenario selector to preview a page's saved sample bin
 
 In an authored scenario, local edits, navigation and modal opening remain simulations; source actions and implementation hooks are refused without claiming a saved result. Synthetic reads (no scenario) restores the existing browser-only adapter behavior. The separate Preview state control can override the displayed state. Scenario selection never changes the exported project JSON. Modal scenarios are not independently selectable in this increment; narrow layout intent is not device qualification.
 
-Review dependency readiness in design/compiler-readiness.json. Install explicitly, then run npm run typecheck:clickdummy and npm run build:clickdummy. The shipped offline builder embeds the libraries and blocks external requests. Existing output is preserved; use node scripts/compiler/build-clickdummy.mjs --replace for a deliberate replacement.
+Review dependency readiness in design/compiler-readiness.json. Install explicitly, then run npm run typecheck:clickdummy and npm run build:clickdummy. The shipped offline builder embeds the libraries and blocks external requests. Existing output is preserved; use node tooling/compiler/build-clickdummy.mjs --replace for a deliberate replacement.
 
 Bundling is not browser or business acceptance. External component adapters remain explicit implementation points.
 `),

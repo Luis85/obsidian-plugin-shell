@@ -247,6 +247,20 @@
       ]
     },
     {
+      "id": "source",
+      "title": "Source projects (workbench.sources.json)",
+      "commands": [
+        "source list",
+        "source graph",
+        "source check",
+        "source add",
+        "source link",
+        "source unlink",
+        "source rename",
+        "source remove"
+      ]
+    },
+    {
       "id": "compiler",
       "title": "Project compiler",
       "commands": [
@@ -5843,6 +5857,470 @@
       ]
     },
     {
+      "id": "source list",
+      "summary": "List the source projects of workbench.sources.json (or the implicit legacy plugin project) with kind, path, references, alias and dependents.",
+      "effect": "read",
+      "maxArgs": 0,
+      "group": "source",
+      "usage": "node bin/app source list [--json]",
+      "examples": [
+        "node bin/app source list",
+        "node bin/app source list --json"
+      ],
+      "options": [
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "source graph",
+      "summary": "Show the source project dependency graph: build order, references and reverse dependents.",
+      "effect": "read",
+      "maxArgs": 0,
+      "group": "source",
+      "usage": "node bin/app source graph [--json]",
+      "examples": [
+        "node bin/app source graph"
+      ],
+      "options": [
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "apply",
+        "dry-run",
+        "plan-out",
+        "timeout",
+        "yes"
+      ]
+    },
+    {
+      "id": "source check",
+      "summary": "Validate the manifest, graph, project folders and tsconfigs, #aliases, cross-project imports and gate scopes; exits 1 on findings. --fix reviews a plan regenerating the derived files.",
+      "effect": "plan",
+      "maxArgs": 0,
+      "group": "source",
+      "usage": "node bin/app source check [--fix [--dry-run | --yes | --apply <sha256>]] [--json]",
+      "examples": [
+        "node bin/app source check",
+        "node bin/app source check --json",
+        "node bin/app source check --fix",
+        "node bin/app source check --fix --yes"
+      ],
+      "options": [
+        {
+          "name": "fix",
+          "kind": "flag",
+          "description": "source check only: review a plan that regenerates the derived files (project and tests tsconfigs, root solution, package.json \"imports\") from the manifest, or writes the manifest of a legacy project without moving files."
+        },
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
+      "id": "source add",
+      "summary": "Review scaffolding src/<name> from the kind template (code, one passing test, both tsconfigs) with its manifest entry, solution reference, alias and suite.",
+      "effect": "plan",
+      "maxArgs": 1,
+      "group": "source",
+      "usage": "node bin/app source add <name> --kind plugin|cli|companion|library [--platform node|browser] [--references a,b] [--dry-run | --yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app source add util --kind library --references shared",
+        "node bin/app source add mobile --kind plugin --references shared --yes"
+      ],
+      "options": [
+        {
+          "name": "kind",
+          "kind": "value",
+          "description": "Kind template of the new source project (templates/sources/<kind>).",
+          "values": [
+            "plugin",
+            "cli",
+            "companion",
+            "library"
+          ]
+        },
+        {
+          "name": "platform",
+          "kind": "value",
+          "description": "TypeScript base of a library project; plugin and companion are browser, cli is node.",
+          "values": [
+            "node",
+            "browser"
+          ],
+          "default": "node"
+        },
+        {
+          "name": "references",
+          "kind": "value",
+          "description": "Comma-separated projects the new project may import.",
+          "default": "none"
+        },
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
+      "id": "source link",
+      "summary": "Review adding a reference <from> -> <to> and the derived tsconfigs; refuses a cycle.",
+      "effect": "plan",
+      "maxArgs": 2,
+      "group": "source",
+      "usage": "node bin/app source link <from> <to> [--dry-run | --yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app source link plugin util",
+        "node bin/app source link plugin util --yes"
+      ],
+      "options": [
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
+      "id": "source unlink",
+      "summary": "Review removing a reference <from> -> <to>; refuses while <from> still imports <to>.",
+      "effect": "plan",
+      "maxArgs": 2,
+      "group": "source",
+      "usage": "node bin/app source unlink <from> <to> [--dry-run | --yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app source unlink plugin util --dry-run"
+      ],
+      "options": [
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
+      "id": "source rename",
+      "summary": "Review renaming a project: moves its folder, rewrites the manifest, references, alias, tsconfigs and every import of the old alias or path.",
+      "effect": "plan",
+      "maxArgs": 2,
+      "group": "source",
+      "usage": "node bin/app source rename <old> <new> [--dry-run | --yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app source rename util helpers",
+        "node bin/app source rename util helpers --apply <sha256>"
+      ],
+      "options": [
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
+      "id": "source remove",
+      "summary": "Review removing an unreferenced project: deletes only files that still match their scaffold hash and keeps and lists edited ones.",
+      "effect": "plan",
+      "maxArgs": 1,
+      "group": "source",
+      "usage": "node bin/app source remove <name> [--dry-run | --yes | --apply <sha256>] [--json]",
+      "examples": [
+        "node bin/app source remove helpers",
+        "node bin/app source remove helpers --yes"
+      ],
+      "options": [
+        {
+          "name": "dry-run",
+          "kind": "flag",
+          "description": "Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file."
+        },
+        {
+          "name": "yes",
+          "kind": "flag",
+          "description": "Apply the freshly rebuilt plan (or run the process) without prompting."
+        },
+        {
+          "name": "apply",
+          "kind": "value",
+          "description": "Apply only if the rebuilt plan still has this reviewed SHA-256 hash."
+        },
+        {
+          "name": "plan-out",
+          "kind": "value",
+          "description": "Save a replayable request plan (for plan inspect/apply)."
+        },
+        {
+          "name": "json",
+          "kind": "flag",
+          "description": "Print exactly one versioned JSON result on stdout."
+        },
+        {
+          "name": "root",
+          "kind": "value",
+          "description": "Project folder to operate on.",
+          "default": "nearest folder with shell.config.json or bin/app"
+        },
+        {
+          "name": "no-interaction",
+          "kind": "flag",
+          "description": "Never prompt, even on a TTY."
+        },
+        {
+          "name": "help",
+          "kind": "flag",
+          "description": "Describe this command instead of running it."
+        }
+      ],
+      "parserOnlyOptions": [
+        "timeout"
+      ]
+    },
+    {
       "id": "handout generate",
       "summary": "Review create-only generation of the root product-trio handout; never overwrites answers or runs processes.",
       "effect": "plan",
@@ -8729,6 +9207,12 @@
         "node bin/app make feature bookmarks --entity bookmark --dry-run"
       ],
       "options": [
+        {
+          "name": "source",
+          "kind": "value",
+          "description": "Source folder.",
+          "default": "src"
+        },
         {
           "name": "feature",
           "kind": "value",

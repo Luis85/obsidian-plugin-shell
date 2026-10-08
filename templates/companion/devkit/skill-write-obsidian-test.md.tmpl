@@ -1,6 +1,6 @@
 ---
 name: write-obsidian-test
-description: Write a test that exercises the plugin against Obsidian, either the fast in-memory kit (@test/obsidian) or a real-Obsidian spec (tests/obsidian). Use when adding tests for commands, views, settings tabs, vault writes or plugin lifecycle.
+description: Write a test that exercises the plugin against Obsidian, either the fast in-memory kit (@test/obsidian) or a real-Obsidian spec (tooling/tests/obsidian). Use when adding tests for commands, views, settings tabs, vault writes or plugin lifecycle.
 ---
 
 # Write an Obsidian test
@@ -10,7 +10,7 @@ Choose the layer:
 - **In-memory kit** (milliseconds, default): plugin logic, commands, settings,
   vault writes, metadata. File: `{{testRoot}}/<behavior>.test.ts`.
 - **Real Obsidian** (seconds per case): anything the kit cannot prove (rendering,
-  host event order, real plugin manager). File: `tests/obsidian/<behavior>.obsidian.ts`.
+  host event order, real plugin manager). File: `tooling/tests/obsidian/<behavior>.obsidian.ts`.
 
 ## In-memory kit template
 
@@ -20,7 +20,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 vi.mock('obsidian', () => import('@test/obsidian'));
 import { App } from 'obsidian';
 import { createTestApp } from '@test/obsidian';
-import Plugin from '<relative path>/src/main';
+import Plugin from '<relative path>/src/plugin/main';
 import manifest from '<relative path>/manifest.json';
 
 afterEach(() => { document.body.replaceChildren(); });
@@ -55,7 +55,7 @@ describe('<feature> in real Obsidian', () => {
 });
 ```
 
-Seed notes in `tests/obsidian/vault/`. Run: `npm run test:obsidian -- <file filter>`;
+Seed notes in `tooling/tests/obsidian/vault/`. Run: `npm run test:obsidian -- <file filter>`;
 evidence is in `reports/obsidian/cases/`. Use `expect.poll`/`waitFor`, never sleeps.
 Guide: `docs/testing/OBSIDIAN-DEV-LOOP.md`.
 

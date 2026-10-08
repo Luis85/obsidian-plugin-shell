@@ -79,10 +79,10 @@ async function workspace(work) {
   const input = { vault, target: join(vault, 'plugin'), content: Buffer.from(JSON.stringify(blank)) };
   const m = projectModel(blank);
   const files = [
-    { path: 'src/generated/presentation/components/screens/workspace-screen.vue', content: 'workspace\n', ownership: 'extension' },
-    { path: 'src/generated/presentation/components/screens/preferences-screen.vue', content: 'preferences\n', ownership: 'extension' },
+    { path: 'src/plugin/generated/presentation/components/screens/workspace-screen.vue', content: 'workspace\n', ownership: 'extension' },
+    { path: 'src/plugin/generated/presentation/components/screens/preferences-screen.vue', content: 'preferences\n', ownership: 'extension' },
     { path: 'design/project.json', content: JSON.stringify(blank), ownership: 'managed' },
-    { path: 'src/generated/navigation.ts', content: 'complete registry\n', ownership: 'managed' },
+    { path: 'src/plugin/generated/navigation.ts', content: 'complete registry\n', ownership: 'managed' },
   ];
   const options = { target: 'plugin', templateRoot: root };
   try { await work({ vault, input, m, files, options }); } finally { await rm(vault, { recursive: true, force: true }); }

@@ -25,10 +25,17 @@ export async function domain<T>(run: () => T | Promise<T>): Promise<T> {
 
 export interface JsonFile { value: unknown; text: string }
 /** A JSON file of the project, null when absent; unparseable content is an INVALID_DATA failure left untouched. */
+export async function parseSourceJson(text: string, path: string): Promise<unknown> {
+  if (!/(?:^|\/)tsconfig\.json$/.test(path)) return JSON.parse(text) as unknown;
+  const ts = (await import('typescript')).default;
+  const parsed = ts.parseConfigFileTextToJson(path, text);
+  if (parsed.error) throw new Error(ts.flattenDiagnosticMessageText(parsed.error.messageText, '\n'));
+  return parsed.config as unknown;
+}
 export async function readJsonFile(root: string, path: string): Promise<JsonFile | null> {
   if (!await exists(join(root, path))) return null;
   const text = (await readBounded(join(root, path), 4_000_000)).toString('utf8');
-  try { return { value: JSON.parse(text) as unknown, text }; }
+  try { return { value: await parseSourceJson(text, path), text }; }
   catch { throw new OperationError('INVALID_DATA', `${path} is not valid JSON; it was left untouched.`, `Repair ${path} by hand.`); }
 }
 export async function isDirectory(root: string, path: string): Promise<boolean> {

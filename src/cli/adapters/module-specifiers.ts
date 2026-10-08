@@ -57,7 +57,7 @@ function scriptSpecifiers(ts: Typescript, path: string, source: string, offset: 
     const literal = literalOf(ts, node, ast);
     if (literal) {
       const start = literal.getStart(ast) + 1;
-      found.push({ specifier: literal.text, line: ast.getLineAndCharacterOfPosition(node.getStart(ast)).line + firstLine, start: start + offset, end: start + offset + literal.text.length });
+      found.push({ specifier: literal.text, line: ast.getLineAndCharacterOfPosition(node.getStart(ast)).line + firstLine, start: start + offset, end: literal.getEnd() - 1 + offset });
     }
     ts.forEachChild(node, visit);
   };

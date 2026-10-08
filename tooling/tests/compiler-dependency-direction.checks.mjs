@@ -11,10 +11,10 @@ const root = fileURLToPath(new URL('../../', import.meta.url));
 // The former companion facades and the whole compiler moved to src/cli/compiler;
 // nothing may recreate or import the removed paths.
 const owners = new Map([
-  ['scripts/companion/compiler/plan.ts', 'src/cli/compiler/adapters/project-plan.ts'],
-  ['scripts/companion/compiler/cli.ts', 'src/cli/adapters/framework-cli.ts'],
-  ['scripts/companion/compiler/fixture-code.ts', 'src/cli/compiler/adapters/fixture-emitter.ts'],
-  ['scripts/companion/compiler/project-files.ts', 'src/cli/compiler/adapters/plugin-emitter.ts'],
+  ['src/shared/companion/compiler/plan.ts', 'src/cli/compiler/adapters/project-plan.ts'],
+  ['src/shared/companion/compiler/cli.ts', 'src/cli/adapters/framework-cli.ts'],
+  ['src/shared/companion/compiler/fixture-code.ts', 'src/cli/compiler/adapters/fixture-emitter.ts'],
+  ['src/shared/companion/compiler/project-files.ts', 'src/cli/compiler/adapters/plugin-emitter.ts'],
   // The inward-only compiler core moved to src/cli/compiler; its former scripts/compiler paths are gone too.
   ...['artifacts', 'contracts', 'diagnostics', 'project-starter', 'references', 'selection', 'source-references']
     .map(name => [`scripts/compiler/domain/${name}.ts`, `src/cli/compiler/domain/${name}.ts`]),
@@ -85,7 +85,7 @@ test('repository sources keep the compiler -> companion dependency direction', a
 
 test('the former companion compiler facades are gone and their compiler owners exist', async () => {
   // E4: the code emitters moved to src/cli/compiler/emitters; the whole former folder is gone.
-  await assert.rejects(readdir(resolve(root, 'scripts/companion/compiler')), { code: 'ENOENT' });
+  await assert.rejects(readdir(resolve(root, 'src/shared/companion/compiler')), { code: 'ENOENT' });
   for (const [path, owner] of owners) {
     await assert.rejects(readFile(resolve(root, path), 'utf8'), { code: 'ENOENT' }, path);
     assert.ok((await readFile(resolve(root, owner), 'utf8')).includes('export '), owner);
@@ -123,20 +123,20 @@ test('companion code reaches compiler domain contracts through import type only'
 
 test('no source may import or recreate a removed companion facade', () => {
   for (const [path, statement] of [
-    ['src/cli/adapters/example.ts', "import { planProject } from '../../../scripts/companion/compiler/plan.ts';"],
-    ['src/cli/adapters/example.ts', "const cli = await import('../../../scripts/companion/compiler/cli.ts');"],
-    ['src/cli/adapters/starters/example.ts', "import { projectFiles } from '../../../../scripts/companion/compiler/project-files.ts';"],
+    ['src/cli/adapters/example.ts', "import { planProject } from '../../../src/shared/companion/compiler/plan.ts';"],
+    ['src/cli/adapters/example.ts', "const cli = await import('../../../src/shared/companion/compiler/cli.ts');"],
+    ['src/cli/adapters/starters/example.ts', "import { projectFiles } from '../../../../src/shared/companion/compiler/project-files.ts';"],
     ['scripts/compiler/adapters/example.ts', "export { fixtureCode } from '../../companion/compiler/fixture-code.ts';"],
-    ['plugins/example/index.ts', "import '../../scripts/companion/compiler/plan.ts';"],
+    ['plugins/example/index.ts', "import '../../src/shared/companion/compiler/plan.ts';"],
     ['src/cli/adapters/example.ts', "import { CompilerError } from '../../../scripts/compiler/domain/diagnostics.ts';"],
     ['scripts/compiler/adapters/example.ts', "import { runCompiler } from '../application/pipeline.ts';"],
-    ['tests/tooling/example.checks.mjs', "import { planProject } from '../../scripts/companion/compiler/plan.ts';"],
+    ['tests/tooling/example.checks.mjs', "import { planProject } from '../../src/shared/companion/compiler/plan.ts';"],
   ]) {
     const findings = directionFindings(new Map([[path, statement]]));
     assert.equal(findings.length, 1, `${path}: ${statement}`);
     assert.match(findings[0], /instead of removed facade/);
   }
-  const recreated = directionFindings(new Map([['scripts/companion/compiler/plan.ts', 'export const planProject = 1;']]));
+  const recreated = directionFindings(new Map([['src/shared/companion/compiler/plan.ts', 'export const planProject = 1;']]));
   assert.equal(recreated.length, 1);
   assert.match(recreated[0], /removed facade was recreated/);
   const generated = 'const output = `import { planProject } from "../companion/compiler/plan.ts";`;';

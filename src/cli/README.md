@@ -259,9 +259,13 @@ writing operation previews a plan and writes only with `--apply <planHash>` or
 `--yes`; a corrupt manifest is never overwritten. `add` renders
 `templates/sources/<kind>` (code, one passing `node:test` test, both tsconfigs),
 registers a `source:<name>` suite in `tests/suites.json` and records the scaffold
-hashes in `.workbench/sources/<name>.json`; `remove` deletes only files that still
-match them and lists the rest. `rename` moves files through the plan (delete plus
-create; Git detects the rename) and lists other textual mentions for review.
+hashes in `.workbench/sources/<name>.json`; `remove` deletes unchanged scaffold
+files and derived tsconfigs, and lists retained files. It also removes an unchanged
+scaffold suite when no tests are retained; customized suites stay for review.
+`rename` moves files through the plan (delete plus create; Git detects the rename),
+updates import literals, suite paths and test build metadata, and lists other
+textual mentions for review. Valid tsconfig comments and trailing commas are
+accepted; unchanged configurations keep their original formatting.
 The repository's project boundary gate (`tooling/quality/check-project-boundaries.mjs`)
 reads the same manifest through `src/shared/platform/source-manifest.mjs`.
 

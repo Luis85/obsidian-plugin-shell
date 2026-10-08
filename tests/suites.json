@@ -20,7 +20,7 @@
       "summary": "A real browser or a real Obsidian host. Opt-in in workflows and mandatory in the Release tier (tooling/quality/e2e-policy.mjs).",
       "paths": [
         "src/plugin/tests/e2e/**",
-        "src/plugin/tests/obsidian/**",
+        "tooling/tests/obsidian/**",
         "tests/browser-specimen/**",
         "tests/browser-workflows/**",
         "src/companion/tests/concepts/*.browser.{py,mjs}"
@@ -898,6 +898,7 @@
       },
       "include": [
         "src/cli/tests/maker-*.checks.mjs",
+        "src/cli/tests/maker-source-target.test.mjs",
         "tooling/tests/maker-*.checks.mjs",
         "tooling/tests/makers.checks.mjs",
         "tests/tooling/custom-*.checks.mjs",
@@ -1266,7 +1267,7 @@
         "script": "test:obsidian"
       },
       "include": [
-        "src/plugin/tests/obsidian/**/*.obsidian.ts"
+        "tooling/tests/obsidian/**/*.obsidian.ts"
       ],
       "optional": true,
       "prerequisites": [
@@ -1286,7 +1287,7 @@
     {
       "purpose": "Synthetic vault copied for each real-Obsidian case",
       "include": [
-        "src/plugin/tests/obsidian/vault/**"
+        "tooling/tests/obsidian/vault/**"
       ]
     },
     {
@@ -1328,11 +1329,11 @@
     {
       "purpose": "Real-host test support, fixtures and declarations",
       "include": [
-        "src/plugin/tests/obsidian/support/**",
-        "src/plugin/tests/obsidian/fixtures/**",
-        "src/plugin/tests/obsidian/**/*-fixture.*",
-        "src/plugin/tests/obsidian/**/*-helpers.*",
-        "src/plugin/tests/obsidian/**/*.d.ts"
+        "tooling/tests/obsidian/support/**",
+        "tooling/tests/obsidian/fixtures/**",
+        "tooling/tests/obsidian/**/*-fixture.*",
+        "tooling/tests/obsidian/**/*-helpers.*",
+        "tooling/tests/obsidian/**/*.d.ts"
       ]
     },
     {

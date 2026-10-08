@@ -66,8 +66,8 @@ export function solutionRequirements(manifest: SourceManifest, testFolders: read
 }
 function solutionPaths(config: unknown): string[] | null {
   if (!config || typeof config !== 'object' || Array.isArray(config)) return null;
-  const { references, include, compilerOptions } = config as Record<string, unknown>;
-  if (!Array.isArray(references) || include !== undefined || compilerOptions !== undefined) return null;
+  const { references, files, include, compilerOptions } = config as Record<string, unknown>;
+  if (!Array.isArray(references) || include !== undefined || compilerOptions !== undefined || !Array.isArray(files) || files.length !== 0) return null;
   return references.map(item => normalized(String((item as { path?: unknown } | null)?.path ?? '')));
 }
 /** Missing project/tests references and stale `src` references of a root solution; `solution: false` when it is no solution file. */

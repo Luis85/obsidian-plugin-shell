@@ -50,7 +50,7 @@ test('package files copy exact engine pins, merge adapter pins and refuse scope 
   assert.equal(nuxt.devDependencies.obsidian, '1.13.0'); assert.equal(nuxt.scripts['build:prototype'], 'node scripts/build.mjs --prototype');
   const cli = parsed(packageFiles(template(), selection('none', ['cli']), 'fixture', requireFrameworkAdapter('none')));
   assert.deepEqual(Object.keys(cli.devDependencies), ['typescript', '@types/node']); assert.equal(cli.scripts.start, undefined);
-  assert.equal(cli.scripts['start:cli'], 'node dist/cli/src/targets/cli/main.js'); assert.equal(cli.scripts.typecheck, 'tsc --noEmit --project tsconfig.json');
+  assert.equal(cli.scripts['start:cli'], 'node dist/cli/src/plugin/targets/cli/main.js'); assert.equal(cli.scripts.typecheck, 'tsc --noEmit --project tsconfig.json');
   const react = { id: 'react', label: 'React', engine: 'vanilla', dependencies: { react: '19.0.0' }, devDependencies: { vite: '7.0.0' } };
   const merged = parsed(packageFiles(template(), selection('react', ['webapp']), 'fixture', react));
   assert.equal(merged.dependencies.react, '19.0.0'); assert.equal(merged.devDependencies.vite, '7.0.0');
@@ -71,13 +71,13 @@ test('the starter emitter refuses mismatched or unsupported adapters and unsafe 
   const svelte = selection('svelte', ['webapp']);
   assert.throws(() => renderStarterProject(model, template(), svelte, { id: 'svelte', label: 'Svelte', engine: 'nuxtui' }), /FRAMEWORK_ADAPTER_ENGINE_UNSUPPORTED:svelte/);
   const react = selection('react', ['webapp']);
-  for (const files of [{ 'src/core/evil.ts': 'x' }, { 'src/ui/../evil.ts': 'x' }, { 'src/ui/ok.ts': 1 }])
+  for (const files of [{ 'src/plugin/core/evil.ts': 'x' }, { 'src/ui/../evil.ts': 'x' }, { 'src/ui/ok.ts': 1 }])
     assert.throws(() => renderStarterProject(model, template(), react, { id: 'react', label: 'React', engine: 'vanilla', files: () => files }), /FRAMEWORK_ADAPTER_FILE_INVALID:react/);
   const contributed = renderStarterProject(model, template(), react, { id: 'react', label: 'React', engine: 'vanilla', files: () => ({ 'src/ui/App.tsx': 'app' }) });
   const paths = contributed.map(file => file.path);
   assert.equal(contributed.find(file => file.path === 'src/ui/App.tsx').content, 'app');
-  assert.ok(paths.includes('src/ui/mount.ts') && paths.includes('scripts/serve.mjs') && paths.includes('src/targets/webapp/main.ts'));
-  assert.ok(contributed.find(file => file.path === 'src/core/project.ts').origins.length === model.screens.length);
+  assert.ok(paths.includes('src/ui/mount.ts') && paths.includes('scripts/serve.mjs') && paths.includes('src/plugin/targets/webapp/main.ts'));
+  assert.ok(contributed.find(file => file.path === 'src/plugin/core/project.ts').origins.length === model.screens.length);
   const cli = renderStarterProject(model, template(), selection('none', ['cli'])).map(file => file.path);
-  assert.ok(cli.includes('src/targets/cli/main.ts') && !cli.includes('src/ui/styles.css') && !cli.includes('scripts/serve.mjs'));
+  assert.ok(cli.includes('src/plugin/targets/cli/main.ts') && !cli.includes('src/ui/styles.css') && !cli.includes('scripts/serve.mjs'));
 });

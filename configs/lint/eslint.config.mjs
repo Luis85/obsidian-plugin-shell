@@ -42,8 +42,8 @@ export default ts.config(
     languageOptions: { parserOptions: { parser: ts.parser, project: [projectTsconfig], extraFileExtensions: ['.vue'], tsconfigRootDir: root } },
     ...(folder === 'harness' || folder.startsWith('harness/') ? {} : { plugins: { obsidianmd: obsidian }, rules: pluginRules }) })),
   // The test folders: a generated project keeps its tests/{runtime,support,e2e,obsidian} and harness/app; the shell lints every
-  // source project's tests plus the harness app (tooling/tests/**/*.ts is added here and to the eslint-tests step once a .ts test exists there).
-  { files: shell ? ['tests/support/**/*.ts', 'src/*/tests/**/*.ts', 'src/plugin/harness/app/**/*.ts']
+  // source project's tests, repository-owned real-host tests, and the harness app.
+  { files: shell ? ['tests/support/**/*.ts', 'src/*/tests/**/*.ts', 'tooling/tests/**/*.ts', 'src/plugin/harness/app/**/*.ts']
       : ['tests/runtime/**/*.ts', 'tests/support/**/*.ts', 'tests/e2e/**/*.ts', 'tests/obsidian/**/*.ts', 'harness/app/**/*.ts'],
     languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: root } },
     rules: { '@typescript-eslint/no-floating-promises': 'error',

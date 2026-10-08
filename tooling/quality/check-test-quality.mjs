@@ -3,14 +3,15 @@ import { join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 
-/** AST-only policy for imported Vitest/Playwright test declarations, including aliases.
+/** AST-only policy for imported Vitest/Playwright/node:test test declarations, including aliases.
  * Promise handling belongs to the separately configured type-aware ESLint rule. */
 export function inspectTestQuality(text, name = 'example.test.ts') {
   const source = ts.createSourceFile(name, text, ts.ScriptTarget.Latest, true);
   if (source.parseDiagnostics.length) return ['TEST_PARSE_ERROR'];
   const bindings = new Set(); const namespaces = new Set(); const failures = [];
   for (const statement of source.statements) {
-    if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier) || !['vitest', '@playwright/test'].includes(statement.moduleSpecifier.text)) continue;
+    if (!ts.isImportDeclaration(statement) || !ts.isStringLiteral(statement.moduleSpecifier) || !['vitest', '@playwright/test', 'node:test'].includes(statement.moduleSpecifier.text)) continue;
+    if (statement.moduleSpecifier.text === 'node:test' && statement.importClause?.name) bindings.add(statement.importClause.name.text);
     const named = statement.importClause?.namedBindings;
     if (named && ts.isNamespaceImport(named)) namespaces.add(named.name.text);
     if (named && ts.isNamedImports(named)) for (const item of named.elements) {
@@ -48,12 +49,14 @@ export async function checkTestQuality(root = process.cwd()) {
     }
   }
   // Vitest/Playwright declarations live in the plugin project's tests; tooling/tests holds the few Vitest suites that also need tooling modules.
-  for (const path of ['src/plugin/tests/unit', 'src/plugin/tests/e2e', 'src/plugin/tests/obsidian', 'tooling/tests']) await walk(resolve(root, path));
+  for (const path of ['src/plugin/tests/unit', 'src/plugin/tests/e2e', 'tooling/tests']) await walk(resolve(root, path));
+  // This suite was migrated from typed Vitest to node:test; preserve its declaration gate.
+  files.push(resolve(root, 'tooling/tests/setup-tooling-boundaries.checks.mjs'));
   if (!files.length) throw new Error('NO_TEST_INPUTS');
   const failures = [];
   for (const file of files) failures.push(...inspectTestQuality(await readFile(file, 'utf8'), relative(root, file)));
   if (failures.length) throw new Error(failures.join('\n'));
-  return { status: 'passed', files: files.length, scope: 'imported Vitest/Playwright declarations; typed promises use ESLint' };
+  return { status: 'passed', files: files.length, scope: 'imported Vitest/Playwright/node:test declarations; typed promises use ESLint' };
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try { if (process.argv.length !== 2) throw new Error('NO_ARGUMENTS_SUPPORTED'); console.log(JSON.stringify(await checkTestQuality())); }

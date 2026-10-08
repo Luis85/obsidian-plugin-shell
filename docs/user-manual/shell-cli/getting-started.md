@@ -4,6 +4,8 @@
 
 Use the Node and npm versions qualified by the checked-out release: inspect `.nvmrc`, `package.json` and the retained release instructions. The reviewed source declares Node at least 22.13.0 and npm at least 11.19.1 but below 13. A minimum supported version is not a statement that every newer version has passed the project's qualification suite. The project uses TypeScript 6; do not downgrade it to accommodate documentation tooling.
 
+The extracted kit contains compiled CLI modules and can start before project dependency installation. In a framework source checkout, first run `npm ci` with the qualified toolchain and `npm run build:cli` to generate the complete `bin/` folder; `npm run app:dev -- <command>` runs the current development source. Starting the CLI is different from installing dependencies required to build or test a generated application.
+
 ```sh
 node --version
 npm --version
@@ -12,8 +14,6 @@ node bin/app doctor
 ```
 
 Run from the project or CLI package root and invoke `node bin/app`; it is the single supported launcher. Commands normally discover a project root from the working directory; use `--root` when you need to select it explicitly. Quote paths containing spaces. Avoid developing directly inside your personal Obsidian vault.
-
-The extracted kit contains compiled CLI modules and can start before project dependency installation. The source launcher uses Node's TypeScript support, requesting type stripping where necessary. Starting the CLI is different from installing dependencies required to build or test a generated application.
 
 ## 2. Add Workbench to a project that already exists
 

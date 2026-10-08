@@ -411,20 +411,20 @@ test('declared packages merge into package.json with extension-owned adapters, a
   const pkg = JSON.parse(get('package.json').content), names = Object.keys(pkg.dependencies);
   assert.equal(pkg.dependencies['@tiptap/vue-3'], '2.11.5'); assert.deepEqual(names, [...names].sort()); assert.deepEqual(pkg.devDependencies, before.devDependencies);
   assert.equal(JSON.parse(get('package-lock.json').content).packages[''].dependencies['@tiptap/vue-3'], undefined);
-  const adapter = get(`src/generated/presentation/components/library/${component.libraryId}/editor.adapter.ts`);
+  const adapter = get(`src/plugin/generated/presentation/components/library/${component.libraryId}/editor.adapter.ts`);
   assert.equal(adapter.ownership, 'extension');
   for (const part of ['import type { VisualExternalAdapter } from "../../../../domain/visual-runtime.ts";', 'import { NotImplementedError } from "../../../../domain/contract.ts";', '// Implement with: import … from "@tiptap/vue-3"', 'export interface Props extends Record<string, unknown> {\n  "content": unknown;\n}', 'export function createAdapter(): VisualExternalAdapter<Props>'])
     assert.ok(adapter.content.includes(part), part);
   assert.equal(adapter.content.match(/throw new NotImplementedError\("@tiptap\/vue-3 adapter editor", "(mount|update|destroy)"\)/g).length, 3);
-  const lifecycle = get(`tests/project/acceptance/${component.libraryId}-editor.adapter.test.ts`).content;
+  const lifecycle = get(`src/plugin/tests/project/acceptance/${component.libraryId}-editor.adapter.test.ts`).content;
   assert.match(lifecycle, /it\.todo\("\[[a-z0-9-]+\/editor\] implement the @tiptap\/vue-3 adapter/);
-  assert.ok(lifecycle.includes(`vi.mock("../../../src/generated/presentation/components/library/${component.libraryId}/editor.adapter.ts"`));
+  assert.ok(lifecycle.includes(`vi.mock("../../../src/plugin/generated/presentation/components/library/${component.libraryId}/editor.adapter.ts"`));
   assert.ok(lifecycle.includes(`fake.emit("update", 'fixture'); await flushPromises();`) && lifecycle.includes(`toContain("${interactionId}");`));
   assert.ok(lifecycle.includes('expect(fake.log).toEqual(["mount","destroy"]);'));
   const notes = get('PROJECT-IMPLEMENTATION.md').content;
   assert.ok(notes.includes(`- @tiptap/vue-3@2.11.5 (${component.exportName}): Rich text editing`));
   assert.ok(notes.includes("Licenses of these packages are the author's responsibility"));
-  assert.ok(notes.includes(`- \`src/generated/presentation/components/library/${component.libraryId}/editor.adapter.ts\` (@tiptap/vue-3, ${component.exportName})`), 'the real adapter path');
+  assert.ok(notes.includes(`- \`src/plugin/generated/presentation/components/library/${component.libraryId}/editor.adapter.ts\` (@tiptap/vue-3, ${component.exportName})`), 'the real adapter path');
   assert.ok(!notes.includes('library/<library>/'), 'no placeholder path');
   assert.deepEqual(JSON.parse(get('design/visual-traceability.json').content).adapters.map(a => [a.package, a.adapter]), [['@tiptap/vue-3', 'editor']]);
   assert.ok((await projectFiles(process.cwd(), projectModel(self))).find(f => f.path === 'PROJECT-IMPLEMENTATION.md').content.includes('No visual component declares a third-party package.'));

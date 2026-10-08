@@ -36,7 +36,7 @@
     "../../src/plugin/tests/unit/**/*.ts",
     "../../tests/support/**/*.ts",
     "../../src/plugin/tests/e2e/**/*.ts",
-    "../../src/plugin/tests/obsidian/**/*.ts",
+    "../../tooling/tests/obsidian/**/*.ts",
     "../testing/playwright.config.ts"
   ]
 }

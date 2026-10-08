@@ -62,7 +62,7 @@ export default preview;
 `, 'extension'),
     add('vite.config.mjs', `// Reuse the framework's hash-guarded Nuxt UI adaptation, local icons and scoped CSS.
 // shell storybook commands run from the project root, never from this workspace.
-import { sharedConfig } from '../scripts/bundling/vite-shared.mjs';
+import { sharedConfig } from '../tooling/bundling/vite-shared.mjs';
 export default () => {
   const config = sharedConfig();
   return { ...config, resolve: { ...config.resolve, dedupe: ['vue', 'pinia'] }, server: { ...config.server, host: '127.0.0.1' } };

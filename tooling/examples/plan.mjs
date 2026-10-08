@@ -2,6 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import { createFilePlan } from '../../src/shared/platform/file-plan.ts';
+import { makerTarget } from '../../src/cli/adapters/makers/target.ts';
 import { readRegistry, validateRegistrySource } from '../../src/cli/adapters/makers/registry.ts';
 
 const digest = value => createHash('sha256').update(value).digest('hex');
@@ -21,9 +22,9 @@ function validateManifest(manifest) {
   }
 }
 /** Only the reviewed imports and registered property nodes are eligible for removal. */
-async function withoutExamples(root, expected) {
-  const probe = await createFilePlan(root, [{ path: 'src/plugin/bootstrap/features.ts', content: null }]);
-  const registry = await readRegistry(root);
+async function withoutExamples(root, expected, sourcePath) {
+  const probe = await createFilePlan(root, [{ path: `${sourcePath}/bootstrap/features.ts`, content: null }]);
+  const registry = await readRegistry(root, undefined, sourcePath);
   if (digest(registry.source) !== probe.changes[0].beforeHash) throw new Error('EXAMPLES_STALE_INPUT: ' + registry.path);
   const ts = await import('typescript');
   const ast = ts.createSourceFile(registry.path, registry.source, ts.ScriptTarget.Latest, true);
@@ -122,7 +123,9 @@ async function generationReceipt(root) {
  * recorded, it is kept unchanged, and any later edit conflicts exactly like an edited example file.
  */
 export async function planExampleRemoval(root, { beforeFinalize } = {}) {
-  const manifestPath = 'tooling/examples/ownership.json';
+  const target = await makerTarget(root);
+  const sourcePath = target.path;
+  const manifestPath = `${target.tooling}/examples/ownership.json`;
   const manifestProbe = await createFilePlan(root, [{ path: manifestPath, content: null }]);
   const manifestBytes = await readFile(resolve(root, manifestPath));
   if (digest(manifestBytes) !== manifestProbe.changes[0].beforeHash) throw new Error('EXAMPLES_STALE_MANIFEST');
@@ -145,13 +148,17 @@ export async function planExampleRemoval(root, { beforeFinalize } = {}) {
       content = await readFile(resolve(root, path), 'utf8');
       if (digest(content) !== templateProbe.changes[0].beforeHash) throw new Error('EXAMPLES_STALE_TEMPLATE: ' + path);
       inputs.set(path, digest(content));
+      if (sourcePath !== 'src' && item.path.startsWith(`${sourcePath}/tests/`)) {
+        content = content.replaceAll('../../src/', '../../').replaceAll('../../../src/', '../../../')
+          .replaceAll('../../manifest.json', '../../../../manifest.json').replace(/(['"])\/harness\/app\//g, '$1/src/plugin/harness/app/');
+      }
     }
     const targetHash = content === null ? null : digest(content);
     if (currentHash !== item.sha256 && currentHash !== targetHash) conflicts.push(item.path);
     entries.push({ path: item.path, content }); inspected.set(item.path, currentHash);
   }
   if (conflicts.length) throw new Error('EXAMPLES_EDITED_FILES: ' + conflicts.join(', ') + '. Preserve these files and reconcile their example dependencies before removal.');
-  const registry = await withoutExamples(root, manifest.registrations);
+  const registry = await withoutExamples(root, manifest.registrations, sourcePath);
   entries.push({ path: registry.path, content: registry.content }); inspected.set(registry.path, digest(registry.original));
   await beforeFinalize?.();
   const sourceProbe = await createFilePlan(root, [...inputs.keys()].map(path => ({ path, content: null })));

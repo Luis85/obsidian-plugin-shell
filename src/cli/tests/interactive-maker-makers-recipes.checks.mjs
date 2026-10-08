@@ -23,9 +23,9 @@ const paths = planned => planned.plan.changes.filter(change => change.status ===
 async function authorFixture(root) {
   await installMakerFoundation(root); await copyMakerSuite(root);
   await mkdir(join(root, 'src/locales'), { recursive: true });
-  await cp(join(makerSourceRoot, 'src/locales/en.json'), join(root, 'src/locales/en.json'));
+  await cp(join(makerSourceRoot, 'src/plugin/locales/en.json'), join(root, 'src/locales/en.json'));
   await mkdir(join(root, 'plugins'), { recursive: true });
-  for (const file of ['api.ts', 'runtime.ts', 'registry.ts']) await cp(join(makerSourceRoot, 'plugins', file), join(root, 'plugins', file));
+  for (const file of ['api.ts', 'runtime.ts', 'registry.ts']) await cp(join(makerSourceRoot, 'src/cli/sdk', file), join(root, 'plugins', file));
   await apply(root, ['feature', 'bookmarks', '--entity', 'bookmark']);
 }
 

@@ -23,6 +23,7 @@ import { upgradePlan } from './kit.ts';
 import { configFile, object } from './configuration.ts';
 import { readConfiguration, readJson, readBounded, hash, exists } from './files.ts';
 import { OperationError, requireThat, stringOption, type Context, type Request } from './contracts.ts';
+import { makerLayout } from '../makers/target.ts';
 import { customRecipeNames } from '../makers/custom-registry.ts';
 import { pendingChecks } from './maker-checks.ts';
 import { didYouMean, suggestions } from './suggest.ts';
@@ -36,7 +37,7 @@ async function resolveRecipe(request: Request, context: Context, recipe: string)
   if (builtinRecipes.includes(recipe)) return;
   const custom = await customRecipeNames(context.root);
   if (!custom.includes(recipe)) throw new OperationError('MAKER_UNKNOWN', `Unknown recipe: ${recipe}.${didYouMean(suggestions(recipe, [...builtinRecipes, ...custom]), value => `"${value}"`)}`, 'node bin/app make list');
-  requireThat(request.options['trust-custom'] === true, 'CUSTOM_TRUST_REQUIRED', `${recipe} is a local custom recipe that executes trusted project code; review scripts/makers/custom/${recipe}.mjs, then pass --trust-custom.`);
+  requireThat(request.options['trust-custom'] === true, 'CUSTOM_TRUST_REQUIRED', `${recipe} is a local custom recipe that executes trusted project code; review ${makerLayout(context.root).tooling}/makers/custom/${recipe}.mjs, then pass --trust-custom.`);
 }
 async function makerPlan(request: Request, context: Context): Promise<Planned> {
   const [recipe, name] = request.args;

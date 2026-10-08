@@ -26,6 +26,25 @@ report `plugin-data`. Unrelated recipes omit backend/folder/schema options. Defa
 view, command and input labels include the feature owner so multiple generated
 features remain distinguishable. Existing developer-owned scaffolds are preserved.
 
+## Choose the source project
+
+Plugin recipes resolve their destination from `workbench.sources.json`. With one
+plugin project, selection is automatic; this checkout uses `src/plugin/`. With
+several plugin projects, pass `--source <name>` using the manifest's project name,
+not a directory path. An unknown name, ambiguous selection or malformed manifest
+fails before files are written.
+
+```sh
+node bin/app source list
+npm run make -- feature bookmarks --entity bookmark --source plugin --dry-run
+```
+
+The selected project owns the generated feature, registrations and tests under
+its own `tests/` directory. A legacy flat project without a manifest keeps its
+`src/` and `tests/runtime/` layout. The `maker` and Workbench `plugin` recipes
+extend repository tooling and the CLI SDK respectively; they do not create an
+Obsidian feature in a source project.
+
 ## Recipes and integration
 
 All child recipes take `<name> --feature <existing-owner>` unless stated otherwise.

@@ -80,16 +80,16 @@ function makerDiscovery(request: Request): Result {
   return result(request.command, { makers });
 }
 const isMakerCheck = (request: Request) => request.command === 'make' && request.options.check === true;
-const checkOptions = ['check', 'json', 'root', 'no-interaction', 'dry-run'];
+const checkOptions = ['source', 'check', 'json', 'root', 'no-interaction', 'dry-run'];
 /** make locale <name> --check compares the pending draft with the current base keys; it plans and writes nothing. */
 async function makerCheck(request: Request, context: Context): Promise<Result> {
   const [recipe, name] = request.args;
   requireThat(recipe === 'locale' && name, 'MAKER_CHECK_UNSUPPORTED', 'Only make locale <name> --check has a read-only check.');
   requireThat(Object.keys(request.options).every(key => checkOptions.includes(key)), 'MAKER_CHECK_OPTIONS', '--check is read-only; it accepts only --json, --root, --no-interaction and --dry-run.');
   const { slug } = await import('../makers/arguments.ts');
-  const { createMakerContext } = await import('../makers/engine.ts');
+  const { makerTarget, targetedMakerContext } = await import('../makers/target.ts');
   const { checkPendingLocale } = await import('../makers/pending-locale.ts');
-  const check = await checkPendingLocale(createMakerContext(context.root).read, slug(name, 'locale name'));
+  const check = await checkPendingLocale(targetedMakerContext(context.root, await makerTarget(context.root, 'plugin', typeof request.options.source === 'string' ? request.options.source : undefined)).read, slug(name, 'locale name'));
   if (!check.missing.length && !check.extra.length && check.selectable === false) return result(request.command, check);
   const drift = new OperationError('LOCALE_DRAFT_DRIFT', `Pending locale ${check.locale} differs from the base keys or is selectable.`, `Review make locale ${check.locale} --refresh --dry-run, which restores missing keys and removes extra keys, and keep the draft unselectable until its translation review.`);
   drift.details = check;

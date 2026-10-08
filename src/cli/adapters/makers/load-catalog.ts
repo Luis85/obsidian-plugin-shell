@@ -1,6 +1,7 @@
 import { mkdtemp, writeFile, rm, access } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
+import { makerTarget } from './target.ts';
 import { readRegistry } from './registry.ts';
 
 type Data = Record<string, unknown>;
@@ -35,16 +36,16 @@ function noteEntry(key: string, override: unknown, feature: Data): CatalogEntry 
   return { registration: key, backend: feature.backend ?? 'markdown', entity: entity.key, schemaVersion: entity.schemaVersion, defaultFolder: feature.defaultFolder, liveFolderOverride: override, fields: catalogFields(entity), mappings };
 }
 const domainEntry = (entity: Data): CatalogEntry => ({ registration: String(entity.key), backend: 'domain', entity: entity.key, schemaVersion: entity.schemaVersion, fields: catalogFields(entity), mappings: [] });
-async function catalogEntry(root: string, directory: string): Promise<string> {
-  const registry = await readRegistry(root);
+async function catalogEntry(root: string, directory: string, source: string): Promise<string> {
+  const registry = await readRegistry(root, undefined, source);
   const specifier = (path: string) => JSON.stringify(resolve(root, path).replaceAll('\\', '/'));
-  const imports = registry.registrations.map((registration, index) => `import { ${registration.exported} as feature${index} } from ${specifier(`src/bootstrap/${registration.from.endsWith('.ts') ? registration.from : `${registration.from}.ts`}`)};`);
+  const imports = registry.registrations.map((registration, index) => `import { ${registration.exported} as feature${index} } from ${specifier(`${source}/bootstrap/${registration.from.endsWith('.ts') ? registration.from : `${registration.from}.ts`}`)};`);
   const definitions = registry.registrations.map((registration, index) => `{ key: ${JSON.stringify(registration.key)}, override: ${registration.override}, feature: feature${index} }`);
   let domains = 'export const domains = [];';
-  try { await access(resolve(root, 'src/bootstrap/authoring-domains.ts')); domains = `export { authoringDomains as domains } from ${specifier('src/bootstrap/authoring-domains.ts')};`; }
+  try { await access(resolve(root, `${source}/bootstrap/authoring-domains.ts`)); domains = `export { authoringDomains as domains } from ${specifier(`${source}/bootstrap/authoring-domains.ts`)};`; }
   catch (error) { if (!(error instanceof Error && 'code' in error && error.code === 'ENOENT')) throw error; }
   const entry = join(directory, 'catalog-entry.ts');
-  await writeFile(entry, `${imports.join('\n')}\nimport { validateDocumentCatalog } from ${specifier('src/application/document-definition.ts')};\nexport const entries = [${definitions.join(',')}];\nvalidateDocumentCatalog(entries.filter(entry => entry.feature.document).map(entry => entry.feature.document));\n${domains}\n`);
+  await writeFile(entry, `${imports.join('\n')}\nimport { validateDocumentCatalog } from ${specifier(`${source}/application/document-definition.ts`)};\nexport const entries = [${definitions.join(',')}];\nvalidateDocumentCatalog(entries.filter(entry => entry.feature.document).map(entry => entry.feature.document));\n${domains}\n`);
   return entry;
 }
 /** One self-contained chunk: the bundle may not reach back into the developer's environment at load time. */
@@ -59,10 +60,11 @@ async function bundle(root: string, entry: string): Promise<string> {
 }
 /** Bundles trusted, checked-in definitions using the installed Vite toolchain.
  * No source scan discovers entities: only explicit feature registrations count. */
-export async function loadCatalog(root = process.cwd()): Promise<{ version: 1; status: 'passed'; entities: CatalogEntry[] }> {
+export async function loadCatalog(root = process.cwd(), sourceName?: string): Promise<{ version: 1; status: 'passed'; entities: CatalogEntry[] }> {
+  const target = await makerTarget(root, 'plugin', sourceName);
   const directory = await mkdtemp(join(tmpdir(), 'plugin-entity-catalog-'));
   try {
-    const code = await bundle(root, await catalogEntry(root, directory));
+    const code = await bundle(root, await catalogEntry(root, directory, target.path));
     const loaded: unknown = await import(`data:text/javascript;base64,${Buffer.from(code).toString('base64')}`);
     if (!isData(loaded)) catalogInvalid('module');
     const catalog = records(loaded.entries).map(({ key, override, feature }) => noteEntry(String(key), override, isData(feature) ? feature : catalogInvalid(String(key))));

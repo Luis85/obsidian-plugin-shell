@@ -43,12 +43,12 @@ export function configuration(value: unknown): Configuration {
   const reserved = [...PROTECTED_PROJECT_SEGMENTS, 'design', 'dist', 'docs', 'scripts', 'templates', 'harness'];
   const values = [source, tests, vault].map(path => path.toLowerCase());
   const overlaps = (a: string, b: string) => a === b || a.startsWith(b + '/') || b.startsWith(a + '/');
-  requireThat(!values.some((a, i) => values.some((b, j) => i !== j && overlaps(a, b))), 'CONFIG_OVERLAP', 'Source, tests and test vault must not overlap.');
+  requireThat(!values.some((a, i) => values.some((b, j) => i !== j && overlaps(a, b) && !((i === 0 && j === 1 || i === 1 && j === 0) && values[1] === values[0] + '/tests'))), 'CONFIG_OVERLAP', 'Source, tests and test vault must not overlap.');
   requireThat(![source, tests].some(path => reserved.some(base => overlaps(path.toLowerCase(), base))), 'CONFIG_PATH', 'Source or tests overlap a framework-owned path.');
   return { schemaVersion: 1, project: identity(input.project), paths: { codebaseFolder: source, testsFolder: tests, testVaultFolder: vault, configDirectory: directory } };
 }
 export function defaults(project: Identity): Configuration {
-  return configuration({ schemaVersion: 1, project, paths: { codebaseFolder: 'src', testsFolder: 'tests', testVaultFolder: '.test-vault', configDirectory: defaultVaultConfigDirectory } });
+  return configuration({ schemaVersion: 1, project, paths: { codebaseFolder: 'src/plugin', testsFolder: 'src/plugin/tests', testVaultFolder: '.test-vault', configDirectory: defaultVaultConfigDirectory } });
 }
 export function resolveImport(config: Configuration | null, document: AuthoringDocument, policy?: string) {
   requireThat(policy === undefined || ['project', 'import'].includes(policy), 'INVALID_POLICY', 'Resolution must be project or import.');

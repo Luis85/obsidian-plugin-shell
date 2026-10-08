@@ -45,13 +45,13 @@ function projectScripts(scripts: Scripts, m: Model): void {
   scripts['typecheck:project'] = 'node node_modules/vue-tsc/bin/vue-tsc.js --noEmit --project configs/types/tsconfig.project.json';
   // The root tsconfig is the framework's; generated sources import with .ts extensions that only the project config allows.
   scripts['typecheck'] = scripts['typecheck:project'];
-  scripts['test:ui-effects'] = effects ? 'node scripts/testing/suites.mjs project:ui-effects' : noUiEffects;
+  scripts['test:ui-effects'] = effects ? 'node tooling/testing/suites.mjs project:ui-effects' : noUiEffects;
   scripts['build:clickdummy'] = 'node bin/app clickdummy build';
-  scripts['ui:gallery'] = 'node scripts/ui/review-gallery.mjs --target clickdummy';
+  scripts['ui:gallery'] = 'node tooling/ui/review-gallery.mjs --target clickdummy';
   scripts['doctor'] = 'node bin/app doctor';
   Object.assign(scripts, previewScripts());
   uiQualityScripts(scripts);
-  scripts['test:project'] = effects ? 'node scripts/testing/suites.mjs project project:ui-effects' : 'node scripts/testing/suites.mjs project && npm run test:ui-effects';
+  scripts['test:project'] = effects ? 'node tooling/testing/suites.mjs project project:ui-effects' : 'node tooling/testing/suites.mjs project && npm run test:ui-effects';
   // What the full gate adds to `check` (which already runs typecheck, both linters, the product tests and the maker
   // tooling tests): CI runs `check` then this, so no gate runs twice.
   scripts['verify:artifacts'] = 'npm run build && npm run test:ui-effects';
@@ -61,8 +61,8 @@ function projectScripts(scripts: Scripts, m: Model): void {
   for (const name of Object.keys(scripts)) if (maintainerScript(name)) delete scripts[name];
 }
 function fixtureScripts(scripts: Scripts): void {
-  scripts['testdata:check']='node scripts/test-data/verify.mjs'; scripts['verify:artifacts'] += ' && npm run testdata:check';
-  for(const command of ['plan','apply','reset-plan','reset','serve']) scripts['testdata:'+command]='node scripts/test-data/cli.mjs '+command;
+  scripts['testdata:check']='node tooling/test-data/verify.mjs'; scripts['verify:artifacts'] += ' && npm run testdata:check';
+  for(const command of ['plan','apply','reset-plan','reset','serve']) scripts['testdata:'+command]='node tooling/test-data/cli.mjs '+command;
 }
 /** Always present, so `npm run test:tdd` has a real acceptance check before the first requirement exists. */
 function acceptanceSmoke(m: Model, add: Add): void {
@@ -114,7 +114,7 @@ export async function renderProjectFiles(templateRoot: TemplateSnapshot, m: Mode
   if (declared.length) pkg.dependencies = Object.fromEntries([...Object.entries<string>(pkg.dependencies ?? {}),...declared].sort(([a],[b]) => a < b ? -1 : 1));
   add('package.json',json(pkg)); add('package-lock.json',json(lock));
   add('versions.json',json({...readJson('versions.json'),[String(m.project.version)]:manifest.minAppVersion}));
-  add('configs/types/tsconfig.project.json',json({extends:'../../tsconfig.json',compilerOptions:{allowImportingTsExtensions:true,...((m.document.design as {editors?:unknown}).editors ? {allowJs:true,checkJs:false} : {})},include:['src/**/*.ts','src/**/*.vue',m.sourceRoot+'/**/*.ts',m.sourceRoot+'/**/*.vue',m.testRoot+'/**/*.ts','harness/prototype/**/*.ts',makerTests+'/**/*.ts'].map(path => '../../'+path)}));
+  add('configs/types/tsconfig.project.json',json({extends:'./tsconfig.base.json',compilerOptions:{allowImportingTsExtensions:true,...((m.document.design as {editors?:unknown}).editors ? {allowJs:true,checkJs:false} : {})},exclude:[],include:['src/plugin/**/*.ts','src/plugin/**/*.vue',m.sourceRoot+'/**/*.ts',m.sourceRoot+'/**/*.vue',m.testRoot+'/**/*.ts','harness/prototype/**/*.ts',makerTests+'/**/*.ts'].map(path => '../../'+path)}));
   add('design/project.json',json(m.document),'managed');
   add('design/traceability.json',json({status:'scaffold-not-accepted',requirements:m.requirements.map(r => ({...r,implementation:`${m.sourceRoot}/application/use-cases/${r.key}.ts`,test:`${m.testRoot}/acceptance/${r.key}.test.ts`,verification:'todo'})),interactions:m.links,flows:m.flows,visualDesigns:((m.document.design as Record<string,unknown>).visualDesigns ?? null),warnings:m.warnings}),'managed');
   add('design/design-system.json',json(m.document.design && (m.document.design as Record<string,unknown>).designSystem || {}),'managed');

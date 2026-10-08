@@ -1,5 +1,5 @@
 import { describe, expect } from 'vitest';
-import { test } from './support/obsidian-fixture';
+import { test } from './support/obsidian-fixture.ts';
 
 describe('plugin views in real Obsidian', () => {
   test('opens every view type the plugin registers and renders content', async ({ obsidian }) => {

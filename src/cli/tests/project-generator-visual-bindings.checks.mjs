@@ -26,7 +26,7 @@ function bindingFixture() {
   store.nextId = 42;
   return d;
 }
-const bindings = 'tests/project/visual/vp-15-bindings.test.ts', page = 'src/generated/presentation/components/details/vp-15.vue';
+const bindings = 'src/plugin/tests/project/visual/vp-15-bindings.test.ts', page = 'src/plugin/generated/presentation/components/details/vp-15.vue';
 test('generated binding tests assert every bound prop, table rows and cells, and text', async () => {
   const test = (await projectFiles(root, projectModel(bindingFixture()))).find(f => f.path === bindings).content;
   for (const id of ['vn-17', 'vn-40', 'vn-41']) assert.match(test, new RegExp(`\\[${id}\\] displays validated source output`));

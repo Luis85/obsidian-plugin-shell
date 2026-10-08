@@ -6,9 +6,9 @@ import {
   closeOnAbort, createConsoleRecorder, createObsidianSession, disablePlugin, enablePlugin, executeCommand, formatEntry,
   loadErrors, provisionHost, reloadPlugin, requestedAppVersion, withSession,
   type ConsoleEntry, type ObsidianHost, type PluginState,
-} from '@test/obsidian-host';
-import { capturePage, caseDirectory, sourceCommit, writeEvidence } from './evidence';
-import type { HostContext } from './host';
+} from '../../../testing/obsidian-harness.mjs';
+import { capturePage, caseDirectory, sourceCommit, writeEvidence } from './evidence.ts';
+import type { HostContext } from './host.ts';
 
 export interface PluginIdentity { readonly id: string; readonly name: string; readonly version: string; readonly minAppVersion?: string }
 export interface ObsidianHarness {
@@ -101,7 +101,7 @@ export const test = base.extend<{ obsidian: ObsidianHarness }>({
     const recorder = createConsoleRecorder({ pluginId: manifest.id });
     const provisionedHost = await host();
     let pluginViewTypes: string[] = [];
-    const session = createObsidianSession({ host: provisionedHost, chromium, vaultSource: 'tests/obsidian/vault',
+    const session = createObsidianSession({ host: provisionedHost, chromium, vaultSource: 'tooling/tests/obsidian/vault',
       async onReady(client) {
         const context = client.browser.contexts()[0];
         if (!context) throw new Error('OBSIDIAN_CONTEXT_MISSING');

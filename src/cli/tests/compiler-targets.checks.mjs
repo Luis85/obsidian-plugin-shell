@@ -12,7 +12,7 @@ const source=starterDocumentText('quick-capture');
 test('browser output shares generated product code and packages an explicit offline build entry',async()=>{
   const plugin=await compileProject({source,template});const browser=await compileProject({source,template,outputKind:'clickdummy'});
   assert.equal(browser.status,'ok',JSON.stringify(browser.diagnostics));
-  for(const file of plugin.artifacts.filter(file=>file.path.startsWith('src/generated/')))assert.equal(browser.artifacts.find(item=>item.path===file.path)?.content,file.content,file.path);
+  for(const file of plugin.artifacts.filter(file=>file.path.startsWith('src/plugin/generated/')))assert.equal(browser.artifacts.find(item=>item.path===file.path)?.content,file.content,file.path);
   const entry=browser.artifacts.find(file=>file.path==='harness/prototype/main.ts').content;
   const parsed=ts.transpileModule(entry,{fileName:'main.ts',reportDiagnostics:true,compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}});
   assert.ok(!parsed.diagnostics?.some(d=>d.category===ts.DiagnosticCategory.Error));
@@ -24,7 +24,7 @@ test('browser output shares generated product code and packages an explicit offl
   assert.match(shared.content, /createClickdummySources/);assert.match(shared.content, /exportProject/);
   assert.match(shared.content, /designState/);assert.match(shared.content, /function reset/);
   assert.equal(browser.readiness.bundle,'not-run');assert.notEqual(browser.fingerprint,plugin.fingerprint);
-  const pkg=JSON.parse(browser.artifacts.find(file=>file.path==='package.json').content);assert.equal(pkg.scripts['build:clickdummy'],'node scripts/compiler/build-clickdummy.mjs');
+  const pkg=JSON.parse(browser.artifacts.find(file=>file.path==='package.json').content);assert.equal(pkg.scripts['build:clickdummy'],'node tooling/compiler/build-clickdummy.mjs');
   for (const result of [plugin, browser]) {
     const generated = JSON.parse(result.artifacts.find(file => file.path === 'package.json').content);
     assert.equal(generated.devDependencies.typescript, ts.version);

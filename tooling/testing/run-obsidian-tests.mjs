@@ -7,8 +7,8 @@ import { ProvisionRequired, assertHostPath, downloadAllowed, provisionHost, requ
 import { ensureDisplay } from './obsidian-display.mjs';
 
 const usage = `Usage: npm run test:obsidian -- [--allow-download] [--no-build] [vitest filters/options]
-Builds the plugin, then runs src/plugin/tests/obsidian/**/*.obsidian.ts against real Obsidian. Each case gets a
-fresh copy of src/plugin/tests/obsidian/vault under .nq/ with the built plugin enabled there only.
+Builds the plugin, then runs tooling/tests/obsidian/**/*.obsidian.ts against real Obsidian. Each case gets a
+fresh copy of tooling/tests/obsidian/vault under .nq/ with the built plugin enabled there only.
 Provisioning (obsidian-launcher into .native-runner, Obsidian into .native-cache) needs --allow-download
 or OBSIDIAN_ALLOW_DOWNLOAD=1. OBSIDIAN_VERSION selects the host (default 1.13.7). Evidence: reports/obsidian/.`;
 

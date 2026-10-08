@@ -63,14 +63,14 @@
       "label": "Source folder",
       "type": "string",
       "required": true,
-      "default": "src"
+      "default": "src/plugin"
     },
     {
       "id": "testsFolder",
       "label": "Tests folder",
       "type": "string",
       "required": true,
-      "default": "tests"
+      "default": "src/plugin/tests"
     }
   ],
   "generator": {
@@ -87,8 +87,8 @@
         "description": "A small command-led tool for transforming or inspecting text."
       },
       "settings": {
-        "codebaseFolder": "src",
-        "testsFolder": "tests"
+        "codebaseFolder": "src/plugin",
+        "testsFolder": "src/plugin/tests"
       },
       "design": {
         "schema": 6,

@@ -3,7 +3,7 @@
 > Type: reference · Part of the [docs index](../README.md)
 
 > **Contract:** PRD 0.4 extension, requirements **DOC-01–20**.  
-> **Status:** Normative target. Entity-driven creation (`src/application/document-service.ts`)
+> **Status:** Normative target. Entity-driven creation (`src/plugin/application/document-service.ts`)
 > and a separate typed CRUD repository are implemented; [Build a feature](../development/BUILD-A-FEATURE.md)
 > and [entity documents](../development/ENTITY-DOCUMENTS.md) describe the current API.
 > Numbered requirements below remain in force; qualification results are in the
@@ -154,7 +154,7 @@ existing character limit and does not establish every broader DOC-18 clause.
 
 **DOC-19 — `make entity`.** Extend the existing maker runner with an `entity` recipe. `npm run make -- entity task --feature tasks --document` adds a typed entity definition, explicit document mapping/body template, defaults/validation, registry entry, creation action integration, and relevant type/serialization/service tests plus a Markdown fixture. A Task preset demonstrates `type`, `due`, and the other example fields. Without `--document`, an entity can remain domain-only.
 
-Reuse existing command/modal/event/style recipes for an optional creation UI, with no business logic in main.ts. All maker implementations/templates stay under `scripts/make/`. A maker generates source; it never writes real Task notes into a user's vault. Apply existing dry-run/conflict/rerun/noninteractive/safe-plan rules. Expose `entities:check` and `entities:catalog` through scripts for definition/mapping/default/property-type conflicts and derived documentation. No catch-all registry that hides dead scaffolds from fallow.
+Reuse existing command/modal/event/style recipes for an optional creation UI, with no business logic in main.ts. Maker implementations live under `src/cli/adapters/makers/`; shared templates live under `templates/`, and repository maker commands under `tooling/makers/`. A maker generates source; it never writes real Task notes into a user's vault. Apply existing dry-run/conflict/rerun/noninteractive/safe-plan rules. Expose `entities:check` and `entities:catalog` through scripts for definition/mapping/default/property-type conflicts and derived documentation. No catch-all registry that hides dead scaffolds from fallow.
 
 A new Project or Meeting entity and its document definition must be addable without editing DocumentCreationService, the YAML codec, or the native writer. The catalog represents developer-owned schemas, not a runtime form-builder or user-executable workflow language.
 

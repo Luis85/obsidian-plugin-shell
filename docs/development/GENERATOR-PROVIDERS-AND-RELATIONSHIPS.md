@@ -8,7 +8,7 @@ Tracked as [SH-035](../tasks/shell/SH-035.md) (formerly the colliding SH-023). I
 
 | Declaration | Output and behavior |
 | --- | --- |
-| Enabled source test recipes | `scripts/test-data/manifest.json`, exact retained engine/CLI/adapters, guarded `.test-vault` seeding and reset, generated recipe tests |
+| Enabled source test recipes | `tooling/test-data/manifest.json`, exact retained engine/CLI/adapters, guarded `.test-vault` seeding and reset, generated recipe tests |
 | Native entity fixture | UUID identities, declared properties/defaults/relations plus canonical `schema_version` and `created_at`; real Markdown/repository consumption tests |
 | Native note create/update/delete with relationships | Shared generated relationship preflight around the existing canonical repositories |
 | HTTPS API source | Typed `<source>-http.ts` provider; input/output guards, path/query/JSON mapping, explicit runtime origin approval |
@@ -43,7 +43,7 @@ Canonical Markdown fixture metadata is significant: data containing only `id` an
 
 Generated `application/sources.ts` contains `SourcePorts`. `createSources(shell, overrides)` accepts complete ports per source, applies the normal input/output validators, and keeps the existing per-view Pinia stores. It rejects unknown sources, accessors, extra/missing operations and non-functions. A partial simulation cannot accidentally combine mocked reads and live writes.
 
-`createProjectTestPorts(manifest)` in `scripts/test-data/source-ports.mjs` adapts non-vault fixture operations to the same `(input, signal)` signature. Use it only in tests or an explicitly controlled development bootstrap, pass its `ports` as overrides, and call `dispose()` at scope end. Native vault sources use actual seeded notes rather than a second in-memory persistence owner. The generated typed factories under the configured tests root cover every method; disabled or missing recipes reject. The generic simulator-port helper still needs a complete source before it can be injected. Production bootstrap never imports the test-data kit.
+`createProjectTestPorts(manifest)` in `tooling/test-data/source-ports.mjs` adapts non-vault fixture operations to the same `(input, signal)` signature. Use it only in tests or an explicitly controlled development bootstrap, pass its `ports` as overrides, and call `dispose()` at scope end. Native vault sources use actual seeded notes rather than a second in-memory persistence owner. The generated typed factories under the configured tests root cover every method; disabled or missing recipes reject. The generic simulator-port helper still needs a complete source before it can be injected. Production bootstrap never imports the test-data kit.
 
 For a database, implement the generated port in a developer-owned module and return it from `configureSourceProviders`. The export does not specify a trustworthy database driver, credential store, migration strategy or transaction protocol, so none is silently chosen.
 

@@ -73,7 +73,7 @@ export async function main(args = process.argv.slice(2)) {
   }
   if (args.some(arg => arg !== '--check') || args.length > 1) throw new Error('MANUAL_ARGUMENT: expected no arguments or --check');
   const check = args.includes('--check'); const files = await outputs(); const stale = await synchronize(files, { check });
-  if (check && stale.length) throw new Error(`MANUAL_STALE: ${stale.join(', ')}. Run node --experimental-strip-types scripts/documentation/manual.mjs`);
+  if (check && stale.length) throw new Error(`MANUAL_STALE: ${stale.join(', ')}. Run node --experimental-strip-types tooling/documentation/manual.mjs`);
   console.log(`Manual ${check ? 'checked' : 'generated'}: ${JSON.parse(files['commands.json']).commands.length} commands; ${stale.length} changed files.`);
   return 0;
 }

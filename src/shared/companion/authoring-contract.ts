@@ -67,7 +67,7 @@ export function validateCompanionFolders(value: unknown): AuthoringDocument['set
   requireValid(companionRelativeFolder(value.codebaseFolder) && companionRelativeFolder(value.testsFolder),
     'Folders must be portable relative paths outside protected vault folders.');
   const { codebaseFolder, testsFolder } = value, a = codebaseFolder.toLowerCase(), b = testsFolder.toLowerCase();
-  requireValid(a !== b && !a.startsWith(b + '/') && !b.startsWith(a + '/'), 'Codebase and tests folders must not overlap.');
+  requireValid(a !== b && !a.startsWith(b + '/') && (!b.startsWith(a + '/') || b === a + '/tests'), 'Codebase and tests folders must not overlap.');
   return { codebaseFolder, testsFolder };
 }
 function validateIdentity(value: unknown): string {

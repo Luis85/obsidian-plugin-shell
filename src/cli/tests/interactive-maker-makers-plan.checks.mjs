@@ -31,7 +31,7 @@ test('maker arguments parse flags, values and positionals and reject malformed i
   assert.throws(() => args('a', 'b', 'c'), { message: 'Expected a maker and one name' });
   assert.ok(builtinRecipes.includes('feature') && builtinRecipes.includes('plugin'));
   assert.ok(recipeOptions('feature').includes('--entity'));
-  assert.deepEqual(recipeOptions('custom-local'), ['--dry-run', '--yes', '--no-interaction', '--json', '--help', '--list', '--feature']);
+  assert.deepEqual(recipeOptions('custom-local'), ['--dry-run', '--yes', '--no-interaction', '--json', '--help', '--list', '--feature', '--source']);
   for (const value of [undefined, 'Bad', 'a'.repeat(49), 'con', 'class', '-x', 'x-']) assert.throws(() => slug(value, 'name'), { message: 'Invalid name: use a lowercase non-reserved hyphenated name' });
   assert.equal(slug('reading-list', 'name'), 'reading-list');
   assert.equal(title('reading-list'), 'Reading List'); assert.equal(makerSymbol('reading-list-2'), 'readingList2');

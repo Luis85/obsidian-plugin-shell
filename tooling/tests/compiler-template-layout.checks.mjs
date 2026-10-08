@@ -11,7 +11,7 @@ import { APPROVALS_PATH } from '../quality/self-review-approvals.mjs';
 // the developer-kit text templates, the example-removal templates, the adoption skill the kit installs into existing projects
 // and the Claude Design folder templates `design prepare` renders. The shared companion contracts stay in scripts/companion.
 const root = fileURLToPath(new URL('../../', import.meta.url));
-const removed = ['scripts/companion/runtime', 'scripts/companion/devkit', 'scripts/examples/templates'];
+const removed = ['src/shared/companion/runtime', 'src/shared/companion/devkit', 'src/cli/tooling/examples/templates'];
 async function files(folder) {
   const entries = await readdir(join(root, folder), { withFileTypes: true }).catch(error => error.code === 'ENOENT' ? [] : Promise.reject(error));
   // Agent worktrees under .claude/worktrees are separate checkouts of this repository, not its sources.
@@ -36,11 +36,11 @@ test('the template snapshot copies every templates/ file except the framework-en
   const snapshot = await loadTemplateSnapshot(root);
   const paths = new Set(snapshot.frameworkFiles.map(file => file.path));
   const templates = await files('templates');
-  // Only the example-removal template of the framework src/main.ts entry test stays maintainer-only (a generated project replaces that entry).
+  // Only the example-removal template of the framework src/plugin/main.ts entry test stays maintainer-only (a generated project replaces that entry).
   assert.deepEqual(templates.filter(maintainerOnly), ['templates/examples/tests__runtime__shell-entry-lifecycle.test.ts.txt']);
   for (const path of templates) assert.equal(paths.has(path), !maintainerOnly(path), path);
   assert.match(snapshot.text('templates/companion/runtime/contract.ts'), /export function matches/);
-  for (const contract of ['scripts/companion/composition-contract.mjs', 'scripts/companion/visual/visual-ir.mjs', 'scripts/companion/journey/project-store.ts']) assert.ok(paths.has(contract), contract);
+  for (const contract of ['src/shared/companion/composition-contract.mjs', 'src/shared/companion/visual/visual-ir.mjs', 'src/shared/companion/journey/project-store.ts']) assert.ok(paths.has(contract), contract);
 });
 
 test('no source, test, plugin, workflow or configuration file names a removed template path', async () => {

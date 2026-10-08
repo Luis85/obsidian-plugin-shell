@@ -10,7 +10,7 @@ Build, watch and hot-reload the plugin in real Obsidian on a contained sandbox v
   --sandbox <.name>    Sandbox directory in this checkout: .obsidian-sandbox or .obsidian-sandbox-<suffix>
   --no-debug-logging   Do not run the plugin's debug-toggle command after each load
   --allow-download     Opt in to provisioning obsidian-launcher/Obsidian (env OBSIDIAN_ALLOW_DOWNLOAD=1)
-The sandbox is seeded once from src/plugin/tests/obsidian/vault and never replaced; personal vaults are never opened.`;
+The sandbox is seeded once from tooling/tests/obsidian/vault and never replaced; personal vaults are never opened.`;
 
 function integer(value, name, min, max) {
   if (!/^\d+$/.test(value ?? '')) throw new Error(`DEV_OPTION_INVALID: ${name}`);

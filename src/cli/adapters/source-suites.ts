@@ -69,14 +69,48 @@ function edited(text: string, expected: Json, additions: Array<[string, unknown]
   return json(expected);
 }
 export interface SuiteChange { entries: FilePlanEntry[]; suite: string | null; manual: string[] }
+const scaffoldSuite = (name: string) => ({ name: `source:${name}`, purpose: `Tests of the ${name} source project (src/${name}).`, level: 'unit', runner: { type: 'node-test' },
+  include: [`src/${name}/tests/**/*.test.ts`], verify: 'opt-in' });
+
+/** Rename the registered suite and its paths, preserving custom runner options and unrelated suite entries. */
+export async function renameSuite(root: string, from: string, to: string, fromPath: string, toPath: string): Promise<SuiteChange> {
+  const file = await readJsonFile(root, manifestPath).catch(() => null), value = file?.value as Json | undefined;
+  if (!file || !value || !Array.isArray(value.suites)) return { entries: [], suite: null, manual: [] };
+  const suite = `source:${from}`, renamed = `source:${to}`;
+  if ((value.suites as Json[]).some(item => item?.name === renamed))
+    return { entries: [], suite, manual: [`${manifestPath} already has a ${renamed} suite; reconcile ${suite} by hand.`] };
+  const replacePath = (path: unknown): unknown => typeof path === 'string' && (path === fromPath || path.startsWith(`${fromPath}/`)) ? toPath + path.slice(fromPath.length) : path;
+  const next: Json = { ...value, suites: (value.suites as Json[]).map(item => {
+    const updated = { ...item };
+    for (const key of ['include', 'exclude']) if (Array.isArray(item[key])) updated[key] = (item[key] as unknown[]).map(replacePath);
+    if (item.name === suite) {
+      updated.name = renamed;
+      if (item.purpose === scaffoldSuite(from).purpose) updated.purpose = scaffoldSuite(to).purpose;
+    }
+    return updated;
+  }) };
+  for (const key of ['roots', 'helperRoots']) if (Array.isArray(value[key])) next[key] = (value[key] as Json[]).map(item => ({ ...item, path: replacePath(item.path) }));
+  return { entries: isDeepStrictEqual(value, next) ? [] : [{ path: manifestPath, content: json(next) }], suite: renamed, manual: [] };
+}
+
+/** Remove only the unchanged suite source add created; edited suites require an explicit review. */
+export async function removeSuite(root: string, name: string): Promise<SuiteChange> {
+  const file = await readJsonFile(root, manifestPath).catch(() => null), value = file?.value as Json | undefined;
+  const suite = `source:${name}`;
+  if (!file || !value || !Array.isArray(value.suites)) return { entries: [], suite: null, manual: [] };
+  const entry = (value.suites as Json[]).find(item => item?.name === suite);
+  if (!entry) return { entries: [], suite: null, manual: [] };
+  if (!isDeepStrictEqual(entry, scaffoldSuite(name))) return { entries: [], suite, manual: [`Review the customized ${suite} suite in ${manifestPath}; it was retained.`] };
+  return { entries: [{ path: manifestPath, content: json({ ...value, suites: value.suites.filter(item => item !== entry) }) }], suite, manual: [] };
+}
+
 export async function withSuite(root: string, name: string): Promise<SuiteChange> {
   const file = await readJsonFile(root, manifestPath).catch(() => null), suite = `source:${name}`, folder = `src/${name}/tests`;
   const value = file?.value as Json | undefined;
   if (!file || !value || !Array.isArray(value.suites) || !Array.isArray(value.roots))
     return { entries: [], suite: null, manual: [`No usable ${manifestPath}: register ${folder} with your test runner by hand.`] };
   if ((value.suites as Json[]).some(item => item?.name === suite)) return { entries: [], suite, manual: [`${manifestPath} already has a ${suite} suite; review it.`] };
-  const entry = { name: suite, purpose: `Tests of the ${name} source project (src/${name}).`, level: 'unit', runner: { type: 'node-test' },
-    include: [`${folder}/**/*.test.ts`], verify: 'opt-in' };
+  const entry = scaffoldSuite(name);
   const reached = (value.roots as Json[]).some(item => typeof item?.path === 'string' && (posix.matchesGlob(folder, item.path) || folder.startsWith(`${item.path}/`)));
   const additions: Array<[string, unknown]> = [...(reached ? [] : [['roots', { path: folder }] as [string, unknown]]), ['suites', entry]];
   const expected = { ...value, roots: [...value.roots as unknown[], ...(reached ? [] : [{ path: folder }])], suites: [...value.suites as unknown[], entry] };

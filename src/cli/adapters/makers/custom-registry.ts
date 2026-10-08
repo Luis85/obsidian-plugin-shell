@@ -1,8 +1,8 @@
+import { makerLayout } from './target.ts';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { hasSyntaxErrors, loadTypescript, namedImports, parseTypescript, variableNamed } from './syntax.ts';
 
-const customRegistryPath = 'scripts/makers/custom/registry.mjs';
 const isMissing = (error: unknown): boolean => error instanceof Error && 'code' in error && error.code === 'ENOENT';
 const localModule = /^\.\/([a-z][a-z0-9]*(?:-[a-z0-9]+)*)\.mjs$/;
 
@@ -11,6 +11,7 @@ const localModule = /^\.\/([a-z][a-z0-9]*(?:-[a-z0-9]+)*)\.mjs$/;
  * A registered recipe lives in `./<name>.mjs`; resolving a name never imports trusted code.
  */
 export async function customRecipeNames(root: string): Promise<string[]> {
+  const customRegistryPath = `${makerLayout(root).tooling}/makers/custom/registry.mjs`;
   let source: string;
   try { source = await readFile(resolve(root, customRegistryPath), 'utf8'); }
   catch (error) { if (isMissing(error)) return []; throw error; }

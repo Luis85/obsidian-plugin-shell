@@ -11,7 +11,7 @@ const artifact = (path, content = 'safe') => ({path, content, ownership:'managed
 const template = Object.freeze({fingerprint:'fixture',frameworkFiles:[],skillFiles:[],text(){throw new Error('unexpected template read');}});
 const hash = value => createHash('sha256').update(value).digest('hex');
 const ports = overrides => ({validate:value=>value,resolve:()=>{},lower:()=>[],
-  emit:async()=>[artifact('src/main.ts')],dependencies:()=>({ready:true,diagnostics:[]}),hash,...overrides});
+  emit:async()=>[artifact('src/plugin/main.ts')],dependencies:()=>({ready:true,diagnostics:[]}),hash,...overrides});
 const request = {source:'{}',template};
 
 test('pure compilation has explicit phases, deterministic output and honest not-run verification',async()=>{

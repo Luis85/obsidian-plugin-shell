@@ -6,7 +6,7 @@ import { uiQualitySpec, type UiQualitySurface } from './ui-quality-spec.ts';
  * source with the project's own build command, served on loopback and audited per surface. Framework harness specs keep their own config and script. */
 const port = 4181;
 const spec = 'tests/e2e/ui-quality.spec.ts';
-const server = 'scripts/e2e/serve-clickdummy.mjs';
+const server = 'tooling/e2e/serve-clickdummy.mjs';
 
 /** Page-like surfaces in model order, as the preview's surface picker lists them; dialogs, actions and groups have no address. */
 export function uiQualitySurfaces(m: Model): UiQualitySurface[] {

@@ -139,3 +139,27 @@ test('a project outside the lint, coverage or analyzer scope is SOURCE_GATE_UNCO
   const passed = await source(root, 'check');
   assert.equal(passed.status, 0, JSON.stringify(passed.result.diagnostics));
 });
+
+
+test('JSONC tsconfigs with comments and trailing commas pass without rewriting their text', async t => {
+  const root = await fixture(t);
+  for (const path of ['tsconfig.json', 'src/plugin/tsconfig.json', 'src/plugin/tests/tsconfig.json']) {
+    const original = await read(root, path);
+    const text = '// Maintainer notes stay intact.\n' + original.replace(/\n}\s*$/, ',\n}\n');
+    await write(root, path, text);
+    const checked = await source(root, 'check');
+    assert.equal(checked.status, 0, JSON.stringify(checked.result.diagnostics));
+    assert.equal(await read(root, path), text);
+  }
+});
+
+test('a root config compiling explicit files is not rewritten as a solution', async t => {
+  const root = await fixture(t);
+  const config = { ...await readJson(root, 'tsconfig.json'), files: ['custom.ts'] };
+  const text = JSON.stringify(config);
+  await write(root, 'tsconfig.json', text);
+  const checked = await finds(root, 'SOURCE_TSCONFIG_DRIFT');
+  assert.equal(checked.result.data.fixable, 0);
+  await source(root, 'check', '--fix', '--yes');
+  assert.equal(await read(root, 'tsconfig.json'), text);
+});

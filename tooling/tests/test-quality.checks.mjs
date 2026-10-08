@@ -10,6 +10,11 @@ test('test declaration policy rejects focus and skip through framework imports a
   assert.match(inspectTestQuality('import { it as check } from "vitest"; check.only("case", () => {});')[0], /FOCUSED_OR_SKIPPED_TEST/);
   assert.match(inspectTestQuality('import * as v from "vitest"; v.describe.skip("case", () => {});')[0], /FOCUSED_OR_SKIPPED_TEST/);
   assert.deepEqual(inspectTestQuality('import { test } from "vitest"; test("mentions test.only", () => {}); // test.skip()'), []);
+  for (const source of ['import test from "node:test"; test.only("case", () => {});',
+    'import { it as check } from "node:test"; check.skip("case", () => {});',
+    'import * as nodeTest from "node:test"; nodeTest.describe.only("suite", () => {});']) {
+    assert.match(inspectTestQuality(source)[0], /FOCUSED_OR_SKIPPED_TEST/);
+  }
   assert.deepEqual(inspectTestQuality('const unrelated = { skip() {} }; unrelated.skip();'), []);
   assert.deepEqual(inspectTestQuality('import {'), ['TEST_PARSE_ERROR']);
 });

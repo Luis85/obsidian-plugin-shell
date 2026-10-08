@@ -7,7 +7,7 @@ export function journeyBootstrapCode(m: Model, add: Add): void {
   const workspace=`${base}/journey-workspace.ts`;
   add(workspace,`import type { App } from 'vue';
 import type { Pinia } from 'pinia';
-import type { JourneyProjectStore } from ${literal(relativeImport(workspace,'scripts/companion/journey/project-store.ts'))};
+import type { JourneyProjectStore } from ${literal(relativeImport(workspace,'src/shared/companion/journey/project-store.ts'))};
 import { workspaceKey } from '../presentation/journey/workspace/contracts.ts';
 import { mount } from './journey-mount.ts';
 import Flow from 'virtual:journey-flow';
@@ -30,7 +30,7 @@ export function provideJourney(app:App,pinia:Pinia,runtime:JourneyRuntime): void
 `);
   const native=`${base}/journey-native.ts`;
   add(native,`import type { Vault } from 'obsidian';
-import { JourneyProjectStore } from ${literal(relativeImport(native,'scripts/companion/journey/project-store.ts'))};
+import { JourneyProjectStore } from ${literal(relativeImport(native,'src/shared/companion/journey/project-store.ts'))};
 import { journeyVaultFiles } from ${literal(relativeImport(native,'templates/companion/runtime/journey-vault.ts'))};
 import type { JourneyRuntime } from './journey-workspace.ts';
 export function createJourneyNative(vault:Vault,report:()=>void): JourneyRuntime {
@@ -42,7 +42,7 @@ export function createJourneyNative(vault:Vault,report:()=>void): JourneyRuntime
 }
 `);
   const preview=`${base}/journey-preview.ts`;
-  add(preview,`import { JourneyProjectStore } from ${literal(relativeImport(preview,'scripts/companion/journey/project-store.ts'))};
+  add(preview,`import { JourneyProjectStore } from ${literal(relativeImport(preview,'src/shared/companion/journey/project-store.ts'))};
 import type { JourneyRuntime } from './journey-workspace.ts';
 import { seed } from '../domain/journey-seed.ts';
 /** Deliberately memory-only. No native/host adapter is imported by the preview. */

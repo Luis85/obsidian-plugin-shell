@@ -118,9 +118,9 @@ test('generator uses the same compiler under custom roots with a separate custom
   const doc=structuredClone(fixture);doc.settings={codebaseFolder:'product/src',testsFolder:'product/tests'};
   const entries=new Map();styleCode(projectModel(doc),(path,content,ownership)=>entries.set(path,{content,ownership}));
   const compiled=compileDesignSystem(doc.design.designSystem,doc.project.id);
-  for(const piece of compiled.pieces)assert.deepEqual(entries.get('product/src/generated/styles/design-system/'+piece.name+'.css'),{content:piece.css,ownership:'managed'});
-  assert.match(entries.get('product/src/generated/styles/project.css').content,/design-system\.css/);
-  assert.match(entries.get('product/src/generated/styles/project.css').content,/custom\.css/);
+  for(const piece of compiled.pieces)assert.deepEqual(entries.get('product/src/plugin/generated/styles/design-system/'+piece.name+'.css'),{content:piece.css,ownership:'managed'});
+  assert.match(entries.get('product/src/plugin/generated/styles/project.css').content,/design-system\.css/);
+  assert.match(entries.get('product/src/plugin/generated/styles/project.css').content,/custom\.css/);
   assert.deepEqual(JSON.parse(entries.get('design/style-manifest.json').content),compiled.manifest);
 });
 test('real plan/apply updates saved palette, preserves custom CSS and clears a removed design system',async()=>{
@@ -128,7 +128,7 @@ test('real plan/apply updates saved palette, preserves custom CSS and clears a r
   try {
     const doc=structuredClone(fixture);doc.design.designSystem.frontend=declaration();await writeFile(input,JSON.stringify(doc));
     const initial=await planProject(options);await applyProject(initial,initial.hash);
-    const base=join(vault,'plugin/src/generated/styles');await writeFile(join(base,'custom.css'),'/* consumer owned */\n');
+    const base=join(vault,'plugin/src/plugin/generated/styles');await writeFile(join(base,'custom.css'),'/* consumer owned */\n');
     doc.design.designSystem.colors[0].light='#123456';await writeFile(input,JSON.stringify(doc));
     const next=await planProject(options);assert.equal(next.conflicts.length,0);await applyProject(next,next.hash);
     assert.match(await readFile(join(base,'design-system/colors.css'),'utf8'),/#123456/);
@@ -143,7 +143,7 @@ test('a manually changed managed stylesheet is a regeneration conflict, never an
   const vault=await mkdtemp(join(tmpdir(),'design-system-conflict-'));const input=join(vault,'input.json');const options={vault,input,target:'plugin'};
   try {
     const doc=structuredClone(fixture);await writeFile(input,JSON.stringify(doc));const initial=await planProject(options);await applyProject(initial,initial.hash);
-    const path=join(vault,'plugin/src/generated/styles/design-system/colors.css');await writeFile(path,'/* manual edit */\n');
+    const path=join(vault,'plugin/src/plugin/generated/styles/design-system/colors.css');await writeFile(path,'/* manual edit */\n');
     doc.design.designSystem.colors[0].light='#123456';await writeFile(input,JSON.stringify(doc));const result=await planProject(options);
     assert.ok(result.conflicts.some(c=>c.includes('design-system/colors.css')));await assert.rejects(applyProject(result,result.hash),/conflicts/);
     assert.equal(await readFile(path,'utf8'),'/* manual edit */\n');

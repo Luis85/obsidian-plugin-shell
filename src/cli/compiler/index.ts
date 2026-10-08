@@ -49,7 +49,7 @@ export async function compileProject(request:CompileRequest,control:Control={},e
         if (request.projectSelection) throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID', 'lower', 'A project selection requires outputKind project.'));
         return lowerTarget(model,template,kind,sourceName);
       }
-      if (model.sourceRoot !== 'src/generated' || model.testRoot !== 'tests/project') throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID', 'lower', 'Project starters currently require src/ and tests/ roots.'));
+      if (model.sourceRoot !== 'src/plugin/generated' || model.testRoot !== 'src/plugin/tests/project') throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID', 'lower', 'Project starters require src/plugin and src/plugin/tests roots.'));
       const selection = validateProjectSelection(request.projectSelection);
       try { requireFrameworkAdapter(selection.framework, extensions.frameworkAdapters); }
       catch { throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID', 'lower', 'Project starter needs an installed framework adapter for ' + selection.framework + '.')); }
