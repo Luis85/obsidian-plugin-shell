@@ -20,11 +20,12 @@ async function files(folder) {
   return nested.flat();
 }
 
-test('templates/ holds only the runtime, developer-kit, example-removal, adoption-skill, design-folder and Astro site templates', async () => {
+test('templates/ holds only the runtime, developer-kit, example-removal, adoption-skill, design-folder, Astro site and source-project templates', async () => {
   const all = await files('templates');
   const kinds = [[/^templates\/companion\/runtime\/[\w-]+\.ts$/, 'runtime'], [/^templates\/companion\/devkit\/[\w.-]+\.tmpl$/, 'devkit'], [/^templates\/examples\/[\w.-]+\.txt$/, 'examples'],
     [/^templates\/adoption\/(?:claude|agents)-skill\/SKILL\.md$/, 'adoption skill'], [/^templates\/design-folder\/[\w-]+\.md\.tmpl$/, 'design folder'],
-    [/^templates\/sites\/(?:catalog\.json|[a-z-]+\/[\w./-]+\.tmpl)$/, 'Astro site']];
+    [/^templates\/sites\/(?:catalog\.json|[a-z-]+\/[\w./-]+\.tmpl)$/, 'Astro site'],
+    [/^templates\/sources\/(?:plugin|cli|companion|library)\/[\w./-]+\.tmpl$/, 'source project']];
   const unexpected = all.filter(path => !kinds.some(([pattern]) => pattern.test(path)));
   assert.deepEqual(unexpected, []);
   for (const [pattern, name] of kinds) assert.ok(all.some(path => pattern.test(path)), `${name} templates are present`);

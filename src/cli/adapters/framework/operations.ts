@@ -34,6 +34,7 @@ import { isUiCommand, uiOperation } from './ui-operation.ts';
 import { incrementRead, isIncrementRead } from '../increments/read-operation.ts';
 import { remoteOperation } from '../increments/remote-operation.ts';
 import { pluginsRead } from '../community-plugins/operations.ts';
+import { isSourceRead, sourceRead } from '../source-command.ts';
 
 /** One command page, a group of subcommands sharing a root word, every command, or the golden path. */
 function helpSelection(request: Request) {
@@ -153,6 +154,7 @@ const routes: Route[] = [
   [prefixed('entities '), entityCatalog],
   [named('adopt analyze'), adoptAnalyze],
   [named('hosting show'), hostingShow],
+  [isSourceRead, sourceRead],
   [isIncrementRead, incrementRead],
   [named('setup status', 'setup resume'), (request, context) => setupProgress(request, context, executeOperation)],
   [named('new'), newProject],

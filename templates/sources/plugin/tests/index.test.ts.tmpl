@@ -1,0 +1,7 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { projectName } from '../index.ts';
+
+test('the {{name}} source project is wired up', () => {
+  assert.equal(projectName(), '{{name}}');
+});

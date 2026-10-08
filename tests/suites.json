@@ -501,7 +501,9 @@
           "tooling/tests/starter-catalog-docs.checks.mjs",
           "src/cli/tests/starter-submission-identity.checks.mjs",
           "src/cli/tests/gate-scope.checks.mjs",
-          "src/cli/tests/source-projects.test.mjs"
+          "src/cli/tests/source-projects.test.mjs",
+          "src/cli/tests/source-projects-edit.test.mjs",
+          "src/cli/tests/source-imports.test.mjs"
         ]
       },
       "runner": {
@@ -513,7 +515,7 @@
         "tooling/tests/framework-*.checks.mjs",
         "tooling/tests/capability-discovery.checks.mjs",
         "src/cli/tests/gate-scope.checks.mjs",
-        "src/cli/tests/source-projects.test.mjs",
+        "src/cli/tests/source-*.test.mjs",
         "src/cli/tests/starter-*.checks.mjs",
         "src/shared/tests/starter-*.checks.mjs",
         "tooling/tests/starter-*.checks.mjs"

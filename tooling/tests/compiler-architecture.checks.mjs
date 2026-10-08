@@ -35,3 +35,11 @@ test('the former scripts/compiler core paths are no longer treated as the inward
   assert.equal(checkCompilerBoundaries(new Map([[domain,"import '../adapters/cli.ts';"]])).length,1);
   assert.deepEqual(checkCompilerBoundaries(new Map([[legacy,"export {};"]])),[]);
 });
+test('#name/* aliases resolve through package.json "imports", so a pure entrypoint reaching I/O through #shared is caught',()=>{
+  const emitter='src/cli/compiler/adapters/plugin-emitter.ts', helper='src/shared/platform/helper.ts';
+  const sources=new Map([[emitter,"import '#shared/platform/helper.ts';"],[helper,"import 'node:fs';"]]);
+  assert.ok(checkCompilerBoundaries(sources).some(f=>f.includes('plugin-emitter.ts -> src/shared/platform/helper.ts')&&f.includes('node:fs')));
+  // Without the alias the specifier is an unknown package import, reported as such rather than followed.
+  assert.ok(checkCompilerBoundaries(sources,{}).some(f=>f.includes('cannot import #shared/platform/helper.ts')));
+  assert.deepEqual(checkCompilerBoundaries(new Map([[domain,"import '#shared/x.ts';"],['src/shared/x.ts','export {};']]),{'#shared/*':'./src/shared/*'}).length,1);
+});

@@ -5,10 +5,16 @@ import { mkdtemp, mkdir, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { verifySteps } from '../quality/verify-steps.mjs';
-import { checkProjectBoundaries, moduleSpecifiers, projectDependencies, resolveSpecifier } from '../quality/check-project-boundaries.mjs';
+import { boundarySpecifiers, boundaryTarget, checkProjectBoundaries } from '../quality/check-project-boundaries.mjs';
+import { packageImports, readSourceManifest } from '../../src/shared/platform/source-manifest.mjs';
 
 const gate = resolve(import.meta.dirname, '../quality/check-project-boundaries.mjs');
-const codes = files => checkProjectBoundaries(new Map(Object.entries(files))).map(item => item.code);
+/** The fixtures' graph is this repository's: shared -> none; tui -> shared; cli -> shared, tui; companion -> shared; plugin -> shared. */
+const project = (name, references) => ({ name, kind: name === 'shared' || name === 'tui' ? 'library' : name, path: `src/${name}`, references });
+const manifest = { schemaVersion: 1, projects: [project('shared', []), project('tui', ['shared']), project('cli', ['shared', 'tui']), project('companion', ['shared']), project('plugin', ['shared'])] };
+const imports = { '#shared/*': './src/shared/*', '#tui/*': './src/tui/*' };
+const codes = (files, sources = { manifest, imports }) => checkProjectBoundaries(new Map(Object.entries(files)), sources).map(item => item.code);
+const repositoryRoot = resolve(import.meta.dirname, '../..');
 
 test('a source project importing tooling/ or the root tests/ folder is rejected', () => {
   assert.deepEqual(codes({ 'src/plugin/application/bad.ts': "import { loadThresholds } from '../../../tooling/quality/thresholds.mjs';" }), ['SOURCE_IMPORTS_TOOLING']);
@@ -38,15 +44,28 @@ test('declared dependencies, aliases, packages and files outside the projects st
     'tooling/quality/free.mjs': "import { run } from '../../src/cli/app.ts'; import { x } from '../../tests/support/x.mjs';",
     'tests/support/free.mjs': "import { run } from '../../src/plugin/main.ts';",
   }), []);
-  assert.deepEqual(projectDependencies.cli, ['shared', 'tui']);
+  // The gate reads its graph and aliases from the repository's manifest and package.json, which the fixtures mirror.
+  const repository = readSourceManifest(repositoryRoot);
+  assert.deepEqual(repository.projects.map(item => [item.name, item.path, item.references]), manifest.projects.map(item => [item.name, item.path, item.references]));
+  assert.deepEqual(packageImports(repositoryRoot), imports);
+});
+
+test('the graph comes from the manifest: a new reference allows the import, a missing one rejects it', () => {
+  const linked = { ...manifest, projects: manifest.projects.map(item => item.name === 'plugin' ? { ...item, references: ['shared', 'companion'] } : item) };
+  const file = { 'src/plugin/feature/uses.ts': "import { value } from '../../companion/editor/value.ts';" };
+  assert.deepEqual(codes(file), ['PROJECT_DEPENDENCY']);
+  assert.deepEqual(codes(file, { manifest: linked, imports }), []);
+  // An alias resolves through package.json "imports": without the #tui entry the specifier names a package, not a project.
+  assert.deepEqual(codes({ 'src/plugin/bad.ts': "import { x } from '#tui/prompts.ts';" }), ['PROJECT_DEPENDENCY']);
+  assert.deepEqual(codes({ 'src/plugin/bad.ts': "import { x } from '#tui/prompts.ts';" }, { manifest, imports: { '#shared/*': './src/shared/*' } }), []);
 });
 
 test('only real module references count, not strings or comments', () => {
   const source = "// import x from '../../tooling/a.mjs'\nconst text = \"import y from '../../tests/b.mjs'\";\nconst template = `require('../../tooling/c.mjs')`;\n";
   assert.deepEqual(codes({ 'src/plugin/ok.ts': source }), []);
-  assert.deepEqual(moduleSpecifiers('src/plugin/vue.vue', '<script setup lang="ts">\nimport x from "../../../tooling/a.mjs";\n</script>\n<template><div /></template>').map(item => item.specifier), ['../../../tooling/a.mjs']);
-  assert.equal(resolveSpecifier('src/plugin/a/b.ts', '#shared/x.ts'), 'src/shared/x.ts');
-  assert.equal(resolveSpecifier('src/plugin/a/b.ts', 'vue'), null);
+  assert.deepEqual(boundarySpecifiers('src/plugin/vue.vue', '<script setup lang="ts">\nimport x from "../../../tooling/a.mjs";\n</script>\n<template><div /></template>').map(item => item.specifier), ['../../../tooling/a.mjs']);
+  assert.equal(boundaryTarget('src/plugin/a/b.ts', '#shared/x.ts', imports), 'src/shared/x.ts');
+  assert.equal(boundaryTarget('src/plugin/a/b.ts', 'vue', imports), null);
 });
 
 test('a directory under src that is not a declared project, or a code file directly under src, fails closed', () => {
@@ -74,6 +93,11 @@ test('the gate command exits 1 on a src/plugin file importing tooling/ and 0 on 
     await write('src/plugin/main.ts', "import { sha256 } from '#shared/platform/hash.ts';\nexport const hash = sha256;\n");
     await write('src/shared/platform/hash.ts', 'export const sha256 = () => "";\n');
     await write('tooling/quality/thresholds.mjs', 'export const thresholds = {};\n');
+    const missing = spawnSync(process.execPath, [gate], { cwd: root, encoding: 'utf8' });
+    assert.equal(missing.status, 1);
+    assert.match(missing.stderr, /PROJECT_BOUNDARY_MANIFEST_MISSING/);
+    await write('workbench.sources.json', JSON.stringify({ schemaVersion: 1, projects: [project('shared', []), project('plugin', ['shared'])] }));
+    await write('package.json', JSON.stringify({ imports: { '#shared/*': './src/shared/*' } }));
     const clean = spawnSync(process.execPath, [gate], { cwd: root, encoding: 'utf8' });
     assert.equal(clean.status, 0, clean.stderr);
     assert.deepEqual(JSON.parse(clean.stdout).projects, ['plugin', 'shared']);

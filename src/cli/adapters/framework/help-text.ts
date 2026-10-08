@@ -1,6 +1,7 @@
 import { defaultVaultConfigDirectory } from '../../domain/host-paths.ts';
 import { prototypeCommands } from './prototype-catalog.ts';
 import { incrementExamples, incrementGroup, incrementOptionHelp, incrementOptionOverrides, incrementUsage } from './increment-help.ts';
+import { sourceExamples, sourceGroup, sourceOptionHelp, sourceOptionOverrides, sourceUsage } from './source-help.ts';
 /**
  * Explanatory help metadata for the command catalog: groups, the golden path, examples and
  * option documentation. Data only; execution policy stays in catalog.ts and the handlers.
@@ -46,6 +47,7 @@ export const groups: ReadonlyArray<{ id: string; title: string; commands: readon
   { id: 'agent-mcp', title: 'Optional local agent MCP', commands: ['mcp'] },
   { id: 'hosting', title: 'Hosting platform (GitHub, Azure DevOps or none)', commands: ['hosting show', 'hosting set'] },
   incrementGroup,
+  sourceGroup,
   { id: 'compiler', title: 'Project compiler', commands: ['compiler check', 'compiler inspect', 'compiler explain'] },
   { id: 'plans', title: 'Reviewed plans', commands: ['plan inspect', 'plan apply'] },
   { id: 'inspect', title: 'Inspect/configure', commands: ['status', 'doctor', 'support report', 'version', 'config get', 'config explain', 'config validate', 'config set'] },
@@ -66,6 +68,7 @@ const common: Record<string, OptionHelp> = {
 };
 const specific: Record<string, OptionHelp> = {
   ...incrementOptionHelp,
+  ...sourceOptionHelp,
   type: { description: 'Component-template type filter.', values: ['component', 'component-with-children', 'page', 'page-with-bricks'] },
   'atomic-level': { description: 'Atomic Design level filter.', values: ['atom', 'molecule', 'organism', 'template', 'page'] },
   category: { description: 'Exact component-template category filter.' },
@@ -171,6 +174,7 @@ const specific: Record<string, OptionHelp> = {
 const profileDefaults: Record<string, string> = { test: 'unit (project when configs/testing/vitest.project.config.mjs exists)', verify: 'full', dev: 'watch' };
 const usage: Record<string, string> = {
   ...incrementUsage,
+  ...sourceUsage,
   'adopt analyze': 'node bin/app adopt analyze [--target <dir>] [--out <report.json>] [--replace] [--json]',
   'adopt plan': 'node bin/app adopt plan [--target <dir>] [--report <report.json>] [--out <plan.md>] [--replace] [--yes | --apply <sha256>] [--json]',
   'adopt skill': 'node bin/app adopt skill [--target <dir>] [--yes | --apply <sha256>] [--json]',
@@ -201,6 +205,7 @@ const usage: Record<string, string> = {
 };
 const examples: Record<string, string[]> = {
   ...incrementExamples,
+  ...sourceExamples,
   'adopt analyze': ['node bin/app adopt analyze --target ../legacy-app', 'node bin/app adopt analyze --target ../legacy-app --json --out ../legacy-report.json'],
   'adopt plan': ['node bin/app adopt plan --target ../legacy-app', 'node bin/app adopt plan --target ../legacy-app --apply <sha256>', 'node bin/app adopt plan --report ../legacy-report.json --target ../legacy-app --dry-run'],
   'adopt skill': ['node bin/app adopt skill --target ../legacy-app --dry-run', 'node bin/app adopt skill --target ../legacy-app --yes'],
@@ -369,6 +374,7 @@ const optionOverrides: OptionOverride[] = [
   [option('templates instantiate', 'project'), doc => { doc.description = 'Canonical Companion project JSON file to update.'; doc.default = 'design/project.json'; }],
   [option('templates instantiate', 'name'), describe('Optional instance/component/page title override; the template name is the default.')],
   ...incrementOptionOverrides,
+  ...sourceOptionOverrides,
 ];
 function optionDoc(entry: Command, name: string): OptionHelp {
   const doc = { ...(specific[name] ?? { description: '' }) };

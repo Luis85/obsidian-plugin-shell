@@ -3,6 +3,8 @@ import ts from 'typescript';
 import { readFile, readdir } from 'node:fs/promises';
 import { posix, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { packageImports } from '../../src/shared/platform/source-manifest.mjs';
+import { aliasPrefixes } from '../../src/cli/domain/source-imports.ts';
 
 export const pureEntrypoints = [
   'src/cli/compiler/adapters/plugin-emitter.ts', 'src/cli/compiler/adapters/clickdummy-emitter.ts',
@@ -45,14 +47,15 @@ export function inspectModule(path, text) {
   visit(source);
   return { dependencies, globals: [...new Set(globals)] };
 }
-/** Input map allows negative tests without creating invalid production modules. */
-export function checkCompilerBoundaries(sources) {
+/** Root package.json "imports": the #name/* aliases of the library source projects, derived from workbench.sources.json. */
+const repositoryImports = packageImports(fileURLToPath(new URL('../../', import.meta.url)));
+/** Input map allows negative tests without creating invalid production modules; tests may pass their own "imports". */
+export function checkCompilerBoundaries(sources, imports = repositoryImports) {
   const failures = [], modules = new Map([...sources].map(([path, text]) => [path, inspectModule(path, text)]));
-  // package.json "imports": #shared/* and #tui/* name files of the shared and tui source projects.
-  const aliases = { '#shared/': 'src/shared/', '#tui/': 'src/tui/' };
+  const aliases = aliasPrefixes(imports);
   function resolveImport(from, specifier) {
-    const alias = Object.keys(aliases).find(prefix => specifier.startsWith(prefix));
-    if (alias) { const target = aliases[alias] + specifier.slice(alias.length); return modules.has(target) ? target : null; }
+    const alias = aliases.find(([prefix]) => specifier.startsWith(prefix));
+    if (alias) { const target = alias[1] + specifier.slice(alias[0].length); return modules.has(target) ? target : null; }
     if (!specifier.startsWith('.')) return null;
     const path = posix.normalize(posix.join(posix.dirname(from), specifier));
     return modules.has(path) ? path : null;
