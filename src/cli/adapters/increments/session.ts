@@ -19,7 +19,7 @@ export interface PlanSummary {
   edits: EditSummary[];
 }
 type Warning = { code: string; message: string };
-export interface SessionPlan { plan: Awaited<ReturnType<typeof createFilePlan>>; summary: PlanSummary & { warnings: Warning[] }; conflicts: string[]; steps?: unknown[]; prepare?: () => Promise<unknown> }
+export interface SessionPlan { plan: Awaited<ReturnType<typeof createFilePlan>>; summary: PlanSummary & { warnings: Warning[] }; conflicts: string[]; steps?: unknown[]; prepare?: () => Promise<unknown>; finalize?: () => Promise<unknown> }
 const parsers = { increment: parseIncrement, pullRequest: parsePullRequest, issue: parseIssue } as const;
 type Models = { increment: IncrementModel; pullRequest: PullRequestModel; issue: IssueModel };
 
@@ -69,7 +69,7 @@ export class Session {
     if (next !== text) this.write(path, next);
   }
   /** The reviewed file plan of every edit, with the touched Increments refreshed. */
-  async plan<Summary extends PlanSummary>(summary: Summary, extra: { steps?: unknown[]; prepare?: () => Promise<unknown> } = {}): Promise<SessionPlan> {
+  async plan<Summary extends PlanSummary>(summary: Summary, extra: { steps?: unknown[]; prepare?: () => Promise<unknown>; finalize?: () => Promise<unknown> } = {}): Promise<SessionPlan> {
     for (const id of this.touched) await this.refresh(id);
     const entries = [];
     for (const [path, text] of this.writes) if (text !== await this.ws.read(path)) entries.push({ path, content: text });

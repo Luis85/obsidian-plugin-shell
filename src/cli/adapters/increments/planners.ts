@@ -10,6 +10,7 @@ import { blocking, requireGate } from './delivery-gates.ts';
 import { incrementDocumentPlanners } from './increment-planner.ts';
 import { pullRequestPlanners } from './pull-request-planner.ts';
 import { issuePlanners } from './issue-planner.ts';
+import { iterationPlanners } from './iteration-planner.ts';
 import { option } from './inputs.ts';
 
 /** Rules the planned outputs satisfy: changelog entries, docs index rows, status Done and the Completion record. */
@@ -32,6 +33,7 @@ async function completePlan(request: Request, context: Context): Promise<Session
 
 export const incrementPlanners: Record<string, (request: Request, context: Context) => Promise<SessionPlan>> = {
   ...incrementDocumentPlanners,
+  ...iterationPlanners,
   'increment complete': completePlan,
   ...pullRequestPlanners,
   ...issuePlanners,

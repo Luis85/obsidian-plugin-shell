@@ -9,6 +9,13 @@ const branching = flags('branch', 'no-branch', 'switch', 'fetch');
  * use the `remote` effect: the preview reads the hosting platform, --apply/--yes writes it, never --plan-out.
  */
 export const incrementCommands: readonly Command[] = [
+  { id: 'increment plan', summary: 'Start an iteration planning meeting: create linked Markdown records without creating a branch.', options: { ...values('title', 'owner', 'size', 'e2e', 'from', 'input'), ...flags('issue', 'no-issue') }, maxArgs: 1, effect: 'plan' },
+  { id: 'increment commit', summary: 'Commit to the scoped iteration after readiness passes; --branch creates its branch and commits the planning records.', options: flags('branch', 'no-branch'), maxArgs: 1, effect: 'plan' },
+  { id: 'increment present', summary: 'Save a Markdown review presentation of delivered criteria, evidence, pull requests and open items.', options: {}, maxArgs: 1, effect: 'plan' },
+  { id: 'increment carry-over', summary: 'Copy unfinished issues into a planning iteration, preserving source history and mapping acceptance criteria.', options: {}, maxArgs: 2, effect: 'plan' },
+  { id: 'pr review', summary: 'Mark a published draft ready for review after its Definition of Done passes.', options: {}, maxArgs: 1, effect: 'remote' },
+  { id: 'pr close', summary: 'Close a published pull request without merging; preview and approval required.', options: {}, maxArgs: 1, effect: 'remote' },
+  { id: 'pr merge', summary: 'Merge a reviewed pull request with a merge commit after its Definition of Done passes.', options: {}, maxArgs: 1, effect: 'remote' },
   { id: 'increment new', summary: 'Plan a new Increment (the Definition of Ready handoff) with its kick-off pull request, optionally its issue, acceptance test stubs and the increment branch.', options: { ...values('title', 'owner', 'size', 'e2e', 'from', 'input'), ...flags('issue', 'no-issue'), ...branching }, maxArgs: 1, effect: 'plan' },
   { id: 'increment list', summary: 'List Increments with status, owner, size, linked pull requests and issues.', options: values('status'), maxArgs: 0, effect: 'read' },
   { id: 'increment show', summary: 'Show one Increment: frontmatter, sections, acceptance criteria, links, validation and allowed transitions.', options: {}, maxArgs: 1, effect: 'read' },

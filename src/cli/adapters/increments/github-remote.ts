@@ -1,8 +1,8 @@
 /**
  * GitHub adapter of the HostingRemote port over `gh api`, with the user's own gh sign-in. Only fixed REST routes
  * under `repos/<owner>/<repo>` are issued, request bodies go through stdin as JSON, every call has a timeout and a
- * bounded response, and failures carry a code, never gh's raw output (which can echo tokens). It never pushes,
- * marks a draft ready, merges or stores credentials.
+ * bounded response, and failures carry a code, never gh's raw output (which can echo tokens). It never pushes or
+ * stores credentials. Lifecycle transitions require a separately reviewed command.
  */
 import { githubRemoteState } from '../../domain/increments/remote-state.ts';
 import { hasControls } from '../../domain/errors.ts';
@@ -50,7 +50,8 @@ function toPullRequest(value: unknown, step: Step): RemotePullRequest {
   const state = githubRemoteState({ state: pull.state, draft: pull.draft, merged: isText(pull.merged_at) });
   const valid = Number.isSafeInteger(pull.number) && [pull.html_url, pull.title, head, base, body].every(isText) && String(pull.html_url).startsWith('https://');
   if (!valid || state === null) throw invalid(step);
-  return pullRequest({ number: pull.number as number, url: pull.html_url as string, title: pull.title as string, body: body as string, state, head: head as string, base: base as string });
+  const headCommit = isObject(pull.head) && isText(pull.head.sha) ? pull.head.sha : undefined;
+  return { ...(headCommit ? { headCommit } : {}), ...pullRequest({ number: pull.number as number, url: pull.html_url as string, title: pull.title as string, body: body as string, state, head: head as string, base: base as string }) };
 }
 function requireBody(body: string, step: Step): string {
   const size = bodySize(body, 'github');
@@ -67,7 +68,7 @@ export function createGitHubRemote(options: GitHubRemoteOptions): HostingRemote 
   if (!/^[A-Za-z0-9][A-Za-z0-9-]*\/[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(repository)) throw definite('PR_REPOSITORY_UNRESOLVED', 'The GitHub repository must be owner/repo.', 'read');
   const env = { ...(options.env ?? process.env), GH_PROMPT_DISABLED: '1', GH_NO_UPDATE_NOTIFIER: '1', NO_COLOR: '1' };
   const gh = (args: string[], input?: string) => run('gh', args, { ...remoteLimits, env, ...(input === undefined ? {} : { input }) });
-  async function api(method: 'GET' | 'POST' | 'PATCH', path: string, step: Step, body?: Record<string, unknown>): Promise<unknown> {
+  async function api(method: 'GET' | 'POST' | 'PATCH' | 'PUT', path: string, step: Step, body?: Record<string, unknown>): Promise<unknown> {
     const route = `repos/${repository}${path}`;
     if (!routePattern.test(route) || /\/\.{1,2}(?:\/|$|\?)/.test(route)) throw definite('PR_REMOTE_ARGUMENT_UNSAFE', 'Refusing an unexpected GitHub API route.', step);
     const result = await gh(['api', '--method', method, '-H', 'Accept: application/vnd.github+json', '-H', 'X-GitHub-Api-Version: 2022-11-28',
@@ -86,6 +87,19 @@ export function createGitHubRemote(options: GitHubRemoteOptions): HostingRemote 
   }
   return {
     platform: 'github', repository,
+    async transition(number, action, headCommit) {
+      requireNumber(number);
+      if (!/^[0-9a-f]{40,64}$/.test(headCommit)) throw definite('PR_REMOTE_ARGUMENT_UNSAFE', 'A reviewed source commit is required.', 'read');
+      if (action === 'review') {
+        const response = await gh(['pr', 'ready', String(number), '--repo', repository]);
+        if (response.status !== 0) throw failure(response, 'update');
+      } else if (action === 'close') {
+        await api('PATCH', `/pulls/${number}`, 'update', { state: 'closed' });
+      } else {
+        const response = await api('PUT', `/pulls/${number}/merge`, 'update', { sha: headCommit, merge_method: 'merge' });
+        if (!isObject(response) || response.merged !== true) throw uncertainWrite('update', 'merge completion was not confirmed');
+      }
+    },
     async readiness(): Promise<RemoteReadiness> {
       const status = await gh(['auth', 'status', '--hostname', 'github.com']);
       if (status.error === 'ENOENT') return readinessResult('github', repository, { cli: 'missing', auth: 'unknown', defaultBranch: null },

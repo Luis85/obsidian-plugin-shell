@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "frameworkVersion": "0.4.0",
-  "commandCount": 173,
+  "commandCount": 180,
   "sources": [
     {
       "path": "package.json",
@@ -10,7 +10,7 @@
     },
     {
       "path": "src/cli/adapters/framework/catalog.ts",
-      "sha256": "546c8b79714a6d58f84286a4aad5f1fd8ed17dcbe9feacb8819dd5c9c11ef977"
+      "sha256": "ea4c8183534f859de2821e1c9f5d21a5d7d7235f9c51908255a2f2db59216b8f"
     },
     {
       "path": "src/cli/adapters/framework/help-text.ts",
@@ -18,11 +18,11 @@
     },
     {
       "path": "src/cli/adapters/framework/increment-catalog.ts",
-      "sha256": "155c674d71f58aeed5bce9ac4c7f7166838f03b7dbd9fef72f2983cbb6203ffd"
+      "sha256": "b39da0955793f68989e0dc5909304e032271801de718add454fcdbc91b0cc492"
     },
     {
       "path": "src/cli/adapters/framework/increment-help.ts",
-      "sha256": "4482f64b12eefff667822a6fe13cc0f6c0a524cb424b4f722456121ac22063a0"
+      "sha256": "050cf5913be70ab1c63c94b6d2bc807dccce30224105299d43ad814301c2a69a"
     },
     {
       "path": "src/cli/compiler/domain/diagnostics.ts",
@@ -40,7 +40,7 @@
   "outputs": [
     {
       "path": "reference.md",
-      "sha256": "7206b139180f0be11786e39a7917314a61c4575d6cfaf1bb72ceabf756858d57"
+      "sha256": "ee36192972ec05ce065fc0f71d647a9f1cde124f5c076c81fbbfde06249e30ae"
     },
     {
       "path": "diagnostics.md",
@@ -48,7 +48,7 @@
     },
     {
       "path": "commands.json",
-      "sha256": "5366b30d8a905819d8cc633eac7baa9ae2f22c48c68ff85ffac5412ecdb29303"
+      "sha256": "6239655bfdc193aae8d3fdd7f91aacbe673e19a5bfe383e49399b94a7ee916c8"
     }
   ]
 }
