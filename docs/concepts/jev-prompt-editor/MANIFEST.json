@@ -226,7 +226,7 @@
     {
       "path": "scripts/compiler.cjs",
       "bytes": 3784,
-      "sha256": "d9821e36e25046847adbbe7cd0e980393ecbbf26e1ca44d2606da9a5bd370486"
+      "sha256": "dd906627f0af9f866a90110b66c8a035ee68936a4503b4129cfda03800956514"
     },
     {
       "path": "scripts/export-examples.cjs",
@@ -441,7 +441,7 @@
     {
       "path": "tests/compiler.test.cjs",
       "bytes": 5364,
-      "sha256": "87556469dce4da4220280c39f236f4cda9dd7a8143c7b05aa2d363822ab2d0c3"
+      "sha256": "53136f86f58eae29d43ea0e045bb1f74dacbb5c103f7e3aa9ce552c0cbb68fa4"
     },
     {
       "path": "tests/domain.test.cjs",

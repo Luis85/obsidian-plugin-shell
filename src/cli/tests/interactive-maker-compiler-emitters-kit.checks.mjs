@@ -30,7 +30,7 @@ test('the developer kit renders every template, follows custom roots and owns it
   const config = out.text('configs/testing/vitest.project.config.mjs');
   assert.ok(config.includes(`  include: ["checks/project/**/*.test.{ts,mjs}", "${makerTests}/**/*.test.ts"], environment: 'node', fileParallelism: false,\n  // Playwright specs (npm run test:e2e) run in a browser, never in Vitest.\n  exclude: [...configDefaults.exclude, 'tests/e2e/**'],\n  setupFiles: ["checks/project/ui-bootstrap.mjs"],\n`));
   assert.equal(out.text('checks/project/ui-bootstrap.mjs'), "// Install the actual locally bundled icons, not a mock or a remote provider.\nimport { addIcon } from '@iconify/vue';\nimport { init } from 'virtual:nuxt-ui-icons';\ninit(addIcon);\n");
-  assert.equal(out.text('tests/suites.json'), (await template.text('tests/suites.json')).replaceAll('"tests/project', '"checks/project'));
+  assert.deepEqual(JSON.parse(out.text('tests/suites.json')).suites.find(suite => suite.name === 'project').include, ['checks/project/**/*.test.ts', 'checks/project/**/*.test.mjs']);
   const host = out.text('checks/project/plugin-host.test.ts');
   assert.ok(host.includes('import GeneratedPlugin from "../../src/plugin/main.ts";\nimport manifest from "../../manifest.json";\n'));
   assert.ok(host.includes('  const files = loadVaultFixtures(join(import.meta.dirname, "../../tooling/tests/obsidian/vault"));\n'));
@@ -40,14 +40,18 @@ test('the developer kit renders every template, follows custom roots and owns it
   assert.ok(defaults.text('tests/suites.json').includes('src/plugin/tests/project'));
 });
 
-test('the copied suite manifest classifies emitted journey specs and their helper, and nothing else changes', async () => {
-  const out = recorder(); await devkitFiles(template, model(await starterDocument('feature-showcase')), out.add);
-  const original = await template.text('tests/suites.json');
-  assert.equal(out.text('tests/suites.json'), original.replace('"src/plugin/tests/e2e/*.spec.ts"', '"src/plugin/tests/e2e/*.spec.ts",\n        "tests/e2e/journeys/*.spec.ts"')
-    .replace('"src/plugin/tests/e2e/control-metrics.ts"', '"src/plugin/tests/e2e/control-metrics.ts",\n        "tests/e2e/journeys/journey-support.ts"').replaceAll('"tests/project', '"src/plugin/tests/project'));
-  const suites = JSON.parse(out.text('tests/suites.json'));
-  assert.ok(suites.suites.find(suite => suite.name === 'e2e').include.includes('tests/e2e/journeys/*.spec.ts'));
-  assert.ok(suites.helpers.some(helper => helper.include.includes('tests/e2e/journeys/journey-support.ts')));
+test('the copied suite manifest classifies emitted browser tests without changing other suite policy', async () => {
+  const m = model(await starterDocument('feature-showcase'));
+  const out = recorder(); await devkitFiles(template, m, out.add);
+  const original = JSON.parse(template.text('tests/suites.json').replaceAll('"tests/project', '"src/plugin/tests/project'));
+  original.roots.push({ path: 'tests/e2e' });
+  original.testLevels.find(level => level.name === 'e2e').paths.push('tests/e2e/**');
+  original.suites.find(suite => suite.name === 'e2e').include.push('tests/e2e/ui-quality.spec.ts', 'tests/e2e/journeys/*.spec.ts');
+  original.helpers.find(helper => helper.include.includes('src/plugin/tests/e2e/control-metrics.ts')).include.push('tests/e2e/journeys/journey-support.ts');
+  assert.deepEqual(JSON.parse(out.text('tests/suites.json')), original);
+  const reused = recorder();
+  await devkitFiles({ ...template, text: path => path === 'tests/suites.json' ? out.text(path) : template.text(path) }, m, reused.add);
+  assert.equal(reused.text('tests/suites.json'), out.text('tests/suites.json'), 'reusing a generated template never duplicates registrations');
 });
 
 test('templates substitute known placeholders once and refuse unknown ones', () => {

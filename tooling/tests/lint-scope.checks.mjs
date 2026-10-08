@@ -108,3 +108,43 @@ test('generated named-source tests retain test rules without plugin-only rules',
     assert.ok(Object.keys(production.rules).some(name => name.startsWith('obsidianmd/')), 'product rules remain active');
   } finally { await unlink(join(root, 'node_modules')).catch(() => rmdir(join(root, 'node_modules'))); }
 });
+
+test('generated compiler receipts retain historical support scope without hiding new consumer code', async t => {
+  const root = await project(t, 'generated');
+  const recorded = sources.filter(path => path !== 'src/shared/platform/hash.ts');
+  await writeFile(join(root, '.companion/generation.json'), JSON.stringify({ version: 1, files: recorded.map(path => ({ path, hash: 'a'.repeat(64), ownership: path.includes('/tests/') ? 'managed' : 'framework' })) }));
+  const expected = [...shellLinted, 'src/shared/platform/hash.ts'].sort();
+  assert.deepEqual(await linted(root), expected);
+  assert.equal(lintExcluded(root, 'src/shared/platform/hash.ts'), false, 'unreceipted shared consumer code remains linted');
+  assert.equal(lintExcluded(root, 'src/companion/new-component.ts'), false, 'new companion product code remains linted');
+  assert.equal(lintExcluded(root, 'src/plugin/tests/new-test.ts'), false, 'new test code retains its dedicated lint checks');
+  for (const path of shellLinted) assert.equal(lintExcluded(root, path), false, `previous production input ${path}`);
+  assert.ok(lintExclusionGlobs(root).every(path => !path.includes('*')), 'generated scope contains exact paths only');
+  for (const path of ['configs/lint/eslint.config.mjs', 'configs/lint/lint-scope.mjs',
+    'src/shared/platform/project-roots.mjs', 'src/shared/platform/project-configs.mjs', 'src/shared/platform/repository-kind.mjs']) {
+    await mkdir(dirname(join(root, path)), { recursive: true }); await cp(join(repositoryRoot, path), join(root, path));
+  }
+  await writeFile(join(root, 'package.json'), '{"type":"module"}');
+  await symlink(join(repositoryRoot, 'node_modules'), join(root, 'node_modules'), 'junction');
+  try {
+    const eslint = new ESLint({ cwd: root, overrideConfigFile: join(root, 'configs/lint/eslint.config.mjs') });
+    for (const path of sources) assert.equal(await eslint.isPathIgnored(join(root, path)), lintExcluded(root, path), path);
+    const testPath = join(root, 'src/plugin/tests/unit/entity.test.ts');
+    const explicit = new ESLint({ cwd: root, overrideConfigFile: join(root, 'configs/lint/eslint.config.mjs'), ignore: false });
+    assert.equal((await explicit.calculateConfigForFile(testPath)).rules['@typescript-eslint/no-floating-promises'][0], 2, 'explicit test lint retains promises');
+  } finally { await unlink(join(root, 'node_modules')).catch(() => rmdir(join(root, 'node_modules'))); }
+});
+
+
+test('invalid generated receipts never widen lint exclusions', async t => {
+  const root = await project(t, 'generated');
+  for (const receipt of ['null', '{', '{}', JSON.stringify({ version: 1, files: [
+    { path: 'src/shared/**', hash: 'a'.repeat(64), ownership: 'framework' },
+    { path: '/src/shared/absolute.ts', hash: 'a'.repeat(64), ownership: 'framework' },
+    { path: 'src/shared/../escape.ts', hash: 'a'.repeat(64), ownership: 'framework' },
+    null,
+  ] })]) {
+    await writeFile(join(root, '.companion/generation.json'), receipt);
+    assert.deepEqual(lintExclusionGlobs(root), [], receipt);
+  }
+});

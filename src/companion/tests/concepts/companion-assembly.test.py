@@ -30,6 +30,12 @@ class AssemblyContract(unittest.TestCase):
         # the repository layout is mirrored so the assembly finds every input where it does in the checkout.
         for folder in ['tooling', 'src/shared', 'src/cli']:
             shutil.copytree(ROOT / folder, self.root / folder, ignore=ignore_tests)
+        # Vite follows project tsconfig references even when their modules are not in the bundle.
+        shutil.copytree(ROOT / 'configs/types', self.root / 'configs/types')
+        for config in (ROOT / 'src').glob('*/tsconfig.json'):
+            target = self.root / config.relative_to(ROOT)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(config, target)
         (self.root / 'node_modules').symlink_to(ROOT / 'node_modules', target_is_directory=True)
         shutil.copy(ROOT / 'package.json', self.root / 'package.json')
         (self.root / 'configs/quality').mkdir(parents=True, exist_ok=True)
@@ -37,7 +43,9 @@ class AssemblyContract(unittest.TestCase):
         spec = importlib.util.spec_from_file_location('companion_assembly', ROOT / 'tooling/concepts/build-companion.py')
         self.builder = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(self.builder)
+        self.builder.REPO = self.root
         self.builder.ROOT = self.concept
+        self.builder.APP = self.app
         self.output = self.concept / 'index.html'
 
     def tearDown(self):

@@ -3,7 +3,7 @@ import { readdir, lstat } from 'node:fs/promises';
 import { resolve, join, relative, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { runNodeProcess } from '../../src/shared/platform/process.ts';
-import { lintExcluded } from '../../configs/lint/lint-scope.mjs';
+import { lintExcluded, lintExclusionGlobs } from '../../configs/lint/lint-scope.mjs';
 
 /** The reviewed rules of the repository that owns this script; a project runs its own copy, so both always match. */
 const config = fileURLToPath(new URL('../../configs/lint/oxlintrc.json', import.meta.url));
@@ -11,7 +11,7 @@ const config = fileURLToPath(new URL('../../configs/lint/oxlintrc.json', import.
 /** Explicit file arguments prevent an ignored archive ancestor from hiding its src tree. `only` (repository-relative
  * paths) narrows the run to those owned inputs, as `check --fast` does for changed files; the default is every input. */
 export async function lintOwnedSource(root = process.cwd(), tool = resolve(root, 'node_modules/oxlint/bin/oxlint'), only = null) {
-  const files = [];
+  const files = [], exclusions = lintExclusionGlobs(root);
   async function visit(path) {
     const stat = await lstat(path);
     if (stat.isSymbolicLink()) throw new Error('LINT_SOURCE_SYMLINK');
@@ -19,8 +19,8 @@ export async function lintOwnedSource(root = process.cwd(), tool = resolve(root,
       for (const entry of await readdir(path)) await visit(join(path, entry));
     } else if (stat.isFile() && /\.(?:[cm]?[jt]sx?|vue)$/.test(path)) {
       const name = relative(root, path).split(sep).join('/');
-      // The shell repository's own exclusions (shared with configs/lint/eslint.config.mjs); a generated project has none.
-      if (!lintExcluded(root, name)) files.push(relative(root, path));
+      // Shared historical scope, narrowed to exact compiler-owned files in generated projects.
+      if (!lintExcluded(root, name, exclusions)) files.push(relative(root, path));
     }
   }
   await visit(resolve(root, 'src'));

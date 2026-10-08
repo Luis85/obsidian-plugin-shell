@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, writeFile, mkdtemp, rm } from 'node:fs/promises';
+import { readFile, writeFile, mkdtemp, mkdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, posix } from 'node:path';
+import { join, dirname, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { projectModel } from '../../src/cli/compiler/emitters/model.ts';
 import { projectFiles } from '../../src/cli/tests/support/project-render.mjs';
@@ -12,6 +12,7 @@ import { rebaseMarkdown, relocatedPath } from '../../src/cli/compiler/emitters/f
 import { inspectWorkflow, markdownLinks } from '../quality/check-repository.mjs';
 import { starterDocument } from '#shared/testing/starter-documents.mjs';
 import { permission } from './support/claude-permissions.mjs';
+import { checkSuites } from '../../src/cli/tooling/testing/suite-manifest.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const starter = starterDocument('quick-capture');
@@ -147,7 +148,7 @@ test('[GENERATOR-DEVKIT-07] custom test folders keep the example test, Vitest co
   assert.ok(suites.roots.some(entry => entry.path === 'verification/specs/project'));
   assert.deepEqual(suites.suites.find(suite => suite.name === 'project').include, ['verification/specs/project/**/*.test.ts', 'verification/specs/project/**/*.test.mjs']);
   assert.ok(!output.get('tests/suites.json').content.includes('"tests/project'));
-  assert.equal(text('tests/suites.json'), (await readFile(join(root, 'tests/suites.json'), 'utf8')).replaceAll('"tests/project', '"src/plugin/tests/project'));
+  assert.deepEqual(JSON.parse(output.get('tests/suites.json').content.replaceAll('verification/specs/project', 'src/plugin/tests/project')), JSON.parse(text('tests/suites.json')));
 });
 test('[GENERATOR-DEVKIT-05] templates and link rebasing are exact and fail closed', () => {
   assert.equal(renderTemplate('# {{name}} ${{ github.ref }}', { name: 'X' }), '# X ${{ github.ref }}');
@@ -215,4 +216,26 @@ test('[GENERATOR-DEVKIT-11] project scripts type-check the project config, alway
     assert.equal(scripts.check, 'node bin/app check');
     assert.match(scripts['verify:artifacts'], /npm run test:ui-effects/);
   }
+});
+
+test('fresh generated browser tests pass the strict suite inventory used by test:ui-effects', async () => {
+  const scratch = await mkdtemp(join(tmpdir(), 'generated-suite-inventory-'));
+  try {
+    const showcase = starterDocument('feature-showcase');
+    const output = await projectFiles(root, projectModel(showcase.document ?? showcase));
+    for (const entry of output) {
+      const path = join(scratch, entry.path);
+      await mkdir(dirname(path), { recursive: true });
+      await writeFile(path, entry.content, entry.encoding === 'base64' ? 'base64' : 'utf8');
+    }
+    const result = await checkSuites(scratch);
+    assert.deepEqual(result.failures, []);
+    const e2e = result.suites.find(suite => suite.name === 'e2e');
+    assert.ok(e2e.files.includes('tests/e2e/ui-quality.spec.ts'));
+    assert.ok(e2e.files.some(path => path.startsWith('tests/e2e/journeys/')));
+    const manifest = result.manifest;
+    manifest.roots = manifest.roots.filter(entry => entry.path !== 'tests/e2e');
+    await writeFile(join(scratch, 'tests/suites.json'), JSON.stringify(manifest));
+    assert.ok((await checkSuites(scratch)).failures.some(failure => failure.startsWith('UNDECLARED_TEST_DIRECTORY: tests/e2e')));
+  } finally { await rm(scratch, { recursive: true, force: true }); }
 });

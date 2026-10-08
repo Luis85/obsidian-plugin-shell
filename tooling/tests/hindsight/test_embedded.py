@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
-SPEC = importlib.util.spec_from_file_location("adapter", Path(__file__).resolve().parents[2] / "scripts/hindsight/embedded.py")
+SPEC = importlib.util.spec_from_file_location("adapter", Path(__file__).resolve().parents[3] / "src/cli/tooling/hindsight/embedded.py")
 A = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(A)
 URL = "http://127.0.0.1:9876"

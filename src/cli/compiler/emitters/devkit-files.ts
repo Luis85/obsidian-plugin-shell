@@ -4,9 +4,9 @@ import type { TemplateSnapshot } from '../domain/contracts.ts';
  * Every file is 'extension' ownership: regeneration keeps a developer's edits and reports a conflict
  * instead of overwriting when the template itself changed. */
 import { posix } from 'node:path';
-import { literal, type Model } from './model.ts';
-import { relativeImport, rewriteTemplate, type Add } from './file-code.ts';
-import { journeySuitePairs } from './authored-journey-code.ts';
+import { literal, json, requireValue, type Model } from './model.ts';
+import { relativeImport, type Add } from './file-code.ts';
+import { journeySuiteFiles } from './authored-journey-code.ts';
 import { clickdummyBuilderFiles } from './clickdummy-builder-files.ts';
 import { briefValues } from './devkit-brief.ts';
 import { hostingProfile, projectHosting, type HostingProfile } from '#shared/companion/schema/hosting.mjs';
@@ -77,13 +77,26 @@ init(addIcon);
   const example = `${m.testRoot}/plugin-host.test.ts`;
   add(example, pluginHostTest(example, posix.relative(posix.dirname(example), 'tooling/tests/obsidian/vault')), 'extension');
 }
-/** The copied suite manifest classifies product tests under tests/project (follow a custom tests folder) and must
- * classify emitted journey specs, or every suite run fails UNCLASSIFIED_TEST_FILE. An unchanged manifest is not re-emitted. */
+interface SuiteManifest {
+  roots: Array<{ path: string; optional?: boolean }>;
+  testLevels: Array<{ name: string; paths?: string[] }>;
+  suites: Array<{ name: string; include: string[] }>;
+  helpers: Array<{ purpose: string; include: string[] }>;
+}
+const appendUnique = (paths: string[], additions: string[]) => { paths.push(...additions.filter(path => !paths.includes(path))); };
+/** Register the product browser tests independently of the copied shell harness and retain opt-in e2e execution. */
 function projectSuites(templateRoot: TemplateSnapshot, m: Model, add: Add): void {
-  const template = templateRoot.text('tests/suites.json'), pairs = journeySuitePairs(m);
-  let suites = pairs.length ? rewriteTemplate(template, pairs, 'tests/suites.json') : template;
-  if (m.testRoot !== 'tests/project') suites = suites.replaceAll('"tests/project', JSON.stringify(m.testRoot).slice(0, -1));
-  if (suites !== template) add('tests/suites.json', suites, 'framework');
+  const template = templateRoot.text('tests/suites.json');
+  const suites: SuiteManifest = JSON.parse(template.replaceAll('"tests/project', JSON.stringify(m.testRoot).slice(0, -1)));
+  const e2e = suites.suites.find(suite => suite.name === 'e2e'), level = suites.testLevels.find(item => item.name === 'e2e');
+  const helpers = suites.helpers.find(item => item.include.includes('src/plugin/tests/e2e/control-metrics.ts'));
+  requireValue(e2e && level?.paths && helpers, 'The template must classify browser specs and their helpers.');
+  if (!suites.roots.some(item => item.path === 'tests/e2e')) suites.roots.push({ path: 'tests/e2e' });
+  appendUnique(level.paths, ['tests/e2e/**']);
+  const journey = journeySuiteFiles(m);
+  appendUnique(e2e.include, ['tests/e2e/ui-quality.spec.ts', ...journey.specs]);
+  appendUnique(helpers.include, journey.helpers);
+  add('tests/suites.json', json(suites), 'framework');
 }
 /** Same shared build config and throwing `obsidian` boundary as the framework's own Vitest config. */
 function projectVitestConfig(m: Model): string {

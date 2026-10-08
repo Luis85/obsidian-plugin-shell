@@ -20,7 +20,7 @@ const pluginRules = { ...obsidian.ruleConfigs.recommended, ...obsidian.ruleConfi
 };
 export default ts.config(
   { ignores: ['node_modules/**', 'dist/**', 'dist-harness/**', 'reports/**'] },
-  // The shell repository's own exclusions (tests, harness, companion, former scripts/ code); a generated project has none.
+  // Historical support scope: shell globs, or exact compiler-receipted support files in generated projects.
   // One list, shared with tooling/quality/lint-source.mjs; the eslint-tests step lints the test folders with --no-ignore.
   { ignores: lintExclusionGlobs(root) },
   ...ts.configs.recommended,
