@@ -3,7 +3,7 @@ import { relativeImport, type Add } from './file-code.ts';
 
 /** Real-host acceptance is explicit and runs only in the existing copied-vault fixture. */
 export function journeyTestCode(m: Model, surface: string, add: Add): void {
-  const file = 'tests/obsidian/journey-lens.obsidian.ts';
+  const file = 'tooling/tests/obsidian/journey-lens.obsidian.ts';
   const screen = m.screens.find(screen => screen.id === surface)!;
   add(file, `import { expect } from 'vitest';
 import { expect as browserExpect } from '@playwright/test';

@@ -3,27 +3,28 @@
 > Type: reference · Part of the [docs index](../README.md)
 
 > **Contract:** PRD 0.3 extension; requirements CSS-01–12.  
-> **Status:** Normative target; the shared pipeline exists. `src/styles/index.css` and Vue SFC styles compose through the shared Vite configuration (`scripts/bundling/vite-shared.mjs`) and selector scoping (`scripts/bundling/css-ownership.mjs`) into one `dist/styles.css`; `npm run check:tokens` and `npm run check:style-literals` guard token use. File layouts below are illustrative; CSS-01–12 remain in force.  
-> **Related:** [PRD](../product/PRD.md), [setup and makers](../development/SETUP-AND-MAKERS.md), [research](../_archive/research/2026-09-22-setup-makers-events-styles.md).
+> **Status:** Normative target; the shared pipeline exists. `src/plugin/styles/index.css` and Vue SFC styles compose through the shared Vite configuration (`tooling/bundling/vite-shared.mjs`) and selector scoping (`tooling/bundling/css-ownership.mjs`) into one `dist/styles.css`; `npm run check:tokens` and `npm run check:style-literals` guard token use. File layouts below are illustrative; CSS-01–12 remain in force.
+> **Related:** [PRD](../product/PRD.md), [setup and makers](../development/SETUP-AND-MAKERS.md), [research](../_archive/research/2026-09-22-setup-makers-events-styles.md).  
+> **Style-literal scope:** `check:style-literals` (`tooling/styles/check-style-literals.mjs`) scans handwritten CSS and Vue style blocks under `src/` except `src/companion/` and `src/plugin/harness/`. That is the scope it had before the src project split, when both were outside `src/` (`docs/concepts/companion/` and `harness/`): the companion concept keeps its own assembly and browser verification, and the harness carries the simulated host palette.
 
 ## 1. The intended result
 
 Developers author small, cohesive CSS files and Vue component styles. The build produces **one complete `styles.css`** next to the plugin's `main.js` and `manifest.json`. Local installation and release publication use that exact composed artifact.
 
 ```text
-src/styles/index.css ── ordered CSS source imports ──┐
-                                                   │
-imported Vue components ── compiled SFC styles ──────┼─ shared Vite CSS pipeline
-                                                   │        │
-approved local assets/dependency styles ────────────┘        ▼
-                                                       dist/styles.css
-                                                            │
-                                      local fixture vault / release assets
+src/plugin/styles/index.css ── ordered CSS imports ────┐
+                                                       │
+imported Vue components ── compiled SFC styles ────────┼─ shared Vite CSS pipeline
+                                                       │        │
+approved local assets/dependency styles ───────────────┘        ▼
+                                                           dist/styles.css
+                                                                │
+                                          local fixture vault / release assets
 ```
 
 Obsidian loads a plugin-root stylesheet named `styles.css`. This is the installed plugin directory, not a requirement to hand-edit a monolithic file at the repository root. Vite supports CSS import inlining/rebasing and single-file library CSS output. Use those supported facilities rather than building a CSS compiler from string concatenation. [S10, S11, S13]
 
-**CSS-01 — Source/output separation.** `src/styles/**` and component-owned styles are maintained source. `dist/styles.css` is generated and ignored by Git. Do not edit it, use it as an input, copy it back over source, or require developers to manually concatenate CSS before release. A generated header identifies the authoring entry without embedding timestamps or machine-specific paths that destabilize the artifact hash.
+**CSS-01 — Source/output separation.** `src/plugin/styles/**` and component-owned styles are maintained source. `dist/styles.css` is generated and ignored by Git. Do not edit it, use it as an input, copy it back over source, or require developers to manually concatenate CSS before release. A generated header identifies the authoring entry without embedding timestamps or machine-specific paths that destabilize the artifact hash.
 
 ## 2. Source organization
 
@@ -32,7 +33,7 @@ The default means **modular CSS files**, not mandatory hashed CSS Modules. Ordin
 An illustrative layout is:
 
 ```text
-src/
+src/plugin/
   styles/
     index.css
     tokens.css
@@ -51,17 +52,17 @@ src/
       modals.css
       notices.css
     utilities.css
-  presentation/
+  presentation/components/
     example/
       ItemCard.vue             # may contain <style scoped>
       ItemCard.css             # optional externally owned SFC style source
-scripts/
-  build/
-    styles.mjs
+tooling/
+  bundling/
+    build.mjs
     vite-shared.mjs
-  quality/
-    check-styles.mjs
-bin/
+  styles/
+    check-style-literals.mjs
+src/cli/
   adapters/makers/
     extra-recipes.ts           # style recipe
 ```
@@ -82,15 +83,15 @@ Create only modules with an actual use. A large product can split its feature/na
 
 Imports are resolved at build time. They are not runtime requests for loose source files in a user's vault. Do not automatically include every CSS file through an unordered filesystem scan, hide scratch styles in a wildcard, or append an import after ordinary rules where CSS import placement would be invalid.
 
-A single side-effect style entry in bootstrap may import `src/styles/index.css`. `main.ts` remains composition-only. No generator inserts style strings or DOM `<style>` construction into the plugin entrypoint.
+A single side-effect style entry in bootstrap may import `src/plugin/styles/index.css`. `main.ts` remains composition-only. No generator inserts style strings or DOM `<style>` construction into the plugin entrypoint.
 
 ## 3. Build composition
 
-**CSS-03 — One processing implementation.** Shared Vite configuration under `scripts/build/` owns CSS resolution, Vue style compilation, supported transforms, minification, asset treatment, and output validation. Conventional Vite config files remain thin root adapters. `styles:build`, `build`, `build:dev`, `dev:local`, and harness builds reuse these rules; they do not maintain separate concatenation scripts.
+**CSS-03 — One processing implementation.** Shared Vite configuration under `tooling/bundling/` owns CSS resolution, Vue style compilation, supported transforms, minification, asset treatment, and output validation. Conventional Vite config files remain thin root adapters. `styles:build`, `build`, `build:dev`, `dev:local`, and harness builds reuse these rules; they do not maintain separate concatenation scripts.
 
 For the selected compatible Vite version, configure single CSS extraction and the `styles` filename. Current documented facilities include `build.cssCodeSplit: false` and `build.lib.cssFileName: 'styles'`; prove the exact resulting filename/config behavior against the pinned version. [S11, S14]
 
-The styles command must account for **the complete imported UI graph**, including compiled SFC styles. Building only `src/styles/index.css` while omitting component styles is not a valid complete stylesheet build. It may invoke the relevant full plugin build internally rather than duplicate SFC discovery/compilation.
+The styles command must account for **the complete imported UI graph**, including compiled SFC styles. Building only `src/plugin/styles/index.css` while omitting component styles is not a valid complete stylesheet build. It may invoke the relevant full plugin build internally rather than duplicate SFC discovery/compilation.
 
 **CSS-04 — Complete self-contained output.** The native plugin build emits exactly one required plugin stylesheet. No unresolved local `@import`, remote stylesheet import, development URL, unintended CSS chunk, or unshipped asset path remains. Approved local static assets are inlined for the three-file baseline or require a separately specified packaging extension; do not silently emit an `assets/` directory that the installer never copies. No CDN fonts or runtime dependency downloads.
 
@@ -104,7 +105,7 @@ Use plain ordered author CSS as the default. Cascade layers are optional only af
 
 **CSS-06 — SFC support.** Styles declared by imported Vue SFCs must be compiled and included in the same output. Preserve Vue-generated scope identifiers and CSS Module class mappings. Raw concatenation of `<style scoped>` text is invalid because it omits the compilation that binds selectors to the component markup. [S12]
 
-For externally stored component styles, declare ownership explicitly: a file consumed as scoped SFC source must not also be imported globally through `src/styles/index.css`. Avoid accidentally loading two differently scoped copies. Moving a style into a separate file does not waive either file's normal source-size policy.
+For externally stored component styles, declare ownership explicitly: a file consumed as scoped SFC source must not also be imported globally through `src/plugin/styles/index.css`. Avoid accidentally loading two differently scoped copies. Moving a style into a separate file does not waive either file's normal source-size policy.
 
 Vue scoped styles do not style arbitrary host-created DOM just because it appears nearby. Native settings/modals/notices need owned namespaced rules in the native style group, or an explicitly mounted Vue subtree with matching compiled styles. Teleported content and pop-out windows require their own tested ownership/inheritance path.
 

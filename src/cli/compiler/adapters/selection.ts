@@ -3,7 +3,7 @@ import type { Model } from '../emitters/model.ts';
 import { row, rows } from '../emitters/model.ts';
 import { componentFile, type Entry } from '../emitters/file-code.ts';
 import { visualDefinitions, visualPagePath, visualComponentPath, visualAdapterPath } from '../emitters/visual-model.ts';
-import { visualNodes, visualRoot } from '../../../../scripts/companion/visual/visual-ir.mjs';
+import { visualNodes, visualRoot } from '#shared/companion/visual/visual-ir.mjs';
 import { noteEntity } from '../emitters/persistence-code.ts';
 
 type VisualStore = ReturnType<typeof visualDefinitions>;

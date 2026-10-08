@@ -1,0 +1,8 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { run } from '../app.ts';
+
+test('the {{name}} command answers with its name and arguments', () => {
+  assert.equal(run([]), '{{name}}');
+  assert.equal(run(['check']), '{{name}} check');
+});

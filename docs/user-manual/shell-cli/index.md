@@ -25,7 +25,7 @@ The documentation build creates `generated/reference.md`, `generated/diagnostics
 To produce these references from a trusted source checkout, run:
 
 ```sh
-node --experimental-strip-types scripts/documentation/manual.mjs
+node --experimental-strip-types tooling/documentation/manual.mjs
 ```
 
 No documentation package installation is needed for that command. Rendering the searchable HTML site is a separate, maintainer-only operation described in the authoring guide. Markdown remains readable in GitHub and Obsidian without a website or account.

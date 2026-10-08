@@ -25,7 +25,7 @@ node bin/app ui gallery --target clickdummy --out reports/ui-gallery --input cli
 
 In a generated project `npm run ui:gallery` already means `--target clickdummy`.
 
-The browser comes from `SHELL_CHROMIUM` (an absolute executable path) when set, otherwise the Chromium revision pinned by the installed Playwright (resolution is shared with the other browser scripts in `scripts/testing/browser-executable.mjs`). The tool never downloads a browser. An older installed revision is refused unless you opt in with `SHELL_CHROMIUM`.
+The browser comes from `SHELL_CHROMIUM` (an absolute executable path) when set, otherwise the Chromium revision pinned by the installed Playwright (resolution is shared with the other browser scripts in `src/cli/tooling/testing/browser-executable.mjs`). The tool never downloads a browser. An older installed revision is refused unless you opt in with `SHELL_CHROMIUM`.
 
 ## What is captured
 
@@ -65,11 +65,11 @@ Generated projects get the same script and `npm run ui:gallery`; wiring it into 
 
 | File | Responsibility |
 | --- | --- |
-| `scripts/ui/review-gallery.mjs` | Entry for `npm run ui:gallery` |
-| `scripts/ui/gallery-options.ts` | Option validation shared by the script and `ui gallery` |
-| `scripts/ui/gallery-matrix.ts` | Matrix expansion, deterministic order, file names |
-| `scripts/ui/gallery-report.ts` | `index.json` entries and escaped `gallery.html` |
-| `scripts/ui/gallery-run.ts` | Capture loop over an injected session; writes files, always closes the session |
-| `scripts/ui/gallery-browser.ts`, `gallery-harness.ts`, `gallery-clickdummy.ts` | Playwright sessions for the two targets |
+| `tooling/ui/review-gallery.mjs` | Entry for `npm run ui:gallery` |
+| `src/cli/tooling/ui/gallery-options.ts` | Option validation shared by the script and `ui gallery` |
+| `tooling/ui/gallery-matrix.ts` | Matrix expansion, deterministic order, file names |
+| `tooling/ui/gallery-report.ts` | `index.json` entries and escaped `gallery.html` |
+| `tooling/ui/gallery-run.ts` | Capture loop over an injected session; writes files, always closes the session |
+| `tooling/ui/gallery-browser.ts`, `gallery-harness.ts`, `gallery-clickdummy.ts` | Playwright sessions for the two targets |
 | `src/cli/adapters/framework/ui-gallery.ts` | `node bin/app ui gallery` (validates, then runs the script) |
-| `tests/tooling/framework-ui-gallery*.checks.mjs` | Matrix, ordering, index shape, HTML escaping and CLI parsing with a fake capture function (no browser) |
+| `tooling/tests/framework-ui-gallery*.checks.mjs` | Matrix, ordering, index shape, HTML escaping and CLI parsing with a fake capture function (no browser) |

@@ -43,17 +43,17 @@ from `docs/project-tasks/TEMPLATE.md`.
 - `{{sourceRoot}}/`: generated product code (domain, application use cases,
   sources, Pinia stores, Vue screens). Edit freely; regeneration keeps edits and
   reports conflicts instead of overwriting.
-- `src/features/<name>/`: hand-written features using only `src/features/api.ts`.
-- `src/main.ts`: lifecycle composition only (at most 100 code lines).
+- `src/plugin/features/<name>/`: hand-written features using only `src/plugin/features/api.ts`.
+- `src/plugin/main.ts`: lifecycle composition only (at most 100 code lines).
 - `{{testRoot}}/`: product tests; `acceptance/` has one TODO test per requirement
   (`req-*.test.ts`) and per unimplemented interaction (`vi-*.test.ts`).
-- `tests/obsidian/`: real-Obsidian specs and the fixture vault they copy.
+- `tooling/tests/obsidian/`: real-Obsidian specs and the fixture vault they copy.
 - `design/traceability.json`: requirements with acceptance text, implementation
   path, test path and `verification` status. `design/project.json` is the design.
 - `design/visual-traceability.json`: every UI interaction (`vi-*`) with its
   `verification` kind, hook (`implementation`) and test.
 - `BRIEF.md`: owner-written product brief. `docs/project-tasks/`: task template.
-- The rest of `src/`, `scripts/` and `tests/` is the shell framework. Change it only
+- Source projects are declared in `workbench.sources.json`; `src/plugin/` owns the plugin runtime and its tests. The rest of `src/`, `tooling/` and `tests/` is the shell framework. Change it only
   when a product need cannot be met through its APIs.
 
 ## Architecture rules
@@ -61,7 +61,7 @@ from `docs/project-tasks/TEMPLATE.md`.
 - Domain and application code are framework-free: no imports from `obsidian`, Vue,
   Pinia, browser or Node APIs, or concrete adapters.
 - Features depend only on feature/application/domain contracts via
-  `src/features/api.ts`; host UI goes through `services.modals` and
+  `src/plugin/features/api.ts`; host UI goes through `services.modals` and
   `services.notices`, never `new Notice()`/`new Modal()` in feature code.
 - Every `.vue` file lives under `src/presentation/components` or the generated
   `presentation/components`; keep SFC scripts to imports, props and composable
@@ -120,7 +120,7 @@ contained sandbox vault, reloads the plugin once and prints one JSON summary:
 `commands`, and paths to `last-run.png` (screenshot), `dev.log` and
 `debug-report.json` under `.obsidian-sandbox/logs/`. Read those files for detail.
 Exit code 2 means Obsidian is not provisioned: ask the user to run it once
-with `--allow-download` (agents never download it themselves). Specs: `tests/obsidian/*.obsidian.ts`, run with
+with `--allow-download` (agents never download it themselves). Specs: `tooling/tests/obsidian/*.obsidian.ts`, run with
 `npm run test:obsidian -- <filter>`; evidence lands in `reports/obsidian/`.
 Guide: `docs/testing/OBSIDIAN-DEV-LOOP.md`.
 
@@ -134,7 +134,7 @@ records; the dev loop enables them automatically.
 ## Safety
 
 - Only open contained vaults inside this folder (`.obsidian-sandbox/`, `.nq/`,
-  `tests/obsidian/vault`). Never point any tool at a personal vault.
+  `tooling/tests/obsidian/vault`). Never point any tool at a personal vault.
 - Do not commit `.obsidian-sandbox/`, `.native-cache/`, `.native-runner/`,
   `reports/` or `dist/`.
 - Do not publish, tag, push with force, run `release:operate` or install global
@@ -144,7 +144,7 @@ records; the dev loop enables them automatically.
 
 ## Working in a cloud session
 
-In Claude Code on the web, `scripts/agent/session-start.mjs` provisions the exact `.nvmrc` Node
+In Claude Code on the web, `tooling/agent/session-start.mjs` provisions the exact `.nvmrc` Node
 (checksum-verified, cached under `~/.cache/workbench`) and restores `node_modules` with `npm ci --ignore-scripts`;
 read its status first. An older Chromium is adopted as a non-pinned `SHELL_CHROMIUM`: say so when you report
 browser evidence. Opt out with `SHELL_SESSION_START_NODE=0`. Setup script and troubleshooting:

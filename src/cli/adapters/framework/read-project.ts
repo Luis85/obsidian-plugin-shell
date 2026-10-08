@@ -2,7 +2,7 @@
 import { constants, type Stats } from 'node:fs';
 import { lstat, open, realpath, type FileHandle } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { COMPANION_MAX_BYTES, companionRelativeFolder, parseAuthoringDocument, type AuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
+import { COMPANION_MAX_BYTES, companionRelativeFolder, parseAuthoringDocument, type AuthoringDocument } from '#shared/companion/authoring-contract.ts';
 
 export interface CompanionRequest { input: unknown; target: string; vault?: string }
 export interface ProjectSettings { settings: Record<string, string> }

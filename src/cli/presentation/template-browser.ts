@@ -1,8 +1,8 @@
 import type { Workspace } from '../application/workspace.ts';
 import { loadComponentTemplates } from '../adapters/component-template-repository.ts';
-import { pluginComponentTemplates } from '../../../plugins/template-contributions.ts';
-import type { WorkbenchPluginRuntime } from '../../../plugins/runtime.ts';
-import { choose, titleInput, confirm, type Prompts } from './prompts.ts';
+import { pluginComponentTemplates } from '../sdk/template-contributions.ts';
+import type { WorkbenchPluginRuntime } from '../sdk/runtime.ts';
+import { choose, titleInput, confirm, type Prompts } from '#tui/prompts.ts';
 
 interface TemplateBrowserOptions {
   root: string;

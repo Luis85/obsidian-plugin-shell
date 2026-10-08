@@ -1,11 +1,13 @@
-import { lstat } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { lstat, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { hasPortableProjectSegments } from '../../../../scripts/shared/project-path.ts';
-import type { FilePlan } from '../../../../scripts/shared/file-plan.ts';
-import { projectConfigPath } from '../../../../scripts/shared/project-configs.mjs';
+import { hasPortableProjectSegments } from '#shared/platform/project-path.ts';
+import type { FilePlan } from '#shared/platform/file-plan.ts';
+import { projectConfigPath } from '#shared/platform/project-configs.mjs';
 import { slug, title, recipeOptions } from './arguments.ts';
-import { createMakerContext } from './engine.ts';
+import { makerTarget, makerLayout, makerPath, targetedMakerContext, type MakerTarget } from './target.ts';
 import { dispatchMaker } from './dispatch.ts';
+import { loadTypescript } from './syntax.ts';
 import type { Backend, MakerArguments, MakerInput, MakerOptions, Preset } from './contracts.ts';
 
 /** One planned project check: a Node entry point and its arguments, run after a successful apply. */
@@ -71,9 +73,9 @@ function resolveDocument(options: MakerOptions, owner: string | undefined, name:
   if (unsafeFolder(folder)) throw new Error('Unsafe document folder');
   return { preset, folder };
 }
-export async function ownerDirectoryExists(root: string, owner: string): Promise<boolean> {
+export async function ownerDirectoryExists(root: string, owner: string, source: string): Promise<boolean> {
   try {
-    const entry = await lstat(resolve(root, 'src/features', owner));
+    const entry = await lstat(resolve(root, source, 'features', owner));
     if (!entry.isDirectory() || entry.isSymbolicLink()) throw new Error('Feature owner must be a real directory');
     return true;
   } catch (error) {
@@ -81,9 +83,9 @@ export async function ownerDirectoryExists(root: string, owner: string): Promise
     return false;
   }
 }
-async function checkOwner(root: string, maker: string, owner: string | undefined): Promise<boolean> {
+async function checkOwner(root: string, maker: string, owner: string | undefined, source: string): Promise<boolean> {
   if (!owner) return false;
-  const exists = await ownerDirectoryExists(root, owner);
+  const exists = await ownerDirectoryExists(root, owner, source);
   if (maker !== 'feature' && !exists)
     throw new Error(`Feature ${owner} does not exist. Create it first with make feature ${owner}.`);
   return exists;
@@ -99,15 +101,33 @@ const pluginChecks: readonly MakerCheck[] = [
   { id: 'plugin-types', command: 'node', args: ['node_modules/typescript/bin/tsc', '--noEmit', '--project', 'configs/types/tsconfig.maker.json'] },
   { id: 'plugin-tests', command: 'node', args: ['scripts/testing/suites.mjs', 'workbench-plugins'] },
 ];
+/** A root `tsconfig.json` that is a solution (`files: []` plus `references`) checks no file with `--noEmit`. */
+async function solutionRoot(root: string): Promise<boolean> {
+  const path = resolve(root, 'tsconfig.json');
+  let text: string;
+  try { text = await readFile(path, 'utf8'); } catch (error) { if (isMissing(error)) return false; throw error; }
+  // TypeScript requires slash-normalized diagnostic filenames, even when reading a native Windows path.
+  const ts = await loadTypescript(), parsed = ts.parseConfigFileTextToJson(path.replaceAll('\\', '/'), text);
+  if (parsed.error) throw new Error(`TSCONFIG_INVALID: ${ts.flattenDiagnosticMessageText(parsed.error.messageText, ' ')}`);
+  const config = parsed.config as unknown;
+  if (config === null || typeof config !== 'object' || Array.isArray(config)) return false;
+  const { files, references } = config as { files?: unknown; references?: unknown };
+  return Array.isArray(files) && files.length === 0 && Array.isArray(references) && references.length > 0;
+}
+/** Type-check step: a generated project's own config, a solution root in build mode, otherwise the root config. */
+export async function makerTypecheck(root: string): Promise<MakerCheck> {
+  const tsconfig = projectConfigPath(root, 'typescript');
+  const args = tsconfig ? ['--noEmit', '--project', tsconfig] : await solutionRoot(root) ? ['-b'] : ['--noEmit'];
+  return { id: 'typecheck', command: 'node', args: ['node_modules/vue-tsc/bin/vue-tsc.js', ...args] };
+}
 /** A generated project checks its own project-scoped TypeScript and Vitest configuration, the same ones `check` uses. */
-export function planChecks(root: string, maker: string, tests: ReadonlySet<string>): MakerCheck[] {
+export async function planChecks(root: string, maker: string, tests: ReadonlySet<string>, target?: MakerTarget): Promise<MakerCheck[]> {
   const runtimeTests = [...tests].filter((path) => path.endsWith('.test.ts'));
   const toolingTests = [...tests].filter((path) => path.endsWith('.checks.mjs'));
-  const tsconfig = projectConfigPath(root, 'typescript');
   const vitestConfig = projectConfigPath(root, 'vitest') ?? 'configs/testing/vitest.config.mjs';
-  return [
+  const checks: MakerCheck[] = [
     ...(maker === 'plugin' ? pluginChecks : []),
-    { id: 'typecheck', command: 'node', args: ['node_modules/vue-tsc/bin/vue-tsc.js', '--noEmit', ...(tsconfig ? ['--project', tsconfig] : [])] },
+    await makerTypecheck(root),
     ...(runtimeTests.length
       ? [{ id: 'generated-tests', command: 'node' as const, args: ['node_modules/vitest/vitest.mjs', 'run', '--config', vitestConfig, ...runtimeTests] }]
       : []),
@@ -116,6 +136,8 @@ export function planChecks(root: string, maker: string, tests: ReadonlySet<strin
     { id: 'events-check', command: 'node', args: ['scripts/events/catalog.mjs', '--check'] },
     { id: 'entities-check', command: 'node', args: ['scripts/makers/entities.mjs', '--check'] },
   ];
+  return target ? checks.map(check => ({ ...check, args: [...check.args.map(arg => makerPath(target, arg)),
+    ...(target.path !== 'src' && ['events-check', 'entities-check'].includes(check.id) ? ['--source', target.name] : [])] })) : checks;
 }
 export async function fullGate(root: string): Promise<string> {
   try {
@@ -141,9 +163,11 @@ export function resolveRequest(request: MakerArguments): MakerInput {
 export async function planMaker(root: string, request: MakerArguments, { beforeFinalize }: { beforeFinalize?: () => unknown } = {}): Promise<PlannedMaker> {
   const input = resolveRequest(request);
   const { maker, owner } = input;
-  const ownerExists = await checkOwner(root, maker, owner);
-  const context = createMakerContext(root);
-  await dispatchMaker(context, input);
+  const target = ['maker', 'plugin'].includes(maker) ? makerLayout(root) : await makerTarget(root, 'plugin', input.options['--source']);
+  const ownerExists = await checkOwner(root, maker, owner, target.path);
+  const context = targetedMakerContext(root, target);
+  if (existsSync(resolve(root, 'workbench.sources.json'))) await context.read('workbench.sources.json');
+  await dispatchMaker(context, target.path !== 'src' ? { ...input, options: { ...input.options, '--source': target.name } } : input);
   const plan = await context.finish(beforeFinalize);
   if (maker === 'feature' && ownerExists && plan.changes.some((change) => change.status === 'create'))
     throw new Error(`Feature ${owner} already exists. Use a child recipe to extend it.`);
@@ -153,7 +177,7 @@ export async function planMaker(root: string, request: MakerArguments, { beforeF
     owner,
     ...planMetadata(input),
     plan,
-    checks: planChecks(root, maker, context.tests),
+    checks: await planChecks(root, maker, context.tests, target),
     next: await fullGate(root),
   };
 }

@@ -1,13 +1,14 @@
 import { dirname, join, resolve } from 'node:path';
 import { lstat, readdir } from 'node:fs/promises';
-import { parseDesignData } from '../../../../scripts/contracts/json-data.ts';
+import { parseDesignData } from '#shared/contracts/json-data.ts';
 import { exists, hash, readBounded, readJson } from '../framework/files.ts';
 import { requireThat } from '../framework/contracts.ts';
-import { portablePath, record, validateDefinition } from './validation.ts';
-import type { CompanionStarter, LoadedStarter, StarterDefinition } from './types.ts';
-import { validateAuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
-import { STARTER_MAX_BYTES } from './browser.ts';
-import { pluginStarterDefinitions } from '../../../../plugins/runtime.ts';
+import { portablePath, record, validateDefinition } from '#shared/companion/starters/validation.ts';
+import type { StarterDefinition } from '#shared/companion/starters/types.ts';
+import type { CompanionStarter, LoadedStarter } from './types.ts';
+import { validateAuthoringDocument } from '#shared/companion/authoring-contract.ts';
+import { STARTER_MAX_BYTES } from '#shared/companion/starters/browser.ts';
+import { pluginStarterDefinitions } from '../../sdk/runtime.ts';
 const defaultStarterFolder = 'configs/starters';
 /** Only the invocation project's explicit preferences; never a fallback into the installed shell. */
 export async function starterFolder(root: string): Promise<string> {

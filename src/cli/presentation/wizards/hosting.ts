@@ -4,7 +4,7 @@
  * flags are never asked again. Only the platform name and non-secret Azure DevOps identifiers enter the wizard state,
  * never the origin URL itself.
  */
-import { azureRemoteDetails, classifyRemote, hostingPlatforms } from '../../../../scripts/companion/schema/hosting.mjs';
+import { azureRemoteDetails, classifyRemote, hostingPlatforms } from '#shared/companion/schema/hosting.mjs';
 import { requireThat, type Request } from '../../adapters/framework/contracts.ts';
 import { getPath, type FormValues } from '../../domain/form-model.ts';
 import type { ActionContext } from '../wizard-runner.ts';

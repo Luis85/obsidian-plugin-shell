@@ -1,7 +1,7 @@
 import { firstRunPlan } from '../../adapters/first-run-plan.ts';
 import { executeFirstRun } from '../../adapters/first-run.ts';
 import { loadSettings } from '../../adapters/user-settings.ts';
-import { safe } from '../prompts.ts';
+import { safe } from '#tui/prompts.ts';
 import type { FormValues } from '../../domain/form-model.ts';
 import type { WizardModule } from './module.ts';
 type Plan = Awaited<ReturnType<typeof firstRunPlan>>;

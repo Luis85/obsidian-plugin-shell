@@ -1,5 +1,5 @@
 {
-  "$schema": "../../scripts/starters/starter.schema.json",
+  "$schema": "../../tooling/starters/starter.schema.json",
   "schemaVersion": 1,
   "id": "agent-ready",
   "name": "Agent Ready",
@@ -65,14 +65,14 @@
       "label": "Source folder",
       "type": "string",
       "required": true,
-      "default": "src"
+      "default": "src/plugin"
     },
     {
       "id": "testsFolder",
       "label": "Tests folder",
       "type": "string",
       "required": true,
-      "default": "tests"
+      "default": "src/plugin/tests"
     }
   ],
   "generator": {
@@ -89,8 +89,8 @@
         "description": "A minimal agent-ready starting point with reviewed Airship and Hindsight defaults. Installation and data processing remain explicit."
       },
       "settings": {
-        "codebaseFolder": "src",
-        "testsFolder": "tests"
+        "codebaseFolder": "src/plugin",
+        "testsFolder": "src/plugin/tests"
       },
       "design": {
         "schema": 6,

@@ -1,9 +1,9 @@
-import { mapBounded } from '../../../../scripts/shared/bounded-map.ts';
+import { mapBounded } from '#shared/platform/bounded-map.ts';
 import { readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { readBounded, hash } from '../../adapters/framework/files.ts';
 import { maintainerOnly, relocatedPath } from '../emitters/framework-docs.ts';
-import { statIfPresent } from '../../../../scripts/shared/fs-presence.ts';
+import { statIfPresent } from '#shared/platform/fs-presence.ts';
 import { prototypeSkillFiles } from '../../adapters/framework/prototype-skill.ts';
 import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
 import type { Artifact, TemplateSnapshot } from '../domain/contracts.ts';
@@ -51,8 +51,8 @@ export async function loadTemplateSnapshot(root: string, signal?: AbortSignal): 
   });
   // The compiled CLI loads defaults beside its bundle. Source plugin configs are the only inputs;
   // locally installed bin/plugins and their edited settings are never scanned into another project.
-  const pluginDefaults = files.filter(file => /^plugins\/[^/]+\/config\.json$/.test(file.path));
-  files.push(...pluginDefaults.map(file => ({ ...file, path: 'bin/' + file.path })));
+  const pluginDefaults = files.filter(file => /^src\/cli\/sdk\/[^/]+\/config\.json$/.test(file.path));
+  files.push(...pluginDefaults.map(file => ({ ...file, path: 'bin/plugins/' + file.path.slice('src/cli/sdk/'.length) })));
   const skillFiles: Artifact[] = (await prototypeSkillFiles(root)).map((file: {path:string;bytes:Buffer}) => ({
     path:file.path,content:file.bytes.toString('utf8'),ownership:'extension',producer:'devkit' }));
   checkpoint();

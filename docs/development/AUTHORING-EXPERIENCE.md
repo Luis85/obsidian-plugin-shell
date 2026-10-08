@@ -16,7 +16,7 @@ The status area remains present in narrow leaves. It distinguishes a pending nam
 
 ## Implementation and verification
 
-The pure [`arrangeSitemap`](../../scripts/companion/sitemap/arrangement.ts) contract uses a 218-by-160 card footprint, spacing and canonical node order. Full arrangement distributes subtrees into columns and rows. It returns data rather than writing or approving it. Saved positions remain detached copies. The graph memoizes this calculation per committed snapshot, not per search keystroke, and each mounted editor uses its own Vue Flow instance ID. Failed/stale drags restore the committed display instead of leaving an unsaved position looking durable.
+The pure [`arrangeSitemap`](../../src/shared/companion/sitemap/arrangement.ts) contract uses a 218-by-160 card footprint, spacing and canonical node order. Full arrangement distributes subtrees into columns and rows. It returns data rather than writing or approving it. Saved positions remain detached copies. The graph memoizes this calculation per committed snapshot, not per search keystroke, and each mounted editor uses its own Vue Flow instance ID. Failed/stale drags restore the committed display instead of leaving an unsaved position looking durable.
 
 Labels clamp to the footprint while retaining full text in names/titles and the inspector. Controls have minimum target dimensions; scoped reduced-motion rules disable incidental transitions. Keyboard shortcuts ignore composition events and editable ancestors. These changes do not establish complete accessibility conformance or native mobile support.
 

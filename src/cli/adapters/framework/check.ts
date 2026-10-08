@@ -6,8 +6,10 @@
 import { join } from 'node:path';
 import { readdir } from 'node:fs/promises';
 import { exists } from './files.ts';
-import { lintRoots } from '../../../../scripts/shared/project-roots.mjs';
-import { projectConfigPath, projectConfigs } from '../../../../scripts/shared/project-configs.mjs';
+import { readSourceState } from '../source-workspace.ts';
+import { lintRoots } from '#shared/platform/project-roots.mjs';
+import { projectConfigPath, projectConfigs } from '#shared/platform/project-configs.mjs';
+import { repositoryScope, toolingPath } from './repository-scope.ts';
 import { runNode } from './process.ts';
 import { OperationError, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
 import { changedFiles, runGit, type Changes, type Git } from './check-changes.ts';
@@ -21,20 +23,17 @@ export interface StepOutcome {
 type Runner = typeof runNode;
 const vueTsc = 'node_modules/vue-tsc/bin/vue-tsc.js', eslint = 'node_modules/eslint/bin/eslint.js', vitest = 'node_modules/vitest/vitest.mjs';
 const eslintConfig = 'configs/lint/eslint.config.mjs';
-/** A generated project carries its ownership receipt and a project-scoped TypeScript config. */
-async function checkScope(root: string): Promise<'generated-project' | 'shell-repository'> {
-  return await exists(join(root, '.companion/generation.json')) && projectConfigPath(root, 'typescript') ? 'generated-project' : 'shell-repository';
-}
 /** The shipped maker CLI is type-checked everywhere. Its qualification suite needs shell-only fixtures (the starter
  * pack and the companion reference project) that generated projects deliberately omit, so it runs only in the shell. */
 async function makerSteps(root: string, project: boolean): Promise<CheckStep[]> {
   if (!await exists(join(root, 'src/cli/app.ts')) || !await exists(join(root, 'configs/types/tsconfig.maker.json'))) return [];
   const types: CheckStep = { id: 'maker-types', display: 'tsc --noEmit --project configs/types/tsconfig.maker.json', entry: 'node_modules/typescript/bin/tsc', args: ['--noEmit', '--project', 'configs/types/tsconfig.maker.json'] };
   if (project) return [types];
-  return [types, { id: 'maker-tests', display: 'node scripts/testing/suites.mjs maker', entry: 'scripts/testing/suites.mjs', args: ['maker'], timeoutMs: suiteTimeoutMs }];
+  return [types, { id: 'maker-tests', display: 'node tooling/testing/suites.mjs maker', entry: 'tooling/testing/suites.mjs', args: ['maker'], timeoutMs: suiteTimeoutMs }];
 }
 function typecheckStep(root: string, project: boolean): CheckStep {
-  if (!project) return { id: 'typecheck', display: 'vue-tsc --noEmit', entry: vueTsc, args: ['--noEmit'] };
+  // The shell repository root is a solution of TypeScript project references; only build mode checks its projects.
+  if (!project) return { id: 'typecheck', display: 'vue-tsc -b', entry: vueTsc, args: ['-b'] };
   const tsconfig = projectConfigPath(root, 'typescript') ?? projectConfigs.typescript.path;
   return { id: 'typecheck', display: `vue-tsc --noEmit --project ${tsconfig}`, entry: vueTsc, args: ['--noEmit', '--project', tsconfig] };
 }
@@ -45,13 +44,24 @@ interface Parts { makers: CheckStep[]; typecheck: CheckStep; fullTest: CheckStep
 const authoringTest = /^(?:custom|locale)-[a-z0-9-]+\.checks\.mjs$/;
 /** Tooling tests the custom-maker and locale recipes write; a node:test file runs its tests when executed directly. */
 async function authoringSteps(root: string): Promise<CheckStep[]> {
-  if (!await exists(join(root, 'tests/tooling'))) return [];
-  const names = (await readdir(join(root, 'tests/tooling'))).filter(name => authoringTest.test(name)).sort();
-  return names.map(name => ({ id: `tooling:${name.slice(0, -'.checks.mjs'.length)}`, display: `node tests/tooling/${name}`, entry: `tests/tooling/${name}`, args: [] }));
+  const { manifest } = await readSourceState(root);
+  const folders = new Set(['tests/tooling', 'tooling/tests', ...manifest.projects.map(project => `${project.path}/tests/tooling`)]);
+  const entries: Array<{ name: string; path: string }> = [];
+  for (const folder of folders) {
+    if (!await exists(join(root, folder))) continue;
+    const files = await readdir(join(root, folder), { withFileTypes: true });
+    for (const file of files.filter(file => file.isFile() && authoringTest.test(file.name)).sort((a, b) => a.name.localeCompare(b.name)))
+      entries.push({ name: file.name.slice(0, -'.checks.mjs'.length), path: `${folder}/${file.name}` });
+  }
+  return entries.map(({ name, path }) => ({
+    id: `tooling:${entries.filter(entry => entry.name === name).length > 1 ? path.slice(0, -'.checks.mjs'.length) : name}`,
+    display: `node ${path}`, entry: path, args: [],
+  }));
 }
-const oxlintEntry = 'scripts/quality/lint-source.mjs';
+const oxlintEntryFor = (root: string): string => toolingPath(root, 'quality/lint-source.mjs');
 /** The same two linters as `npm run lint`: oxlint over owned source, then ESLint over the configured roots. */
 function stepParts(root: string, project: boolean, makers: CheckStep[], config: string[], extra: { oxlint: boolean; authoring: CheckStep[] }): Parts {
+  const oxlintEntry = oxlintEntryFor(root);
   const lint: CheckStep | null = extra.oxlint ? { id: 'lint', display: `node ${oxlintEntry}`, entry: oxlintEntry, args: [] } : null;
   // A generated project also lints its configured product roots (for example <codebaseFolder>/generated).
   const eslintRoots = project ? lintRoots(root) : ['src'];
@@ -63,10 +73,10 @@ const fullSteps = (parts: Parts): CheckStep[] => [parts.typecheck, ...(parts.lin
 export interface CheckSelection { scope: string; steps: CheckStep[]; changes?: Changes; suites?: Array<{ name: string; reasons: Reason[] }> }
 /** `base` (fast mode only) is the ref whose merge-base with HEAD starts the diff; default origin/main, else HEAD. */
 export async function checkSteps(root: string, fast: boolean, git: Git = runGit, base?: string, skipSuites = false): Promise<CheckSelection> {
-  const scope = await checkScope(root), project = scope === 'generated-project';
+  const scope = repositoryScope(root), project = scope === 'generated-project';
   const makers = await makerSteps(root, project), config = vitestConfig(root, project);
   // A generated project without the shell's oxlint wrapper keeps ESLint only; the shell always runs both.
-  const oxlint = !project || await exists(join(root, oxlintEntry));
+  const oxlint = !project || await exists(join(root, oxlintEntryFor(root)));
   const parts = stepParts(root, project, makers, config, { oxlint, authoring: await authoringSteps(root) });
   if (!fast) return { scope, steps: fullSteps(parts) };
   const changes = await changedFiles(root, git, base);

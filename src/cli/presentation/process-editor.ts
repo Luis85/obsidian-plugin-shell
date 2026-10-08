@@ -1,10 +1,10 @@
-import { requireSketch, slug, SketchError } from '../domain/errors.ts';
+import { requireSketch, slug, SketchError } from '#shared/contracts/sketch-errors.ts';
 import { readForm, type FormField } from '../domain/form.ts';
 import type { FormValues } from '../domain/form-model.ts';
 import { readRuleClause, ruleClauses, ruleText, type RuleExpression } from '../domain/process-rules.ts';
 import { processSeverities, type ProcessDoc, type ProcessRole, type ProcessRule, type ProcessStep, type ProcessTransition } from '../domain/process.ts';
 import { formDefinition, runForm } from './form-runner.ts';
-import { Back, choose, confirm, reportError } from './prompts.ts';
+import { Back, choose, confirm, reportError } from '#tui/prompts.ts';
 import type { ActionContext } from './wizard-runner.ts';
 /**
  * Authoring views: each form edits a flat view of a role, step or rule, and code turns it back into the definition.

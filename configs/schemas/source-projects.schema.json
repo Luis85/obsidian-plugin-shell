@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "source-projects.schema.json",
+  "title": "Source project manifest (workbench.sources.json)",
+  "description": "Editor completion only. src/cli/domain/source-projects.ts is authoritative and fails closed; node bin/app source check also rejects unknown references, cycles and a flat src project next to src/<name> projects.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "projects"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "projects": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/project" }
+    }
+  },
+  "$defs": {
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^(?![/\\\\])(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\)(?![A-Za-z]:).+$"
+    },
+    "relativePaths": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/relativePath" }
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind", "path", "references"],
+      "properties": {
+        "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$", "description": "Unique; also the #<name>/* import alias of a library project." },
+        "kind": { "enum": ["plugin", "cli", "companion", "library"], "description": "Template in templates/sources/<kind>; plugin and companion use the browser TypeScript base, cli the node base." },
+        "path": { "type": "string", "pattern": "^src(?:/[a-z][a-z0-9-]*)?$", "description": "src/<name>, or src for the only project of a legacy flat layout." },
+        "references": { "type": "array", "uniqueItems": true, "items": { "type": "string" }, "description": "Projects this one may import; they must form a DAG." },
+        "platform": { "enum": ["node", "browser"], "description": "Library projects only: the TypeScript base (default node)." },
+        "include": { "$ref": "#/$defs/relativePaths", "description": "Replaces the kind's default tsconfig include globs." },
+        "compilerOptions": {
+          "type": "object",
+          "description": "Extra tsconfig compiler options; rootDir, declarationDir, tsBuildInfoFile and composite are derived.",
+          "not": { "anyOf": [{ "required": ["rootDir"] }, { "required": ["declarationDir"] }, { "required": ["tsBuildInfoFile"] }, { "required": ["composite"] }] }
+        },
+        "extraReferences": { "$ref": "#/$defs/relativePaths", "description": "Repository-relative tsconfig files referenced after the project references." },
+        "gateExemptions": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "Gates that deliberately do not cover this project, each with its reason.",
+          "properties": {
+            "lint": { "type": "string", "minLength": 1, "maxLength": 500 },
+            "lineLimit": { "type": "string", "minLength": 1, "maxLength": 500 },
+            "coverage": { "type": "string", "minLength": 1, "maxLength": 500 },
+            "analyzer": { "type": "string", "minLength": 1, "maxLength": 500 }
+          }
+        }
+      }
+    }
+  }
+}

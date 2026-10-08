@@ -1,12 +1,12 @@
 /** Source-derived model coverage, deliberately separate from executed/native acceptance. */
-import { validateAuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
-import { visualCatalog } from '../../../../scripts/companion/visual/visual-catalog.mjs';
-import { VISUAL_CONTROL_KINDS } from '../../../../scripts/companion/visual/visual-mapping.mjs';
-import { VISUAL_ACTION_KINDS, VISUAL_STATES, VISUAL_LAYOUT_MODES, visualNodes, visualRoot, type VisualDesigns } from '../../../../scripts/companion/visual/visual-ir.mjs';
-import { validateVisualDesigns } from '../../../../scripts/companion/visual/visual-validate.mjs';
-import { editorBindings, SHIPPED_EDITORS } from '../../../../scripts/companion/sitemap/editor-bindings.ts';
-import { validateDefinition } from './validation.ts';
-import type { StarterDefinition } from './types.ts';
+import { validateAuthoringDocument } from '#shared/companion/authoring-contract.ts';
+import { visualCatalog } from '#shared/companion/visual/visual-catalog.mjs';
+import { VISUAL_CONTROL_KINDS } from '#shared/companion/visual/visual-mapping.mjs';
+import { VISUAL_ACTION_KINDS, VISUAL_STATES, VISUAL_LAYOUT_MODES, visualNodes, visualRoot, type VisualDesigns } from '#shared/companion/visual/visual-ir.mjs';
+import { validateVisualDesigns } from '#shared/companion/visual/visual-validate.mjs';
+import { editorBindings, SHIPPED_EDITORS } from '#shared/companion/sitemap/editor-bindings.ts';
+import { validateDefinition } from '#shared/companion/starters/validation.ts';
+import type { StarterDefinition } from '#shared/companion/starters/types.ts';
 function inventory(expected: readonly string[], used: Set<string>) {
   return { expected: [...expected], used: [...used].sort(), missing: expected.filter(id => !used.has(id)) };
 }

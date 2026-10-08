@@ -27,11 +27,11 @@ function html(script, css, inline) {
 async function buildVisual(target, directory) {
   const { build } = await import('vite');
   let shared = {};
-  if (config.framework === 'nuxtui') shared = (await import('./bundling/vite-shared.mjs')).sharedConfig();
+  if (config.framework === 'nuxtui') shared = (await import('../tooling/bundling/vite-shared.mjs')).sharedConfig();
   const linker = config.framework === 'angular' ? [(await import('./angular-linker.mjs')).angularLinker()] : [];
   const { projectLicenses } = await import('./licenses.mjs');
   const plugin = target === 'plugin';
-  const entry = config.framework === 'angular' ? '.compiled/src/targets/' + target + '/main.js' : 'src/targets/' + target + '/main.ts';
+  const entry = config.framework === 'angular' ? '.compiled/src/plugin/targets/' + target + '/main.js' : 'src/plugin/targets/' + target + '/main.ts';
   await build({ ...shared, configFile: false, root,
     // Libraries such as React read process.env.NODE_ENV; a browser bundle is always a production build.
     define: { 'process.env.NODE_ENV': JSON.stringify('production'), ...(shared.define ?? {}), ...(config.framework === 'angular' ? { ngDevMode: false, ngJitMode: false } : {}) },
@@ -50,8 +50,8 @@ if (visual && config.framework === 'angular') {
   const angular = JSON.parse(await readFile('node_modules/@angular/compiler-cli/package.json', 'utf8'));
   run(join('node_modules/@angular/compiler-cli', angular.bin.ngc), ['--project', 'configs/types/tsconfig.angular.json']);
   // ngc emits JavaScript, not imported CSS. Preserve its explicit relative stylesheet dependency.
-  await mkdir('.compiled/src/ui', { recursive: true });
-  await copyFile('src/ui/styles.css', '.compiled/src/ui/styles.css');
+  await mkdir('.compiled/src/plugin/ui', { recursive: true });
+  await copyFile('src/plugin/ui/styles.css', '.compiled/src/plugin/ui/styles.css');
 }
 if (prototype) {
   const directory = '.prototype-build';
@@ -94,7 +94,7 @@ export function projectLicenses() {
       }
     }
     for (const item of Object.values(bundle)) if (item.type === 'chunk') for (const id of Object.keys(item.modules)) if (id.includes('node_modules')) inspect(id);
-    if (existsSync('src/ui/Starter.vue')) {
+    if (existsSync('src/plugin/ui/Starter.vue')) {
       inspect(resolve('node_modules/tailwindcss/index.css'));
       inspect(resolve('node_modules/@iconify-json/lucide/icons.json'));
     }

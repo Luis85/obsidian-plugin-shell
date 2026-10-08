@@ -1,5 +1,5 @@
 import { join, resolve } from 'node:path';
-import { parseAuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
+import { parseAuthoringDocument } from '#shared/companion/authoring-contract.ts';
 import { configuration } from '../../adapters/framework/configuration.ts';
 import { keyOf, docsObject as object, insist, validateEntity, jsonData, type DocsIndex, type Resolutions } from '../domain/contracts.ts';
 import { readDocumentationSettings, validateSettings, type DocsSettings } from './settings.ts';

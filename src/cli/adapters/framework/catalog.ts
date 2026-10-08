@@ -1,8 +1,9 @@
 import { adoptCommands } from './adopt-catalog.ts';
 import { prototypeCommands } from './prototype-catalog.ts';
 import { incrementCommands } from './increment-catalog.ts';
+import { sourceCommands } from './source-catalog.ts';
 import { requireThat, OperationError, type Request, type Values } from './contracts.ts';
-import { assertJsonData } from '../../../../scripts/contracts/json-data.ts';
+import { assertJsonData } from '#shared/contracts/json-data.ts';
 import { suggestions, didYouMean } from './suggest.ts';
 export interface Command {
   id: string; summary: string; options: Record<string, 'value' | 'flag'>;
@@ -45,6 +46,7 @@ export const commands: readonly Command[] = [
   ...prototypeCommands,
   ...adoptCommands,
   ...incrementCommands,
+  ...sourceCommands,
   { id: 'handout generate', summary: 'Review create-only generation of the root product-trio handout; never overwrites answers or runs processes.', options: values('prds'), maxArgs: 0, effect: 'plan' },
   { id: 'handout refresh', summary: 'Review source-fingerprint refresh while preserving answers and notes and resetting review checkboxes.', options: values('prds'), maxArgs: 0, effect: 'plan' },
   { id: 'handout validate', summary: 'Validate required handout decisions and source freshness without writes or execution authorization.', options: values('prds'), maxArgs: 0, effect: 'read' },
@@ -91,9 +93,9 @@ export const commands: readonly Command[] = [
   { id: 'project import', summary: 'Review configuration conflicts and accept a design snapshot.', options: values('input', 'resolve'), maxArgs: 0, effect: 'plan' },
   { id: 'new', summary: 'Create a new project in <dir> from a reviewed file or Companion starter, or an exported companion project (--from); previews unless --yes. Project starters run without <dir>: new --starter <id>.', options: { ...values('storybook', 'storybook-stories', 'starter', 'from', 'id', 'name', 'author', 'extension', 'extensions', 'values', 'answers', 'run', ...hosting), 'trust-processes': 'flag', list: 'flag', install: 'flag', 'inside-vault': 'flag', 'no-git': 'flag', airship: 'flag', 'no-airship': 'flag' }, maxArgs: 1, effect: 'plan' },
   { id: 'generate', summary: 'Plan generation for the configured project in place.', options: values('storybook', 'storybook-stories', 'input', 'output-kind', 'scope'), maxArgs: 0, effect: 'plan' },
-  { id: 'entities check', summary: 'Validate the explicitly registered entity definitions with the installed Vite toolchain; writes nothing.', options: {}, maxArgs: 0, effect: 'read' },
-  { id: 'entities catalog', summary: 'Print the source-derived entity catalog (backend, schema, fields, defaults, Markdown mappings); writes nothing.', options: {}, maxArgs: 0, effect: 'read' },
-  { id: 'make', summary: 'Use the shared maker registry and file planner.', options: { ...values('feature', 'entity', 'folder', 'preset', 'backend', 'event', 'view', 'preference', 'extension', 'format', 'extensions', 'editor', 'file-type', 'input'), document: 'flag', bare: 'flag', list: 'flag', 'trust-custom': 'flag', check: 'flag', refresh: 'flag' }, maxArgs: 2, effect: 'plan' },
+  { id: 'entities check', summary: 'Validate the explicitly registered entity definitions with the installed Vite toolchain; writes nothing.', options: values('source'), maxArgs: 0, effect: 'read' },
+  { id: 'entities catalog', summary: 'Print the source-derived entity catalog (backend, schema, fields, defaults, Markdown mappings); writes nothing.', options: values('source'), maxArgs: 0, effect: 'read' },
+  { id: 'make', summary: 'Use the shared maker registry and file planner.', options: { ...values('source', 'feature', 'entity', 'folder', 'preset', 'backend', 'event', 'view', 'preference', 'extension', 'format', 'extensions', 'editor', 'file-type', 'input'), document: 'flag', bare: 'flag', list: 'flag', 'trust-custom': 'flag', check: 'flag', refresh: 'flag' }, maxArgs: 2, effect: 'plan' },
   { id: 'plan inspect', summary: 'Rebuild and compare a saved request plan; never execute it.', options: {}, maxArgs: 1, effect: 'read' },
   { id: 'plan apply', summary: 'Rebuild a saved request and apply only its matching reviewed plan.', options: {}, maxArgs: 1, effect: 'plan' },
   { id: 'install', summary: 'Explicit exact-lock npm ci; reviewed lifecycle hooks may run.', options: {}, maxArgs: 0, effect: 'process' },

@@ -65,18 +65,18 @@ The compiler writes `tests/project/ux-acceptance/<slug>.test.ts` for a surface t
 - `platform` is `github`, `azure-devops` or `none`. `azureDevOps` is allowed only with `azure-devops`; `organization` is `https://dev.azure.com/<org>` or `https://<org>.visualstudio.com`, `project` and the optional `repository` (defaults to the project) are 1-64 letters, digits, spaces, dots, underscores or hyphens. Unknown fields, accessors and other values are rejected.
 - Only non-secret identifiers are stored. Tokens are never part of a project document; sign in with `az login` or a session-only `AZURE_DEVOPS_EXT_PAT`.
 - `azure-devops` emits `azure-pipelines.yml` and `.azuredevops/pull_request_template.md`; `none` emits no CI or hosting files and keeps the summary template at `docs/project-tasks/CHANGE-SUMMARY.md`. Both leave out the framework's `.github/` files. README, AGENTS.md and the self-review skill name the platform's template and commands.
-- The standalone concept embeds this contract, so changing it requires rebuilding `docs/concepts/companion/index.html` (`python3 scripts/concepts/build-companion.py`, then `--check`).
-- Contract and emission tests: `node --test tests/tooling/companion-hosting-contract.checks.mjs tests/tooling/project-generator-hosting.checks.mjs`.
+- The standalone concept embeds this contract, so changing it requires rebuilding `docs/concepts/companion/index.html` (`python3 tooling/concepts/build-companion.py`, then `--check`).
+- Contract and emission tests: `node --test src/shared/tests/companion-hosting-contract.checks.mjs tooling/tests/project-generator-hosting.checks.mjs`.
 
 ## Regression evidence
 
 The shared corpus is every Companion starter in `configs/starters/` (the self-project, the showcase and the twelve focused examples: fourteen definitions), all project v6. Node tests exercise the actual read-only CLI, retired-version rejection, safe diagnostics, copy isolation, hostile inputs and semantic rejection. The independent Python test uses `jsonschema==4.26.0` and distinguishes structural negatives from documents which pass JSON Schema but deliberately fail the authoritative reference checks:
 
 ```sh
-node --test tests/tooling/companion-schema.checks.mjs tests/tooling/companion-surface-acceptance.checks.mjs
-node --test tests/tooling/project-generator-surface-acceptance.checks.mjs
+node --test src/cli/tests/companion-schema.checks.mjs src/shared/tests/companion-surface-acceptance.checks.mjs
+node --test src/cli/tests/project-generator-surface-acceptance.checks.mjs
 # In an explicitly provisioned scratch venv with jsonschema==4.26.0:
-python -B tests/concepts/companion-schema.test.py
+python -B src/companion/tests/concepts/companion-schema.test.py
 ```
 
 The independent schema test is separately discoverable as `companion:schema`; absence of its prerequisite is reported as not run, never a successful schema qualification. Its test-only dependency does not change the plugin/package lock or become required by ordinary project use.

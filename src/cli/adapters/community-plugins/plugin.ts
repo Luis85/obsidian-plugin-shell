@@ -1,11 +1,11 @@
 import { join } from 'node:path';
-import { applyFilePlan, createFilePlan } from '../../../../scripts/shared/file-plan.ts';
-import { serializeJson } from '../../../../scripts/contracts/serialization.ts';
-import { assertJsonData, parseJsonData } from '../../../../scripts/contracts/json-data.ts';
+import { applyFilePlan, createFilePlan } from '#shared/platform/file-plan.ts';
+import { serializeJson } from '#shared/contracts/serialization.ts';
+import { assertJsonData, parseJsonData } from '#shared/contracts/json-data.ts';
 import { OperationError, requireThat } from '../framework/contracts.ts';
 import { readBounded } from '../framework/files.ts';
 import { isCommunityPluginId, isSettingsDocument, type CommunityPluginManifest } from '../../domain/community-plugin.ts';
-import type { PluginCommandContext, PluginTuiContext } from '../../../../plugins/api.ts';
+import type { PluginCommandContext, PluginTuiContext } from '../../sdk/api.ts';
 import type { WorkbenchApp } from './app-api.ts';
 
 export interface CommunityCommandRequest { readonly flags: Readonly<Record<string, string | boolean>> }

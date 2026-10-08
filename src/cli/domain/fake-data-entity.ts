@@ -1,5 +1,5 @@
 import { object, keys, text, list } from './data.ts';
-import { hasControls, requireSketch, slug } from './errors.ts';
+import { hasControls, requireSketch, slug } from '#shared/contracts/sketch-errors.ts';
 import { definitionId } from './form-model.ts';
 import { fakerCall, fakePropertyTypes, validIsoDate, type FakeArgs, type FakePropertyType } from './fake-data-generators.ts';
 export type FakeScalar = string | number | boolean;

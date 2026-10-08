@@ -3,11 +3,11 @@
 > Type: how-to guide · Part of the [docs index](../README.md)
 
 Feature authors declare commands in a dedicated file and add one factory to the
-explicit registry in `src/bootstrap/commands.ts`. `main.ts`, native registration
+explicit registry in `src/plugin/bootstrap/commands.ts`. `main.ts`, native registration
 and generic dispatch do not change for each new feature.
 
 ```ts
-// src/features/bookmarks/commands.ts
+// src/plugin/features/bookmarks/commands.ts
 import { defineCommand, defineRibbon } from '../api';
 import type { Result } from '../../domain/outcome';
 
@@ -72,7 +72,7 @@ presentation callbacks and late feedback remain inactive.
 
 ## Native ownership
 
-`src/infrastructure/obsidian/commands.ts` owns host registration, public removal
+`src/plugin/infrastructure/obsidian/commands.ts` owns host registration, public removal
 and ribbon elements. Native registration failure cleans up the handles already
 acquired. Cleanup failures are independently recorded, and callbacks are disabled
 before cleanup so a retained host handle cannot revive the runtime.

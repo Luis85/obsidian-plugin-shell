@@ -25,15 +25,17 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review, labeled]
     paths:
-      - 'scripts/companion/**'
+      - 'src/shared/companion/**'
       - 'templates/**'
-      - 'scripts/compiler/**'
+      - 'tooling/compiler/**'
       - 'src/cli/compiler/**'
       - 'src/cli/adapters/framework/**'
       - 'src/cli/adapters/framework-cli.ts'
       - 'src/cli/presentation/terminal/**'
-      - 'scripts/bundling/**'
-      - 'tests/tooling/compiler-storybook*.checks.mjs'
+      - 'src/tui/**'
+      - 'tooling/bundling/**'
+      - 'src/cli/tests/compiler-storybook*.checks.mjs'
+      - 'tooling/tests/compiler-storybook*.checks.mjs'
       - 'package*.json'
       - '.github/actions/setup-qualified/**'
       - '.github/workflows/optional-storybook.yml'
@@ -58,12 +60,12 @@ jobs:
           install-flags: --no-fund
       - name: Check contracts on the unchanged root toolchain
         run: |
-          node --test --test-concurrency=1 tests/tooling/compiler-storybook*.checks.mjs
+          node --test --test-concurrency=1 src/cli/tests/compiler-storybook*.checks.mjs tooling/tests/compiler-storybook*.checks.mjs
       - name: Resolve fresh consumer dependencies only from versions published at least 24 hours ago
         run: node -e "console.log('npm_config_before=' + new Date(Date.now() - 864e5).toISOString())" >> "$GITHUB_ENV"
       - name: Qualify explicitly opted-in generated workspace without the browser preview
         if: ${{ !(inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) }}
-        run: node scripts/compiler/qualify-storybook.mjs --no-browser
+        run: node tooling/compiler/qualify-storybook.mjs --no-browser
       - name: Resolve the pinned Playwright version
         id: playwright
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
@@ -79,7 +81,7 @@ jobs:
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
-          node scripts/compiler/qualify-storybook.mjs
+          node tooling/compiler/qualify-storybook.mjs
       - name: Retain evidence, including failures
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

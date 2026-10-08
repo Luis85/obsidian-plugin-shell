@@ -20,7 +20,7 @@ export const bookmarkFeature = definePluginDataFeature({
 ```
 
 Add `bookmarks: register(bookmarkFeature)` to the explicit registry in
-`src/bootstrap/features.ts`. Bootstrap provides the same serialized plugin-data
+`src/plugin/bootstrap/features.ts`. Bootstrap provides the same serialized plugin-data
 coordinator used by preferences and owns repository disposal. Authors use
 `services.repositories.bookmarks`; they do not construct storage adapters.
 
@@ -92,7 +92,7 @@ write. Repositories and preferences suppress late events after disposal.
 
 ## Verification scope
 
-The optional `src/features/items` reference uses this backend in the Documents
+The optional `src/plugin/features/items` reference uses this backend in the Documents
 panel. Its actions own create, rename and confirmed permanent deletion; the view
 owns drafts, pending/error feedback and a committed projection. Labels trim
 surrounding whitespace and must contain 1–120 characters. Task note filenames keep
@@ -105,11 +105,11 @@ save requires explicit reload/review before applying the retained draft. An
 uncertain save disables further writes and instructs the user to investigate and
 restart; querying cannot clear the shared writer's uncertainty lockout.
 
-`tests/runtime/items.test.ts`, `items-components.test.ts` and the served item
+`src/plugin/tests/unit/items.test.ts`, `items-components.test.ts` and the served item
 scenarios exercise actual actions, repositories and UI. The example-removal plan
 owns the item source, registrations, locales and tests alongside Task/Project.
 
-`tests/runtime/plugin-data.test.ts` exercises real shared services, registration,
+`src/plugin/tests/unit/plugin-data.test.ts` exercises real shared services, registration,
 CRUD, revisions, concurrent preferences, uncertain writes, subscriber failures and
 disposal. `plugin-data-preservation.test.ts` covers corrupt/future schemas,
 unrelated data, capacity/version bounds and seeded property-based CRUD/reload

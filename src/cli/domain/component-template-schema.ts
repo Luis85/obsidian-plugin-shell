@@ -1,5 +1,5 @@
-import { VISUAL_STATES, VISUAL_TAGS } from '../../../scripts/companion/visual/visual-ir.mjs';
-import { visualBuiltinLayouts, visualCatalog, visualRecipes } from '../../../scripts/companion/visual/visual-catalog.mjs';
+import { VISUAL_STATES, VISUAL_TAGS } from '#shared/companion/visual/visual-ir.mjs';
+import { visualBuiltinLayouts, visualCatalog, visualRecipes } from '#shared/companion/visual/visual-catalog.mjs';
 
 type Pattern = RegExp;
 type AtomicLevel = 'atom' | 'molecule' | 'organism' | 'template' | 'page';

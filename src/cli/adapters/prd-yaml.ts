@@ -1,5 +1,5 @@
 import { prdFrontmatter, typedPrd, type PrdMarkdown } from '../domain/prd-markdown.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 /** The pinned library parses inert YAML only. No custom tags, JavaScript constructors or network access. */
 export async function parsePrdMarkdown(markdown: string, filename: string): Promise<PrdMarkdown | null> {
   const header = prdFrontmatter(markdown,filename);

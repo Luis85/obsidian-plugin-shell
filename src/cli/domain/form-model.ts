@@ -1,5 +1,5 @@
 import { object, keys, text } from './data.ts';
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 /** Shared vocabulary of data-driven forms and wizards: bound paths, conditions and inert text templates. */
 export type FieldValue = string | number | boolean | string[];
 export type FormValues = Record<string, unknown>;

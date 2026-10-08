@@ -55,8 +55,8 @@ jobs:
       - name: TypeScript and both source linters
         run: |
           node "$QUALIFIED_NPM" run typecheck:maker
-          node node_modules/eslint/bin/eslint.js -c configs/lint/eslint.config.mjs src/cli plugins --max-warnings 0
-          node node_modules/oxlint/bin/oxlint -c configs/lint/oxlintrc.json src/cli plugins --no-ignore --deny-warnings
+          node node_modules/eslint/bin/eslint.js -c configs/lint/eslint.config.mjs src/cli src/tui --max-warnings 0
+          node tooling/quality/lint-source.mjs
           node "$QUALIFIED_NPM" run check:plugins
       - name: Workbench plugin contracts
         if: ${{ !cancelled() }}
@@ -78,7 +78,7 @@ jobs:
           NODE
       - name: Qualify plugin-provided React starter without the browser smoke
         if: ${{ !cancelled() && runner.os == 'Linux' && !(inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) }}
-        run: node scripts/compiler/qualify-project-starters.mjs --starter webapp-react --execute --no-browser
+        run: node tooling/compiler/qualify-project-starters.mjs --starter webapp-react --execute --no-browser
       - name: Resolve the pinned Playwright version
         id: playwright
         if: ${{ !cancelled() && runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) }}
@@ -94,7 +94,7 @@ jobs:
         if: ${{ !cancelled() && runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) }}
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
-          node scripts/compiler/qualify-project-starters.mjs --starter webapp-react --execute
+          node tooling/compiler/qualify-project-starters.mjs --starter webapp-react --execute
       - name: Restore the example extension configuration
         if: ${{ always() && steps.extension.outcome != 'skipped' }}
         run: cp "$RUNNER_TEMP/example-extension-config.json" bin/plugins/example-extension/config.json
@@ -111,7 +111,7 @@ jobs:
       - name: Source inventory gate
         if: ${{ !cancelled() && runner.os == 'Linux' }}
         run: |
-          node scripts/testing/suites.mjs --check
+          node tooling/testing/suites.mjs --check
           node "$QUALIFIED_NPM" run check:source
       - name: Repository analyzer and architecture gates
         if: ${{ !cancelled() && runner.os == 'Linux' }}

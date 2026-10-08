@@ -18,8 +18,8 @@ for the implemented gates. See [README](../../README.md) for current commands.
 The separate historical style specimen is still available:
 
 ```sh
-node scripts/harness/serve-style-fixture.mjs --port 4174
-node --test tests/harness-styles/server.test.mjs
+node tooling/harness/serve-style-fixture.mjs --port 4174
+node --test tests/verification/harness-style-server.test.mjs
 ```
 
 Inspect light/dark controls, settings, notices and a modal in the printed loopback URL. These are isolated appearance/interaction specimens; they create no notes and do not run Vue or native Obsidian. See [host-style documentation](../testing/HARNESS-STYLES.md) and the [review evidence](../_archive/reviews/2026-09-22-product-review.md).
@@ -149,8 +149,8 @@ A handoff describes actual behavior, exact checks and limitations. Extensive gen
 Cloud containers (Claude Code on the web) usually ship a different Node/npm than the qualified
 toolchain (`.nvmrc`, `package.json` engines and `packageManager`: Node 24.21.0, npm 11.19.1) and may start
 without `node_modules`. The repository's `.claude/settings.json` therefore registers a `SessionStart` hook,
-`scripts/agent/session-start.mjs` (the same file serves generated projects), and the existing `Stop` hook
-(`scripts/agent/stop-check.mjs`, which runs the fast check, `node bin/app check --fast`).
+`tooling/agent/session-start.mjs` (the same file serves generated projects), and the existing `Stop` hook
+(`tooling/agent/stop-check.mjs`, which runs the fast check, `node bin/app check --fast`).
 
 The SessionStart hook prints at most ten lines of context and never fails the session (it always exits 0 and
 reports problems as text). It is read-only and fast when everything is fine:
@@ -167,7 +167,7 @@ reports problems as text). It is read-only and fast when everything is fine:
   `SHELL_SESSION_START_INSTALL=1`; `SHELL_SESSION_START_INSTALL=0` disables it everywhere. Local sessions are never
   changed unasked. Lifecycle scripts stay off and nothing is downloaded beyond the locked packages (and, in cloud
   sessions, the qualified Node itself).
-- **Browser:** reported through the single resolver, `scripts/testing/browser-executable.mjs`. It never downloads a
+- **Browser:** reported through the single resolver, `src/cli/tooling/testing/browser-executable.mjs`. It never downloads a
   browser. In a cloud session an installed Chromium of another revision is exported as `SHELL_CHROMIUM` and
   labelled non-pinned; locally only the hint is printed.
 
@@ -178,6 +178,6 @@ read it). Without it the Chromium revision pinned by the installed Playwright
 An installed but different revision, such as the cloud image's `/opt/pw-browsers/chromium-1194`, is a
 `revision-mismatch`: browser suites are reported `not-run` with the reason `browser-revision-mismatch` and the exact
 opt-in, for example `SHELL_CHROMIUM=/opt/pw-browsers/chromium-1194/chrome-linux/chrome`. A mismatched Chromium is
-never used silently and never reported as a pass. `node scripts/testing/browser-executable.mjs [--json]` prints the
+never used silently and never reported as a pass. `node src/cli/tooling/testing/browser-executable.mjs [--json]` prints the
 resolution (exit 0 only when a browser is usable). The earlier names `CHROMIUM_EXECUTABLE`, `CHROMIUM_PATH`,
 `PLAYWRIGHT_EXECUTABLE_PATH` and the `--browser` option of the browser specimen check are removed.

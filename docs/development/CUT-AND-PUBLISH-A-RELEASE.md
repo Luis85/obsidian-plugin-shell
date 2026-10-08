@@ -51,7 +51,7 @@ On an up-to-date `main` checkout with a clean tree:
 
 ```sh
 git switch main && git pull --ff-only
-node scripts/release/cut.mjs --version X.Y.Z
+node tooling/release/cut.mjs --version X.Y.Z
 ```
 
 The dry run prints the planned branch, the files release preparation changes
@@ -75,7 +75,7 @@ pushes it, opens the draft pull request "Release X.Y.Z" from
 the branch. Its log is retained as the `release-cut-X.Y.Z-<attempt>` artifact.
 
 The same steps run locally from a clean `main`, with your own `gh` login:
-`node scripts/release/cut.mjs --version X.Y.Z --execute` creates the branch and
+`node tooling/release/cut.mjs --version X.Y.Z --execute` creates the branch and
 commit only (review it), and adding `--remote` pushes, opens the pull request and
 dispatches Release. Prefer the workflow, so the approval is recorded.
 
@@ -121,7 +121,7 @@ Preview first. This is read-only discovery through `gh` and reports what Publish
 would do:
 
 ```sh
-node scripts/release/publish.mjs --version X.Y.Z --repository Luis85/obsidian-plugin-shell
+node tooling/release/publish.mjs --version X.Y.Z --repository Luis85/obsidian-plugin-shell
 ```
 
 It refuses (exit 1) unless one open pull request from `release/X.Y.Z` targets

@@ -13,7 +13,7 @@ import { defaultDeliverySchema, deliveryPathsDrift, deliverySchemaFrom, type Del
 import { parseIncrement } from '../../domain/increments/increment-document.ts';
 import { parsePullRequest } from '../../domain/increments/pull-request-document.ts';
 import { parseIssue } from '../../domain/increments/issue-document.ts';
-import { isProtectedSegment } from '../../../../scripts/shared/protected-directories.ts';
+import { isProtectedSegment } from '#shared/platform/protected-directories.ts';
 import { createGitPort, type GitRunner } from './git.ts';
 import type { GitPort } from '../../application/increments/git-port.ts';
 import type { HostingRemote } from '../../application/increments/remote-port.ts';

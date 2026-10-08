@@ -13,5 +13,5 @@
     "skipLibCheck": true,
     "types": ["node"]
   },
-  "include": ["../../scripts/hindsight/*.ts"]
+  "include": ["../../src/cli/tooling/hindsight/*.ts"]
 }

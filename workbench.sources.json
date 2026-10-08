@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "projects": [
+    {
+      "name": "shared",
+      "kind": "library",
+      "path": "src/shared",
+      "references": []
+    },
+    {
+      "name": "tui",
+      "kind": "library",
+      "path": "src/tui",
+      "references": [
+        "shared"
+      ],
+      "include": [
+        "**/*.ts"
+      ]
+    },
+    {
+      "name": "cli",
+      "kind": "cli",
+      "path": "src/cli",
+      "references": [
+        "shared",
+        "tui"
+      ],
+      "include": [
+        "**/*.ts",
+        "**/*.mjs",
+        "**/*.d.mts"
+      ],
+      "extraReferences": [
+        "configs/types/tsconfig.templates.json",
+        "configs/types/tsconfig.test-kit.json"
+      ]
+    },
+    {
+      "name": "companion",
+      "kind": "companion",
+      "path": "src/companion",
+      "references": [
+        "shared"
+      ],
+      "compilerOptions": {
+        "allowJs": true,
+        "checkJs": false
+      },
+      "gateExemptions": {
+        "lint": "Owner decision: the companion concept keeps its own assembly, analyzer inventory and browser verification; it was outside the source lint before the split (configs/lint/lint-scope.mjs).",
+        "coverage": "Owner decision: the companion concept is verified by its own browser and assembly suites, not by a Vitest coverage gate.",
+        "analyzer": "Owner decision: Fallow ignores the companion concept sources (configs/quality/fallow.json ignorePatterns); the project boundary gate keeps it inside the graph."
+      }
+    },
+    {
+      "name": "plugin",
+      "kind": "plugin",
+      "path": "src/plugin",
+      "references": [
+        "shared"
+      ],
+      "compilerOptions": {
+        "paths": {
+          "#build/*": [
+            "../../node_modules/.nuxt-ui/*"
+          ]
+        }
+      }
+    }
+  ]
+}

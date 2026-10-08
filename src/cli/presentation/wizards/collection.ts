@@ -1,4 +1,4 @@
-import { requireSketch } from '../../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import type { FormChoice, FormField } from '../../domain/form.ts';
 import type { FormValues } from '../../domain/form-model.ts';
 import type { CollectionDefinition } from '../../domain/collection-definition.ts';
@@ -7,7 +7,7 @@ import type { CollectionRecord } from '../../domain/collection-record.ts';
 import { collectionCreatePlan, collectionNote, collectionUpdatePlan, openCollection, readCollection, type CollectionContext } from '../../adapters/collection-store.ts';
 import type { Prepared } from '../../adapters/storage.ts';
 import { formDefinition, runForm } from '../form-runner.ts';
-import { Back, reportError } from '../prompts.ts';
+import { Back, reportError } from '#tui/prompts.ts';
 import { review } from '../review.ts';
 import type { ActionContext } from '../wizard-runner.ts';
 import type { WizardModule } from './module.ts';

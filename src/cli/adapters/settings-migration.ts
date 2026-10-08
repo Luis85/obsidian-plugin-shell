@@ -1,12 +1,12 @@
 import { validateDocumentationSettings } from './settings-documentation.ts';
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
-import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { hash } from './framework/files.ts';
 import { object, list } from '../domain/data.ts';
 import { documentText, openDocument } from '../domain/document.ts';
 import { collectionPathKeys, designRoot, effectivePaths, pathsOverlap, readSettings, settingsPath, setupStatePath, type UserSettings } from '../domain/user-settings.ts';
 import { designManifestFile, readDesignManifest } from '../domain/design-folder.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { prepared } from './storage.ts';
 import { guardedText, jsonText, loadSettings } from './user-settings.ts';
 import { migrationFiles, type MigrationFile } from './migration-files.ts';

@@ -1,7 +1,7 @@
-import type { Interaction } from '../../../../scripts/companion/visual/visual-ir.mjs';
+import type { Interaction } from '#shared/companion/visual/visual-ir.mjs';
 import type { VisualSpec } from '../../../../templates/companion/runtime/visual-runtime.ts';
-import { resolveSurfaceAcceptance, validateSurfaceAcceptance, type ResolvedSurfaceAcceptance } from '../../../../scripts/companion/sitemap/acceptance.ts';
-import type { SitemapDesign } from '../../../../scripts/companion/sitemap/model.ts';
+import { resolveSurfaceAcceptance, validateSurfaceAcceptance, type ResolvedSurfaceAcceptance } from '#shared/companion/sitemap/acceptance.ts';
+import type { SitemapDesign } from '#shared/companion/sitemap/model.ts';
 import { literal, row, type Model, type Screen } from './model.ts';
 import type { Add } from './file-code.ts';
 import { navigationTests } from './navigation-code.ts';

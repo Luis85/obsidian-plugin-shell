@@ -1,7 +1,7 @@
 import { posix } from 'node:path';
 import type { TemplateSnapshot } from '../domain/contracts.ts';
-import { editorBindings } from '../../../../scripts/companion/sitemap/editor-bindings.ts';
-import type { SitemapDesign } from '../../../../scripts/companion/sitemap/model.ts';
+import { editorBindings } from '#shared/companion/sitemap/editor-bindings.ts';
+import type { SitemapDesign } from '#shared/companion/sitemap/model.ts';
 import { componentFile, relativeImport, type Add } from './file-code.ts';
 import { literal, type Model } from './model.ts';
 import { journeyBootstrapCode } from './journey-bootstrap-code.ts';
@@ -11,7 +11,7 @@ import { journeyTestCode } from './journey-test-code.ts';
 export function journeyCode(template: TemplateSnapshot, m: Model, add: Add): void {
   const bindings = editorBindings(m.document.design as SitemapDesign);
   if (!bindings.length) return;
-  const prefix = 'docs/concepts/companion/editor/', target = `${m.sourceRoot}/presentation/journey/`;
+  const prefix = 'src/companion/editor/', target = `${m.sourceRoot}/presentation/journey/`;
   const sources = template.frameworkFiles.filter(file => file.path.startsWith(prefix) && /\.(?:ts|vue|css)$/.test(file.path) && file.path !== prefix + 'ui.css');
   for (const required of ['main.ts','flow-context.ts','contracts.ts','components/SitemapEditor.vue','components/SitemapGraph.vue','workspace/JourneyWorkspace.vue','workspace/use-workspace.ts','workspace/contracts.ts']) {
     if (!sources.some(file=>file.path===prefix+required)) throw new Error('JOURNEY_TEMPLATE_MISSING: '+required);
@@ -24,7 +24,7 @@ export function journeyCode(template: TemplateSnapshot, m: Model, add: Add): voi
     if (file.path === prefix + 'main.ts') {
       // The prototype bridge exports validators and the shell's starter API; a native mount is not that browser bridge.
       source = source.replace(/^import .* from '.*\/(?:authoring-contract|sitemap\/(?:validate|safety))\.ts';\r?\n/gm, '')
-        .replace(/^export \{[^}\n]+\} from '.*\/src\/cli\/[^']+';\r?\n/gm, '')
+        .replace(/^export \{[^}\n]+\} from '(?:.*\/src\/cli\/|#shared\/companion\/starters\/)[^']+';\r?\n/gm, '')
         .replace(/^export \{ validateAuthoringDocument,[^\n]+\r?\n/m, '')
         .replace('flow:FlowRuntime = root.ownerDocument.defaultView!.VueFlowCore', 'flow:FlowRuntime');
       if (source.includes('authoring-contract.ts') || source.includes('defaultView!.VueFlowCore') || /from '[^']*\/src\/cli\//.test(source)) throw new Error('JOURNEY_MOUNT_CONTRACT');
@@ -80,8 +80,8 @@ A generated test file is not evidence of a passing run; retain its actual host r
 `);
   const test = `${m.testRoot}/journey-generated.test.ts`;
   add(test, `import { it, expect } from 'vitest';
-import { JourneyProjectStore } from ${literal(relativeImport(test,'scripts/companion/journey/project-store.ts'))};
-import { SitemapSession } from ${literal(relativeImport(test,'scripts/companion/sitemap/session.ts'))};
+import { JourneyProjectStore } from ${literal(relativeImport(test,'src/shared/companion/journey/project-store.ts'))};
+import { SitemapSession } from ${literal(relativeImport(test,'src/shared/companion/sitemap/session.ts'))};
 import { seed } from ${literal(relativeImport(test,`${m.sourceRoot}/domain/journey-seed.ts`))};
 it('saves the complete generated project and reopens an independent editor session',async()=>{
   let bytes=seed;

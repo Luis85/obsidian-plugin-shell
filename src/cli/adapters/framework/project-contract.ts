@@ -1,7 +1,7 @@
 import { resolve } from 'node:path';
-import { companionProjectSchema } from '../../../../scripts/companion/schema/project.mjs';
-import { parseAuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
-import { inspectSitemap } from '../../../../scripts/companion/sitemap/validate.ts';
+import { companionProjectSchema } from '#shared/companion/schema/project.mjs';
+import { parseAuthoringDocument } from '#shared/companion/authoring-contract.ts';
+import { inspectSitemap } from '#shared/companion/sitemap/validate.ts';
 import { readBounded, hash } from './files.ts';
 import { requireThat, stringOption, result, type Request, type Context } from './contracts.ts';
 

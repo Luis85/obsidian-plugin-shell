@@ -1,5 +1,5 @@
-import { hasPortableProjectSegments } from '../../../scripts/shared/project-path.ts';
-import { requireSketch, hasControls } from './errors.ts';
+import { hasPortableProjectSegments } from '#shared/platform/project-path.ts';
+import { requireSketch, hasControls } from '#shared/contracts/sketch-errors.ts';
 /**
  * Learning Markdown is shown as plain terminal text, never rendered as HTML or evaluated. Content that only
  * makes sense as executable markup is rejected so a course cannot smuggle it into other renderers.

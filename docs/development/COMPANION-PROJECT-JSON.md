@@ -20,7 +20,7 @@ npm run --silent companion:generate -- \
 The equivalent direct invocation does not require dependency installation:
 
 ```sh
-node scripts/companion-tools/generate.mjs \
+node tooling/companion-tools/generate.mjs \
   --input ./my-plugin.companion.json \
   --vault "/path/to/my-vault" \
   --target "."
@@ -44,11 +44,11 @@ Redirection is a shell operation, not a write by this script. Never redirect out
 | `design` | Schema-6 saved authoring definition (`design.schema` must equal `schemaVersion`): blueprint, goals, platform, screens, containment/navigation, components and their content/versions/variants, PRDs and requirement mappings, entities/relationships, source operations and shapes, test recipes, design system, visual arrangement, storymaps with release assignments and artifact links, and visual page/component designs with immutable revisions and fixture scenarios |
 | `notes` | Saved project note strings |
 
-The embedded document of `configs/starters/companion-plugin.json` is a complete example, not an abbreviated schema snippet. `scripts/companion/authoring-contract.ts` is the shared executable envelope/path contract of the shell, compiler and current authoring build; it delegates to the shared subsystem validators (`scripts/companion/visual/`, Storymaps, Design System, native integrations and the sitemap core). The read-only script is **not** evidence that an arbitrary nested design is ready for compilation.
+The embedded document of `configs/starters/companion-plugin.json` is a complete example, not an abbreviated schema snippet. `src/shared/companion/authoring-contract.ts` is the shared executable envelope/path contract of the shell, compiler and current authoring build; it delegates to the shared subsystem validators (`src/shared/companion/visual/`, Storymaps, Design System, native integrations and the sitemap core). The read-only script is **not** evidence that an arbitrary nested design is ready for compilation.
 
 ### Storymaps
 
-Projects without maps are treated as having an empty collection. The exact shared Storymaps record validator is `scripts/companion/storymap-contract.mjs`, embedded in the concept and imported by the Node boundary. Invalid internal structure, duplicate IDs, unsupported fields and excessive collections fail before import. External PRD/sitemap/requirement references can be explicitly unresolved and are preserved with last-known labels.
+Projects without maps are treated as having an empty collection. The exact shared Storymaps record validator is `src/shared/companion/storymap-contract.mjs`, embedded in the concept and imported by the Node boundary. Invalid internal structure, duplicate IDs, unsupported fields and excessive collections fail before import. External PRD/sitemap/requirement references can be explicitly unresolved and are preserved with last-known labels.
 
 Ordering and assignments are portable; transient Vue Flow state is not. The older blueprint/compiler preview excludes storymaps and remains a distinct format. The transfer version change does not authorize writes, produce boilerplate or move configured folders. See [Storymaps](../concepts/companion/STORYMAPS.md) for canonical fields and bounded limits.
 
@@ -85,18 +85,18 @@ Import and folder changes refuse observed stale storage, modified owned Project.
 
 ## Ownership and verification
 
-- `scripts/companion/storymap-contract.mjs`: shared bounded Storymaps records and reference validation, no I/O.
-- `scripts/companion/authoring-contract.ts`: shared schema 6 transport/path validation, no I/O.
+- `src/shared/companion/storymap-contract.mjs`: shared bounded Storymaps records and reference validation, no I/O.
+- `src/shared/companion/authoring-contract.ts`: shared schema 6 transport/path validation, no I/O.
 - `src/cli/adapters/framework/read-project.ts`: bounded file read and contained target inspection; returns `{content, document, vault, target}` without writing.
-- `scripts/companion-tools/generate.mjs`: CLI arguments and stdout/stderr contract, **read-only v1**.
-- `docs/concepts/companion/src/project-transfer.js`: reviewed import/export and folder settings.
+- `tooling/companion-tools/generate.mjs`: CLI arguments and stdout/stderr contract, **read-only v1**.
+- `src/companion/app/project-transfer.js`: reviewed import/export and folder settings.
 - `docs/concepts/companion/src/companion-project.js`: declarative self-project seed, not an implemented native plugin.
 
 ```sh
-node --test tests/tooling/companion-project.checks.mjs tests/tooling/companion-storymaps.checks.mjs
-python -B scripts/concepts/build-companion.py --check
-python -B tests/concepts/companion-assembly.test.py
-SHELL_CHROMIUM=/path/to/chromium python -B scripts/concepts/run-browser-checks.py --real-storage
+node --test tooling/tests/companion-project.checks.mjs src/companion/tests/companion-storymaps.checks.mjs
+python -B tooling/concepts/build-companion.py --check
+python -B src/companion/tests/concepts/companion-assembly.test.py
+SHELL_CHROMIUM=/path/to/chromium python -B tooling/concepts/run-browser-checks.py --real-storage
 ```
 
 The browser suite downloads an actual project export and passes those bytes to the real CLI in a temporary vault, verifies full semantic round trips, checks replacement failures and renders the seed's editors. The separate storage suite tests actual two-window storage and reload when loopback navigation is permitted. The golden JSON must match the executable seed's export. Exact-artifact results and environment limits belong in the current verification receipt rather than this contract.
@@ -111,7 +111,7 @@ The read-only handoff command above remains separate from workspace generation. 
 
 ## Page and component designs
 
-`design.visualDesigns` (subsystem schema 3) holds page definitions owned by sitemap page/modal/settings surfaces, component definitions owned by library entries, saved layouts and immutable published revisions as declarative UI trees. It is validated by `scripts/companion/visual/visual-validate.mjs` (delegated from `authoring-contract.ts`) before browser import, export, CLI handoff and generation; a document cannot carry the retired `detailDesigns`. The catalog is pinned to `{ "id": "nuxt-ui", "version": 1 }`, matching the generated `@nuxt/ui` 4.11.3. The model never evaluates its declarations. See [Visual editors](../concepts/companion/VISUAL-EDITORS.md) and the [design spec](../_archive/superpowers/specs/2026-09-26-visual-editors-design.md) for fields, limits and the native conversion boundary. The separate compiler generates Vue SFCs with explicit Nuxt UI imports, typed contracts, source/Pinia projections, slots, extension-owned external-library adapters and declared local UI effects. Arbitrary business intent remains an implementation hook or acceptance TODO, not a successful mock result.
+`design.visualDesigns` (subsystem schema 3) holds page definitions owned by sitemap page/modal/settings surfaces, component definitions owned by library entries, saved layouts and immutable published revisions as declarative UI trees. It is validated by `src/shared/companion/visual/visual-validate.mjs` (delegated from `authoring-contract.ts`) before browser import, export, CLI handoff and generation; a document cannot carry the retired `detailDesigns`. The catalog is pinned to `{ "id": "nuxt-ui", "version": 1 }`, matching the generated `@nuxt/ui` 4.11.3. The model never evaluates its declarations. See [Visual editors](../concepts/companion/VISUAL-EDITORS.md) and the [design spec](../_archive/superpowers/specs/2026-09-26-visual-editors-design.md) for fields, limits and the native conversion boundary. The separate compiler generates Vue SFCs with explicit Nuxt UI imports, typed contracts, source/Pinia projections, slots, extension-owned external-library adapters and declared local UI effects. Arbitrary business intent remains an implementation hook or acceptance TODO, not a successful mock result.
 
 ## Design-system frontend extension
 

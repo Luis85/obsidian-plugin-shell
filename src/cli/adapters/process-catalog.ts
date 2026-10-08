@@ -1,8 +1,8 @@
 import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
-import { hasPortableProjectSegments } from '../../../scripts/shared/project-path.ts';
-import { requireSketch, SketchError } from '../domain/errors.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
+import { hasPortableProjectSegments } from '#shared/platform/project-path.ts';
+import { requireSketch, SketchError } from '#shared/contracts/sketch-errors.ts';
 import type { FormDefinition, FormField } from '../domain/form.ts';
 import { getPath } from '../domain/form-model.ts';
 import { readProcess, type ProcessDefinition, type ProcessDoc, type ProcessReferences } from '../domain/process.ts';

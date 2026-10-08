@@ -9,18 +9,18 @@ export function relationshipCode(template: TemplateSnapshot,m:Model,add:Add):voi
   add('design/relationships.json',json({rules:all,writeGuard:scope.rules.map(r=>r.id),scope:'generated-runtime-preflight-not-cross-process-transaction'}),'managed');
   add(`${m.sourceRoot}/domain/note-values.ts`,template.text('templates/companion/runtime/note-values.ts'),'managed');
   add(`${m.sourceRoot}/domain/relationships.ts`,template.text('templates/companion/runtime/relationships.ts'),'managed');
-  const tests=template.text('tests/tooling/project-generator-relationships.checks.mjs');
+  const tests=template.text('src/cli/tests/project-generator-relationships.checks.mjs');
   const testPath=`${m.testRoot}/relationships.test.mjs`;
   // This is the same executable suite against the emitted runtime, not source-text assertions.
   add(testPath,copiedTemplateTest(tests,[
-    ["../../templates/companion/runtime/relationships.ts",relativeImport(testPath,`${m.sourceRoot}/domain/relationships.ts`)],
-    ["../../templates/companion/runtime/relationship-session.ts",relativeImport(testPath,`${m.sourceRoot}/application/relationship-session.ts`)]],'project-generator-relationships.checks.mjs'),'managed');
+    ["../../../templates/companion/runtime/relationships.ts",relativeImport(testPath,`${m.sourceRoot}/domain/relationships.ts`)],
+    ["../../../templates/companion/runtime/relationship-session.ts",relativeImport(testPath,`${m.sourceRoot}/application/relationship-session.ts`)]],'project-generator-relationships.checks.mjs'),'managed');
   add(`${m.sourceRoot}/application/relationship-session.ts`,rewriteTemplate(template.text('templates/companion/runtime/relationship-session.ts'),
     [["'./relationships.ts'","'../domain/relationships.ts'"],["'./note-values.ts'","'../domain/note-values.ts'"]],'relationship-session.ts'),'managed');
   if(!auditScope.rules.length)return;
   nativeRelationshipTests(m,add);
   const file=`${m.sourceRoot}/bootstrap/relationships.ts`;
-  add(file,`import type { Services } from ${literal(relativeImport(file,'src/bootstrap/services.ts'))};
+  add(file,`import type { Services } from ${literal(relativeImport(file,'src/plugin/bootstrap/services.ts'))};
 import { createRelationshipSession } from '../application/relationship-session.ts';
 const sessions = new WeakMap<Services,ReturnType<typeof createRelationshipSession>>();
 /** Shared across this runtime's generated adapters. External vault changes still require reconciliation. */
@@ -50,9 +50,9 @@ function nativeRelationshipTests(m:Model,add:Add):void {
     // The shared session reads the whole connected audit graph, so every in-scope repository must be registered.
     const related=relationshipScope(m,true).entities.filter(e=>e.id!==entity.id);
     add(path,`import { test, expect } from 'vitest';
-import { NoteRepository } from ${literal(relativeImport(path,'src/application/note-repository.ts'))};
-import { markdownCodec } from ${literal(relativeImport(path,'src/infrastructure/markdown.ts'))};
-import { success, failure } from ${literal(relativeImport(path,'src/domain/outcome.ts'))};
+import { NoteRepository } from ${literal(relativeImport(path,'src/plugin/application/note-repository.ts'))};
+import { markdownCodec } from ${literal(relativeImport(path,'src/plugin/infrastructure/markdown.ts'))};
+import { success, failure } from ${literal(relativeImport(path,'src/plugin/domain/outcome.ts'))};
 import { document } from ${literal(relativeImport(path,`${m.sourceRoot}/application/documents/${entity.slug}.ts`))};
 ${related.map(e=>`import { document as ${symbol(e.slug)}Document } from ${literal(relativeImport(path,`${m.sourceRoot}/application/documents/${e.slug}.ts`))};
 `).join('')}import { create${sourceName}Adapter } from ${literal(relativeImport(path,`${m.sourceRoot}/infrastructure/sources/${source.slug}.ts`))};

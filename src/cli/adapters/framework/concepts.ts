@@ -1,11 +1,11 @@
 import { join } from 'node:path';
-import { createFilePlan, type FilePlanEntry } from '../../../../scripts/shared/file-plan.ts';
-import { serializeJson } from '../../../../scripts/contracts/serialization.ts';
-import { applyConcept } from '../../../../scripts/companion/concepts/apply.ts';
-import { conceptRequire } from '../../../../scripts/companion/concepts/contract.ts';
-import { parseAuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
+import { createFilePlan, type FilePlanEntry } from '#shared/platform/file-plan.ts';
+import { serializeJson } from '#shared/contracts/serialization.ts';
+import { applyConcept, type ConceptDelta } from '#shared/companion/concepts/apply.ts';
+import { conceptRequire } from '#shared/companion/concepts/contract.ts';
+import { parseAuthoringDocument } from '#shared/companion/authoring-contract.ts';
 import { projectModel } from '../../compiler/emitters/model.ts';
-import { record } from '../../../../scripts/companion/sitemap/safety.ts';
+import { record } from '#shared/companion/sitemap/safety.ts';
 import { configurationPlan } from './changes.ts';
 import { designFile } from './configuration.ts';
 import { hash, exists, readBounded } from './files.ts';
@@ -49,8 +49,9 @@ async function prepare(context: Context, input: string) {
   }
   const applied = applyConcept(concept, current);
   candidateSummary(applied.document);
+  const changes: ConceptDelta[] = applied.changes;
   return { source, current, referenceOnly: false as const, receiptPath, receipt: null, candidate: applied.document,
-    changes: applied.changes, replay: false, concept };
+    changes, replay: false, concept };
 }
 
 /** No compiler/build processes or storage writes are performed by discovery and inspection. */

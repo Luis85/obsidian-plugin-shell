@@ -1,7 +1,7 @@
 import type { TemplateSnapshot } from '../domain/contracts.ts';
 import { fixtureNoteTests } from '../emitters/fixture-notes-code.ts';
 import { sampleCode } from '../emitters/schema-code.ts';
-import { buildCompanionFixtureManifest } from '../../../../scripts/companion/test-data-manifest.mjs';
+import { buildCompanionFixtureManifest } from '#shared/companion/test-data-manifest.mjs';
 import { createFixtureEngine } from '../../../../docs/concepts/companion/test-kit/engine.mjs';
 import { createFixtureAdapter } from '../../../../docs/concepts/companion/test-kit/adapters.mjs';
 import { noteEntity } from '../emitters/persistence-code.ts';
@@ -20,23 +20,23 @@ export function renderFixtureCode(templateRoot: TemplateSnapshot, m: Model, add:
   const manifest = fixtureManifest(m);
   if (!manifest) return false;
   fixtureNoteTests(m,add);
-  for (const name of kitFiles) add('scripts/test-data/' + name, templateRoot.text(`docs/concepts/companion/test-kit/${name}`), 'managed');
-  add('scripts/test-data/manifest.json', json(manifest), 'managed');
-  add('scripts/test-data/adapters.d.mts', `export interface FixtureAdapter {
+  for (const name of kitFiles) add('tooling/test-data/' + name, templateRoot.text(`docs/concepts/companion/test-kit/${name}`), 'managed');
+  add('tooling/test-data/manifest.json', json(manifest), 'managed');
+  add('tooling/test-data/adapters.d.mts', `export interface FixtureAdapter {
 execute(id: string, input?: unknown, options?: { signal?: AbortSignal }): Promise<unknown>;
 port(source: string): Readonly<Record<string, (input?: unknown, options?: { signal?: AbortSignal }) => Promise<unknown>>>;
 reset(): void; captured(): Array<{operation: string; direction: string; input: unknown}>; dispose(): void;
 }
 export function createFixtureAdapter(manifest: unknown): FixtureAdapter;
 `, 'managed');
-  add('scripts/test-data/engine.d.mts', `export interface GeneratedFixtures {
+  add('tooling/test-data/engine.d.mts', `export interface GeneratedFixtures {
 files: Array<{path: string; content: string; owner: string}>;
 operations: Array<{id: string; source: string; slug: string; kind: string; input: {none?: boolean; schema?: unknown}; output: {none?: boolean; schema?: unknown}; inputValue: unknown; outputValue: unknown}>;
 bytes: number;
 }
 export function createFixtureEngine(): {generate(manifest: unknown): GeneratedFixtures; matches(value: unknown, schema: unknown): boolean};
 `, 'managed');
-  add('scripts/test-data/verify.mjs', `import { readFile } from 'node:fs/promises';
+  add('tooling/test-data/verify.mjs', `import { readFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import { createFixtureEngine } from './engine.mjs';
 import { createFixtureAdapter } from './adapters.mjs';
@@ -46,7 +46,7 @@ assert.deepEqual(engine.generate(manifest), first, 'Seeded fixtures must be dete
 const adapter = createFixtureAdapter(manifest); adapter.dispose();
 console.log(JSON.stringify({status:'fixture-contracts-verified',operations:first.operations.length,files:first.files.length,bytes:first.bytes,nativeAcceptance:'not-run'}));
 `, 'managed');
-  add('scripts/test-data/README.md', `# Generated test data
+  add('tooling/test-data/README.md', `# Generated test data
 
 The exported DataSource recipes are compiled into manifest.json by the same data-only translator as the companion prototype. Generation validates the actual fixture engine and simulator but never seeds notes, starts a server, installs a package, or contacts a provider.
 
@@ -60,9 +60,9 @@ The built-in provider is dependency-free. faker-provider.mjs remains an optional
 `, 'managed');
   const test = `${m.testRoot}/fixtures/recipes.test.ts`;
   add(test, `import { it, expect } from 'vitest';
-import { createFixtureEngine } from ${literal(relativeImport(test, 'scripts/test-data/engine.mjs'))};
-import { createFixtureAdapter } from ${literal(relativeImport(test, 'scripts/test-data/adapters.mjs'))};
-import manifest from ${literal(relativeImport(test, 'scripts/test-data/manifest.json'))};
+import { createFixtureEngine } from ${literal(relativeImport(test, 'tooling/test-data/engine.mjs'))};
+import { createFixtureAdapter } from ${literal(relativeImport(test, 'tooling/test-data/adapters.mjs'))};
+import manifest from ${literal(relativeImport(test, 'tooling/test-data/manifest.json'))};
 it('compiles the authored recipes into deterministic bounded fixture data', () => {
   const engine = createFixtureEngine(); const first = engine.generate(manifest);
   expect(engine.generate(manifest)).toEqual(first); expect(first.operations).toHaveLength(manifest.operations.length);
@@ -73,8 +73,8 @@ it('compiles the authored recipes into deterministic bounded fixture data', () =
 `, 'managed');
   for (const source of m.sources.filter(s => s.kind !== 'vault' && manifest.operations.some((op: {source: string}) => op.source === s.slug))) {
     const name = symbol(source.slug), file = `${m.testRoot}/fixtures/${source.slug}.ts`;
-    add(file, `import { createFixtureAdapter, type FixtureAdapter } from ${literal(relativeImport(file, 'scripts/test-data/adapters.mjs'))};
-import manifest from ${literal(relativeImport(file, 'scripts/test-data/manifest.json'))} with { type: 'json' };
+    add(file, `import { createFixtureAdapter, type FixtureAdapter } from ${literal(relativeImport(file, 'tooling/test-data/adapters.mjs'))};
+import manifest from ${literal(relativeImport(file, 'tooling/test-data/manifest.json'))} with { type: 'json' };
 import type { ${name}Port } from ${literal(relativeImport(file, `${m.sourceRoot}/application/${source.slug}/contracts.ts`))};
 /** A full typed port: disabled/missing recipes reject instead of reaching a live provider. */
 export function create${name}FixturePort(adapter: FixtureAdapter = createFixtureAdapter(manifest)): {port: ${name}Port; dispose(): void} {
@@ -102,7 +102,7 @@ ${source.operations.map(op => `  await expect(fixture.port[${literal(op.slug)}](
 });
 `, 'managed');
   }
-  const adapter='scripts/test-data/source-ports.mjs';
+  const adapter='tooling/test-data/source-ports.mjs';
   add(adapter,`import { createFixtureAdapter } from './adapters.mjs';\nexport function createProjectTestPorts(manifest) {\n  const adapter=createFixtureAdapter(manifest);\n  const sources=[...new Set(manifest.operations.filter(op=>op.kind!=='vault').map(op=>op.source))];\n  const ports=Object.fromEntries(sources.map(source=>{const port=adapter.port(source);return [source,Object.fromEntries(Object.entries(port).map(([slug,run])=>[slug,(input,signal)=>run(input,{signal})]))];}));\n  return {ports,dispose:()=>adapter.dispose()};\n}\n`,'managed');
   for(const source of m.sources) for(const op of source.operations) {
     const entity=noteEntity(m,source.id,op.id);
@@ -111,14 +111,14 @@ ${source.operations.map(op => `  await expect(fixture.port[${literal(op.slug)}](
     const path=`${m.testRoot}/recipes/${source.slug}-${op.slug}.test.mjs`;
     add(path,`import { it, expect } from 'vitest';
 import { readFile } from 'node:fs/promises';
-import { createFixtureEngine } from ${literal(relativeImport(path,'scripts/test-data/engine.mjs'))};
-import { NoteRepository } from ${literal(relativeImport(path,'src/application/note-repository.ts'))};
-import { markdownCodec } from ${literal(relativeImport(path,'src/infrastructure/markdown.ts'))};
-import { success, failure } from ${literal(relativeImport(path,'src/domain/outcome.ts'))};
+import { createFixtureEngine } from ${literal(relativeImport(path,'tooling/test-data/engine.mjs'))};
+import { NoteRepository } from ${literal(relativeImport(path,'src/plugin/application/note-repository.ts'))};
+import { markdownCodec } from ${literal(relativeImport(path,'src/plugin/infrastructure/markdown.ts'))};
+import { success, failure } from ${literal(relativeImport(path,'src/plugin/domain/outcome.ts'))};
 import { document } from ${literal(relativeImport(path,`${m.sourceRoot}/application/documents/${entity.slug}.ts`))};
 import { create${symbol(source.slug)}Service } from ${literal(relativeImport(path,`${m.sourceRoot}/application/${source.slug}/service.ts`))};
 it(${literal(op.slug+' consumes actual seeded Markdown through the canonical repository')},async()=>{
- const manifest=JSON.parse(await readFile(new URL(${literal(relativeImport(path,'scripts/test-data/manifest.json'))},import.meta.url),'utf8'));
+ const manifest=JSON.parse(await readFile(new URL(${literal(relativeImport(path,'tooling/test-data/manifest.json'))},import.meta.url),'utf8'));
  const generated=createFixtureEngine().generate(manifest);const files=new Map(generated.files.map(f=>[f.path,f.content]));
  const storage={list:async(folder)=>success([...files.keys()].filter(p=>p.startsWith(folder+'/')&&p.endsWith('.md'))),read:async(p)=>files.has(p)?success(files.get(p)):failure('storage','error.read'),create:async()=>{throw Error('NO_WRITE');},replace:async()=>{throw Error('NO_WRITE');},trash:async()=>{throw Error('NO_WRITE');}};
  const repository=new NoteRepository(document,storage,markdownCodec,{publish:()=>{}},()=>${literal(entity.folder)},()=> 'unused',()=>manifest.referenceDate,{report:()=>{}});

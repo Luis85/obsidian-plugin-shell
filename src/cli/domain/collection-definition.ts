@@ -1,5 +1,5 @@
 import { object, keys, text, list } from './data.ts';
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { definitionId, fieldId } from './form-model.ts';
 import { collectionPathKeys, type CollectionPathKey } from './user-settings.ts';
 import { readCollectionAccepts } from './collection-reference.ts';

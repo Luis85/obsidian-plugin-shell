@@ -1,4 +1,4 @@
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 
 /**
  * Parser for the documented subset of the Obsidian Bases formula language used by `.base` filters and formulas.

@@ -1,9 +1,9 @@
 import { validateDocumentationSettings } from './settings-documentation.ts';
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { hash } from './framework/files.ts';
-import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { object, keys } from '../domain/data.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { readSetupDraft, setupCheckpointPath, type SetupDraft } from '../domain/setup-checkpoint.ts';
 import { setupStatePath } from '../domain/user-settings.ts';
 import { intakePrds } from './prd-intake.ts';

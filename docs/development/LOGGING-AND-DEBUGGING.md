@@ -116,10 +116,10 @@ developer evidence, not a durable audit log or proof of native/device qualificat
 
 ## Verification
 
-`tests/runtime/logging.test.ts` covers levels, independent diagnostics, capacity,
+`src/plugin/tests/unit/logging.test.ts` covers levels, independent diagnostics, capacity,
 immutable scoped exports, typed catalogs, getters/circular/prototype/non-Error
 inputs, observer/reporter failures, synchronous/asynchronous reentry and disposal.
-`tests/runtime/debugging-commands.test.ts` exercises actual debug service commands,
+`src/plugin/tests/unit/debugging-commands.test.ts` exercises actual debug service commands,
 bounded reports through the modal contract and honest modal failures. Host modal
 focus/window behavior is qualified separately by the native adapter tests and
 explicit native runs.

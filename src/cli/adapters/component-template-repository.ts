@@ -1,6 +1,6 @@
 import { join, resolve } from 'node:path';
 import { lstat, readdir } from 'node:fs/promises';
-import { parseDesignData } from '../../../scripts/contracts/json-data.ts';
+import { parseDesignData } from '#shared/contracts/json-data.ts';
 import { exists, hash, readBounded } from './framework/files.ts';
 import { requireThat } from './framework/contracts.ts';
 import { resolveTemplateRoot } from './template-root.ts';

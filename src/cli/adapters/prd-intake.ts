@@ -1,11 +1,11 @@
-import { PRD_LIMITS } from '../../../scripts/companion/prd-limits.mjs';
+import { PRD_LIMITS } from '#shared/companion/prd-limits.mjs';
 import { parsePrdMarkdown } from './prd-yaml.ts';
 import { lstat, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { object, keys, list } from '../domain/data.ts';
 import { projectPath, type UserSettings } from '../domain/user-settings.ts';
 import { type PrdMarkdown } from '../domain/prd-markdown.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { hash } from './framework/files.ts';
 import { guardedText } from './user-settings.ts';
 import type { Entry } from './storage.ts';

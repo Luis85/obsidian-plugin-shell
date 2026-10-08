@@ -41,7 +41,7 @@ Besides the framework copy and the generated product code, every project gets a 
 | --- | --- |
 | `README.md` | Product README: quick start, daily-loop and gate commands, code map, testing layers, logging and debugging |
 | `AGENTS.md`, `CLAUDE.md` | Short agent instructions (definition of done = `npm run check`, architecture and safety rules, TDD against `design/traceability.json`); `CLAUDE.md` imports `AGENTS.md` |
-| `.claude/settings.json` | Permission allowlist for safe commands, deny rules for publishing/force-push/release; a PostToolUse hook runs `vitest related` for each edited source or test file and a Stop hook runs `npm run check -- --fast` (`scripts/agent/*.mjs`) |
+| `.claude/settings.json` | Permission allowlist for safe commands, deny rules for publishing/force-push/release; a PostToolUse hook runs `vitest related` for each edited source or test file and a Stop hook runs `npm run check -- --fast` (`tooling/agent/*.mjs`) |
 | `.claude/skills/*/SKILL.md` | `implement-requirement`, `debug-in-obsidian`, `add-feature`, `write-obsidian-test` |
 | `.github/copilot-instructions.md`, `.cursor/rules/project.mdc` | One-line pointers to `AGENTS.md` |
 | `.vscode/` | Recommended extensions, Vitest pointed at `configs/testing/vitest.project.config.mjs`, "Attach to Obsidian (dev:obsidian)" on port 9222, "Debug current Vitest file", tasks for `dev:obsidian`, `check`, `test:watch` |
@@ -49,7 +49,7 @@ Besides the framework copy and the generated product code, every project gets a 
 | `.github/workflows/ci.yml`, `obsidian.yml` | Product CI: `check` + `verify:project` on every push/PR; real-Obsidian tests on `main` and on demand, with cached host download and uploaded evidence |
 | `configs/testing/vitest.project.config.mjs` | Product tests with the shared build config, the `@test/obsidian` in-memory host and the throwing `obsidian` boundary; default reporters (agents get Vitest's `agent` reporter) |
 | `configs/types/tsconfig.project.json`, `configs/bundling/vite.preview.config.mjs` | Project typecheck scope (`typecheck:project`) and the source preview (`dev:preview`); `configs/types/tsconfig.clickdummy.json` joins them for click-dummy output |
-| `<tests>/project/plugin-host.test.ts` | Example kit test: loads `src/main.ts`, opens the workbench, toggles debug logging, unloads, and proves fixture notes are untouched |
+| `<tests>/project/plugin-host.test.ts` | Example kit test: loads `src/plugin/main.ts`, opens the workbench, toggles debug logging, unloads, and proves fixture notes are untouched |
 
 Tool configuration lives under `configs/<concern>/`, like the framework's own. Only files a tool requires at the project root stay there: `package.json`, the lockfile, `manifest.json`, `versions.json`, a `tsconfig.json` stub for editors and `airship.config.json` (the upstream Airship CLI reads it from the project root). A project generated before this layout keeps its root copies of `vitest.project.config.mjs`, `tsconfig.project.json` and `vite.preview.config.mjs`: regeneration writes the new files but never removes a retired one, and the CLI, suite runner and agent hooks fall back to the root copy until the new one exists. Delete the root copies after regenerating.
 
@@ -57,7 +57,7 @@ The framework's own `README.md`, `AGENTS.md`, `TEMPLATE-GUIDE.md` and `SHELL-FIR
 
 Generated plugins also register the shell's `debug-toggle` and `debug-report` commands (the dev loop enables debug logging after each load), use `<id>-view-*` view types that the shell's view-header binding accepts, and name Vue component files with multiple words so `npm run check` is lint-clean for every starter.
 
-The original `npm run companion:generate` and `scripts/companion-tools/generate.mjs` **remain byte-exact read-only JSON echo tools** for backward compatibility. The prototype's existing Prepare handoff is that v1 reader; use the new scaffold command above to generate implementation files.
+The original `npm run companion:generate` and `tooling/companion-tools/generate.mjs` **remain byte-exact read-only JSON echo tools** for backward compatibility. The prototype's existing Prepare handoff is that v1 reader; use the new scaffold command above to generate implementation files.
 
 ## Generated implementation contracts
 
@@ -79,7 +79,7 @@ The original `npm run companion:generate` and `scripts/companion-tools/generate.
 
 Pinia holds per-view projections/drafts, not canonical persistence. Each source adapter receives the shell's services and must use the existing canonical data owner. Unspecified custom/provider adapters and use cases throw explicit `NotImplementedError` until implemented. Declared native note operations use the shell repository, not an empty implementation. A request is not reported successful because an adapter is empty. Unknown source shapes, unsupported schema keywords, dangling references, path/name collisions and incompatible flows fail generation rather than silently becoming `any`.
 
-`codebaseFolder` selects `<folder>/generated`; `testsFolder` selects `<folder>/project`. The reusable framework remains under `src` and its original tests under `tests/runtime`. This increment relocates generated product code, not the foundation's internal modules. Paths are target-relative, validated and portable. Every generated project keeps its framework scripts, harness, docs, lockfile and release tooling; no repository, credentials or installed dependencies are copied.
+`codebaseFolder` selects `<folder>/generated`; `testsFolder` selects `<folder>/project`. The reusable framework runtime lives under `src/plugin/`, with its original tests under `src/plugin/tests/`. Generated product code follows the configured roots alongside the framework source projects. Paths are target-relative, validated and portable. Every generated project keeps its framework scripts, harness, docs, lockfile and release tooling; no repository, credentials or installed dependencies are copied.
 
 ## TDD and verification truth
 
@@ -91,7 +91,7 @@ The CI workflow generates from the actual bundled export, installs the generated
 
 ### Journey tests
 
-Journeys authored in `design.sitemap.journeys` compile to Playwright specs, emitted by `scripts/companion/compiler/authored-journey-code.ts` (not to be confused with the Journey Lens editor tests in `journey-test-code.ts`). A project without journeys, and a journey without steps, emits nothing.
+Journeys authored in `design.sitemap.journeys` compile to Playwright specs, emitted by `src/cli/compiler/emitters/authored-journey-code.ts` (not to be confused with the Journey Lens editor tests in `journey-test-code.ts`). A project without journeys, and a journey without steps, emits nothing.
 
 - Each journey with steps becomes `tests/e2e/journeys/<journeyId>.spec.ts` (an id that is not a plain `[A-Za-z0-9_-]` name is sanitized and suffixed with a hash of the id) plus one shared `tests/e2e/journeys/journey-support.ts`. Both are `managed` files regenerated from the design; edit the journey, not the spec.
 - `test.describe('[<journeyId>] <name>')` runs in serial mode on one page, so a failed step skips the rest of the walk. Every step is its own test whose title starts with `[<journeyId>/<stepId>]`, which makes each step countable in the Playwright list/JSON reports.
@@ -99,24 +99,24 @@ Journeys authored in `design.sitemap.journeys` compile to Playwright specs, emit
 - Steps that need business behavior are `test.fixme` entries with annotations `journey-step`, `reason` and, for a transition, `interaction=<design.links id>`: `conditional` transitions (a prose condition is not a predicate), unresolved planning references, steps without an incoming transition, action/group surfaces, dialogs reached by address and controls inside dialogs. They are skipped, never green. A step after one of them re-opens its source screen by address so the rest of the walk still runs.
 - The specs run with the generated project's Playwright configuration (`testDir: tests/e2e`, `baseURL` of the source preview served at `/`) via `npm run test:e2e`; `npx playwright test tests/e2e/journeys` runs only journeys. Preview data is synthetic, so a passing journey proves navigation only, never business acceptance.
 
-Compiler coverage: `tests/tooling/project-generator-journey-specs.checks.mjs` (generator suite).
+Compiler coverage: `src/cli/tests/project-generator-journey-specs.checks.mjs` (generator suite).
 
 ### UI quality checks
 
-Every generated project gets a managed Playwright setup that audits the generated preview, emitted by `scripts/companion/compiler/ui-quality-code.ts` (spec text in `ui-quality-spec.ts`). Nothing here is added to the plugin bundle.
+Every generated project gets a managed Playwright setup that audits the generated preview, emitted by `src/cli/compiler/emitters/ui-quality-code.ts` (spec text in `ui-quality-spec.ts`). Nothing here is added to the plugin bundle.
 
-- Files (all `managed`, regenerated from the design): `playwright.config.ts` (root; `testDir: tests/e2e`, reporters `list`, `json` to `reports/e2e/results.json` and `html` to `reports/e2e/html` with `open: 'never'`, `reducedMotion: 'reduce'`), `scripts/e2e/serve-clickdummy.mjs` and `tests/e2e/ui-quality.spec.ts`. The config only runs `ui-quality.spec.ts` and `journeys/**/*.spec.ts`; the framework's own harness specs under `tests/e2e/` keep `configs/testing/playwright.config.ts` and run with `npm run test:e2e:framework`.
+- Files (all `managed`, regenerated from the design): `playwright.config.ts` (root; `testDir: tests/e2e`, reporters `list`, `json` to `reports/e2e/results.json` and `html` to `reports/e2e/html` with `open: 'never'`, `reducedMotion: 'reduce'`), `tooling/e2e/serve-clickdummy.mjs` and `tests/e2e/ui-quality.spec.ts`. The config only runs `ui-quality.spec.ts` and `journeys/**/*.spec.ts`; the framework's own harness specs under `src/plugin/tests/e2e/` keep `configs/testing/playwright.config.ts` and run with `npm run test:e2e:framework`.
 - Target: the offline click-dummy. The Playwright `webServer` runs the serve script, which rebuilds the click-dummy with the project's own `node bin/app clickdummy build --replace` (so the local `clickdummy.html` is replaced) and serves it on `127.0.0.1:4181`. This is deterministic, needs no dev server and tests the same artifact `build:clickdummy` produces.
 - `tests/e2e/ui-quality.spec.ts` is generated from the model's page surfaces (every screen that is not a dialog, action or group, in model order; `design/visual-traceability.json` describes the same definitions). For every surface it runs: axe-core WCAG 2.1 A/AA (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`) with zero allowed violations in the light and in the dark theme (violations are printed readably and attached as JSON); a 360px reflow check (`document.scrollingElement.scrollWidth <= clientWidth`, listing the elements past the edge); and a keyboard check that every enabled button, link and form control of the workbench is reached with `Tab` and shows a visible focus indicator (outline or ring).
 - Themes follow how the generated UI themes itself: Obsidian's `theme-dark` / `theme-light` body classes inside the `.obsidian-harness` token scope. The spec toggles the body class and fails if the page background did not actually change, so a theme that restyles nothing cannot pass silently.
 - Run `npm ci`, provision Playwright's pinned Chromium (`npx playwright install chromium`, explicit and never automatic) or set `SHELL_CHROMIUM` to a Chromium executable, then `npm run test:ui-quality` (this spec only) or `npm run test:e2e` (this spec and the journeys). `@playwright/test` and `@axe-core/playwright` are the framework's exact pins and are already in the generated lockfile. Playwright specs are excluded from the generated Vitest run (`npm test`).
 - Scope: results are evidence for the preview, not product acceptance, not a native Obsidian result and not proof of WCAG conformance (automated rules find only part of the issues). Dialogs and states other than `default` are not scanned. There are no screenshot baselines (`toHaveScreenshot` is not used); failure screenshots and traces go to `reports/e2e/artifacts` only.
 
-Compiler coverage: `tests/tooling/project-generator-ui-quality.checks.mjs` (generator suite). The repository's own `tests/concepts/feature-showcase.browser.mjs` applies the same dark-theme, 360px and axe checks to a compiled showcase.
+Compiler coverage: `src/cli/tests/project-generator-ui-quality.checks.mjs` (generator suite). The repository's own `src/companion/tests/concepts/feature-showcase.browser.mjs` applies the same dark-theme, 360px and axe checks to a compiled showcase.
 
 ## Regeneration and safety
 
-The generator uses `scripts/shared/file-plan.ts` (executing `scripts/shared/file-plan-runtime.ts`), the same lock, precondition checks and rollback engine as framework makers/setup. Explicit base64 entries support the existing compressed host CSS fixture without interpreting bytes as UTF-8; decoded bytes are hashed, validated and written by the same engine. Text behavior remains compatible.
+The generator uses `src/shared/platform/file-plan.ts` (executing `src/shared/platform/file-plan-runtime.ts`), the same lock, precondition checks and rollback engine as framework makers/setup. Explicit base64 entries support the existing compressed host CSS fixture without interpreting bytes as UTF-8; decoded bytes are hashed, validated and written by the same engine. Text behavior remains compatible.
 
 `.companion/generation.json` records generated hashes and ownership. Unchanged output is a no-op. Unmodified generated files may update. Customized extension/framework files are preserved byte-for-byte (including a UTF-8 BOM) when their template is unchanged; a customized text file that is not valid UTF-8 is reported as a conflict rather than rewritten through lossy decoding. A new design/template that also needs to alter a customized file is a conflict. Customized managed registries, unowned destinations and removed owned files require reconciliation. No files are implicitly deleted. Retired ownership remains tracked. The receipt is local ownership metadata, not a signature or authority token.
 

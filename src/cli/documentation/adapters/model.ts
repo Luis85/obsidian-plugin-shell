@@ -1,5 +1,5 @@
-import { validateAuthoringDocument, type AuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
-import { visualNodes, type UiNode } from '../../../../scripts/companion/visual/visual-ir.mjs';
+import { validateAuthoringDocument, type AuthoringDocument } from '#shared/companion/authoring-contract.ts';
+import { visualNodes, type UiNode } from '#shared/companion/visual/visual-ir.mjs';
 import { docsObject as object, array, text, insist, keyOf, equal, validateEntity, type Entity, type ObjectData } from '../domain/contracts.ts';
 import { restoreProject } from './restore.ts';
 const list = (value: unknown): ObjectData[] => value === undefined ? [] : array(value).map(object);

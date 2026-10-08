@@ -1,5 +1,5 @@
 import { object, keys, text, list } from './data.ts';
-import { requireSketch, hasControls } from './errors.ts';
+import { requireSketch, hasControls } from '#shared/contracts/sketch-errors.ts';
 import { readForm, type FormField } from './form.ts';
 import { definitionId, readPath } from './form-model.ts';
 import { readRuleExpression, type RuleExpression } from './process-rules.ts';

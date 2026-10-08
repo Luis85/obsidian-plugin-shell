@@ -54,7 +54,7 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           GITHUB_TOKEN: ${{ github.token }}
-        run: node scripts/projects/required-checks.mjs
+        run: node tooling/projects/required-checks.mjs
   report:
     needs: [scope, project-ci]
     if: always()

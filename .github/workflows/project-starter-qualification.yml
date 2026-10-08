@@ -72,7 +72,7 @@ jobs:
           failed=""
           for id in $STARTER_IDS; do
             echo "::group::Starter $id"
-            node scripts/compiler/qualify-project-starters.mjs --starter "$id" --execute --no-browser || failed="$failed $id"
+            node tooling/compiler/qualify-project-starters.mjs --starter "$id" --execute --no-browser || failed="$failed $id"
             echo "::endgroup::"
           done
           if [ -n "$failed" ]; then echo "::error::Project starter qualification failed:$failed"; exit 1; fi
@@ -84,7 +84,7 @@ jobs:
           failed=""
           for id in $STARTER_IDS; do
             echo "::group::Starter $id"
-            node scripts/compiler/qualify-project-starters.mjs --starter "$id" --execute || failed="$failed $id"
+            node tooling/compiler/qualify-project-starters.mjs --starter "$id" --execute || failed="$failed $id"
             echo "::endgroup::"
           done
           if [ -n "$failed" ]; then echo "::error::Project starter qualification failed:$failed"; exit 1; fi
@@ -127,7 +127,7 @@ jobs:
         run: |
           npm install --prefix "$RUNNER_TEMP/qualified-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
           node "$RUNNER_TEMP/qualified-npm/node_modules/npm/bin/npm-cli.js" ci --no-fund
-          node scripts/bundling/build-cli.mjs
+          node tooling/bundling/build-cli.mjs
       - name: Provision Chromium for the e2e step
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: node node_modules/@playwright/test/cli.js install --with-deps chromium
@@ -136,7 +136,7 @@ jobs:
         if: ${{ !(inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) }}
         run: |
           status=0
-          node scripts/testing/qualify-project-handoff.mjs --starter '${{ matrix.starter }}' --base-node "$CLOUD_NODE" --out 'reports/project-handoff-${{ matrix.starter }}.json' --skip-e2e || status=$?
+          node tooling/testing/qualify-project-handoff.mjs --starter '${{ matrix.starter }}' --base-node "$CLOUD_NODE" --out 'reports/project-handoff-${{ matrix.starter }}.json' --skip-e2e || status=$?
           if [ "$status" -eq 3 ]; then
             node -e 'const s = require(process.argv[1]); const open = s.steps.filter(step => step.status !== "passed"); process.exit(open.length === 1 && open[0].name === "e2e" && open[0].status === "not-run" ? 0 : 1)' "$PWD/reports/project-handoff-${{ matrix.starter }}.json"
           else
@@ -144,7 +144,7 @@ jobs:
           fi
       - name: Generate, push-simulate (git clone) and replay a cloud session start
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
-        run: node scripts/testing/qualify-project-handoff.mjs --starter '${{ matrix.starter }}' --base-node "$CLOUD_NODE" --out 'reports/project-handoff-${{ matrix.starter }}.json'
+        run: node tooling/testing/qualify-project-handoff.mjs --starter '${{ matrix.starter }}' --base-node "$CLOUD_NODE" --out 'reports/project-handoff-${{ matrix.starter }}.json'
       - name: Retain the step summary
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

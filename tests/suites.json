@@ -17,13 +17,13 @@
     },
     {
       "name": "e2e",
-      "summary": "A real browser or a real Obsidian host. Opt-in in workflows and mandatory in the Release tier (scripts/quality/e2e-policy.mjs).",
+      "summary": "A real browser or a real Obsidian host. Opt-in in workflows and mandatory in the Release tier (tooling/quality/e2e-policy.mjs).",
       "paths": [
-        "tests/e2e/**",
-        "tests/obsidian/**",
+        "src/plugin/tests/e2e/**",
+        "tooling/tests/obsidian/**",
         "tests/browser-specimen/**",
         "tests/browser-workflows/**",
-        "tests/concepts/*.browser.{py,mjs}"
+        "src/companion/tests/concepts/*.browser.{py,mjs}"
       ]
     },
     {
@@ -50,6 +50,15 @@
   },
   "roots": [
     {
+      "path": "src/*/tests"
+    },
+    {
+      "path": "src/cli/sdk"
+    },
+    {
+      "path": "tooling/tests"
+    },
+    {
       "path": "tests/tooling"
     },
     {
@@ -57,44 +66,21 @@
       "optional": true
     },
     {
-      "path": "tests/runtime"
-    },
-    {
       "path": "tests/verification"
     },
     {
-      "path": "tests/harness-styles"
-    },
-    {
-      "path": "tests/browser-specimen"
-    },
-    {
-      "path": "tests/browser-workflows"
-    },
-    {
-      "path": "tests/concepts",
-      "optional": true
-    },
-    {
-      "path": "tests/e2e"
-    },
-    {
-      "path": "tests/obsidian",
-      "optional": true
+      "path": "tests/browser-*"
     },
     {
       "path": "tests/project",
       "optional": true
-    },
-    {
-      "path": "tests/hindsight",
-      "optional": true
-    },
-    {
-      "path": "plugins"
     }
   ],
   "helperRoots": [
+    "src/*/tests/support",
+    "src/*/tests/fixtures",
+    "tooling/tests/support",
+    "tooling/tests/fixtures",
     "tests/support",
     "tests/fixtures"
   ],
@@ -170,14 +156,14 @@
           [
             "{python}",
             "-B",
-            "tests/tooling/interactive-maker-pty.py",
+            "src/cli/tests/interactive-maker-pty.py",
             "--node",
             "{node}"
           ]
         ]
       },
       "include": [
-        "tests/tooling/interactive-maker-pty.py"
+        "src/cli/tests/interactive-maker-pty.py"
       ],
       "prerequisites": [
         "python3"
@@ -194,56 +180,59 @@
       "level": "integration",
       "levels": {
         "unit": [
-          "tests/tooling/interactive-maker-adopt-detectors.checks.mjs",
-          "tests/tooling/interactive-maker-adopt-findings.checks.mjs",
-          "tests/tooling/interactive-maker-adopt-plan.checks.mjs",
-          "tests/tooling/interactive-maker-angular-bricks.checks.mjs",
-          "tests/tooling/interactive-maker-brainstorm-contract.checks.mjs",
-          "tests/tooling/interactive-maker-ci-workflow-model.checks.mjs",
-          "tests/tooling/interactive-maker-compiler-core.checks.mjs",
-          "tests/tooling/interactive-maker-compiler-emitters-data.checks.mjs",
-          "tests/tooling/interactive-maker-compiler-emitters-host.checks.mjs",
-          "tests/tooling/interactive-maker-compiler-emitters-journey.checks.mjs",
-          "tests/tooling/interactive-maker-compiler-emitters-kit.checks.mjs",
-          "tests/tooling/interactive-maker-compiler-emitters-native-boilerplate.checks.mjs",
-          "tests/tooling/interactive-maker-compiler-emitters-persistence.checks.mjs",
-          "tests/tooling/interactive-maker-compiler-emitters-storybook.checks.mjs",
-          "tests/tooling/interactive-maker-compiler-emitters-visual-files.checks.mjs",
-          "tests/tooling/interactive-maker-compiler-emitters-visual-sfc.checks.mjs",
-          "tests/tooling/interactive-maker-compiler-emitters-visual-tests.checks.mjs",
-          "tests/tooling/interactive-maker-compiler-project.checks.mjs",
-          "tests/tooling/interactive-maker-controls.checks.mjs",
-          "tests/tooling/interactive-maker-documentation-codec.checks.mjs",
-          "tests/tooling/interactive-maker-documentation-core.checks.mjs",
-          "tests/tooling/interactive-maker-documentation-model.checks.mjs",
-          "tests/tooling/interactive-maker-domain.checks.mjs",
-          "tests/tooling/interactive-maker-first-run-domain.checks.mjs",
-          "tests/tooling/interactive-maker-handout-model.checks.mjs",
-          "tests/tooling/interactive-maker-handout-questions.checks.mjs",
-          "tests/tooling/interactive-maker-increment-branches.checks.mjs",
-          "tests/tooling/interactive-maker-increment-documents.checks.mjs",
-          "tests/tooling/interactive-maker-increment-transitions.checks.mjs",
-          "tests/tooling/interactive-maker-increment-views.checks.mjs",
-          "tests/tooling/interactive-maker-issue-documents.checks.mjs",
-          "tests/tooling/interactive-maker-operations-catalog.checks.mjs",
-          "tests/tooling/interactive-maker-pull-request-documents.checks.mjs",
-          "tests/tooling/interactive-maker-pull-request-remote-body.checks.mjs",
-          "tests/tooling/interactive-maker-pull-request-sync-merge.checks.mjs",
-          "tests/tooling/interactive-maker-pull-request-sync-record.checks.mjs",
-          "tests/tooling/interactive-maker-setup-domain.checks.mjs",
-          "tests/tooling/interactive-maker-setup-source.checks.mjs",
-          "tests/tooling/interactive-maker-starters-browser.checks.mjs",
-          "tests/tooling/interactive-maker-starters-coverage.checks.mjs",
-          "tests/tooling/interactive-maker-starters-render.checks.mjs",
-          "tests/tooling/interactive-maker-style-export.checks.mjs",
-          "tests/tooling/interactive-maker-terminal-views.checks.mjs",
-          "tests/tooling/interactive-maker-tui-state.checks.mjs",
-          "tests/tooling/interactive-maker-ui-status-domain.checks.mjs"
+          "src/cli/tests/interactive-maker-adopt-detectors.checks.mjs",
+          "src/cli/tests/interactive-maker-adopt-findings.checks.mjs",
+          "src/cli/tests/interactive-maker-adopt-plan.checks.mjs",
+          "src/cli/tests/interactive-maker-angular-bricks.checks.mjs",
+          "src/cli/tests/interactive-maker-brainstorm-contract.checks.mjs",
+          "tooling/tests/interactive-maker-ci-workflow-model.checks.mjs",
+          "src/cli/tests/interactive-maker-compiler-core.checks.mjs",
+          "src/cli/tests/interactive-maker-compiler-emitters-data.checks.mjs",
+          "tooling/tests/interactive-maker-compiler-emitters-host.checks.mjs",
+          "src/cli/tests/interactive-maker-compiler-emitters-journey.checks.mjs",
+          "src/cli/tests/interactive-maker-compiler-emitters-kit.checks.mjs",
+          "src/cli/tests/interactive-maker-compiler-emitters-native-boilerplate.checks.mjs",
+          "src/cli/tests/interactive-maker-compiler-emitters-persistence.checks.mjs",
+          "src/cli/tests/interactive-maker-compiler-emitters-storybook.checks.mjs",
+          "src/cli/tests/interactive-maker-compiler-emitters-visual-files.checks.mjs",
+          "src/cli/tests/interactive-maker-compiler-emitters-visual-sfc.checks.mjs",
+          "src/cli/tests/interactive-maker-compiler-emitters-visual-tests.checks.mjs",
+          "src/cli/tests/interactive-maker-compiler-project.checks.mjs",
+          "src/shared/tests/interactive-maker-controls.checks.mjs",
+          "src/cli/tests/interactive-maker-documentation-codec.checks.mjs",
+          "src/cli/tests/interactive-maker-documentation-core.checks.mjs",
+          "src/cli/tests/interactive-maker-documentation-model.checks.mjs",
+          "src/cli/tests/interactive-maker-domain.checks.mjs",
+          "src/cli/tests/interactive-maker-first-run-domain.checks.mjs",
+          "src/cli/tests/interactive-maker-handout-model.checks.mjs",
+          "src/cli/tests/interactive-maker-handout-questions.checks.mjs",
+          "src/cli/tests/interactive-maker-increment-branches.checks.mjs",
+          "src/cli/tests/interactive-maker-increment-documents.checks.mjs",
+          "src/cli/tests/interactive-maker-increment-transitions.checks.mjs",
+          "src/cli/tests/interactive-maker-increment-views.checks.mjs",
+          "src/cli/tests/interactive-maker-issue-documents.checks.mjs",
+          "src/cli/tests/interactive-maker-operations-catalog.checks.mjs",
+          "src/cli/tests/interactive-maker-pull-request-documents.checks.mjs",
+          "src/cli/tests/interactive-maker-pull-request-remote-body.checks.mjs",
+          "src/cli/tests/interactive-maker-pull-request-sync-merge.checks.mjs",
+          "src/cli/tests/interactive-maker-pull-request-sync-record.checks.mjs",
+          "src/cli/tests/interactive-maker-setup-domain.checks.mjs",
+          "src/cli/tests/interactive-maker-setup-source.checks.mjs",
+          "src/cli/tests/interactive-maker-starters-browser.checks.mjs",
+          "src/cli/tests/interactive-maker-starters-coverage.checks.mjs",
+          "src/cli/tests/interactive-maker-starters-render.checks.mjs",
+          "src/cli/tests/interactive-maker-style-export.checks.mjs",
+          "src/cli/tests/interactive-maker-terminal-views.checks.mjs",
+          "src/tui/tests/interactive-maker-tui-state.checks.mjs",
+          "src/cli/tests/interactive-maker-ui-status-domain.checks.mjs",
+          "src/cli/tests/source-projects.checks.mjs",
+          "src/cli/tests/source-projects-edit.checks.mjs",
+          "src/cli/tests/source-imports.checks.mjs"
         ],
         "component": [
-          "tests/tooling/interactive-maker-guide.checks.mjs",
-          "tests/tooling/interactive-maker-tui-hardening.checks.mjs",
-          "tests/tooling/interactive-maker-tui-terminal.checks.mjs"
+          "src/cli/tests/interactive-maker-guide.checks.mjs",
+          "src/cli/tests/interactive-maker-tui-hardening.checks.mjs",
+          "src/tui/tests/interactive-maker-tui-terminal.checks.mjs"
         ]
       },
       "runner": {
@@ -251,7 +240,12 @@
         "config": "configs/testing/vitest.maker.config.mjs"
       },
       "include": [
-        "tests/tooling/interactive-maker-*.checks.mjs"
+        "src/cli/tests/interactive-maker-*.checks.mjs",
+        "src/shared/tests/interactive-maker-*.checks.mjs",
+        "src/tui/tests/interactive-maker-*.checks.mjs",
+        "tooling/tests/interactive-maker-*.checks.mjs",
+        "src/cli/tests/source-*.checks.mjs",
+        "src/cli/tests/maker-source-target.checks.mjs"
       ],
       "verify": "own-step",
       "verifyStep": "maker-coverage-run executes every maker file once, under coverage, and maker-coverage-gate gates it; the tooling step leaves them out",
@@ -269,7 +263,7 @@
         "type": "node-test"
       },
       "include": [
-        "plugins/*/tests/*.test.ts"
+        "src/cli/sdk/*/tests/*.test.ts"
       ],
       "verify": "own-step",
       "verifyStep": "verify runs the Workbench plugin suite explicitly",
@@ -285,7 +279,7 @@
       "level": "unit",
       "levels": {
         "integration": [
-          "tests/tooling/airship-contracts.checks.mjs"
+          "src/cli/tests/airship-contracts.checks.mjs"
         ]
       },
       "runner": {
@@ -293,7 +287,8 @@
         "concurrency": 4
       },
       "include": [
-        "tests/tooling/airship-*.checks.mjs"
+        "src/cli/tests/airship-*.checks.mjs",
+        "tooling/tests/airship-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:airship",
@@ -307,26 +302,29 @@
       "level": "integration",
       "levels": {
         "unit": [
-          "tests/tooling/compiler-architecture.checks.mjs",
-          "tests/tooling/compiler-core.checks.mjs",
-          "tests/tooling/compiler-dependency-direction.checks.mjs",
-          "tests/tooling/compiler-docs.checks.mjs",
-          "tests/tooling/compiler-golden.checks.mjs",
-          "tests/tooling/compiler-retired-modules.checks.mjs",
-          "tests/tooling/compiler-storybook-a11y.checks.mjs",
-          "tests/tooling/compiler-storybook-consolidation.checks.mjs",
-          "tests/tooling/compiler-storybook.checks.mjs",
-          "tests/tooling/compiler-template-layout.checks.mjs"
+          "tooling/tests/compiler-architecture.checks.mjs",
+          "src/cli/tests/compiler-core.checks.mjs",
+          "tooling/tests/compiler-dependency-direction.checks.mjs",
+          "tooling/tests/compiler-docs.checks.mjs",
+          "tooling/tests/compiler-golden.checks.mjs",
+          "tooling/tests/compiler-retired-modules.checks.mjs",
+          "tooling/tests/compiler-storybook-a11y.checks.mjs",
+          "src/cli/tests/compiler-storybook-consolidation.checks.mjs",
+          "src/cli/tests/compiler-storybook.checks.mjs",
+          "tooling/tests/compiler-template-layout.checks.mjs",
+          "tooling/tests/project-boundaries.checks.mjs"
         ]
       },
       "runner": {
         "type": "node-test"
       },
       "include": [
-        "tests/tooling/compiler-*.checks.mjs"
+        "src/cli/tests/compiler-*.checks.mjs",
+        "tooling/tests/compiler-*.checks.mjs",
+        "tooling/tests/project-boundaries.checks.mjs"
       ],
       "exclude": [
-        "tests/tooling/compiler-properties.checks.mjs"
+        "src/cli/tests/compiler-properties.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:compiler",
@@ -343,7 +341,7 @@
         "concurrency": 4
       },
       "include": [
-        "tests/tooling/compiler-properties.checks.mjs"
+        "src/cli/tests/compiler-properties.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:compiler:properties",
@@ -357,15 +355,15 @@
       "level": "integration",
       "levels": {
         "unit": [
-          "tests/tooling/prototype-helpers.checks.mjs"
+          "tooling/tests/prototype-helpers.checks.mjs"
         ]
       },
       "runner": {
         "type": "node-test"
       },
       "include": [
-        "tests/tooling/prototype-*.checks.mjs",
-        "tests/tooling/jev-concept-distribution.checks.mjs"
+        "tooling/tests/prototype-*.checks.mjs",
+        "src/cli/tests/jev-concept-distribution.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:prototypes",
@@ -413,27 +411,27 @@
         "commands": [
           [
             "{node}",
-            "scripts/concepts/build-mvp.mjs"
+            "tooling/concepts/build-mvp.mjs"
           ],
           [
             "{node}",
-            "scripts/concepts/export-golden-project.mjs"
+            "tooling/concepts/export-golden-project.mjs"
           ],
           [
             "{python}",
             "-B",
-            "tests/concepts/companion-mvp.browser.py"
+            "src/companion/tests/concepts/companion-mvp.browser.py"
           ],
           [
             "{python}",
             "-B",
-            "tests/concepts/companion-prototypes.browser.py"
+            "src/companion/tests/concepts/companion-prototypes.browser.py"
           ]
         ]
       },
       "include": [
-        "tests/concepts/companion-mvp.browser.py",
-        "tests/concepts/companion-prototypes.browser.py"
+        "src/companion/tests/concepts/companion-mvp.browser.py",
+        "src/companion/tests/concepts/companion-prototypes.browser.py"
       ],
       "prerequisites": [
         "python-playwright",
@@ -451,45 +449,42 @@
       "level": "unit",
       "levels": {
         "component": [
-          "tests/runtime/acceptance-closure.test.ts",
-          "tests/runtime/authoring-native.test.ts",
-          "tests/runtime/authoring-navigation-failure.test.ts",
-          "tests/runtime/authoring-presentation.test.ts",
-          "tests/runtime/components.test.ts",
-          "tests/runtime/document-lifecycle.test.ts",
-          "tests/runtime/event-authoring.test.ts",
-          "tests/runtime/header.test.ts",
-          "tests/runtime/host-events.test.ts",
-          "tests/runtime/identity.test.ts",
-          "tests/runtime/*-components.test.ts",
-          "tests/runtime/items.test.ts",
-          "tests/runtime/modal-adapters.test.ts",
-          "tests/runtime/mount-lifecycle.test.ts",
-          "tests/runtime/native-adapters*.test.ts",
-          "tests/runtime/native-commands.test.ts",
-          "tests/runtime/native-feature-settings.test.ts",
-          "tests/runtime/native-file-editor.test.ts",
-          "tests/runtime/native-file-integration.test.ts",
-          "tests/runtime/native-file-operations.test.ts",
-          "tests/runtime/native-lifecycle.test.ts",
-          "tests/runtime/notification-sinks.test.ts",
-          "tests/runtime/obsidian-test-kit-shell-entry.test.ts",
-          "tests/runtime/obsidian-test-kit-shell.test.ts",
-          "tests/runtime/persistence-outcomes.test.ts",
-          "tests/runtime/presentation-composables.test.ts",
-          "tests/runtime/repository-panel.test.ts",
-          "tests/runtime/resource-qualification.test.ts",
-          "tests/runtime/service-lifecycle.test.ts",
-          "tests/runtime/settings-storage.test.ts",
-          "tests/runtime/shell-entry-lifecycle.test.ts",
-          "tests/runtime/view-state.test.ts"
-        ],
-        "integration": [
-          "tests/runtime/tooling.test.ts"
+          "src/plugin/tests/unit/acceptance-closure.test.ts",
+          "src/plugin/tests/unit/authoring-native.test.ts",
+          "src/plugin/tests/unit/authoring-navigation-failure.test.ts",
+          "src/plugin/tests/unit/authoring-presentation.test.ts",
+          "src/plugin/tests/unit/components.test.ts",
+          "src/plugin/tests/unit/document-lifecycle.test.ts",
+          "src/plugin/tests/unit/event-authoring.test.ts",
+          "src/plugin/tests/unit/header.test.ts",
+          "src/plugin/tests/unit/host-events.test.ts",
+          "src/plugin/tests/unit/identity.test.ts",
+          "src/plugin/tests/unit/*-components.test.ts",
+          "src/plugin/tests/unit/items.test.ts",
+          "src/plugin/tests/unit/modal-adapters.test.ts",
+          "src/plugin/tests/unit/mount-lifecycle.test.ts",
+          "src/plugin/tests/unit/native-adapters*.test.ts",
+          "src/plugin/tests/unit/native-commands.test.ts",
+          "src/plugin/tests/unit/native-feature-settings.test.ts",
+          "src/plugin/tests/unit/native-file-editor.test.ts",
+          "src/plugin/tests/unit/native-file-integration.test.ts",
+          "src/plugin/tests/unit/native-file-operations.test.ts",
+          "src/plugin/tests/unit/native-lifecycle.test.ts",
+          "src/plugin/tests/unit/notification-sinks.test.ts",
+          "src/plugin/tests/unit/obsidian-test-kit-shell-entry.test.ts",
+          "src/plugin/tests/unit/obsidian-test-kit-shell.test.ts",
+          "src/plugin/tests/unit/persistence-outcomes.test.ts",
+          "src/plugin/tests/unit/presentation-composables.test.ts",
+          "src/plugin/tests/unit/repository-panel.test.ts",
+          "src/plugin/tests/unit/resource-qualification.test.ts",
+          "src/plugin/tests/unit/service-lifecycle.test.ts",
+          "src/plugin/tests/unit/settings-storage.test.ts",
+          "src/plugin/tests/unit/shell-entry-lifecycle.test.ts",
+          "src/plugin/tests/unit/view-state.test.ts"
         ]
       },
       "runner": {"type": "vitest", "config": "configs/testing/vitest.config.mjs"},
-      "include": ["tests/runtime/**/*.test.ts"],
+      "include": ["src/plugin/tests/unit/**/*.test.ts"],
       "verify": "own-step",
       "verifyStep": "production coverage run (configs/testing/vitest.production.config.mjs) executes every runtime test",
       "npmScript": "test:runtime",
@@ -505,22 +500,28 @@
       "level": "integration",
       "levels": {
         "unit": [
-          "tests/tooling/framework-analysis-scope.checks.mjs",
-          "tests/tooling/framework-concept-input.checks.mjs",
-          "tests/tooling/framework-docs-codec.checks.mjs",
-          "tests/tooling/framework-docs-model.checks.mjs",
-          "tests/tooling/framework-documents.checks.mjs",
-          "tests/tooling/starter-catalog-docs.checks.mjs",
-          "tests/tooling/starter-submission-identity.checks.mjs"
+          "tooling/tests/framework-analysis-scope.checks.mjs",
+          "src/cli/tests/framework-concept-input.checks.mjs",
+          "src/cli/tests/framework-docs-codec.checks.mjs",
+          "src/cli/tests/framework-docs-model.checks.mjs",
+          "src/cli/tests/framework-documents.checks.mjs",
+          "tooling/tests/starter-catalog-docs.checks.mjs",
+          "src/cli/tests/starter-submission-identity.checks.mjs",
+          "src/cli/tests/gate-scope.checks.mjs"
         ]
       },
       "runner": {
         "type": "node-test"
       },
       "include": [
-        "tests/tooling/framework-*.checks.mjs",
-        "tests/tooling/capability-discovery.checks.mjs",
-        "tests/tooling/starter-*.checks.mjs"
+        "src/cli/tests/framework-*.checks.mjs",
+        "src/shared/tests/framework-*.checks.mjs",
+        "tooling/tests/framework-*.checks.mjs",
+        "tooling/tests/capability-discovery.checks.mjs",
+        "src/cli/tests/gate-scope.checks.mjs",
+        "src/cli/tests/starter-*.checks.mjs",
+        "src/shared/tests/starter-*.checks.mjs",
+        "tooling/tests/starter-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:cli",
@@ -537,12 +538,12 @@
         "commands": [
           [
             "{node}",
-            "tests/tooling/framework-journey.mjs"
+            "src/cli/tests/framework-journey.mjs"
           ]
         ]
       },
       "include": [
-        "tests/tooling/framework-journey.mjs"
+        "src/cli/tests/framework-journey.mjs"
       ],
       "prerequisites": [
         "qualified-npm"
@@ -559,19 +560,19 @@
       "level": "integration",
       "levels": {
         "unit": [
-          "tests/tooling/project-generator-contract.checks.mjs",
-          "tests/tooling/project-generator-framework-scope.checks.mjs",
-          "tests/tooling/project-generator-http.checks.mjs",
-          "tests/tooling/project-generator-journey-specs.checks.mjs",
-          "tests/tooling/project-generator-native-starters.checks.mjs",
-          "tests/tooling/project-generator-note-operations.checks.mjs",
-          "tests/tooling/project-generator-relationships.checks.mjs",
-          "tests/tooling/project-generator-runtime-guards.checks.mjs",
-          "tests/tooling/project-generator-scenario-runtime.checks.mjs",
-          "tests/tooling/project-generator-surface-acceptance.checks.mjs",
-          "tests/tooling/project-generator-template-rewrite.checks.mjs",
-          "tests/tooling/project-generator-ui-quality.checks.mjs",
-          "tests/tooling/project-generator-visual-refusals.checks.mjs"
+          "tooling/tests/project-generator-contract.checks.mjs",
+          "src/cli/tests/project-generator-framework-scope.checks.mjs",
+          "src/cli/tests/project-generator-http.checks.mjs",
+          "src/cli/tests/project-generator-journey-specs.checks.mjs",
+          "src/cli/tests/project-generator-native-starters.checks.mjs",
+          "src/cli/tests/project-generator-note-operations.checks.mjs",
+          "src/cli/tests/project-generator-relationships.checks.mjs",
+          "src/cli/tests/project-generator-runtime-guards.checks.mjs",
+          "src/cli/tests/project-generator-scenario-runtime.checks.mjs",
+          "src/cli/tests/project-generator-surface-acceptance.checks.mjs",
+          "src/cli/tests/project-generator-template-rewrite.checks.mjs",
+          "src/cli/tests/project-generator-ui-quality.checks.mjs",
+          "src/cli/tests/project-generator-visual-refusals.checks.mjs"
         ]
       },
       "runner": {
@@ -579,9 +580,11 @@
         "concurrency": 4
       },
       "include": [
-        "tests/tooling/project-generator*.checks.mjs",
-        "tests/tooling/project-starters.checks.mjs",
-        "tests/tooling/file-plan*.checks.mjs"
+        "src/cli/tests/project-generator*.checks.mjs",
+        "tooling/tests/project-generator*.checks.mjs",
+        "src/cli/tests/project-starters.checks.mjs",
+        "src/shared/tests/file-plan*.checks.mjs",
+        "tooling/tests/file-plan*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:generator",
@@ -595,7 +598,7 @@
       "level": "unit",
       "levels": {
         "integration": [
-          "tests/tooling/visual-session.checks.mjs"
+          "src/shared/tests/visual-session.checks.mjs"
         ]
       },
       "runner": {
@@ -603,7 +606,8 @@
         "concurrency": 4
       },
       "include": [
-        "tests/tooling/visual-*.checks.mjs"
+        "src/shared/tests/visual-*.checks.mjs",
+        "tooling/tests/visual-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:visual",
@@ -618,20 +622,20 @@
       "level": "unit",
       "levels": {
         "component": [
-          "tests/tooling/companion-authoring-state.checks.mjs",
-          "tests/tooling/companion-sitemap-project-store.checks.mjs",
-          "tests/tooling/companion-sitemap-workspace.checks.mjs",
-          "tests/tooling/companion-visual-*.checks.mjs"
+          "src/companion/tests/companion-authoring-state.checks.mjs",
+          "tooling/tests/companion-sitemap-project-store.checks.mjs",
+          "src/companion/tests/companion-sitemap-workspace.checks.mjs",
+          "tooling/tests/companion-visual-*.checks.mjs"
         ],
         "integration": [
-          "tests/tooling/companion-authoring-evidence.checks.mjs",
-          "tests/tooling/companion-boundaries.checks.mjs",
-          "tests/tooling/companion-composition-contract.checks.mjs",
-          "tests/tooling/companion-project.checks.mjs",
-          "tests/tooling/companion-prototypes-workspace-integrity.checks.mjs",
-          "tests/tooling/companion-schema.checks.mjs",
-          "tests/tooling/concept-metrics.checks.mjs",
-          "tests/tooling/concept-python-inventory.checks.mjs"
+          "tooling/tests/companion-authoring-evidence.checks.mjs",
+          "tooling/tests/companion-boundaries.checks.mjs",
+          "src/shared/tests/companion-composition-contract.checks.mjs",
+          "tooling/tests/companion-project.checks.mjs",
+          "src/cli/tests/companion-prototypes-workspace-integrity.checks.mjs",
+          "src/cli/tests/companion-schema.checks.mjs",
+          "tooling/tests/concept-metrics.checks.mjs",
+          "tooling/tests/concept-python-inventory.checks.mjs"
         ]
       },
       "runner": {
@@ -639,8 +643,11 @@
         "concurrency": 4
       },
       "include": [
-        "tests/tooling/companion-*.checks.mjs",
-        "tests/tooling/concept-*.checks.mjs"
+        "src/cli/tests/companion-*.checks.mjs",
+        "src/companion/tests/companion-*.checks.mjs",
+        "src/shared/tests/companion-*.checks.mjs",
+        "tooling/tests/companion-*.checks.mjs",
+        "tooling/tests/concept-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:companion",
@@ -659,12 +666,12 @@
           [
             "{python}",
             "-B",
-            "tests/concepts/companion-schema.test.py"
+            "src/companion/tests/concepts/companion-schema.test.py"
           ]
         ]
       },
       "include": [
-        "tests/concepts/companion-schema.test.py"
+        "src/companion/tests/concepts/companion-schema.test.py"
       ],
       "prerequisites": [
         "python3",
@@ -685,16 +692,16 @@
         "commands": [
           [
             "{python}",
-            "scripts/concepts/build-companion.py",
+            "tooling/concepts/build-companion.py",
             "--check"
           ],
           [
             "{python}",
             "-B",
-            "tests/concepts/companion-assembly.test.py"
+            "src/companion/tests/concepts/companion-assembly.test.py"
           ],
           {
-            "each": "docs/concepts/companion/src/*.js",
+            "each": "src/companion/app/*.js",
             "argv": [
               "{node}",
               "--check",
@@ -704,7 +711,7 @@
         ]
       },
       "include": [
-        "tests/concepts/companion-assembly.test.py"
+        "src/companion/tests/concepts/companion-assembly.test.py"
       ],
       "prerequisites": [
         "python3"
@@ -725,30 +732,30 @@
         "commands": [
           [
             "{python}",
-            "scripts/concepts/run-browser-checks.py",
+            "tooling/concepts/run-browser-checks.py",
             "--real-storage"
           ]
         ]
       },
       "include": [
-        "tests/concepts/*.browser.py"
+        "src/companion/tests/concepts/*.browser.py"
       ],
       "exclude": [
-        "tests/concepts/companion-prototypes.browser.py",
-        "tests/concepts/companion-mvp.browser.py",
-        "tests/concepts/companion.browser.py",
-        "tests/concepts/companion-bricks.browser.py",
-        "tests/concepts/companion-connections.browser.py",
-        "tests/concepts/companion-flow.browser.py",
-        "tests/concepts/companion-library.browser.py",
-        "tests/concepts/companion-sitemap.browser.py",
-        "tests/concepts/companion-studio.browser.py",
-        "tests/concepts/companion-workflow.browser.py"
+        "src/companion/tests/concepts/companion-prototypes.browser.py",
+        "src/companion/tests/concepts/companion-mvp.browser.py",
+        "src/companion/tests/concepts/companion.browser.py",
+        "src/companion/tests/concepts/companion-bricks.browser.py",
+        "src/companion/tests/concepts/companion-connections.browser.py",
+        "src/companion/tests/concepts/companion-flow.browser.py",
+        "src/companion/tests/concepts/companion-library.browser.py",
+        "src/companion/tests/concepts/companion-sitemap.browser.py",
+        "src/companion/tests/concepts/companion-studio.browser.py",
+        "src/companion/tests/concepts/companion-workflow.browser.py"
       ],
       "inventory": {
-        "source": "scripts/concepts/run-browser-checks.py",
+        "source": "tooling/concepts/run-browser-checks.py",
         "pattern": "\\('([a-z-]+)', '[a-z-]+/[a-z-]+\\.json'\\)",
-        "file": "tests/concepts/companion-$1.browser.py"
+        "file": "src/companion/tests/concepts/companion-$1.browser.py"
       },
       "prerequisites": [
         "python-playwright",
@@ -771,19 +778,19 @@
         "commands": [
           [
             "{python}",
-            "scripts/concepts/run-browser-checks.py",
+            "tooling/concepts/run-browser-checks.py",
             "--only",
             "visual-editors"
           ]
         ]
       },
       "include": [
-        "tests/concepts/companion-*.browser.mjs"
+        "src/companion/tests/concepts/companion-*.browser.mjs"
       ],
       "inventory": {
-        "source": "scripts/concepts/run-browser-checks.py",
+        "source": "tooling/concepts/run-browser-checks.py",
         "pattern": "\\('([a-z-]+)', '[a-z-]+/[a-z-]+\\.json', 'node'\\)",
-        "file": "tests/concepts/companion-$1.browser.mjs"
+        "file": "src/companion/tests/concepts/companion-$1.browser.mjs"
       },
       "prerequisites": [
         "python3",
@@ -804,19 +811,19 @@
         "commands": [
           [
             "{node}",
-            "tests/concepts/starter-workspace.browser.mjs"
+            "src/companion/tests/concepts/starter-workspace.browser.mjs"
           ],
           [
             "{node}",
-            "tests/concepts/feature-showcase.browser.mjs",
+            "src/companion/tests/concepts/feature-showcase.browser.mjs",
             "--html",
             "reports/feature-showcase/clickdummy.html"
           ]
         ]
       },
       "include": [
-        "tests/concepts/starter-workspace.browser.mjs",
-        "tests/concepts/feature-showcase.browser.mjs"
+        "src/companion/tests/concepts/starter-workspace.browser.mjs",
+        "src/companion/tests/concepts/feature-showcase.browser.mjs"
       ],
       "prerequisites": [
         "chromium",
@@ -839,14 +846,14 @@
         "instructions": "docs/concepts/companion/VERIFICATION.md"
       },
       "include": [
-        "tests/concepts/companion.browser.py",
-        "tests/concepts/companion-bricks.browser.py",
-        "tests/concepts/companion-connections.browser.py",
-        "tests/concepts/companion-flow.browser.py",
-        "tests/concepts/companion-library.browser.py",
-        "tests/concepts/companion-sitemap.browser.py",
-        "tests/concepts/companion-studio.browser.py",
-        "tests/concepts/companion-workflow.browser.py"
+        "src/companion/tests/concepts/companion.browser.py",
+        "src/companion/tests/concepts/companion-bricks.browser.py",
+        "src/companion/tests/concepts/companion-connections.browser.py",
+        "src/companion/tests/concepts/companion-flow.browser.py",
+        "src/companion/tests/concepts/companion-library.browser.py",
+        "src/companion/tests/concepts/companion-sitemap.browser.py",
+        "src/companion/tests/concepts/companion-studio.browser.py",
+        "src/companion/tests/concepts/companion-workflow.browser.py"
       ],
       "prerequisites": [
         "python-playwright",
@@ -862,8 +869,8 @@
       "level": "unit",
       "levels": {
         "integration": [
-          "tests/tooling/test-data-inventory.checks.mjs",
-          "tests/tooling/test-data-storage.checks.mjs"
+          "tooling/tests/test-data-inventory.checks.mjs",
+          "tooling/tests/test-data-storage.checks.mjs"
         ]
       },
       "runner": {
@@ -871,7 +878,7 @@
         "concurrency": 4
       },
       "include": [
-        "tests/tooling/test-data-*.checks.mjs"
+        "tooling/tests/test-data-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:test-data",
@@ -885,27 +892,33 @@
       "level": "integration",
       "levels": {
         "unit": [
-          "tests/tooling/formatting.checks.mjs",
-          "tests/tooling/maker-layout.checks.mjs"
+          "src/cli/tests/formatting.checks.mjs",
+          "tooling/tests/maker-layout.checks.mjs"
         ]
       },
       "runner": {
         "type": "node-test"
       },
       "include": [
-        "tests/tooling/maker-*.checks.mjs",
-        "tests/tooling/makers.checks.mjs",
+        "src/cli/tests/maker-*.checks.mjs",
+        "tooling/tests/maker-*.checks.mjs",
+        "tooling/tests/makers.checks.mjs",
+        "tooling/tests/custom-*.checks.mjs",
+        "tooling/tests/locale-*.checks.mjs",
         "tests/tooling/custom-*.checks.mjs",
         "tests/tooling/locale-*.checks.mjs",
-        "tests/tooling/event-*.checks.mjs",
-        "tests/tooling/example-*.checks.mjs",
-        "tests/tooling/readme-*.checks.mjs",
-        "tests/tooling/formatting.checks.mjs"
+        "tooling/tests/event-*.checks.mjs",
+        "tooling/tests/example-*.checks.mjs",
+        "tooling/tests/readme-*.checks.mjs",
+        "src/cli/tests/formatting.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:makers",
       "workflows": [
         "ci"
+      ],
+      "exclude": [
+        "src/cli/tests/maker-source-target.checks.mjs"
       ]
     },
     {
@@ -914,14 +927,14 @@
       "level": "integration",
       "levels": {
         "unit": [
-          "tests/hindsight/policy.checks.mjs"
+          "tooling/tests/hindsight/policy.checks.mjs"
         ]
       },
       "runner": {
         "type": "node-test"
       },
       "include": [
-        "tests/hindsight/*.checks.mjs"
+        "tooling/tests/hindsight/*.checks.mjs"
       ],
       "prerequisites": [
         "python3"
@@ -948,7 +961,7 @@
             "unittest",
             "discover",
             "-s",
-            "tests/hindsight",
+            "tooling/tests/hindsight",
             "-p",
             "test_*.py",
             "-v"
@@ -956,7 +969,7 @@
         ]
       },
       "include": [
-        "tests/hindsight/test_*.py"
+        "tooling/tests/hindsight/test_*.py"
       ],
       "prerequisites": [
         "python3"
@@ -975,15 +988,15 @@
       "level": "integration",
       "levels": {
         "unit": [
-          "tests/tooling/native-diagnostic-observer.checks.mjs",
-          "tests/tooling/native-diagnostic-report.checks.mjs",
-          "tests/tooling/native-item-boundary.checks.mjs",
-          "tests/tooling/native-launch-report.checks.mjs",
-          "tests/tooling/native-launch-resources.checks.mjs",
-          "tests/tooling/native-recovery-handles.checks.mjs",
-          "tests/tooling/native-resource-report.checks.mjs",
-          "tests/tooling/native-runtime-observation.checks.mjs",
-          "tests/tooling/obsidian-session-lifecycle.checks.mjs"
+          "tooling/tests/native-diagnostic-observer.checks.mjs",
+          "tooling/tests/native-diagnostic-report.checks.mjs",
+          "tooling/tests/native-item-boundary.checks.mjs",
+          "tooling/tests/native-launch-report.checks.mjs",
+          "tooling/tests/native-launch-resources.checks.mjs",
+          "tooling/tests/native-recovery-handles.checks.mjs",
+          "tooling/tests/native-resource-report.checks.mjs",
+          "tooling/tests/native-runtime-observation.checks.mjs",
+          "tooling/tests/obsidian-session-lifecycle.checks.mjs"
         ]
       },
       "runner": {
@@ -992,8 +1005,9 @@
       },
       "include": [
         "tests/tooling/native-*.checks.mjs",
-        "tests/tooling/obsidian-*.checks.mjs",
-        "tests/tooling/performance-*.checks.mjs"
+        "tooling/tests/native-*.checks.mjs",
+        "tooling/tests/obsidian-*.checks.mjs",
+        "tooling/tests/performance-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:native-tooling",
@@ -1011,7 +1025,7 @@
         "commands": [
           [
             "{node}",
-            "scripts/testing/check-native.mjs",
+            "tooling/testing/check-native.mjs",
             "--allow-download"
           ]
         ]
@@ -1032,8 +1046,8 @@
       "level": "integration",
       "levels": {
         "unit": [
-          "tests/tooling/harness-preview.checks.mjs",
-          "tests/tooling/identity-styles.checks.mjs"
+          "tooling/tests/harness-preview.checks.mjs",
+          "tooling/tests/identity-styles.checks.mjs"
         ]
       },
       "runner": {
@@ -1041,11 +1055,11 @@
         "concurrency": 4
       },
       "include": [
-        "tests/tooling/setup-*.checks.mjs",
-        "tests/tooling/npm-*.checks.mjs",
-        "tests/tooling/build.checks.mjs",
-        "tests/tooling/identity-*.checks.mjs",
-        "tests/tooling/harness-*.checks.mjs"
+        "tooling/tests/setup-*.checks.mjs",
+        "src/shared/tests/npm-*.checks.mjs",
+        "tooling/tests/build.checks.mjs",
+        "tooling/tests/identity-*.checks.mjs",
+        "tooling/tests/harness-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:setup",
@@ -1060,15 +1074,15 @@
       "level": "integration",
       "levels": {
         "unit": [
-          "tests/tooling/delivery-documents.checks.mjs",
-          "tests/tooling/delivery-done.checks.mjs",
-          "tests/tooling/delivery-handoff.checks.mjs",
-          "tests/tooling/delivery-ready.checks.mjs",
-          "tests/tooling/delivery-rules-reference.checks.mjs",
-          "tests/tooling/maintenance.checks.mjs",
-          "tests/tooling/qualification-trigger.checks.mjs",
-          "tests/tooling/release-remote.checks.mjs",
-          "tests/tooling/security.checks.mjs"
+          "src/cli/tests/delivery-documents.checks.mjs",
+          "src/cli/tests/delivery-done.checks.mjs",
+          "src/cli/tests/delivery-handoff.checks.mjs",
+          "src/cli/tests/delivery-ready.checks.mjs",
+          "src/cli/tests/delivery-rules-reference.checks.mjs",
+          "tooling/tests/maintenance.checks.mjs",
+          "tooling/tests/qualification-trigger.checks.mjs",
+          "tooling/tests/release-remote.checks.mjs",
+          "tooling/tests/security.checks.mjs"
         ]
       },
       "runner": {
@@ -1076,11 +1090,13 @@
         "concurrency": 4
       },
       "include": [
-        "tests/tooling/release*.checks.mjs",
-        "tests/tooling/delivery-*.checks.mjs",
-        "tests/tooling/security.checks.mjs",
-        "tests/tooling/maintenance.checks.mjs",
-        "tests/tooling/qualification-*.checks.mjs"
+        "src/cli/tests/release*.checks.mjs",
+        "tooling/tests/release*.checks.mjs",
+        "src/cli/tests/delivery-*.checks.mjs",
+        "tooling/tests/delivery-*.checks.mjs",
+        "tooling/tests/security.checks.mjs",
+        "tooling/tests/maintenance.checks.mjs",
+        "tooling/tests/qualification-*.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:release",
@@ -1091,7 +1107,7 @@
     },
     {
       "name": "acceptance",
-      "purpose": "Acceptance criterion tests of increments: one stub per criterion generated by scripts/delivery/acceptance.mjs (configs/delivery/delivery.json acceptance), pending until implemented; the Definition of Done requires them implemented.",
+      "purpose": "Acceptance criterion tests of increments: one stub per criterion generated by tooling/delivery/acceptance.mjs (configs/delivery/delivery.json acceptance), pending until implemented; the Definition of Done requires them implemented.",
       "level": "acceptance",
       "runner": {"type": "node-test"},
       "include": ["tests/acceptance/**/*.checks.mjs"],
@@ -1105,14 +1121,14 @@
       "level": "integration",
       "levels": {
         "unit": [
-          "tests/tooling/evidence-failure.checks.mjs",
-          "tests/tooling/style-literals-generated.checks.mjs",
-          "tests/tooling/suite-levels.checks.mjs",
-          "tests/tooling/test-quality.checks.mjs"
+          "tooling/tests/evidence-failure.checks.mjs",
+          "tooling/tests/style-literals-generated.checks.mjs",
+          "tooling/tests/suite-levels.checks.mjs",
+          "tooling/tests/test-quality.checks.mjs"
         ]
       },
       "runner": {"type": "node-test"},
-      "include": ["tests/tooling/gates.checks.mjs", "tests/tooling/coverage.checks.mjs", "tests/tooling/maintainability.checks.mjs", "tests/tooling/quality-thresholds.checks.mjs", "tests/tooling/lint-*.checks.mjs", "tests/tooling/repository.checks.mjs", "tests/tooling/projects-boundary.checks.mjs", "tests/tooling/site-templates-qualification.checks.mjs", "tests/tooling/docs-launchers.checks.mjs", "tests/tooling/test-quality.checks.mjs", "tests/tooling/style-literals*.checks.mjs", "tests/tooling/presentation.checks.mjs", "tests/tooling/evidence-*.checks.mjs", "tests/tooling/archive-*.checks.mjs", "tests/tooling/public-api-*.checks.mjs", "tests/tooling/dependency-*.checks.mjs", "tests/tooling/suite-*.checks.mjs", "tests/tooling/agent-*.checks.mjs", "tests/tooling/verify-*.checks.mjs"],
+      "include": ["tooling/tests/gates.checks.mjs", "tooling/tests/coverage.checks.mjs", "tooling/tests/maintainability.checks.mjs", "tooling/tests/quality-thresholds.checks.mjs", "tooling/tests/lint-*.checks.mjs", "tooling/tests/repository.checks.mjs", "tooling/tests/projects-boundary.checks.mjs", "tooling/tests/types-boundary.checks.mjs", "tooling/tests/site-templates-qualification.checks.mjs", "tooling/tests/docs-launchers.checks.mjs", "tooling/tests/test-quality.checks.mjs", "tooling/tests/style-literals*.checks.mjs", "tooling/tests/presentation.checks.mjs", "tooling/tests/evidence-*.checks.mjs", "tooling/tests/archive-*.checks.mjs", "tooling/tests/public-api-*.checks.mjs", "src/cli/tests/dependency-*.checks.mjs", "tooling/tests/dependency-*.checks.mjs", "tooling/tests/suite-*.checks.mjs", "src/cli/tests/agent-*.checks.mjs", "tooling/tests/agent-*.checks.mjs", "tooling/tests/verify-*.checks.mjs"],
       "prerequisites": ["build"],
       "verify": "tooling",
       "npmScript": "test:quality",
@@ -1128,7 +1144,7 @@
         "integration": [
           "tests/verification/runner.test.mjs",
           "tests/verification/source.test.mjs",
-          "tests/harness-styles/server.test.mjs"
+          "tests/verification/harness-style-server.test.mjs"
         ]
       },
       "runner": {
@@ -1136,15 +1152,14 @@
         "commands": [
           [
             "{node}",
-            "scripts/testing/verify-baseline.mjs",
+            "tooling/testing/verify-baseline.mjs",
             "--repeat",
             "3"
           ]
         ]
       },
       "include": [
-        "tests/verification/*.test.mjs",
-        "tests/harness-styles/*.test.mjs"
+        "tests/verification/*.test.mjs"
       ],
       "verify": "own-step",
       "verifyStep": "verify-baseline --repeat 3",
@@ -1186,7 +1201,7 @@
         "commands": [
           [
             "{node}",
-            "scripts/testing/check-browser-specimen.mjs",
+            "tooling/testing/check-browser-specimen.mjs",
             "--mode",
             "served"
           ]
@@ -1209,7 +1224,7 @@
         "type": "playwright"
       },
       "include": [
-        "tests/e2e/*.spec.ts"
+        "src/plugin/tests/e2e/*.spec.ts"
       ],
       "prerequisites": [
         "chromium",
@@ -1259,7 +1274,7 @@
         "script": "test:obsidian"
       },
       "include": [
-        "tests/obsidian/**/*.obsidian.ts"
+        "tooling/tests/obsidian/**/*.obsidian.ts"
       ],
       "optional": true,
       "prerequisites": [
@@ -1279,47 +1294,53 @@
     {
       "purpose": "Synthetic vault copied for each real-Obsidian case",
       "include": [
-        "tests/obsidian/vault/**"
+        "tooling/tests/obsidian/vault/**"
       ]
     },
     {
       "purpose": "Concept browser-suite phases imported by a *.browser.mjs suite",
       "include": [
-        "tests/concepts/*-phases.mjs"
+        "src/companion/tests/concepts/*-phases.mjs"
       ]
     },
     {
       "purpose": "Tooling fixtures and shared helpers",
       "include": [
-        "tests/tooling/*-fixture.mjs",
-        "tests/tooling/file-symlink.mjs"
+        "src/tui/tests/*-fixture.mjs",
+        "tooling/tests/*-fixture.mjs"
+      ]
+    },
+    {
+      "purpose": "TypeScript project configuration of a source project test root",
+      "include": [
+        "src/*/tests/tsconfig.json"
       ]
     },
     {
       "purpose": "Runtime fixtures, helpers and shared types",
       "include": [
-        "tests/runtime/**/*-fixture.ts",
-        "tests/runtime/**/*-helpers.ts",
-        "tests/runtime/helpers.ts",
-        "tests/runtime/memory-storage.ts",
-        "tests/runtime/types.ts"
+        "src/plugin/tests/unit/**/*-fixture.ts",
+        "src/plugin/tests/unit/**/*-helpers.ts",
+        "src/plugin/tests/unit/helpers.ts",
+        "src/plugin/tests/unit/memory-storage.ts",
+        "src/plugin/tests/unit/types.ts"
       ]
     },
     {
       "purpose": "Playwright fixtures and measurement helpers",
       "include": [
-        "tests/e2e/*-fixture.ts",
-        "tests/e2e/control-metrics.ts"
+        "src/plugin/tests/e2e/*-fixture.ts",
+        "src/plugin/tests/e2e/control-metrics.ts"
       ]
     },
     {
       "purpose": "Real-host test support, fixtures and declarations",
       "include": [
-        "tests/obsidian/support/**",
-        "tests/obsidian/fixtures/**",
-        "tests/obsidian/**/*-fixture.*",
-        "tests/obsidian/**/*-helpers.*",
-        "tests/obsidian/**/*.d.ts"
+        "tooling/tests/obsidian/support/**",
+        "tooling/tests/obsidian/fixtures/**",
+        "tooling/tests/obsidian/**/*-fixture.*",
+        "tooling/tests/obsidian/**/*-helpers.*",
+        "tooling/tests/obsidian/**/*.d.ts"
       ]
     },
     {
@@ -1336,10 +1357,10 @@
     {
       "purpose": "Workbench plugin source and configuration adjacent to plugin-local tests",
       "include": [
-        "plugins/**"
+        "src/cli/sdk/**"
       ],
       "exclude": [
-        "plugins/*/tests/*.test.ts"
+        "src/cli/sdk/*/tests/*.test.ts"
       ]
     }
   ]

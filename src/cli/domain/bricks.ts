@@ -1,8 +1,8 @@
-import { newSitemapSurface } from '../../../scripts/companion/sitemap/create.ts';
+import { newSitemapSurface } from '#shared/companion/sitemap/create.ts';
 import type { SketchDocument } from './document.ts';
 import { object, keys, list, text } from './data.ts';
-import { requireSketch, slug } from './errors.ts';
-import { companionRelativeFolder, RELATIONSHIP_CARDINALITIES } from '../../../scripts/companion/authoring-contract.ts';
+import { requireSketch, slug } from '#shared/contracts/sketch-errors.ts';
+import { companionRelativeFolder, RELATIONSHIP_CARDINALITIES } from '#shared/companion/authoring-contract.ts';
 function collection(document: SketchDocument, store: 'semantic' | 'dataSources', field: 'entities' | 'sources'): Record<string, unknown>[] {
   document.design[store] ??= store === 'semantic' ? { schema: 1, nextId: 1, entities: [], relationships: [], sections: [],
     canvas: { positions: {}, viewport: { x: 40, y: 40, zoom: 1 }, snap: true } } : { schema: 1, nextId: 1, sources: [], flows: [], positions: {} };

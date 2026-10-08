@@ -1,4 +1,4 @@
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { collectionField, collectionStatus, type CollectionDefinition } from './collection-definition.ts';
 import { collectionOverdue, type CollectionRecord, type CollectionValue } from './collection-record.ts';
 import { collectionCell } from './collection-query.ts';

@@ -1,8 +1,8 @@
 import { bindingOf, conditionValue, fieldAnswer, fieldVisible, type FormChoice, type FormDefinition, type FormField } from '../domain/form.ts';
 import { getPath, renderText, setPath, type FormValues } from '../domain/form-model.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import type { DefinitionCatalog } from '../adapters/wizard-catalog.ts';
-import { Back, choose, confirm, input, reportError, selectMany, titleInput, type Prompts } from './prompts.ts';
+import { Back, choose, confirm, input, reportError, selectMany, titleInput, type Prompts } from '#tui/prompts.ts';
 /**
  * The only code a form definition can reach. Each hook is named in JSON and registered here by the
  * process that owns the data; definitions never carry executable code.

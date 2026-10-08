@@ -1,6 +1,6 @@
-import type { UiNode, ElementNode, TextNode, SlotNode, ExternalNode, ComponentNode, VisualDesigns, ComponentDefinition, EmitDefinition, PageDefinition } from '../../../../scripts/companion/visual/visual-ir.mjs';
-import { VISUAL_TAGS, VISUAL_TEXT_ROLES, visualAssert } from '../../../../scripts/companion/visual/visual-ir.mjs';
-import { visualCatalogEntry, visualReservedExport } from '../../../../scripts/companion/visual/visual-catalog.mjs';
+import type { UiNode, ElementNode, TextNode, SlotNode, ExternalNode, ComponentNode, VisualDesigns, ComponentDefinition, EmitDefinition, PageDefinition } from '#shared/companion/visual/visual-ir.mjs';
+import { VISUAL_TAGS, VISUAL_TEXT_ROLES, visualAssert } from '#shared/companion/visual/visual-ir.mjs';
+import { visualCatalogEntry, visualReservedExport } from '#shared/companion/visual/visual-catalog.mjs';
 import type { VisualSpec } from '../../../../templates/companion/runtime/visual-runtime.ts';
 import { literal, type Model } from './model.ts';
 import { relativeImport } from './file-code.ts';

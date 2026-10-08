@@ -1,9 +1,9 @@
 import { checkedCatalog, type DefinitionCatalog, type HookNames } from '../../adapters/wizard-catalog.ts';
 import type { FormValues } from '../../domain/form-model.ts';
-import { requireSketch } from '../../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { formDefinition, runForm, type FormHooks } from '../form-runner.ts';
 import { runWizard, type WizardOptions, type WizardRegistry } from '../wizard-runner.ts';
-import type { Prompts } from '../prompts.ts';
+import type { Prompts } from '#tui/prompts.ts';
 import type { WizardModule } from './module.ts';
 import { builtinModule } from './builtin.ts';
 import { settingsModule } from './settings.ts';

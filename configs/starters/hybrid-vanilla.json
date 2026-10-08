@@ -1,5 +1,5 @@
 {
-  "$schema": "../../scripts/starters/starter.schema.json",
+  "$schema": "../../tooling/starters/starter.schema.json",
   "schemaVersion": 1,
   "id": "hybrid-vanilla",
   "name": "Hybrid vanilla",

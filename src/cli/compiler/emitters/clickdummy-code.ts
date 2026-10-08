@@ -1,5 +1,5 @@
-import { editorBindings } from '../../../../scripts/companion/sitemap/editor-bindings.ts';
-import type { SitemapDesign } from '../../../../scripts/companion/sitemap/model.ts';
+import { editorBindings } from '#shared/companion/sitemap/editor-bindings.ts';
+import type { SitemapDesign } from '#shared/companion/sitemap/model.ts';
 import { literal, symbol, type Model } from './model.ts';
 import { sampleCode } from './schema-code.ts';
 import { relativeImport, type Add } from './file-code.ts';
@@ -76,7 +76,7 @@ import type { VisualState } from ${from('domain/visual-runtime.ts')};
 import { createDialogHost, createPreviewLifecycle } from './clickdummy-host.ts';
 import { scenariosForSurface, resolveScenario, type PreviewScenario } from './clickdummy-scenarios.ts';
 ${journey ? `import { createJourneyPreview } from ${from('bootstrap/journey-preview.ts')};\nimport { provideJourney } from ${from('bootstrap/journey-workspace.ts')};\n` : ''}import './clickdummy.css';
-import '../../src/styles/app.css';
+import '../../src/plugin/styles/app.css';
 import ${from('styles/project.css')};
 import ${from('presentation/detail-layout.css')};
 const root = document.getElementById('prototype-app');
@@ -157,7 +157,7 @@ const lifecycle = createPreviewLifecycle(window, { mount: () => mountFrame(root!
   error: message => { error.value = message; } });
 `);
   add('harness/prototype/clickdummy.css', `/* Original standalone browser host simulation; never imported by the native plugin. */
-@import '../styles/simulated.css';
+@import '../../src/plugin/harness/styles/simulated.css';
 body { margin:0; font-family:var(--font-interface,system-ui,sans-serif); background:var(--background-primary); color:var(--text-normal); }
 .clickdummy-toolbar { display:flex; flex-wrap:wrap; gap:16px; align-items:center; padding:16px; border-bottom:1px solid var(--background-modifier-border); }
 .clickdummy-toolbar h1 { margin:0; font-size:1.15rem; overflow-wrap:anywhere; }

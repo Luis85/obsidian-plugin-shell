@@ -1,5 +1,5 @@
 import { object } from './data.ts';
-import { hasControls, requireSketch, SketchError } from './errors.ts';
+import { hasControls, requireSketch, SketchError } from '#shared/contracts/sketch-errors.ts';
 import { renderText } from './form-model.ts';
 import { collectionStatus, type CollectionDefinition, type CollectionField } from './collection-definition.ts';
 import { collectionAcceptsText, collectionReferenceOk } from './collection-reference.ts';

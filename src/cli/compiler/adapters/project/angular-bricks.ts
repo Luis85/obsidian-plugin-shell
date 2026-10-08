@@ -1,8 +1,8 @@
 import { literal, json, digest, type Model } from '../../emitters/model.ts';
-import { validateAuthoringDocument } from '../../../../../scripts/companion/authoring-contract.ts';
-import { emptyVisualDesigns, type VisualDesigns } from '../../../../../scripts/companion/visual/visual-ir.mjs';
+import { validateAuthoringDocument } from '#shared/companion/authoring-contract.ts';
+import { emptyVisualDesigns, type VisualDesigns } from '#shared/companion/visual/visual-ir.mjs';
 import { angularDefinitionSource, type AngularDefinition, type AngularGap } from './angular-brick-templates.ts';
-import { compositionTheme } from '../../../../../scripts/companion/composition-contract.mjs';
+import { compositionTheme } from '#shared/companion/composition-contract.mjs';
 import { angularBrickRuntime } from './angular-brick-runtime.ts';
 /** AOT component/page sources are derived from the canonical IR, not from user-supplied template strings. */
 export function angularBrickFiles(model: Model): Record<string, string> {
@@ -16,18 +16,18 @@ export function angularBrickFiles(model: Model): Record<string, string> {
       nodes: store.pages.find(item => item.ownerId === page.id)?.root ?? [] })),
   ].map(definition => ({ ...definition, name: 'Brick_' + definition.key.replace(/[^a-zA-Z0-9]/g, '_').slice(0, 32) + '_' + digest(definition.key).slice(0, 12), selector: 'wb-brick-' + digest(definition.key).slice(0, 16) }));
   const gaps: AngularGap[] = [];
-  const files = Object.fromEntries(definitions.map(definition => ['src/ui/' + definition.name + '.ts', angularDefinitionSource(definition, definitions, gaps, definition.designSystem ?? document.design.designSystem)]));
+  const files = Object.fromEntries(definitions.map(definition => ['src/plugin/ui/' + definition.name + '.ts', angularDefinitionSource(definition, definitions, gaps, definition.designSystem ?? document.design.designSystem)]));
   const routes = document.design.sitemap?.routes ?? [];
-  files['src/core/brick-manifest.ts'] = `// Contracts and routes are source data. Providers/business operations are not implemented by this manifest.\nexport const brickManifest: { routes: readonly { id: string; surface: string; path: string }[]; journeys: readonly unknown[]; entities: readonly unknown[]; dataSources: readonly unknown[]; definitions: readonly {id: string; source: string}[]; adapterRequirements: readonly {definition: string; node: string; reason: string}[] } = ${literal({
+  files['src/plugin/core/brick-manifest.ts'] = `// Contracts and routes are source data. Providers/business operations are not implemented by this manifest.\nexport const brickManifest: { routes: readonly { id: string; surface: string; path: string }[]; journeys: readonly unknown[]; entities: readonly unknown[]; dataSources: readonly unknown[]; definitions: readonly {id: string; source: string}[]; adapterRequirements: readonly {definition: string; node: string; reason: string}[] } = ${literal({
     routes, journeys: document.design.sitemap?.journeys ?? [], entities: model.entities, dataSources: model.sources,
-    definitions: definitions.map(({ key, name }) => ({ id: key, source: 'src/ui/' + name + '.ts' })), adapterRequirements: gaps,
+    definitions: definitions.map(({ key, name }) => ({ id: key, source: 'src/plugin/ui/' + name + '.ts' })), adapterRequirements: gaps,
   })} as const;\n`;
   files['design/angular-capabilities.json'] = json({ schemaVersion: 1, nativeTemplates: true, routes: 'browser-hash',
-    definitions: definitions.map(({ key, name, selector }) => ({ id: key, source: 'src/ui/' + name + '.ts', selector })),
+    definitions: definitions.map(({ key, name, selector }) => ({ id: key, source: 'src/plugin/ui/' + name + '.ts', selector })),
     supported: ['native-elements', 'text', 'project-components', 'pinned-revisions', 'props', 'slots', 'variants', 'layout', 'visibility', 'navigate', 'set-state', 'toggle', 'focus', 'emit'],
     adapterRequirements: gaps, businessAcceptance: 'not-run' });
-  files['src/ui/brick-runtime.ts'] = angularBrickRuntime;
-  files['src/ui/Starter.ts'] = starter(model, definitions);
+  files['src/plugin/ui/brick-runtime.ts'] = angularBrickRuntime;
+  files['src/plugin/ui/Starter.ts'] = starter(model, definitions);
   return files;
 }
 function starter(model: Model, definitions: AngularDefinition[]): string {

@@ -16,7 +16,7 @@ function fixture(t, version = '6.0.3') {
   };
   write('package.json', { devDependencies: { typescript: version } });
   write('package-lock.json', { packages: { '': { devDependencies: { typescript: version } }, 'node_modules/typescript': { version } } });
-  write('scripts/security/dependency-policy.json', { packages: { typescript: version } });
+  write('tooling/security/dependency-policy.json', { packages: { typescript: version } });
   const install = installed => {
     write('node_modules/typescript/package.json', { name: 'typescript', version: installed });
     write('node_modules/typescript/lib/typescript.js', `module.exports = {version: ${JSON.stringify(installed)}};`);
@@ -42,9 +42,9 @@ for (const version of ['5.8.3', '^6.0.3', '6.0.3-beta', '7.0.2']) test('rejects 
 });
 test('rejects lockfile and reviewed-policy drift independently', t => {
   const f = fixture(t); f.install('6.0.3');
-  f.write('scripts/security/dependency-policy.json', { packages: { typescript: '5.8.3' } });
+  f.write('tooling/security/dependency-policy.json', { packages: { typescript: '5.8.3' } });
   assert.throws(() => loadCompiler(f.root, {}), /JEV_TYPESCRIPT_PIN_MISMATCH/);
-  f.write('scripts/security/dependency-policy.json', { packages: { typescript: '6.0.3' } });
+  f.write('tooling/security/dependency-policy.json', { packages: { typescript: '6.0.3' } });
   f.write('package-lock.json', { packages: { '': { devDependencies: { typescript: '6.0.3' } }, 'node_modules/typescript': { version: '5.8.3' } } });
   assert.throws(() => loadCompiler(f.root, {}), /JEV_TYPESCRIPT_PIN_MISMATCH/);
 });

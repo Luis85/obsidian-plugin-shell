@@ -14,13 +14,13 @@ argument-hint: "[maker] [name] [options]"
    Review the listed files and the plan hash. Existing files are never overwritten.
 3. Apply exactly that plan: re-run the same command with `--yes` instead of
    `--dry-run` (ask the user first if the plan touches files outside
-   `src/features/<name>/`, locales or the bootstrap registry).
+   `src/plugin/features/<name>/`, locales or the bootstrap registry).
 4. The makers write starter tests to `tests/runtime/generated/`; `npm run check`
    runs them with the product tests. Extend them for the new behaviour (real
    services, exact Markdown/data assertions), then run `npm run check`.
 5. Verify the command or view in Obsidian with `npm run -s dev:obsidian -- --json`
    (the new command id appears in `commands`).
 
-Rules: features import only from `src/features/api.ts` and application/domain
+Rules: features import only from `src/plugin/features/api.ts` and application/domain
 contracts; UI uses `services.modals`/`services.notices`; Vue files stay under
 `presentation/components`. Guide: `docs/development/BUILD-A-FEATURE.md`.

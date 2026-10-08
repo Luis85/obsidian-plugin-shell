@@ -1,5 +1,5 @@
 import { object, keys, text, list } from './data.ts';
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { readSettings, type UserSettings } from './user-settings.ts';
 export const setupCheckpointPath = 'configs/project-setup-draft.json';
 export interface SetupDraft {

@@ -97,7 +97,7 @@ A wizard that only collects, reviews and saves needs no code. It uses the built-
 `src/cli/presentation/wizards/` exporting `{ actions, hooks }` and list it once in `wizardModules`
 (`src/cli/presentation/wizards/registry.ts`). Then give it a command entry like the existing ones in
 `src/cli/app.ts`. Names are global and duplicates fail at startup. Each module's actions are tested
-through real services (see `tests/tooling/interactive-maker-wizard-*.checks.mjs`).
+through real services (see `src/cli/tests/interactive-maker-wizard-*.checks.mjs`).
 
 ## Forms
 
@@ -173,7 +173,7 @@ and `:back` at the first question cancels. The remaining flows below are deliber
 
 | Flow | Why it is not a wizard here |
 | --- | --- |
-| `npm run setup` | Dependency-free Node script that must run before dependencies and TypeScript tooling are installed. Its questions are still data: `configs/forms/setup-identity.json`, read by `scripts/setup/form.mjs`, which supports only `text` and `confirm` fields (`id`, `kind`, `label`, `help`) whose ids equal the setup `--answers` keys (the identity keys, `hosting` and `mcp`), and fails closed on anything else. An `azure-devops` hosting answer is followed by the conditional Azure DevOps details from `scripts/setup/hosting.mjs`, because the dependency-free subset has no conditions. See [setup identity](SETUP-IDENTITY.md). |
+| `npm run setup` | Dependency-free Node script that must run before dependencies and TypeScript tooling are installed. Its questions are still data: `configs/forms/setup-identity.json`, read by `tooling/setup/form.mjs`, which supports only `text` and `confirm` fields (`id`, `kind`, `label`, `help`) whose ids equal the setup `--answers` keys (the identity keys, `hosting` and `mcp`), and fails closed on anything else. An `azure-devops` hosting answer is followed by the conditional Azure DevOps details from `tooling/setup/hosting.mjs`, because the dependency-free subset has no conditions. See [setup identity](SETUP-IDENTITY.md). |
 | Studio editors (pages, bricks, templates) | Open-ended edit menus, not linear guided processes. |
 | Project handout | A Markdown checklist that is filled in and validated, not asked live. |
 
@@ -192,5 +192,5 @@ and `:back` at the first question cancels. The remaining flows below are deliber
   reference stops the run before anything is asked.
 - Every write still goes through a reviewed, hash-approved file plan, and process execution keeps its
   separate approval. Definitions cannot add approvals, run commands or write without a review.
-- The plugin runtime renders the same format with its own reader (`src/domain/forms`) and the `DataForm` component,
-  limited to forms without CLI hooks; definitions live in `src/features/<feature>/forms/`. See [runtime forms](RUNTIME-FORMS.md).
+- The plugin runtime renders the same format with its own reader (`src/plugin/domain/forms`) and the `DataForm` component,
+  limited to forms without CLI hooks; definitions live in `src/plugin/features/<feature>/forms/`. See [runtime forms](RUNTIME-FORMS.md).

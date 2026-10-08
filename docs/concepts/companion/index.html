@@ -13334,7 +13334,7 @@ Edge: ${id2}`,
 </script>
 <script data-contract="CompanionContract">var CompanionContract = (function(exports) {
 	Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
-	//#region scripts/companion/prd-limits.mjs
+	//#region src/shared/companion/prd-limits.mjs
 	var PRD_LIMITS = Object.freeze({
 		count: 256,
 		bytes: 25e4,
@@ -13343,7 +13343,7 @@ Edge: ${id2}`,
 		scanDepth: 20
 	});
 	//#endregion
-	//#region scripts/companion/native-contract.mjs
+	//#region src/shared/companion/native-contract.mjs
 	/** Optional v5 project namespace. JSON describes capabilities, never executable handlers. */
 	var nativeReservedExtensions = Object.freeze([
 		"md",
@@ -13427,7 +13427,7 @@ Edge: ${id2}`,
 		return value;
 	}
 	//#endregion
-	//#region scripts/companion/design-system-roles.mjs
+	//#region src/shared/companion/design-system-roles.mjs
 	var dsRole = (label, group, defaults, ui = [], shell = []) => ({
 		label,
 		group,
@@ -13506,7 +13506,7 @@ Edge: ${id2}`,
 		return errors;
 	}
 	//#endregion
-	//#region scripts/companion/design-system-contract.mjs
+	//#region src/shared/companion/design-system-contract.mjs
 	var DESIGN_SYSTEM_GROUPS = Object.freeze({
 		fonts: "Fonts",
 		typography: "Typography",
@@ -13624,7 +13624,7 @@ Edge: ${id2}`,
 		return value;
 	}
 	//#endregion
-	//#region scripts/companion/storymap-contract.mjs
+	//#region src/shared/companion/storymap-contract.mjs
 	var STORYMAP_LIMITS = Object.freeze({
 		maps: 12,
 		activities: 24,
@@ -13950,7 +13950,7 @@ Edge: ${id2}`,
 		for (const t of system.typography || []) cpAssert(cpRef(t.id) && cpMetric(t, "type") && cpNumber(t.weight, 100, 900) && cpNumber(t.lineHeight, .5, 5) && cpNumber(t.letterSpacing, -10, 20), "Invalid typography token.");
 	}
 	//#endregion
-	//#region scripts/companion/visual/visual-ir.mjs
+	//#region src/shared/companion/visual/visual-ir.mjs
 	var VISUAL_CATALOG = Object.freeze({
 		id: "nuxt-ui",
 		version: 1
@@ -14479,7 +14479,7 @@ Edge: ${id2}`,
 		vcatLayout("builtin-settings", "Settings", "settings", "Settings navigation and grouped forms", (s) => vcatShell(s, vcatSettings(s)))
 	]);
 	//#endregion
-	//#region scripts/companion/visual/visual-composition.mjs
+	//#region src/shared/companion/visual/visual-composition.mjs
 	function vcmpEdges(nodes) {
 		const out = [];
 		visualWalk(nodes, (n) => {
@@ -14513,7 +14513,7 @@ Edge: ${id2}`,
 		for (const key of graphs.keys()) visit(key);
 	}
 	//#endregion
-	//#region scripts/companion/visual/visual-mapping.mjs
+	//#region src/shared/companion/visual/visual-mapping.mjs
 	var VISUAL_CONTROL_KINDS = Object.freeze([
 		"text",
 		"textarea",
@@ -14590,7 +14590,7 @@ Edge: ${id2}`,
 		return control;
 	}
 	//#endregion
-	//#region scripts/companion/visual/visual-validate.mjs
+	//#region src/shared/companion/visual/visual-validate.mjs
 	var vvCommon = [
 		"name",
 		"visibleIn",
@@ -15102,7 +15102,7 @@ Edge: ${id2}`,
 		return store;
 	}
 	//#endregion
-	//#region scripts/companion/sitemap/model.ts
+	//#region src/shared/companion/sitemap/model.ts
 	var SITEMAP_LIMITS = Object.freeze({
 		nodes: 60,
 		links: 120,
@@ -15120,7 +15120,7 @@ Edge: ${id2}`,
 		historyBytes: 8e6
 	});
 	//#endregion
-	//#region scripts/companion/sitemap/safety.ts
+	//#region src/shared/companion/sitemap/safety.ts
 	var SitemapError = class extends Error {
 		code;
 		constructor(code, message) {
@@ -15212,7 +15212,7 @@ Edge: ${id2}`,
 		return render(value);
 	}
 	//#endregion
-	//#region scripts/companion/schema/hosting.mjs
+	//#region src/shared/companion/schema/hosting.mjs
 	/** Optional hosting-platform setting (`tooling.hosting`) of a project schema 6 document, and the pure profile the
 	* compiler emits from it. Absent means GitHub, the behaviour every project had before this field existed.
 	* Only non-secret identifiers are stored: personal access tokens are never part of a project document (sign in with
@@ -15277,7 +15277,7 @@ Edge: ${id2}`,
 		deny: []
 	});
 	//#endregion
-	//#region scripts/companion/tooling-contract.mjs
+	//#region src/shared/companion/tooling-contract.mjs
 	/** Inert optional development settings. No package, process or host is acquired here. */
 	var AIRSHIP_DEFAULTS = Object.freeze({
 		enabled: false,
@@ -15356,12 +15356,12 @@ Edge: ${id2}`,
 		requireTooling((item.targetPort ?? AIRSHIP_DEFAULTS.targetPort) !== (item.port ?? AIRSHIP_DEFAULTS.port), "Preview and proxy ports must differ.");
 	}
 	//#endregion
-	//#region scripts/companion/tooling-contract.ts
+	//#region src/shared/companion/tooling-contract.ts
 	function validateProjectTooling(value) {
 		validateTooling(value);
 	}
 	//#endregion
-	//#region scripts/companion/sitemap/extension.ts
+	//#region src/shared/companion/sitemap/extension.ts
 	function validateSitemapExtension(value, design) {
 		sitemapObject(value, [
 			"schema",
@@ -15503,7 +15503,7 @@ Edge: ${id2}`,
 		featureIds.forEach(visit);
 	}
 	//#endregion
-	//#region scripts/companion/sitemap/acceptance.ts
+	//#region src/shared/companion/sitemap/acceptance.ts
 	/** Optional per-surface UX acceptance block: structural validation and default resolution. No host or UI imports. */
 	var SURFACE_ACCEPTANCE_STATES = [
 		"default",
@@ -15557,7 +15557,7 @@ Edge: ${id2}`,
 		requireSitemap(value.notes === void 0 || typeof value.notes === "string" && value.notes.length <= SURFACE_ACCEPTANCE_LIMITS.notes, "SITEMAP_ACCEPTANCE", `Acceptance notes must be text of at most ${SURFACE_ACCEPTANCE_LIMITS.notes} characters.`);
 	}
 	//#endregion
-	//#region scripts/companion/sitemap/validate.ts
+	//#region src/shared/companion/sitemap/validate.ts
 	function assertDesign(value) {
 		requireSitemap(record$2(value), "SITEMAP_SHAPE", "Expected the canonical design object.");
 		list(value.nodes, SITEMAP_LIMITS.nodes);
@@ -15660,7 +15660,7 @@ Edge: ${id2}`,
 		});
 	}
 	//#endregion
-	//#region scripts/companion/authoring-contract.ts
+	//#region src/shared/companion/authoring-contract.ts
 	/** The Companion project transfer contract. Schema 6 is the only readable format; earlier formats are rejected, never migrated. */
 	var COMPANION_FORMAT = "obsidian-companion-project";
 	var AUTHORING_VERSION = 6;
@@ -15762,7 +15762,7 @@ Edge: ${id2}`,
 		requireValid(shape(value, ["codebaseFolder", "testsFolder"]), "Expected codebaseFolder and testsFolder.");
 		requireValid(companionRelativeFolder(value.codebaseFolder) && companionRelativeFolder(value.testsFolder), "Folders must be portable relative paths outside protected vault folders.");
 		const { codebaseFolder, testsFolder } = value, a = codebaseFolder.toLowerCase(), b = testsFolder.toLowerCase();
-		requireValid(a !== b && !a.startsWith(b + "/") && !b.startsWith(a + "/"), "Codebase and tests folders must not overlap.");
+		requireValid(a !== b && !a.startsWith(b + "/") && (!b.startsWith(a + "/") || b === a + "/tests"), "Codebase and tests folders must not overlap.");
 		return {
 			codebaseFolder,
 			testsFolder
@@ -15974,7 +15974,7 @@ Edge: ${id2}`,
 		return checkData(value, designLimits);
 	}
 	//#endregion
-	//#region scripts/shared/protected-directories.ts
+	//#region src/shared/platform/protected-directories.ts
 	/**
 	* The one framework-free source of protected project directory names. Every set is lower-case; callers compare a
 	* case-folded path segment, so `.GIT` or `Node_Modules` on case-insensitive volumes are refused as well.
@@ -16025,44 +16025,7 @@ Edge: ${id2}`,
 		return names.includes(segment.toLowerCase());
 	}
 	//#endregion
-	//#region src/cli/compiler/domain/diagnostics.ts
-	/** Codes are public API. Catalog changes require documentation and protocol tests. */
-	var diagnosticCatalog = Object.freeze({
-		COMPILER_JSON_INVALID: "Supply a complete UTF-8 project JSON document; check its syntax.",
-		COMPILER_INPUT_LIMIT: "Reduce the input to the supported 4 MB project limit.",
-		COMPILER_SCHEMA_INVALID: "Correct the named contract violation and run compiler check again.",
-		COMPILER_REFERENCE_MISSING: "Choose an existing target or explicitly remove the reference.",
-		COMPILER_DUPLICATE_ID: "Assign a unique identity; update references deliberately.",
-		COMPILER_PATH_COLLISION: "Give artifacts distinct portable paths or declare an intentional replacement.",
-		COMPILER_TEMPLATE_INVALID: "Restore the trusted framework template; do not modify the project to conceal a template defect.",
-		COMPILER_DEPENDENCY_RESOLUTION_REQUIRED: "Review the declared packages, run npm install explicitly, then verify the lockfile before npm ci.",
-		COMPILER_ADAPTER_REQUIRED: "Implement the external adapter; its placeholder is not a completed interaction.",
-		COMPILER_CANCELLED: "The operation was cancelled. Re-run only after reviewing the current workspace.",
-		COMPILER_DIAGNOSTICS_TRUNCATED: "Repair the reported errors and rerun to inspect remaining diagnostics.",
-		COMPILER_REPORT_FAILED: "Choose a new contained reports/compiler destination; do not retry file writes blindly.",
-		COMPILER_INTERNAL: "Retain the debug report and report a compiler defect; do not edit the project spec blindly."
-	});
-	function diagnostic(code, phase, message, source) {
-		return {
-			code,
-			phase,
-			severity: code === "COMPILER_DEPENDENCY_RESOLUTION_REQUIRED" || code === "COMPILER_ADAPTER_REQUIRED" ? "warning" : "error",
-			message,
-			help: diagnosticCatalog[code],
-			retryable: false,
-			...source ? { source } : {}
-		};
-	}
-	var CompilerError = class extends Error {
-		diagnostic;
-		constructor(value, options) {
-			super(value.message, options);
-			this.name = "CompilerError";
-			this.diagnostic = value;
-		}
-	};
-	//#endregion
-	//#region scripts/contracts/errors.ts
+	//#region src/shared/contracts/errors.ts
 	/** Host-independent operation error primitives shared by CLI adapters and core utilities. */
 	var OperationError = class extends Error {
 		code;
@@ -16078,10 +16041,17 @@ Edge: ${id2}`,
 	function requireThat(value, code, message) {
 		if (!value) throw new OperationError(code, message);
 	}
+	//#endregion
+	//#region src/shared/companion/starters/project-generator.ts
+	/** A violated project starter rule; the message names the violation. */
+	var ProjectStarterError = class extends Error {
+		constructor(message) {
+			super(message);
+			this.name = "ProjectStarterError";
+		}
+	};
 	/** The portable lowercase ID rule shared by Companion v6 project identities and starter definitions. */
 	var portableIdPattern = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
-	//#endregion
-	//#region src/cli/compiler/domain/project-starter.ts
 	var targetOrder = [
 		"plugin",
 		"webapp",
@@ -16098,7 +16068,7 @@ Edge: ${id2}`,
 		"tslib"
 	];
 	function check(value, message) {
-		if (!value) throw new CompilerError(diagnostic("COMPILER_SCHEMA_INVALID", "lower", message));
+		if (!value) throw new ProjectStarterError(message);
 	}
 	function record$1(value) {
 		check(value !== null && typeof value === "object" && !Array.isArray(value), "A project starter generator/selection must be an object.");
@@ -16153,7 +16123,7 @@ Edge: ${id2}`,
 		};
 	}
 	//#endregion
-	//#region src/cli/adapters/starters/validation.ts
+	//#region src/shared/companion/starters/validation.ts
 	function record(value) {
 		requireThat(value !== null && typeof value === "object" && !Array.isArray(value), "STARTER_INVALID", "Expected an object.");
 		return value;
@@ -16442,7 +16412,7 @@ Edge: ${id2}`,
 		};
 	}
 	//#endregion
-	//#region src/cli/adapters/starters/render.ts
+	//#region src/shared/companion/starters/render.ts
 	function resolveValues(definition, supplied) {
 		const source = record(supplied), values = {};
 		requireThat(Object.keys(source).every((key) => definition.inputs.some((input) => input.id === key)), "STARTER_INPUT", "Unknown input name.");
@@ -16454,7 +16424,7 @@ Edge: ${id2}`,
 		return values;
 	}
 	//#endregion
-	//#region src/cli/adapters/starters/customize.ts
+	//#region src/shared/companion/starters/customize.ts
 	/** Turns a loaded Companion starter into an independent, editable project v6 document. No catalog projection or execution trust. */
 	var FIELDS = [
 		"id",

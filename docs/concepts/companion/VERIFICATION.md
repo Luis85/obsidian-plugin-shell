@@ -19,7 +19,7 @@ The [machine-readable record](browser-checks.json) lists each named assertion. T
 
 ## Executed checks
 
-The actual [browser test script](../../../tests/concepts/companion.browser.py) exercised the fresh-vault wizard, source/cache selection, identity rejection, target designation, plan approval, setup, deliberate activation, feature and entity makers, source revisions, no-op reruns, failed-test source retention, scoped verification, stale builds, target collisions, sessions, catalog search, inspect-only attachment, trust, note preview/commit, text export, theme switching, cancellation/resume, tour resumption, escaped preview text, malformed state and responsive navigation.
+The actual [browser test script](../../../src/companion/tests/concepts/companion.browser.py) exercised the fresh-vault wizard, source/cache selection, identity rejection, target designation, plan approval, setup, deliberate activation, feature and entity makers, source revisions, no-op reruns, failed-test source retention, scoped verification, stale builds, target collisions, sessions, catalog search, inspect-only attachment, trust, note preview/commit, text export, theme switching, cancellation/resume, tour resumption, escaped preview text, malformed state and responsive navigation.
 
 Captured viewports: 1512 × 1040, 1024 × 768 and 390 × 844. Visual inspection covered the initial workspace, maker review, light-theme release view and narrow wizard. Screenshot inspection is not a pixel-baseline test or a claim of screen-reader conformance.
 
@@ -28,7 +28,7 @@ All inline JavaScript sections also passed `node --check` during authoring using
 ## Reproduce with already provisioned tools
 
 ```sh
-python tests/concepts/companion.browser.py \
+python src/companion/tests/concepts/companion.browser.py \
   --browser /path/to/chromium \
   --report reports/concepts/companion/browser-checks.json \
   --screenshots reports/concepts/companion/screenshots

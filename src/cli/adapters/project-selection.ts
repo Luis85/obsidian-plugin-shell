@@ -1,10 +1,11 @@
 import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
-import { statIfPresent } from '../../../scripts/shared/fs-presence.ts';
-import { validateProjectSelection, type ProjectSelection } from '../compiler/domain/project-starter.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { statIfPresent } from '#shared/platform/fs-presence.ts';
+import type { CompilerProjectSelection as ProjectSelection } from '../compiler/domain/project-starter.ts';
+import { validateCompilerProjectSelection as validateProjectSelection } from '../compiler/adapters/project/selection.ts';
 import { discoverProjectConfig, projectConfigCandidates, projectConfigFolder, projectConfigPattern, retiredProjectConfigPath, type ProjectConfigDiscovery } from '../compiler/domain/project-config.ts';
-import { requireSketch, SketchError } from '../domain/errors.ts';
+import { requireSketch, SketchError } from '#shared/contracts/sketch-errors.ts';
 import { readData } from './storage.ts';
 const entryLimit = 256;
 /** Entry names directly inside configs/. The contained-path inspection refuses a linked or escaping folder chain. */

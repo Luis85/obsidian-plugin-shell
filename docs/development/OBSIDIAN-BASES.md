@@ -96,4 +96,4 @@ project lists into its Astro content collections. See [Astro website projects](A
 
 Code: the framework-free reader and evaluator are in `src/cli/domain/obsidian-base.ts`,
 `base-expression*.ts` and `base-collection.ts`. File access is in `src/cli/adapters/obsidian-base.ts`.
-Tests: `tests/tooling/interactive-maker-obsidian-bases*.checks.mjs`.
+Tests: `src/cli/tests/interactive-maker-obsidian-bases*.checks.mjs`.

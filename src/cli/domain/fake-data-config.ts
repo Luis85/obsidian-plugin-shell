@@ -1,5 +1,5 @@
 import { object, keys, text, list } from './data.ts';
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { definitionId } from './form-model.ts';
 import { fakeFolder, fakeId, readFakeEntity, type FakeEntity } from './fake-data-entity.ts';
 import { validIsoDate } from './fake-data-generators.ts';

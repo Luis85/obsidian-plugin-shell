@@ -1,7 +1,7 @@
 /** Optional Storybook lifecycle. Generation never installs packages or authorizes execution. */
 import { join } from 'node:path';
-import { parseAuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
-import { storybookOptions } from '../../../../scripts/companion/tooling-contract.ts';
+import { parseAuthoringDocument } from '#shared/companion/authoring-contract.ts';
+import { storybookOptions } from '#shared/companion/tooling-contract.ts';
 import { dependencyReadiness } from '../../compiler/adapters/dependencies.ts';
 import { exists, readBounded } from './files.ts';
 import { npmEntry, runNode } from './process.ts';

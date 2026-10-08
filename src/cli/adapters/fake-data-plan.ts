@@ -1,5 +1,5 @@
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { fakeEntityJson, fakeFolder, type FakeEntity } from '../domain/fake-data-entity.ts';
 import { fakeGenerationJson, type FakeGeneration } from '../domain/fake-data-config.ts';
 import { generateCollection, type FakeBase, type FakeNote } from '../domain/fake-data.ts';

@@ -1,5 +1,5 @@
 import { object, keys, text, list } from './data.ts';
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 export type Answer = string | string[] | boolean;
 export type Answers = Record<string, Answer>;
 export interface Condition { field: string; equals?: Answer; notEquals?: Answer }

@@ -1,6 +1,6 @@
 import type { Model } from '../emitters/model.ts';
 import { visualDefinitions, visualPackages } from '../emitters/visual-model.ts';
-import { visualNodes } from '../../../../scripts/companion/visual/visual-ir.mjs';
+import { visualNodes } from '#shared/companion/visual/visual-ir.mjs';
 import { CompilerError, diagnostic } from '../domain/diagnostics.ts';
 import type { CompilerDiagnostic, OutputKind, TemplateSnapshot } from '../domain/contracts.ts';
 import { contractCall } from './frontend.ts';

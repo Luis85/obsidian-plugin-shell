@@ -91,7 +91,7 @@ it does not silently regenerate existing product implementations.
 | Finding | Consequence | Change and regression evidence |
 | --- | --- | --- |
 | CLI development source and product files shared `bin` | Source-relative imports, templates and installed tools prevented a clear standalone product boundary | Moved modules to `src/cli`; built and copied only `bin` into an empty directory in `tests/acceptance/main-reconciliation/ac-1.checks.mjs` |
-| Closed settings forms retained callable save/toggle actions | A stale view reference could persist preferences after disposal | Both actions check scope lifetime before doing work; real preference services and persistence assertions in `tests/runtime/presentation-composables.test.ts` |
+| Closed settings forms retained callable save/toggle actions | A stale view reference could persist preferences after disposal | Both actions check scope lifetime before doing work; real preference services and persistence assertions in `src/plugin/tests/unit/presentation-composables.test.ts` |
 | Manual provenance fingerprinted all of package.json | Unrelated Dependabot updates failed `MANUAL_STALE` despite unchanged documentation | Fingerprint the displayed package version explicitly; keep catalog and renderer hashes; test dependency-only edits and actual version/catalog drift in `framework-manual.checks.mjs` |
 | Projects-only required-check aliases could pass while project CI failed | Companion Vitest and TypeScript PRs had green aliases alongside red actual CI | Wait for the newest pull-request workflow run for the exact head SHA; reject failed, cancelled or skipped evidence; test the alias shell behavior in `projects-boundary.checks.mjs` |
 | Companion Vitest packages updated independently | `vitest` and its coverage provider could have incompatible exact peers | Group `vitest` and `@vitest/*` minor/patch updates |
@@ -181,9 +181,9 @@ separately qualified override. The security gate remains visible and blocking.
   maintainability report has zero gated findings across 635 production inputs
   and 47 template inputs, but records 258 advisory findings in tooling and 48 in
   fixtures. Highest-priority tooling functions include `dispatch` in
-  `scripts/hindsight/cli.ts` (cognitive complexity 92), `compileDesignSystem` in
-  `scripts/companion/design-system-css.mjs` (74), and `executeSetup` in
-  `scripts/setup/execute.mjs` (66). Extract dispatch handlers and stage operations
+  `src/cli/tooling/hindsight/cli.ts` (cognitive complexity 92), `compileDesignSystem` in
+  `src/shared/companion/design-system-css.mjs` (74), and `executeSetup` in
+  `tooling/setup/execute.mjs` (66). Extract dispatch handlers and stage operations
   with their existing behavioral tests; keep parser and failure-path fixtures.
 
 ## Verification and open decisions
@@ -239,7 +239,7 @@ passes. This preserves all 108 runtime TypeScript inputs, 12 Vue components and
 514 CLI modules. No compiler strictness flag changed. The inventory proof remains
 in `reports/reconciliation/type-scope-proof.json`.
 
-`tests/tooling/framework-checkout-build.checks.mjs` copies only Git-tracked files
+`tooling/tests/framework-checkout-build.checks.mjs` copies only Git-tracked files
 into a fresh directory, builds the complete CLI, and verifies that a copied `bin`
 runs independently. It also runs the public typecheck against that checkout and
 injects a real assignment error into each source tree to prove both checks fail

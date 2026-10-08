@@ -1,7 +1,7 @@
 import { resolve } from 'node:path';
-import { parseAuthoringDocument, type AuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
-import { sitemapProjection } from '../../../../scripts/companion/sitemap/projection.ts';
-import { arrangeSitemap } from '../../../../scripts/companion/sitemap/arrangement.ts';
+import { parseAuthoringDocument, type AuthoringDocument } from '#shared/companion/authoring-contract.ts';
+import { sitemapProjection } from '#shared/companion/sitemap/projection.ts';
+import { arrangeSitemap } from '#shared/companion/sitemap/arrangement.ts';
 import { readBounded, hash } from './files.ts';
 import { measureOperation } from './measurement.ts';
 import { result, requireThat, stringOption, type Request, type Context } from './contracts.ts';

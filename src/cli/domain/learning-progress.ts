@@ -1,5 +1,5 @@
 import { object, keys, list } from './data.ts';
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { definitionId, type FormValues } from './form-model.ts';
 import type { LearningPath, LearningStep } from './learning-path.ts';
 /**

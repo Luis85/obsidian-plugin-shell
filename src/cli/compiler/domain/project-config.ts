@@ -8,7 +8,7 @@ export const projectConfigPattern = `${projectConfigFolder}/<project-id>${suffix
 /** The retired root location. It is never read: finding it only yields a coded relocation diagnostic. */
 export const retiredProjectConfigPath = 'project.config.json';
 /** The portable lowercase ID rule shared by Companion v6 project identities and starter definitions. */
-export const portableIdPattern = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
+const portableIdPattern = /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/;
 function isPortableId(value: unknown): value is string {
   return typeof value === 'string' && value.length <= 60 && portableIdPattern.test(value);
 }

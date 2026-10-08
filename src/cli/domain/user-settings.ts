@@ -1,9 +1,9 @@
 import { defaultVaultConfigDirectory } from './host-paths.ts';
-import { hasPortableProjectSegments, hasProtectedProjectRoot } from '../../../scripts/shared/project-path.ts';
-import { isProtectedSegment, RESERVED_FOLDER_NAMES } from '../../../scripts/shared/protected-directories.ts';
+import { hasPortableProjectSegments, hasProtectedProjectRoot } from '#shared/platform/project-path.ts';
+import { isProtectedSegment, RESERVED_FOLDER_NAMES } from '#shared/platform/protected-directories.ts';
 import { firstRunDefaults, firstRunPreferenceSchema, readFirstRunPreferences, type FirstRunPreferences } from './first-run.ts';
 import { object, keys, text } from './data.ts';
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { defaultDesignRoot } from './design-folder.ts';
 /** Settings, setup state, starters and project configurations; configured project paths always stay outside it. */
 const configurationFolder = 'configs';

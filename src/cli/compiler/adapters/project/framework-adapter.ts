@@ -1,6 +1,6 @@
 import type { Model } from '../../emitters/model.ts';
 import type { TemplateSnapshot } from '../../domain/contracts.ts';
-import type { ProjectSelection } from '../../domain/project-starter.ts';
+import type { CompilerProjectSelection as ProjectSelection } from '../../domain/project-starter.ts';
 
 export type FrameworkEngine = 'none' | 'vanilla' | 'nuxtui' | 'angular';
 export interface FrameworkAdapterContext {

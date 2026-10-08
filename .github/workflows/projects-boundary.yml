@@ -9,14 +9,14 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     paths: &boundary-inputs
       - 'projects/**'
-      - 'scripts/projects/**'
+      - 'tooling/projects/**'
       - '**/*.base'
       - 'src/cli/domain/site-*.ts'
       - 'src/cli/domain/obsidian-base.ts'
       - 'src/cli/domain/base-*.ts'
       - 'src/cli/adapters/obsidian-base.ts'
       - 'templates/sites/catalog.json'
-      - 'scripts/quality/check-repository.mjs'
+      - 'tooling/quality/check-repository.mjs'
       - '.github/dependabot.yml'
       - '.github/workflows/**'
       - '.github/actions/setup-qualified/**'
@@ -59,6 +59,6 @@ jobs:
           install: 'true'
           install-flags: --no-fund --ignore-scripts
       - name: Standalone projects, prototype links, synced and isolated workflows
-        run: node scripts/projects/projects.mjs check
+        run: node tooling/projects/projects.mjs check
       - name: Shell workflow security floor (also covers the synced project copies)
-        run: node scripts/quality/check-repository.mjs
+        run: node tooling/quality/check-repository.mjs

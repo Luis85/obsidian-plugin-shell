@@ -12,7 +12,7 @@ on:
       - 'src/cli/domain/site-collections.ts'
       - 'src/cli/adapters/site-templates.ts'
       - 'src/cli/adapters/framework/site-command.ts'
-      - 'scripts/testing/qualify-site-templates.mjs'
+      - 'tooling/testing/qualify-site-templates.mjs'
       - 'tests/fixtures/sites/**'
       - '.github/workflows/site-templates.yml'
       - '!projects/**'
@@ -55,7 +55,7 @@ jobs:
       - name: Render each template with zero and one collection, then npm ci and npm run build
         env:
           ASTRO_TELEMETRY_DISABLED: '1'
-        run: node scripts/testing/qualify-site-templates.mjs --out reports/site-templates.json
+        run: node tooling/testing/qualify-site-templates.mjs --out reports/site-templates.json
       - name: Retain the qualification summary
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

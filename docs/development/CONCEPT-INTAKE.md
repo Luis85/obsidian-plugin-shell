@@ -124,16 +124,16 @@ subsequent generation uses its existing conflict and preservation rules.
 
 ## Implementation and verification
 
-`scripts/companion/concepts/` owns framework-free data contracts and candidate
+`src/shared/companion/concepts/` owns framework-free data contracts and candidate
 transformation. `src/cli/adapters/framework/concept-input.ts` owns bounded local file and
 HTML decoding; `concepts.ts` composes the shared import/file-plan infrastructure.
 CLI catalog, help and programmatic operations expose the same three commands.
 No second generator, storage writer or process execution path is introduced.
 
 ```sh
-node --test tests/tooling/companion-concept-intake.checks.mjs
-node --test tests/tooling/framework-concept-input.checks.mjs tests/tooling/framework-concepts.checks.mjs
-node --test tests/tooling/framework-concepts-kit.checks.mjs
+node --test src/shared/tests/companion-concept-intake.checks.mjs
+node --test src/cli/tests/framework-concept-input.checks.mjs src/cli/tests/framework-concepts.checks.mjs
+node --test src/cli/tests/framework-concepts-kit.checks.mjs
 ```
 
 The final case creates an actual compiled kit, extracts it, runs its dependency-free

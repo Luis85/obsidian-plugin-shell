@@ -9,7 +9,7 @@ import { isAbsolute, join, relative, sep } from 'node:path';
 import { exists, readBounded } from './files.ts';
 import { runNode } from './process.ts';
 import { pluginIdWordProblem } from './plugin-id.ts';
-import { lintRoots } from '../../../../scripts/shared/project-roots.mjs';
+import { lintRoots } from '#shared/platform/project-roots.mjs';
 import { OperationError, result, type Context, type Result } from './contracts.ts';
 export type RuleStatus = 'pass' | 'fail' | 'warn';
 export interface RuleResult { id: string; category: 'manifest' | 'repository' | 'lint' | 'build'; status: RuleStatus; message: string; remediation?: string; source: string }

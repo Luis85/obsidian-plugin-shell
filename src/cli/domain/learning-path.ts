@@ -1,5 +1,5 @@
 import { object, keys, text, list } from './data.ts';
-import { requireSketch, hasControls } from './errors.ts';
+import { requireSketch, hasControls } from '#shared/contracts/sketch-errors.ts';
 import { assertValidated, readForm, type FormField } from './form.ts';
 import { definitionId, readCondition, readPath, type FormCondition } from './form-model.ts';
 import { readLearningMarkdown, readLearningDocTarget, readLearningContentFile } from './learning-markdown.ts';

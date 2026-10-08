@@ -5,7 +5,7 @@ import { object } from './configuration.ts';
 import { cliArtifact } from './cli-artifact.ts';
 import { bundledNoticeFiles } from './docs-vendor.ts';
 import { bundleReleaseCli } from './release-bundle.ts';
-import { serializeJson } from '../../../../scripts/contracts/serialization.ts';
+import { serializeJson } from '#shared/contracts/serialization.ts';
 import type { ArchiveFile } from './zip.ts';
 import type { Kit, KitFile } from './kit-integrity.ts';
 

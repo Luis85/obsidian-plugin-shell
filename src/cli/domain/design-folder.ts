@@ -1,7 +1,7 @@
 /** A per-prototype Claude Design workspace: generated context plus design-owned areas that sync never touches. */
 import { object, keys, text, list } from './data.ts';
-import { requireSketch, slug } from './errors.ts';
-import { resolveSurfaceAcceptance, validateSurfaceAcceptance } from '../../../scripts/companion/sitemap/acceptance.ts';
+import { requireSketch, slug } from '#shared/contracts/sketch-errors.ts';
+import { resolveSurfaceAcceptance, validateSurfaceAcceptance } from '#shared/companion/sitemap/acceptance.ts';
 export const designManifestFile = 'design.manifest.json';
 export const defaultDesignRoot = 'docs/design';
 /** Paths a designer, design agent or coding agent owns; a folder entry ends in a slash. */

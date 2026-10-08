@@ -1,9 +1,9 @@
 import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { defaultReferenceDate } from '../domain/fake-data-config.ts';
 import { generateCollection } from '../domain/fake-data.ts';
-import { requireSketch, SketchError } from '../domain/errors.ts';
+import { requireSketch, SketchError } from '#shared/contracts/sketch-errors.ts';
 import { readTestWorkflow, type TestWorkflowDefinition } from '../domain/test-workflow.ts';
 import { resolveTestWorkflowText, testWorkflowDataContext, type TestWorkflowFakeSource, type TestWorkflowRecord } from '../domain/test-workflow-data.ts';
 import type { TestWorkflowDataRow } from '../domain/test-workflow-docs.ts';

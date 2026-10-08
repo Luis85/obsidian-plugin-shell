@@ -1,5 +1,5 @@
 import type { Context, Request, Result } from '../../adapters/framework/contracts.ts';
-import { parseConfirmation } from '../../../../scripts/shared/confirmation.ts';
+import { parseConfirmation } from '#shared/platform/confirmation.ts';
 type Execute = (request: Request, context: Context) => Promise<Result>;
 type Prompt = (message: string) => Promise<string>;
 function question(direction: 'import' | 'export', sources?: string[]): string {

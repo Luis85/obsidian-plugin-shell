@@ -1,6 +1,6 @@
 import { option, type Arguments } from '../../domain/command-options.ts';
 import { readWizard } from '../../domain/wizard.ts';
-import { choose, type Prompts } from '../prompts.ts';
+import { choose, type Prompts } from '#tui/prompts.ts';
 import { runWizard, type WizardOptions } from '../wizard-runner.ts';
 import { wizardCatalog, wizardRegistry } from './registry.ts';
 /** A standalone form run is itself a small wizard: fill in, review, and optionally save through a reviewed plan. */

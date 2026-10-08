@@ -1,6 +1,6 @@
 import { readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { requireSketch, SketchError } from '../domain/errors.ts';
+import { requireSketch, SketchError } from '#shared/contracts/sketch-errors.ts';
 import type { FormField } from '../domain/form.ts';
 import { learningPrerequisiteIssues, readLearningPath, type LearningPath, type LearningStep } from '../domain/learning-path.ts';
 import { learningDocLink, learningDocTargets, learningHeadings, readLearningMarkdown } from '../domain/learning-markdown.ts';

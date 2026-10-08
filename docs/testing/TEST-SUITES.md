@@ -5,7 +5,7 @@ project can be tested on its own. One declarative manifest,
 [`tests/suites.json`](../../tests/suites.json), names every suite, its runner,
 file patterns, prerequisites, whether `npm run verify` runs it, the workflows
 that cover it and the [test-pyramid level](#test-pyramid-levels) of every test
-file. [`scripts/testing/suites.mjs`](../../scripts/testing/suites.mjs)
+file. [`tooling/testing/suites.mjs`](../../tooling/testing/suites.mjs)
 lists, checks and runs the suites; `verify` builds its tooling step from the same
 manifest.
 
@@ -19,8 +19,8 @@ npm run test:integration               # every integration-level test file, acro
 npm test                               # runtime suite (fast default, unchanged)
 npm run test:cli                       # one suite by responsibility
 npm run test:tooling                   # every suite verify runs in its tooling step
-node scripts/testing/suites.mjs cli makers -- --test-name-pattern=CAP   # several suites + runner args
-node scripts/testing/suites.mjs generator --dry-run                     # print exact commands only
+node tooling/testing/suites.mjs cli makers -- --test-name-pattern=CAP   # several suites + runner args
+node tooling/testing/suites.mjs generator --dry-run                     # print exact commands only
 ```
 
 ## Suites
@@ -39,24 +39,24 @@ or split after that run.
 | `maker:pty` | integration | Real Linux/macOS pseudo-terminal authoring, agent parity, safe review and OS terminal restoration; standard-library Python only. | 1 | `npm run test:maker:pty` | Python command | `python3` | opt-in | not measured |
 | `maker` | integration (+ unit, component) | Interactive and agent-equivalent sketch/prototype makers, data-driven guides, guarded persistence and compiler-generated handoff packages. | 174 | `npm run test:maker` | Vitest `configs/testing/vitest.maker.config.mjs` | none | own step (`maker-coverage-run`) | not measured |
 | `workbench-plugins` | component | Trusted Workbench plugin SDK: plugin-local contracts, event bus, CLI/TUI contributions, framework adapters and custom starter contributions. | 1 | `npm run test:plugins` | `node --test` | none | own step | not measured |
-| `native-handoff` | not in the manifest | Immutable alternative-source verification, local Git reconstruction, no-overwrite writes and agent diagnostics. | 2 | `node scripts/testing/suites.mjs native-handoff` | Python command | `handoff-python` | opt-in | not measured |
+| `native-handoff` | not in the manifest | Immutable alternative-source verification, local Git reconstruction, no-overwrite writes and agent diagnostics. | 2 | `node tooling/testing/suites.mjs native-handoff` | Python command | `handoff-python` | opt-in | not measured |
 | `airship` | unit (+ integration) | Default-off project tooling, source preview mapping, safe explicit processes and regeneration preservation. | 2 | `npm run test:airship` | `node --test` | none | tooling | not measured |
 | `compiler` | integration (+ unit) | Dedicated compiler core, diagnostics, byte-compatibility, architecture, reporting and distribution contracts. | 22 | `npm run test:compiler` | `node --test` | none | tooling | not measured |
 | `compiler:properties` | unit | Seeded fast-check compiler invariants; requires installed development dependencies. | 1 | `npm run test:compiler:properties` | `node --test` | none | tooling | not measured |
 | `prototypes` | integration (+ unit) | Design-first prototype helpers, real shell delegation, shared generation/distribution and single-file build boundaries. | 6 | `npm run test:prototypes` | `node --test` | none | tooling | not measured |
 | `prototypes:python` | integration | Portable prototype package safety and static skill contract tests. | 0 | `npm run test:prototypes:python` | Python command | `python3` | opt-in | not measured |
-| `companion:mvp` | e2e | Compiled Vue/Nuxt UI/Vue Flow sitemap, prototype versions/variants and complete v6 authoring round trips. | 2 | `node scripts/testing/suites.mjs companion:mvp` | Node + Python command | `python-playwright`, `concept-chromium` | opt-in | not measured |
+| `companion:mvp` | e2e | Compiled Vue/Nuxt UI/Vue Flow sitemap, prototype versions/variants and complete v6 authoring round trips. | 2 | `node tooling/testing/suites.mjs companion:mvp` | Node + Python command | `python-playwright`, `concept-chromium` | opt-in | not measured |
 | `runtime` | unit (+ component, integration) | Plugin runtime: domain, application services, adapters, Vue/Pinia presentation and the in-memory Obsidian test kit. | 75 | `npm run test:runtime` | Vitest `configs/testing/vitest.config.mjs` | none | own step | 48 s |
 | `cli` | integration (+ unit) | Central bin/app CLI: command parsing, plans, process execution, kit/archive distribution, new-project creation and capability discovery. | 43 | `npm run test:cli` | `node --test` | none | tooling | 91 s |
 | `cli:journey` | integration | Packs the framework ZIP, extracts it and builds independent generated consumers with a qualified npm (slow, writes reports/framework-cli). | 1 | `npm run test:cli:journey` | Node command | `qualified-npm` | opt-in | 190 s |
 | `generator` | integration (+ unit) | Project compiler: companion JSON to generated project files, runtime guards, starters and the shared safe file-plan engine. | 28 | `npm run test:generator` | `node --test` | none | tooling | 187 s |
 | `visual` | unit (+ integration) | Visual-design contracts: IR, Nuxt UI catalog, validation, composition, layouts, commands, session and generated model tests. | 6 | `npm run test:visual` | `node --test` | none | tooling | not measured |
 | `companion` | unit (+ component, integration) | Companion concept contracts: schema 6 project JSON, storymaps and composition contracts, visual editor harnesses, concept isolation zone and concept metrics. | 37 | `npm run test:companion` | `node --test` | none | tooling | 13 s |
-| `companion:schema` | integration | Independent Draft 2020-12 structural validation and semantic-only negative controls over the shared current project corpus. | 1 | `node scripts/testing/suites.mjs companion:schema` | Python command | `python3`, `python-jsonschema` | opt-in | not measured |
+| `companion:schema` | integration | Independent Draft 2020-12 structural validation and semantic-only negative controls over the shared current project corpus. | 1 | `node tooling/testing/suites.mjs companion:schema` | Python command | `python3`, `python-jsonschema` | opt-in | not measured |
 | `companion:assembly` | integration | Offline companion assembly check, Python assembly/tamper test and syntax check of every authored concept module. | 1 | `npm run test:companion` | Node + Python command | `python3` | opt-in | 5 s |
 | `companion:browser` | e2e | Aggregated companion concept browser suites on one exact assembled artifact (Python Playwright suites plus the Node Playwright suites listed under companion:visual-browser, Chromium). | 23 | `npm run test:companion:browser` | Python command | `python-playwright`, `concept-chromium`, `chromium` | opt-in | 411 s |
-| `companion:visual-browser` | e2e | Visual page and component editors end to end in the assembled concept (Node Playwright + Chromium), run through the concept browser runner so the evidence is bound to the exact artifact. | 1 | `node scripts/testing/suites.mjs companion:visual-browser` | Python command | `python3`, `chromium` | opt-in | 45 s |
-| `companion:starter-browser` | e2e | Empty current authoring startup, external starter round trip, and independently compiled visual-feature showcase behavior. | 2 | `node scripts/testing/suites.mjs companion:starter-browser` | Node command | `chromium`, `companion-current-build`, `showcase-current-build` | opt-in | not measured |
+| `companion:visual-browser` | e2e | Visual page and component editors end to end in the assembled concept (Node Playwright + Chromium), run through the concept browser runner so the evidence is bound to the exact artifact. | 1 | `node tooling/testing/suites.mjs companion:visual-browser` | Python command | `python3`, `chromium` | opt-in | 45 s |
+| `companion:starter-browser` | e2e | Empty current authoring startup, external starter round trip, and independently compiled visual-feature showcase behavior. | 2 | `node tooling/testing/suites.mjs companion:starter-browser` | Node command | `chromium`, `companion-current-build`, `showcase-current-build` | opt-in | not measured |
 | `companion:browser-manual` | e2e | Historical concept browser scripts that the aggregated runner does not execute; run individually per docs/concepts/companion/VERIFICATION.md. | 8 | see [concept verification](../concepts/companion/VERIFICATION.md) | manual | `python-playwright`, `concept-chromium` | opt-in | not automated |
 | `test-data` | unit (+ integration) | Companion test-data kit: seeded generators, storage plans, loopback server/client and source inventory. | 5 | `npm run test:test-data` | `node --test` | none | tooling | 7 s |
 | `makers` | integration (+ unit) | Authoring tools: maker recipes and catalog, checks that the custom-maker and locale recipes write into consumer projects, event contracts, generated-code formatting, example removal and README ownership. | 10 | `npm run test:makers` | `node --test` | none | tooling | 98 s |
@@ -64,22 +64,22 @@ or split after that run.
 | `memory:python` | unit | Stdlib-only Python adapter tests with explicit SDK/manager doubles; not live Hindsight inference. | 2 | `npm run test:memory:python` | Python command | `python3` | own step | not measured |
 | `native` | integration (+ unit) | Native host protocol and dev-loop tooling units (isolation, identity, receipts, diagnostics, performance reports) without launching Obsidian. | 20 | `npm run test:native-tooling` | `node --test` | none | tooling | 3 s |
 | `native:host` | e2e | Real Obsidian smoke in an isolated scratch vault (downloads the host; never a personal vault). | 0 | `npm run test:native` | Node command | `native-runner` | opt-in | not run here |
-| `acceptance` | acceptance | Acceptance criterion tests of increments, generated as pending stubs by `node bin/app increment new` and `increment ac add`, `node scripts/delivery/acceptance.mjs stubs` or `npm run dor -- --write` and implemented before the Definition of Done passes. | 0 | `node scripts/testing/suites.mjs acceptance` | `node --test` | none | tooling | not measured |
+| `acceptance` | acceptance | Acceptance criterion tests of increments, generated as pending stubs by `node bin/app increment new` and `increment ac add`, `node tooling/delivery/acceptance.mjs stubs` or `npm run dor -- --write` and implemented before the Definition of Done passes. | 0 | `node tooling/testing/suites.mjs acceptance` | `node --test` | none | tooling | not measured |
 | `setup` | integration (+ unit) | Guided setup identity, npm install policy, staged build/local install, CSS identity scoping and harness preview. | 6 | `npm run test:setup` | `node --test` | none | tooling | 6 s |
 | `release` | integration (+ unit) | Release preparation, promotion plans, remote execution, Definition of Ready/Done delivery checks, audit classification, maintenance discovery and qualification triggers. | 17 | `npm run test:release` | `node --test` | none | tooling | 3 s |
 | `quality` | integration (+ unit) | Repository gates: analyzer, lint, coverage inventory, maintainability, tighten-only thresholds, presentation, repository and test-quality policies, evidence producers and this suite manifest. | 30 | `npm run test:quality` | `node --test` | `build` | tooling | 89 s |
 | `baseline` | unit (+ integration) | Dependency-free verification baseline: fault ledger, policy, runner, report, source, token and HTTP style-specimen checks, repeated three times. | 8 | `npm run test:baseline` | Node command | none | own step | 20 s |
-| `workflows:browser` | e2e | Browser test workflows run in real headless Chromium: the shipped sign-up example with review screenshots, failing locators, blocked remote requests, masked captures, loopback URL and prototype targets, and the exported spec in the Playwright runner. | 1 | `node scripts/testing/suites.mjs workflows:browser` | Node command | `chromium` | opt-in | 10 s |
-| `browser-specimen` | e2e | Host-style specimen assertions in a real browser (served mode). | 1 | `node scripts/testing/suites.mjs browser-specimen` | Node command | `chromium` | opt-in | 11 s |
+| `workflows:browser` | e2e | Browser test workflows run in real headless Chromium: the shipped sign-up example with review screenshots, failing locators, blocked remote requests, masked captures, loopback URL and prototype targets, and the exported spec in the Playwright runner. | 1 | `node tooling/testing/suites.mjs workflows:browser` | Node command | `chromium` | opt-in | 10 s |
+| `browser-specimen` | e2e | Host-style specimen assertions in a real browser (served mode). | 1 | `node tooling/testing/suites.mjs browser-specimen` | Node command | `chromium` | opt-in | 11 s |
 | `e2e` | e2e | Served harness in Chromium via Playwright: showcase, modals, persistence lifecycle, accessibility and design system. | 11 | `npm run test:e2e` | Playwright `configs/testing/playwright.config.ts` | `chromium`, `harness-build` | opt-in | 78 s |
-| `project` | component | Generated product tests (tests/project) that exist only in a project created by the companion compiler. | 0 | `node scripts/testing/suites.mjs project` | Vitest `configs/testing/vitest.project.config.mjs` | none | opt-in | n/a here |
-| `project:ui-effects` | component | Generated composition/UI-effect checks of a companion-generated project. | 0 | `node scripts/testing/suites.mjs project:ui-effects` | `node --test` | none | opt-in | n/a here |
+| `project` | component | Generated product tests (tests/project) that exist only in a project created by the companion compiler. | 0 | `node tooling/testing/suites.mjs project` | Vitest `configs/testing/vitest.project.config.mjs` | none | opt-in | n/a here |
+| `project:ui-effects` | component | Generated composition/UI-effect checks of a companion-generated project. | 0 | `node tooling/testing/suites.mjs project:ui-effects` | `node --test` | none | opt-in | n/a here |
 | `obsidian` | e2e | Vitest-driven end-to-end tests against a real sandboxed Obsidian host. | 4 | `npm run test:obsidian` | npm script `test:obsidian` | `native-runner` | opt-in | ~30 s, 4 cases (Obsidian 1.13.7 under Xvfb) |
 
 `npm run test:generator` and `npm run test:framework-cli` remain as aliases of
 the `generator` and `cli` suites (both now include their whole responsibility:
 starters and file plans, capability discovery). `npm run test:setup-policy` still
-runs only the npm install policy file of the `setup` suite.
+runs only the npm install policy files of the `setup` suite.
 
 ### Why these boundaries
 
@@ -114,10 +114,10 @@ makes the whole file `integration`.
 
 | Level | What it exercises | Examples |
 | --- | --- | --- |
-| unit | One module in-process with in-memory or checked-in inputs and test doubles for its ports. No child process, temp directory, network, browser or host. Repository-rule checks that read checked-in files in-process belong here. | `tests/runtime/domain.test.ts`, `tests/tooling/interactive-maker-tui-state.checks.mjs`, `tests/tooling/test-quality.checks.mjs` |
-| component | A composed part in-process with its real collaborators: a Vue view with its store, the plugin bootstrapped on the in-memory Obsidian host, a CLI/TUI command or editor session driven through its presentation layer. | `tests/runtime/view-state.test.ts`, `tests/runtime/*-components.test.ts`, `tests/tooling/companion-visual-*.checks.mjs` |
-| integration | Real boundaries without a browser or host: child processes (`node bin/app`, npm, git, Python), temp directories and repositories, generated projects on disk, loopback servers. Negative fixtures that run a checker as a process are here. | `tests/tooling/framework-*.checks.mjs`, `tests/tooling/suite-levels-cli.checks.mjs`, `cli:journey` |
-| e2e | A real browser or a real Obsidian host. Only whole suites are e2e; each must be `opt-in` and run commands the [e2e opt-in policy](../development/WORKFLOWS.md#end-to-end-opt-in) recognizes, so workflows run it only on the `e2e` label or input and always in the Release tier. Reserved for `tests/e2e/**`, `tests/obsidian/**`, `tests/browser-specimen/**`, `tests/browser-workflows/**` and `tests/concepts/*.browser.{py,mjs}`. | `e2e`, `obsidian`, `companion:browser`, `workflows:browser` |
+| unit | One module in-process with in-memory or checked-in inputs and test doubles for its ports. No child process, temp directory, network, browser or host. Repository-rule checks that read checked-in files in-process belong here. | `src/plugin/tests/unit/domain.test.ts`, `src/tui/tests/interactive-maker-tui-state.checks.mjs`, `tooling/tests/test-quality.checks.mjs` |
+| component | A composed part in-process with its real collaborators: a Vue view with its store, the plugin bootstrapped on the in-memory Obsidian host, a CLI/TUI command or editor session driven through its presentation layer. | `src/plugin/tests/unit/view-state.test.ts`, `src/plugin/tests/unit/*-components.test.ts`, `tooling/tests/companion-visual-*.checks.mjs` |
+| integration | Real boundaries without a browser or host: child processes (`node bin/app`, npm, git, Python), temp directories and repositories, generated projects on disk, loopback servers. Negative fixtures that run a checker as a process are here. | `src/cli/tests/framework-*.checks.mjs src/shared/tests/framework-*.checks.mjs tooling/tests/framework-*.checks.mjs`, `tooling/tests/suite-levels-cli.checks.mjs`, `cli:journey` |
+| e2e | A real browser or a real Obsidian host. Only whole suites are e2e; each must be `opt-in` and run commands the [e2e opt-in policy](../development/WORKFLOWS.md#end-to-end-opt-in) recognizes, so workflows run it only on the `e2e` label or input and always in the Release tier. Reserved for `src/plugin/tests/e2e/**/**`, `src/plugin/tests/obsidian/**/** src/plugin/tests/obsidian/support/**/** src/plugin/tests/obsidian/vault/**/** src/plugin/tests/obsidian/vault/Notes/**/**`, `tests/browser-specimen/**`, `tests/browser-workflows/**` and `src/companion/tests/concepts/*.browser.{py,mjs}`. | `e2e`, `obsidian`, `companion:browser`, `workflows:browser` |
 | acceptance | Acceptance-criteria checks of one increment, traced to its handoff. Reserved for `tests/acceptance/**`. | none yet |
 
 The levels, their order (bottom first) and reserved `paths` are declared once in
@@ -126,7 +126,7 @@ files differ adds `levels`, a map from level to file patterns of that suite:
 
 ```json
 "level": "unit",
-"levels": { "component": ["tests/runtime/*-components.test.ts"], "integration": ["tests/runtime/tooling.test.ts"] }
+"levels": { "component": ["src/plugin/tests/unit/*-components.test.ts"] }
 ```
 
 `npm run test:suites -- --pyramid` counts files per level and adds the measured
@@ -144,7 +144,7 @@ checkout:
 | component | 50 | 4 |
 | unit | 178 | 19 |
 
-The repository tooling is integration-heavy (most `tests/tooling` files drive
+The repository tooling is integration-heavy (most CLI and tooling test files drive
 the real CLI or temp repositories), so `--pyramid` currently warns
 `PYRAMID_INVERTED` for integration over unit. That is the honest shape, not a
 gate; new pure logic should get unit tests.
@@ -160,7 +160,7 @@ missing Python or build reports that suite as `not-run`.
 
 1. Decide the level from what the file does, by the table above.
 2. If it equals its suite's `level`, nothing to do. Otherwise add the path (or a
-   naming-convention pattern such as `tests/runtime/*-components.test.ts`) to the
+   naming-convention pattern such as `src/plugin/tests/unit/*-components.test.ts`) to the
    suite's `levels.<level>` list.
 3. A new e2e test belongs in an e2e suite under a reserved e2e path; never
    override a single file to `e2e`.
@@ -168,12 +168,9 @@ missing Python or build reports that suite as `not-run`.
 
 ## Fail-closed classification
 
-`npm run test:suites -- --check` (the first `verify` step) walks every file under
-`tests/tooling`, `tests/runtime`, `tests/verification`, `tests/harness-styles`,
-`tests/browser-specimen`, `tests/concepts`, `tests/e2e`, `tests/obsidian` and
-`tests/project` (the last three and `tests/concepts` may be absent). Each file must
+`npm run test:suites -- --check` (the first `verify` step) walks every file under each declared test root: the `tests/` folder of every source project (`src/<project>/tests`, for example `src/plugin/tests/unit`, `src/plugin/tests/e2e`, `src/companion/tests/concepts`), `tooling/tests`, and the cross-project folders of root `tests/` (`tests/verification`, `tests/browser-specimen`, ...). Some roots may be absent. Each file must
 match exactly one suite `include` (minus its `exclude`) or one `helpers` entry.
-`tests/support` and `tests/fixtures` are helper roots. It fails with:
+The `support` and `fixtures` folders of each project and of root `tests/` are helper roots. It fails with:
 
 | Code | Meaning and fix in `tests/suites.json` |
 | --- | --- |
@@ -182,15 +179,15 @@ match exactly one suite `include` (minus its `exclude`) or one `helpers` entry.
 | `UNDECLARED_TEST_DIRECTORY` / `UNDECLARED_TEST_FILE` | A new `tests/*` directory or loose file: declare it under `roots`/`helperRoots` or move it. |
 | `EMPTY_SUITE` / `TEST_ROOT_MISSING` | A non-optional suite matches nothing, or a required root disappeared. |
 | `SUITE_INVENTORY_MISMATCH` | A suite with an `inventory` (the concept browser runner) differs from the files its runner actually executes. |
-| `TOOLING_NOT_IN_VERIFY` / `TOOLING_NOT_IN_EVIDENCE` | Every file of the evidence producer's tooling inventory (`tests/tooling/**/*.{checks,test}.mjs`) must run in `verify`: in a `verify: "tooling"` suite, or in a suite whose `verifyStepId` names the verify step that runs it (the `maker` suite, in `maker-coverage-run`). A tooling-suite file outside that inventory fails too. |
-| `SUITE_VERIFY_STEP_UNKNOWN` / `SUITE_VERIFY_STEP_MISMATCH` | A `verifyStepId` names no step of `scripts/quality/verify-steps.mjs`, or a step that is not `vitest run --config <the suite's runner config>`; its files then count as running nowhere. |
+| `TOOLING_NOT_IN_VERIFY` / `TOOLING_NOT_IN_EVIDENCE` | Every file of the evidence producer's tooling inventory (`src/cli/tests/**/*.{checks,test}.mjs src/companion/tests/**/*.{checks,test}.mjs src/shared/tests/**/*.{checks,test}.mjs src/tui/tests/**/*.{checks,test}.mjs tests/tooling/**/*.{checks,test}.mjs tooling/tests/**/*.{checks,test}.mjs`) must run in `verify`: in a `verify: "tooling"` suite, or in a suite whose `verifyStepId` names the verify step that runs it (the `maker` suite, in `maker-coverage-run`). A tooling-suite file outside that inventory fails too. |
+| `SUITE_VERIFY_STEP_UNKNOWN` / `SUITE_VERIFY_STEP_MISMATCH` | A `verifyStepId` names no step of `tooling/quality/verify-steps.mjs`, or a step that is not `vitest run --config <the suite's runner config>`; its files then count as running nowhere. |
 | `SUITE_SCRIPT_MISSING` / `SUITE_SCRIPT_MISMATCH` | A declared `npmScript` is absent from `package.json` or does not run that suite. |
 | `TEST_LEVELS_UNDECLARED` / `TEST_LEVELS_INVALID` | `testLevels` is missing, or a level lacks a lowercase name, a summary or valid `paths`. |
 | `SUITE_LEVEL_MISSING` / `SUITE_LEVEL_UNKNOWN` | A suite has no `level`, or a `level`/`levels` key that `testLevels` does not declare. |
 | `AMBIGUOUS_TEST_LEVEL` / `UNUSED_LEVEL_PATTERN` / `SUITE_LEVEL_OVERRIDES_INVALID` | Two `levels` patterns claim one file, a pattern claims none of the suite's files, or `levels` is malformed or repeats the suite's own level. |
 | `TEST_LEVEL_PATH_MISMATCH` | A file under a level's reserved `paths` resolves to another level, or a file elsewhere resolves to a reserved level. |
 | `E2E_LEVEL_OVERRIDE` | `e2e` appears in `levels`, or an e2e suite has overrides: e2e is a whole-suite level. |
-| `E2E_SUITE_NOT_OPT_IN` / `E2E_SUITE_NOT_IN_POLICY` / `E2E_POLICY_LEVEL_MISMATCH` | An e2e suite is not `opt-in`, its commands are unknown to `scripts/quality/e2e-policy.mjs`, or a suite whose commands that policy calls end-to-end is not level `e2e`. |
+| `E2E_SUITE_NOT_OPT_IN` / `E2E_SUITE_NOT_IN_POLICY` / `E2E_POLICY_LEVEL_MISMATCH` | An e2e suite is not `opt-in`, its commands are unknown to `tooling/quality/e2e-policy.mjs`, or a suite whose commands that policy calls end-to-end is not level `e2e`. |
 | `SUITE_UNDOCUMENTED` / `SUITE_DOCUMENTATION_MISSING` | A suite has no `` | `name` | `` row in the guide named by `documentation` (this page), or that guide cannot be read. |
 
 Tooling fixtures (`*-fixture.mjs`, `file-symlink.mjs`), runtime fixtures/helpers,
@@ -209,7 +206,7 @@ developer workflow). Manual suites also exit nonzero.
 
 ## How `verify` uses the manifest
 
-`scripts/quality/verify.mjs` runs `suites.mjs --check`, then (unless
+`tooling/quality/verify.mjs` runs `suites.mjs --check`, then (unless
 `SHELL_EVIDENCE_TOOLING=1` selects the unchanged evidence producer) runs each
 `verify: "tooling"` suite as its own `node --test` call, one suite after another,
 printing `▶ tooling suite: <name> (<n> files)`. Files inside a suite run serially
@@ -235,13 +232,13 @@ writes to the checkout.
 Its `verifyStepId` ties it to that step, so `--check` still accounts for every
 maker file in the tooling inventory and fails if the step stops running them.
 With `SHELL_EVIDENCE_TOOLING=1` (candidate qualification) the unchanged evidence
-producer still records every `tests/tooling` file, the maker files included, so
+producer still records every CLI and tooling test file, the maker files included, so
 that mode runs them twice: once for the evidence packet and once for coverage.
 
 ## Adding a test
 
 1. Name the file by behavior with the responsibility prefix of its suite, for
-   example `tests/tooling/framework-<behavior>.checks.mjs` for the CLI.
+   example `src/cli/tests/framework-<behavior>.checks.mjs` for the CLI.
 2. Run `npm run test:suites -- --check`. If it reports the file as unclassified,
    extend the owning suite's `include` in `tests/suites.json`. If the file's
    [level](#labeling-a-new-test) differs from the suite's `level`, add it to the

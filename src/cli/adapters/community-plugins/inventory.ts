@@ -1,9 +1,9 @@
-import { pluginRegistry } from '../../../../plugins/registry.ts';
+import { pluginRegistry } from '../../sdk/registry.ts';
 import { commands as frameworkCommands } from '../framework/catalog.ts';
 import { makerCommandIds } from '../../domain/command-options.ts';
 import { discoverCommunityPlugins, frameworkVersion, isLoadable, type CommunityPluginInventory } from './discovery.ts';
 import { loadCommunityPlugins, type CommunityPluginHost } from './loader.ts';
-import type { WorkbenchPluginObject } from '../../../../plugins/api.ts';
+import type { WorkbenchPluginObject } from '../../sdk/api.ts';
 import type { AppSession } from './app-api.ts';
 
 /** IDs an app plugin can never take, so `node bin/app <id>` stays unambiguous: every built-in root and bundled plugin. */

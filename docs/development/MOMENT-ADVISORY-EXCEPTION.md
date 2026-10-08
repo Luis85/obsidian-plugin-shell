@@ -8,7 +8,7 @@ claim that the dependency graph is supported.
 
 ## Finding
 
-`node scripts/security/audit.mjs` (live, all dependency categories) reports three moderate
+`node tooling/security/audit.mjs` (live, all dependency categories) reports three moderate
 findings, all from one advisory:
 
 | Item | Value |

@@ -1,7 +1,7 @@
 import type { TemplateSnapshot } from '../domain/contracts.ts';
-import type { ComponentDefinition, ExternalNode, Interaction, UiNode, VisualDesigns } from '../../../../scripts/companion/visual/visual-ir.mjs';
-import { visualAssert, visualNodes, visualRoot } from '../../../../scripts/companion/visual/visual-ir.mjs';
-import { visualTestSource } from '../../../../scripts/companion/visual/visual-session.mjs';
+import type { ComponentDefinition, ExternalNode, Interaction, UiNode, VisualDesigns } from '#shared/companion/visual/visual-ir.mjs';
+import { visualAssert, visualNodes, visualRoot } from '#shared/companion/visual/visual-ir.mjs';
+import { visualTestSource } from '#shared/companion/visual/visual-session.mjs';
 import type { VisualSpec } from '../../../../templates/companion/runtime/visual-runtime.ts';
 import { literal, json, requireValue, type Model } from './model.ts';
 import { componentFile, relativeImport, rewriteTemplate, type Add } from './file-code.ts';
@@ -33,8 +33,8 @@ function vfFileId(value: string, what: string): string {
 /** Runtime modules are copied from the trusted template with import paths rewritten to the generated layout. */
 async function vfRuntime(templateRoot: TemplateSnapshot, m: Model, add: Add): Promise<void> {
   // Runtime templates live in templates/companion/runtime; the composition and visual contracts they import stay in scripts/companion.
-  const read = (path: string) => templateRoot.text(`scripts/companion/${path}`), domain = `${m.sourceRoot}/domain`;
-  const runtime = (file: string) => templateRoot.text(`templates/companion/runtime/${file}`), contract = '../../../scripts/companion/';
+  const read = (path: string) => templateRoot.text(`src/shared/companion/${path}`), domain = `${m.sourceRoot}/domain`;
+  const runtime = (file: string) => templateRoot.text(`templates/companion/runtime/${file}`), contract = '../../../src/shared/companion/';
   for (const file of ['detail-controls.ts', 'detail-actions.ts']) add(`${domain}/${file}`, await runtime(file));
   add(`${domain}/visual-runtime.ts`, rewriteTemplate(await runtime('visual-runtime.ts'), [[`'${contract}visual/visual-ir.mjs'`, "'./visual/visual-ir.mjs'"]], 'visual-runtime.ts'));
   for (const name of ['composition-contract.mjs', 'composition-contract.d.mts']) add(`${domain}/${name}`, await read(name));

@@ -1,11 +1,11 @@
 /** Native-file adapter for the shared, inert prototype workspace. Uses the existing guarded writer. */
 import { resolve, join } from 'node:path';
-import { createFilePlan } from '../../../../scripts/shared/file-plan.ts';
-import { validateAuthoringDocument, parseAuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
-import { PROTOTYPE_REGISTRY, PROTOTYPE_MAX_BYTES, type PrototypeWorkspace } from '../../../../scripts/companion/prototypes/model.ts';
-import { validateWorkspace } from '../../../../scripts/companion/prototypes/validate.ts';
-import { workspaceFiles, readWorkspaceFiles, prototypeJsonText } from '../../../../scripts/companion/prototypes/files.ts';
-import { workspaceKey } from '../../../../scripts/companion/prototypes/safety.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { validateAuthoringDocument, parseAuthoringDocument } from '#shared/companion/authoring-contract.ts';
+import { PROTOTYPE_REGISTRY, PROTOTYPE_MAX_BYTES, type PrototypeWorkspace } from '#shared/companion/prototypes/model.ts';
+import { validateWorkspace } from '#shared/companion/prototypes/validate.ts';
+import { workspaceFiles, readWorkspaceFiles, prototypeJsonText } from '#shared/companion/prototypes/files.ts';
+import { workspaceKey } from '#shared/companion/prototypes/safety.ts';
 import { exists, readBounded, hash, readConfiguration } from './files.ts';
 import { requireThat, type Context } from './contracts.ts';
 import { assertNoOrphanedPrototypes } from './prototype-integrity.ts';

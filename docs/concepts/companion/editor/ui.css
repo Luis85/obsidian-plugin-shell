@@ -1,6 +1,0 @@
-@import "tailwindcss/theme.css" prefix(ps);
-@import "tailwindcss/utilities.css" prefix(ps) source(none);
-@import "@nuxt/ui";
-@import "./editor-reset.css";
-@source "./components";
-@source "../../../../node_modules/.nuxt-ui";

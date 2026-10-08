@@ -36,6 +36,6 @@ ${tests}
 `,'managed');
   }
   const test=`${m.testRoot}/http.test.mjs`;
-  add(test,copiedTemplateTest(template.text('tests/tooling/project-generator-http.checks.mjs'),
-    [['../../templates/companion/runtime/json-http.ts',relativeImport(test,`${m.sourceRoot}/infrastructure/json-http.ts`)]],'project-generator-http.checks.mjs'),'managed');
+  add(test,copiedTemplateTest(template.text('src/cli/tests/project-generator-http.checks.mjs'),
+    [['../../../templates/companion/runtime/json-http.ts',relativeImport(test,`${m.sourceRoot}/infrastructure/json-http.ts`)]],'project-generator-http.checks.mjs'),'managed');
 }

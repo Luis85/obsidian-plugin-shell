@@ -222,6 +222,58 @@ sources. Keep the core projection fields `title`, `mode`, `pages` and
 `components`, and the handoff artifacts, when expanding this prototype guide.
 Unsafe, duplicate or colliding artifact paths fail in the shared writer.
 
+## Manage source projects
+
+`workbench.sources.json` declares the source projects under `src/` (name, kind,
+path, references); `configs/schemas/source-projects.schema.json` gives editor
+completion and `src/cli/domain/source-projects.ts` is the authoritative validator.
+Each project's `tsconfig.json` and `tests/tsconfig.json`, the root solution
+`tsconfig.json` and the `package.json` `"imports"` aliases (`#<library>/*`) are
+derived from it. Optional per-project fields keep the derived files exact where a
+project differs from its kind template: `include`, `compilerOptions` (never the
+derived `rootDir`/`declarationDir`/`tsBuildInfoFile`/`composite`),
+`extraReferences` (repository-relative tsconfig files outside `src`) and
+`gateExemptions` (the recorded reason a lint, line-limit, coverage or analyzer gate
+does not reach the project).
+
+```sh
+node bin/app source list                 # projects, kinds, references, aliases, dependents
+node bin/app source graph                # build order and reverse dependents
+node bin/app source check                # exit 1 on findings, each with its fix
+node bin/app source check --fix          # reviewed plan regenerating the derived files
+node bin/app source add util --kind library --references shared
+node bin/app source link plugin util     # refuses a cycle
+node bin/app source unlink plugin util   # refuses while plugin still imports util
+node bin/app source rename util helpers  # moves the folder, rewrites alias and imports
+node bin/app source remove helpers       # deletes only unedited scaffold files
+```
+
+`check` reports `SOURCE_MANIFEST_MISSING`, `SOURCE_MANIFEST_INVALID`, `SOURCE_CYCLE`,
+`SOURCE_UNKNOWN_REFERENCE`, `SOURCE_PATH_MISSING`, `SOURCE_TSCONFIG_DRIFT`,
+`SOURCE_IMPORTS_DRIFT`, `SOURCE_UNREFERENCED_IMPORT` and `SOURCE_GATE_UNCOVERED`.
+Imports are read from the syntax tree; gate scopes are read statically (shell lint
+exclusions, Vitest coverage `include`, Fallow `ignorePatterns`, code roots) and
+never executed. Without a manifest a project is one implicit `plugin` project at
+`src/plugin` or a flat `src`, and `check --fix` only writes the manifest. Every
+writing operation previews a plan and writes only with `--apply <planHash>` or
+`--yes`; a corrupt manifest is never overwritten. `add` renders
+`templates/sources/<kind>` (code, one passing `node:test` test, both tsconfigs),
+registers a `source:<name>` suite in `tests/suites.json` and records the scaffold
+hashes in `.workbench/sources/<name>.json`; `remove` deletes unchanged scaffold
+files and derived tsconfigs, and lists retained files. It also removes an unchanged
+scaffold suite when no tests are retained; customized suites stay for review.
+`rename` moves files through the plan (delete plus create; Git detects the rename),
+updates import literals, suite paths and test build metadata, and lists other
+textual mentions for review. Review `unrewritable`, `review` and `manual` items in
+the plan before applying: computed import expressions and other textual paths may
+still need edits. Removal refuses projects with dependents; unlink them only after
+removing their imports. Files you edited or added are retained when a project is
+removed from the manifest. Run `source check` and the project type check after an
+applied rename or removal. Valid tsconfig comments and trailing commas are
+accepted; unchanged configurations keep their original formatting.
+The repository's project boundary gate (`tooling/quality/check-project-boundaries.mjs`)
+reads the same manifest through `src/shared/platform/source-manifest.mjs`.
+
 ## Architecture and quality
 
 `domain/` owns validated sketch/guide operations without Node or UI dependencies.

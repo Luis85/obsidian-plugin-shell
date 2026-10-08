@@ -6,7 +6,7 @@
 
 ## Current integration
 
-`scripts/companion/sitemap/` contains framework-free TypeScript over the existing `design.nodes`, `design.links` and `design.canvas`. It does not create a competing page database, browser storage writer or native persistence service. `project inspect` uses the same core for an additive `data.sitemap` summary after the existing project/compiler intake:
+`src/shared/companion/sitemap/` contains framework-free TypeScript over the existing `design.nodes`, `design.links` and `design.canvas`. It does not create a competing page database, browser storage writer or native persistence service. `project inspect` uses the same core for an additive `data.sitemap` summary after the existing project/compiler intake:
 
 ```sh
 node bin/app project inspect --input my-plugin.companion.json --json
@@ -95,7 +95,7 @@ Disposal prevents view updates and new operations but cannot relabel a write alr
 
 ```sh
 node node_modules/typescript/bin/tsc --noEmit --project tsconfig.sitemap.json
-node --test --test-concurrency=1 tests/tooling/companion-sitemap-*.checks.mjs
+node --test --test-concurrency=1 src/cli/tests/companion-sitemap-*.checks.mjs src/shared/tests/companion-sitemap-*.checks.mjs
 ```
 
 These test filenames already belong to the existing companion test-suite pattern. The existing framework CLI workflow adds the strict typecheck and complete sitemap suite on Linux, Windows and macOS without changing its existing checks or permissions. The four checkout-level cases exercise the actual self-project, all starters and real `project inspect`; they are distinct from the dependency-free local unit tests.

@@ -1,6 +1,6 @@
 import { relationshipScope } from './relationship-model.ts';
 import { noteEntity } from './persistence-code.ts';
-import type { Schema } from '../../../../templates/companion/runtime/contract.ts';
+import type { Schema } from '#shared/companion/runtime-contract.ts';
 import { literal, json, symbol, type Entity, type Model, type Source } from './model.ts';
 import { typeCode, sampleCode } from './schema-code.ts';
 import { relativeImport, type Add } from './file-code.ts';
@@ -53,7 +53,7 @@ function adapterSource(m: Model, source: Source, integrity: Integrity, adapter: 
   const adapterMethods = source.operations.map(op => adapterMethod(m, source, op)).join('\n');
   const api = source.kind==='api';
   return `import type { ${name}Port } from '../../application/${source.slug}/contracts.ts';
-import type { Services } from ${literal(relativeImport(adapter,'src/bootstrap/services.ts'))};
+import type { Services } from ${literal(relativeImport(adapter,'src/plugin/bootstrap/services.ts'))};
 ${adapterMethods.includes('NotImplementedError') ? "import { NotImplementedError } from '../../domain/contract.ts';" : ''}
 ${native.size ? "import { noteOperations } from '../../application/note-operations.ts';" : ''}
 ${rules?"import type { RelationshipSession } from '../../application/relationship-session.ts';":''}
@@ -94,7 +94,7 @@ function sourceFiles(m: Model, source: Source, integrity: Integrity, add: Add, r
 function registryFiles(m: Model, integrity: Integrity, registry: SourceRegistry, add: Add): void {
   const root = m.sourceRoot, { serviceImports, serviceProps, sourceInit, sourceTypes, portTypes, portProps } = registry;
   add(`${root}/application/sources.ts`,sourceTypes.join('\n')+'\n'+portTypes.join('\n')+`\n${sourceInit.length ? `export interface Sources { ${sourceInit.join('\n')} }\nexport interface SourcePorts { ${portProps.join('\n')} }` : 'export type Sources = Record<string, never>;\nexport type SourcePorts = Record<string, never>;'}\n`,'managed');
-  add(`${root}/bootstrap/sources.ts`,serviceImports.join('\n')+`\n${integrity.rules.length ? "import { createRelationshipIntegrity } from './relationships.ts';" : ''}\nimport type { Services } from ${literal(relativeImport(`${root}/bootstrap/sources.ts`,'src/bootstrap/services.ts'))};\nimport type { Sources, SourcePorts } from '../application/sources.ts';\nimport { validateSourceOverrides } from '../application/source-overrides.ts';\nexport function createSources(shell: Services, overrides: Partial<SourcePorts> = {}): Sources {\n validateSourceOverrides(overrides,${literal(Object.fromEntries(m.sources.map(source=>[source.slug,source.operations.map(op=>op.slug)])))});\n ${integrity.rules.length ? 'const integrity=createRelationshipIntegrity(shell);' : ''}\n return {${serviceProps.join(',\n')}}; }\n`,'managed');
+  add(`${root}/bootstrap/sources.ts`,serviceImports.join('\n')+`\n${integrity.rules.length ? "import { createRelationshipIntegrity } from './relationships.ts';" : ''}\nimport type { Services } from ${literal(relativeImport(`${root}/bootstrap/sources.ts`,'src/plugin/bootstrap/services.ts'))};\nimport type { Sources, SourcePorts } from '../application/sources.ts';\nimport { validateSourceOverrides } from '../application/source-overrides.ts';\nexport function createSources(shell: Services, overrides: Partial<SourcePorts> = {}): Sources {\n validateSourceOverrides(overrides,${literal(Object.fromEntries(m.sources.map(source=>[source.slug,source.operations.map(op=>op.slug)])))});\n ${integrity.rules.length ? 'const integrity=createRelationshipIntegrity(shell);' : ''}\n return {${serviceProps.join(',\n')}}; }\n`,'managed');
 }
 function requirementFiles(m: Model, add: Add): void {
   for (const r of m.requirements) {

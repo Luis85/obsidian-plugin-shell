@@ -1,0 +1,487 @@
+{
+  "version": 1,
+  "registrations": [
+    {
+      "key": "task",
+      "local": "taskFeature",
+      "from": "../features/tasks/definition",
+      "expression": "register(taskFeature, () => preferences.current.taskFolder)"
+    },
+    {
+      "key": "project",
+      "local": "projectFeature",
+      "from": "../features/projects/definition",
+      "expression": "register(projectFeature)"
+    },
+    {
+      "key": "items",
+      "local": "itemFeature",
+      "from": "../features/items/definition",
+      "expression": "register(itemFeature)"
+    }
+  ],
+  "files": [
+    {
+      "path": "src/plugin/features/tasks/entity.ts",
+      "sha256": "cdacd67561d0eeb4c735d3f36601898c97ca3b403e9477a99802dfa1c03ca9bf"
+    },
+    {
+      "path": "src/plugin/features/tasks/definition.ts",
+      "sha256": "2ba154b22be54c7780938b8accb63d03ec93037fbcb3303578a1cca7ae366016"
+    },
+    {
+      "path": "src/plugin/features/tasks/form.ts",
+      "sha256": "ae13e1b1dbd98602dfd8cbe2d2b039f9c73b3844172b41a97e0b7eb987adad49"
+    },
+    {
+      "path": "src/plugin/features/projects/entity.ts",
+      "sha256": "becd041294b08dfa323b77530a73e61493a8cf3339d0cdf2124c575c6a3710f4"
+    },
+    {
+      "path": "src/plugin/features/projects/definition.ts",
+      "sha256": "51433aa12efd61467ee6f3d7239f422d0acd3f826888538b51ca55a8346338f0"
+    },
+    {
+      "path": "src/plugin/features/showcase/commands.ts",
+      "sha256": "0ef3336eb3eb63b596ecaf9471557a51367d0ad640bb841a6afa8c00e0171da3"
+    },
+    {
+      "path": "src/plugin/presentation/components/ShowcaseApp.vue",
+      "sha256": "60656b03d5d95867729b83cf753dc2135e86e04491aae14cd65c44062822263f"
+    },
+    {
+      "path": "src/plugin/presentation/components/panels/OverviewPanel.vue",
+      "sha256": "6435f3c0c17741cdb5805a823ed54621f1f8a3ba9101fb7c6c0ded3b61c0fed3"
+    },
+    {
+      "path": "src/plugin/presentation/components/panels/DocumentPanel.vue",
+      "sha256": "8c1bd51c5eff568f0d57035a2b97ba73eda37ae76eb109f411caf2ad0e8b0732"
+    },
+    {
+      "path": "src/plugin/presentation/components/panels/EventsPanel.vue",
+      "sha256": "8859a09c28c87603ceb1a78e7ae83b02dccf525af1c0e32a63b3cd0288919096"
+    },
+    {
+      "path": "src/plugin/presentation/components/panels/TaskRepositoryPanel.vue",
+      "sha256": "89aca8dcb1560c3d268f77507e06cfb96517790b99248d8febb604d4525d51b2"
+    },
+    {
+      "path": "src/plugin/presentation/stores/showcase.ts",
+      "sha256": "295b6c1020526114f1fc3ac4729fc0ba511c409fd73bbbe56f72befdd6e8c35b"
+    },
+    {
+      "path": "src/plugin/presentation/composables/use-document-form.ts",
+      "sha256": "fa55f407def621558445fa1834a0393910436f8f1a840d5f14029be7e89b9d11"
+    },
+    {
+      "path": "src/plugin/presentation/composables/use-showcase-actions.ts",
+      "sha256": "d5397486e0f1d53891a5b69fd719ebdfd363f315b4ae4b09b0a3fb6b3d21992a"
+    },
+    {
+      "path": "src/plugin/presentation/composables/use-showcase-shell.ts",
+      "sha256": "9666cd10910881f7a29d2b2b8d4ba62ad18684313e767f9056518126756e03d4"
+    },
+    {
+      "path": "src/plugin/presentation/composables/use-task-repository.ts",
+      "sha256": "00d9b045a66debca0e1e5f1a624144660cc4290c164294c927941b1bc8d286d2"
+    },
+    {
+      "path": "src/plugin/tests/unit/view-state.test.ts",
+      "sha256": "d53400e8f47aa00eef69b045f2801578879e733b968c99e27a0e341877d65982"
+    },
+    {
+      "path": "src/plugin/tests/unit/repository-panel.test.ts",
+      "sha256": "85264265056c7b9bd649f1a57efee575d38ad627f40f4ea1662525fe121f2946"
+    },
+    {
+      "path": "src/plugin/tests/unit/components.test.ts",
+      "sha256": "7bd6807c71dd4a288f98614e65779b0f73e3b07174fedee8be33748fbb8fa97d"
+    },
+    {
+      "path": "src/plugin/tests/unit/presentation-composables.test.ts",
+      "sha256": "3db0027da461bb7862bc3bc93b4df415ddb2dd1074fb7d36b251335523b7a4d4"
+    },
+    {
+      "path": "src/plugin/tests/e2e/layout-and-header.spec.ts",
+      "sha256": "b63743434ba678f4b9fd98206a299da8a3abfa47964476e0182691ceda1f1c44"
+    },
+    {
+      "path": "src/plugin/tests/e2e/modals.spec.ts",
+      "sha256": "ace09bfb357c8f89be019667eb2ed1eac6d8fc36b975e268c87c39ba97ea7be3"
+    },
+    {
+      "path": "src/plugin/tests/e2e/pending-preferences.spec.ts",
+      "sha256": "4d9d5f536f1c18bafe74d2be1b6ec88b5bfcdbeb230d21d3df5b67eb32f011db"
+    },
+    {
+      "path": "src/plugin/tests/e2e/repository.spec.ts",
+      "sha256": "2cd3526dc555e9f14f6675c27fccfeb5049744a055c1d5c0204051f0b0cea63b"
+    },
+    {
+      "path": "src/plugin/tests/e2e/showcase.spec.ts",
+      "sha256": "fe10df06c7f48d6128c8bf820a2d79f17465f34a1b3d367f3cae90bea31e0b12"
+    },
+    {
+      "path": "src/plugin/tests/e2e/accessibility.spec.ts",
+      "sha256": "ab04a066c2b9ed17e3bdea636345a8ca0ceaa6578c04f55b921b9de52db28e34"
+    },
+    {
+      "path": "src/plugin/bootstrap/services.ts",
+      "sha256": "df1f31609156026a5decbc949856a28849a1921e4d47f2b0b2b7fce8148241a7",
+      "template": "src__bootstrap__services.ts.txt"
+    },
+    {
+      "path": "src/plugin/bootstrap/mount-ui.ts",
+      "sha256": "3895a9acf2fd62487dbdcc502551e1a11d24b3b01ed63e7b26c65b624bf9f254",
+      "template": "src__bootstrap__mount-ui.ts.txt"
+    },
+    {
+      "path": "src/plugin/bootstrap/commands.ts",
+      "sha256": "30ff660103658273ba9fd5eb3706d1e52b45a657fe7f8cc341c74ff37ef3bd1a",
+      "template": "src__bootstrap__commands.ts.txt"
+    },
+    {
+      "path": "src/plugin/features/shell/commands.ts",
+      "sha256": null,
+      "template": "src__features__shell__commands.ts.txt"
+    },
+    {
+      "path": "src/plugin/presentation/context/showcase-context.ts",
+      "sha256": "c22268383018e6d92ffc40c1967ef98c99282522a2142896730e9febd69b2a39",
+      "template": "src__presentation__context__showcase-context.ts.txt"
+    },
+    {
+      "path": "src/plugin/presentation/components/FoundationApp.vue",
+      "sha256": null,
+      "template": "src__presentation__components__FoundationApp.vue.txt"
+    },
+    {
+      "path": "src/plugin/presentation/composables/use-foundation-shell.ts",
+      "sha256": null,
+      "template": "src__presentation__composables__use-foundation-shell.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/fixtures/tasks/entity.ts",
+      "sha256": null,
+      "template": "tests__fixtures__tasks__entity.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/fixtures/tasks/definition.ts",
+      "sha256": null,
+      "template": "tests__fixtures__tasks__definition.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/fixtures/tasks/form.ts",
+      "sha256": null,
+      "template": "tests__fixtures__tasks__form.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/fixtures/projects/entity.ts",
+      "sha256": null,
+      "template": "tests__fixtures__projects__entity.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/fixtures/projects/definition.ts",
+      "sha256": null,
+      "template": "tests__fixtures__projects__definition.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/unit/domain.test.ts",
+      "sha256": "c79f6f234d05d98f694db2b675aacaced95f81b1cf778e3bdad2f09caf313933",
+      "template": "tests__runtime__domain.test.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/unit/entities.test.ts",
+      "sha256": "64172a609de4acb8f2b549a137cd8dc42ab772a4513179560a37706c5914d7c9",
+      "template": "tests__runtime__entities.test.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/unit/feature-extension.test.ts",
+      "sha256": "b06a6a3a1b1bd699b73aec3340104c354f55c2a16891d6edcbd53b49d17d0731",
+      "template": "tests__runtime__feature-extension.test.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/unit/helpers.ts",
+      "sha256": "072fc8f52deb99300df481a67abf733b8b516a449c59db010a70efa9411b711a",
+      "template": "tests__runtime__helpers.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/unit/identity.test.ts",
+      "sha256": "6a0ff4afb19a36164c5165e3e02ee9430281b4e2ad2a8ab938c53073cd21fc30",
+      "template": "tests__runtime__identity.test.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/unit/mount-lifecycle.test.ts",
+      "sha256": "73ac28dc3d20e02b5a60f414b7ec4dd895dc5481c2d1d34562442b22771c3621",
+      "template": "tests__runtime__mount-lifecycle.test.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/unit/native-lifecycle.test.ts",
+      "sha256": "05b644f492a04adfc29f557e303b6ec10cefe416d4a9add4a9fe6ae7a6384371",
+      "template": "tests__runtime__native-lifecycle.test.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/unit/shell-entry-lifecycle.test.ts",
+      "sha256": "9f1cb90af802fd5eb44330ec9635ecf83272db33e9793d95b469ef32c7cd5b6e",
+      "template": "tests__runtime__shell-entry-lifecycle.test.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/unit/repository-failures.test.ts",
+      "sha256": "652340ccea71a96589fd66885c8ec61dde40b47cd038f4096ed19a168b49c357",
+      "template": "tests__runtime__repository-failures.test.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/unit/repository-helpers.ts",
+      "sha256": "308b3a62828c4bf374db0491a4aec584ecd0534767978077e300278c63cbe1a1",
+      "template": "tests__runtime__repository-helpers.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/unit/settings-components.test.ts",
+      "sha256": "e7777646ccdae164b884bbb99811727d5c3c51e597326b554a96b145b50b2c02",
+      "template": "tests__runtime__settings-components.test.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/unit/types.ts",
+      "sha256": "5ae8c4d555513535516f6ec32866d7d722f3a37cdb99e5f655e925b73f5f50c3",
+      "template": "tests__runtime__types.ts.txt"
+    },
+    {
+      "path": "src/plugin/styles/shell.css",
+      "sha256": "f0113c434ed7fc810922d51681145422811f1c9cd436eef02bff8e1f6c181588",
+      "template": "src__styles__shell.css.txt"
+    },
+    {
+      "path": "src/plugin/styles/panels.css",
+      "sha256": "b76b5d2782d008a5073b57580a787baf706cf11af591088be3a0170c07b277b6",
+      "template": "src__styles__panels.css.txt"
+    },
+    {
+      "path": "src/plugin/styles/layout.css",
+      "sha256": "54a955fe47aec9628ebb484e4795523de340d706da5f8204750266bb4fb2dacf",
+      "template": "src__styles__layout.css.txt"
+    },
+    {
+      "path": "src/plugin/locales/en.json",
+      "sha256": "2777760124b42de553baf3fb9590bdea0ae1ba9330de0865c3aed0e0b07c4940",
+      "template": "src__locales__en.json.txt"
+    },
+    {
+      "path": "src/plugin/locales/de.json",
+      "sha256": "c79ade78d49a33657fe5b13ea821e553762f6cde46429d868be0f184bde16b70",
+      "template": "src__locales__de.json.txt"
+    },
+    {
+      "path": "README.md",
+      "sha256": "c92f41c802da1809c4f31782f5455d66bde4ac7a8750a3f750ad5b35d6ab05fc",
+      "template": "README.md.txt",
+      "generated": "retain"
+    },
+    {
+      "path": "src/plugin/tests/unit/foundation-view.test.ts",
+      "sha256": null,
+      "template": "tests__runtime__foundation-view.test.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/e2e/foundation.spec.ts",
+      "sha256": null,
+      "template": "tests__e2e__foundation.spec.ts.txt"
+    },
+    {
+      "path": "src/plugin/tests/unit/native-adapters-composition.test.ts",
+      "sha256": "b9b112501a3c6520170de2739f050b8a077aa7743704f51d924fec33ad69d6a2",
+      "template": "tests__runtime__native-adapters-composition.test.ts.txt"
+    },
+    {
+      "path": "tooling/testing/native-profile.json",
+      "sha256": null,
+      "template": "scripts__testing__native-profile.json.txt"
+    },
+    {
+      "path": "tooling/testing/check-native.mjs",
+      "sha256": "b1517d5831c4daa832f644f9b9f4cd5d58098852b6d04912f9dfaeeb4414dc2a",
+      "template": "scripts__testing__check-native.mjs.txt"
+    },
+    {
+      "path": "src/plugin/features/items/definition.ts",
+      "sha256": "5e990e6654335ded0195b7d7a6a0c4513444b86a4b7ae3b9fe8b619bdb80c77b"
+    },
+    {
+      "path": "src/plugin/features/items/actions.ts",
+      "sha256": "8266f31af51e90dbdaebc30642dfe35fc8f8113d6985164249c32d80fc6c1337"
+    },
+    {
+      "path": "src/plugin/presentation/stores/items.ts",
+      "sha256": "5bd198d04cc806bf955e83cfec11b13acbca27cbfcd5a4ae87df8582de4b4f45"
+    },
+    {
+      "path": "src/plugin/presentation/stores/items-state.ts",
+      "sha256": "220bf71046a802dc0c3d64fe0d29f49779e7e755c327318968518f74bea54171"
+    },
+    {
+      "path": "src/plugin/presentation/composables/use-items-controller.ts",
+      "sha256": "14c51c8b447f99e496bb57e43aa2f580a2942edbfadf6c42681a418d0e09cdd7"
+    },
+    {
+      "path": "src/plugin/presentation/components/panels/ItemsPanel.vue",
+      "sha256": "3d0316520250b53ff0e28818c1b26defa67e28bec95394549393c9c25b11cc62"
+    },
+    {
+      "path": "src/plugin/tests/unit/items.test.ts",
+      "sha256": "e5ae6b44df0387da1552193f1d39dbed39fa029b51804591c25aaa9441f77f28"
+    },
+    {
+      "path": "src/plugin/tests/unit/items-fixture.ts",
+      "sha256": "e96e25f57b8c093697f1f4e0a1ae13d375ae9ab411c215014eb2ac95c3a71888"
+    },
+    {
+      "path": "src/plugin/tests/unit/items-components.test.ts",
+      "sha256": "4e0901bc71238202881d480fa62a6c45ddc3288cf2227e3f9a13640c4497d57f"
+    },
+    {
+      "path": "src/plugin/tests/e2e/items.spec.ts",
+      "sha256": "c630cfba6cae26ad26891f7da3d2ae3f35b3762206f7f220e878f424d98eae1d"
+    },
+    {
+      "path": "src/plugin/bootstrap/example-events.ts",
+      "sha256": "3d38aefd85a445a13dfe9078281a30a717ac7549d60b8121b82f93f419789003",
+      "template": "src__bootstrap__example-events.ts.txt"
+    },
+    {
+      "path": "src/plugin/bootstrap/example-event-catalog.ts",
+      "sha256": "8abd0ead28f2272785d930c0daf0fcc9d007b55c64233f06b7bd66c4a6b85670",
+      "template": "src__bootstrap__example-event-catalog.ts.txt"
+    },
+    {
+      "path": "src/plugin/features/showcase/events.ts",
+      "sha256": "8d66a5f3d5ffa0d0113462f5e416661c112ed8bd1a01da9d38e9d7bddc28fe66"
+    },
+    {
+      "path": "tooling/testing/native-items.mjs",
+      "sha256": "18c7c4cb5f5ca05bc13b4d1ba2fbdb64746cf2e7a473a01501cacc5c590f6325"
+    },
+    {
+      "path": "tooling/testing/native-performance.mjs",
+      "sha256": "4551bcd458a1971ced8bc490bfb8cedacca57a141b89dd5ad59fc16cf07fd070"
+    },
+    {
+      "path": "src/plugin/tests/unit/resource-qualification.test.ts",
+      "sha256": "caf14d0d745521a2eae6978042ed1d74a7424a2d9b30e733ff8804692f10ddb3"
+    },
+    {
+      "path": "tooling/testing/native-item-ownership.mjs",
+      "sha256": "5f8e227f5e127d79ba4f05ff4a5fef3c81032fd57512a9cba7c6a35ae037324e"
+    },
+    {
+      "path": "tooling/tests/native-item-boundary.checks.mjs",
+      "sha256": "8b7c5f4c11f968470fd2bf26539eb268cbf75a1dae735b6ffb992a7727df8360"
+    },
+    {
+      "path": "src/plugin/tests/unit/acceptance-closure.test.ts",
+      "sha256": "e13b7df6532edd81e1c7238574db471a88dd6b57a6410a6a9fa28f66838a0fc1"
+    },
+    {
+      "path": "src/plugin/tests/e2e/acceptance-closure.spec.ts",
+      "sha256": "f5b180dee662ec03edc233461f15c36d7b48d0e1c27f88d5c4ae3b27619f2100"
+    },
+    {
+      "path": "src/plugin/tests/unit/persistence-outcomes.test.ts",
+      "sha256": "379257e4b685aa58e3708779f039e28348e58877243dd668856ecab764f1d8cc"
+    },
+    {
+      "path": "src/plugin/tests/unit/document-lifecycle.test.ts",
+      "sha256": "9504f4b8b14d991a0f93f57f63e3e8a60ff5cf477075d8bd7db52f1ca9330a83"
+    },
+    {
+      "path": "src/plugin/tests/unit/lifecycle-recovery-components.test.ts",
+      "sha256": "e84bfd2abd6f7b50b304d3286dac959a5f12791735472cfe1059c1b66806b52b"
+    },
+    {
+      "path": "src/plugin/tests/e2e/persistence-lifecycle.spec.ts",
+      "sha256": "6b3eeb227c06b842feb9c005bf10a397c136d9bd23a2abf73db90cb4e2b6673d"
+    },
+    {
+      "path": "src/plugin/tests/e2e/persistence-lifecycle-fixture.ts",
+      "sha256": "ddea437dcae64129abe100442bc943f31084ba3868be6a03520d1861b12513be"
+    },
+    {
+      "path": "src/plugin/tests/unit/retained-task-actions-components.test.ts",
+      "sha256": "cc6a48d080e613a52c86453aeca764db079319e5f97bdcc03cf31b41567f28b3"
+    },
+    {
+      "path": "tooling/testing/native-resource-ownership.mjs",
+      "sha256": "ba1b8f646dfbe871a984b317d93f1feca511cdb701ad0c9a52fa3aa4cec6e09d"
+    },
+    {
+      "path": "src/plugin/presentation/composables/use-recovery-example.ts",
+      "sha256": "9e1b0f2438b634431b29ce0cf32e48b528c601e2576a10c2627239a58e376999"
+    },
+    {
+      "path": "src/plugin/tests/unit/recovery-example-components.test.ts",
+      "sha256": "129d3c3db3014ab6cdefd41878f69e33c6d389a89810a120c6714793aa7c5c25"
+    },
+    {
+      "path": "src/plugin/tests/e2e/recovery-example.spec.ts",
+      "sha256": "124d682fcc28b10b01d982596f61978440ea08ac06545bb27109624a3a5e47bf"
+    },
+    {
+      "path": "src/plugin/tests/e2e/design-system.spec.ts",
+      "sha256": "02e6f6c2b49df2a39d26709c8ee6178f1dcb08a6f2b62b3d83e263ea5a40a86a"
+    },
+    {
+      "path": "src/shared/testing/native-recovery-handles.mjs",
+      "sha256": "f6006b6886088f05193e1d842df494f94dc58dcc4412be8e2f18cfb28e714450"
+    },
+    {
+      "path": "tooling/tests/native-recovery-handles.checks.mjs",
+      "sha256": "083f86585be562f26f015ed580fc1f8354a7ccf574ce59d4b7afaa8134040277"
+    },
+    {
+      "path": "tooling/testing/native-foreign-notice.mjs",
+      "sha256": "596f23330b675751a263534ba62448819998b28187521e047de1d6c96c15b52f"
+    },
+    {
+      "path": "tooling/tests/native-foreign-notice.checks.mjs",
+      "sha256": "089a36e451b28e59be8b429b623cababd662291d7acc91682c76591168e3ff20"
+    },
+    {
+      "path": "src/shared/testing/native-recovery-handles.d.mts",
+      "sha256": "265e3f8efaa4baface8bc325afe2a3e54c5f7663f70240e3fd20d8ece9b21c82"
+    },
+    {
+      "path": "src/plugin/tests/unit/obsidian-test-kit-shell.test.ts",
+      "sha256": "bae629217c2f8aee3dab08782e0699953ff28389376ca3ca1e4bd6744ed2fb38"
+    },
+    {
+      "path": "src/plugin/tests/unit/obsidian-test-kit-shell-entry.test.ts",
+      "sha256": "beb125bcbf3c946e1dc5c8df35f3b87241b6af9a8ff696d660cec73d533322c3"
+    },
+    {
+      "path": "src/plugin/features/showcase/feature-brief.ts",
+      "sha256": "fa2682e9680bdc106b4218b6ecd7f7952e29793c2181ba4e7cced6ca4437b432"
+    },
+    {
+      "path": "src/plugin/features/showcase/forms/feature-brief.json",
+      "sha256": "c32d7e0c516db95259e2f26b968e434d65b5b4fd31b3fd7f9e590ab302383c9a"
+    },
+    {
+      "path": "src/plugin/presentation/components/panels/FormsPanel.vue",
+      "sha256": "583888934d0428e3902633a0c6200b27794ed48393b577df6ff650d5a8560fb7"
+    },
+    {
+      "path": "src/plugin/presentation/composables/use-forms-page.ts",
+      "sha256": "304c2152e6ea7230a45851e4a22ccac4d6ebed364bff1c42c5937d87ea6c8bae"
+    },
+    {
+      "path": "src/plugin/presentation/stores/forms-showcase.ts",
+      "sha256": "cdb49538f77f0553a5be181527a83d78892a05f76327cc085b7c3d16b8aa4bfa"
+    },
+    {
+      "path": "src/plugin/tests/unit/data-form-components.test.ts",
+      "sha256": "79d49a8c8a3cfbf2415b948764726e87fcee247d69d08787747633924e45415e"
+    },
+    {
+      "path": "tooling/tests/example-removal-rehearsal.checks.mjs",
+      "sha256": "eec528355fb2f6ebeda1d6450592887d02efa80e0e45d912544d81092b11e1f2"
+    }
+  ]
+}

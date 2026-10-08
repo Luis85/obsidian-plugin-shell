@@ -1,7 +1,7 @@
 import { mkdir, rmdir, lstat } from 'node:fs/promises';
 import { join } from 'node:path';
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 const firstRunLock = '.shell-first-run.lock';
 async function absent(root: string, name: string): Promise<boolean> {
   try { await lstat(join(root, name)); return false; }

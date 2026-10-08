@@ -23,7 +23,7 @@ The loop is: reload → errors → screenshot → console/log → fix → repeat
 4. For more context read `.obsidian-sandbox/logs/dev.log` (all console output) and
    `.obsidian-sandbox/logs/debug-report.json` (structured debug records).
 5. Reproduce the failure as a test first when possible (in-memory kit test in the
-   product tests, or a `tests/obsidian/*.obsidian.ts` spec).
+   product tests, or a `tooling/tests/obsidian/*.obsidian.ts` spec).
 6. Fix, then repeat step 1 until `"status": "passed"` with no `errors`. Finish with
    `npm run check`.
 

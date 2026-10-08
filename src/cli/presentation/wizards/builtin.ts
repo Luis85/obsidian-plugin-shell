@@ -1,9 +1,9 @@
-import { createFilePlan } from '../../../../scripts/shared/file-plan.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { prepared } from '../../adapters/storage.ts';
-import { requireSketch } from '../../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { getPath, renderText, type FormValues } from '../../domain/form-model.ts';
 import { review } from '../review.ts';
-import { confirm } from '../prompts.ts';
+import { confirm } from '#tui/prompts.ts';
 import type { ActionContext } from '../wizard-runner.ts';
 import type { WizardModule } from './module.ts';
 /** `with` parameters are inert templates rendered against the wizard state and options. */

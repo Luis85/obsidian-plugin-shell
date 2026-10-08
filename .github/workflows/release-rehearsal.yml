@@ -70,7 +70,7 @@ jobs:
           const input = { candidateDirectory: resolve('reports/release', version + '-' + commit), commit, version, mode: 'draft', remote: JSON.parse(process.env.REMOTE_SNAPSHOT) };
           await writeFile('reports/release/draft-plan-input.json', JSON.stringify(input));
           NODE
-          node scripts/release/promotion-plan.mjs --input reports/release/draft-plan-input.json > reports/release/draft-operation-plan.json
+          node src/cli/tooling/release/promotion-plan.mjs --input reports/release/draft-plan-input.json > reports/release/draft-operation-plan.json
       - name: Retain immutable rehearsal package
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

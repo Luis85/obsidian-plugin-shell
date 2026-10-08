@@ -1,4 +1,4 @@
-import { SketchError } from '../../domain/errors.ts';
+import { SketchError } from '#shared/contracts/sketch-errors.ts';
 import type { FormChoice } from '../../domain/form.ts';
 import type { FormValues } from '../../domain/form-model.ts';
 import { readCandidateInput, readCandidateVersion } from '../../domain/release-candidate.ts';

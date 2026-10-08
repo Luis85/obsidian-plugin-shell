@@ -10,7 +10,7 @@ name: CI
 # passes with every gate skipped. Drafts cannot merge, marking one ready for review
 # (ready_for_review) runs every gate, and Publish requires "Release result" first.
 # End-to-end steps (served UI in Chromium, the UI review gallery, real Obsidian;
-# scripts/quality/e2e-policy.mjs lists them) are opt-in: they run with tier
+# tooling/quality/e2e-policy.mjs lists them) are opt-in: they run with tier
 # release (always), the e2e dispatch/call input or the pull request label e2e.
 # Adding the label starts a run of only the jobs that hold e2e steps; its
 # aggregator reports as "E2E result", never as the required "CI result". In that
@@ -80,7 +80,7 @@ jobs:
           node-version-file: .nvmrc
           package-manager-cache: false
       - name: Verify the dependency-free executable baseline three times
-        run: node scripts/testing/verify-baseline.mjs --repeat 3 --json
+        run: node tooling/testing/verify-baseline.mjs --repeat 3 --json
       - name: Retain scope-labeled verification evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -234,7 +234,7 @@ jobs:
       - &extend-consumer
         name: Extend consumer source and exercise local event and plugin-data authoring
         run: |
-          node --input-type=module -e 'import { readFileSync, writeFileSync } from "node:fs"; const path = "src/features/bookmarks/bookmark.entity.ts"; const original = readFileSync(path, "utf8"); const edited = original.replace("max: 120", "max: 100"); if (edited === original) throw new Error("CONSUMER_EDIT_NOT_APPLIED"); writeFileSync(path, edited);'
+          node --input-type=module -e 'import { readFileSync, writeFileSync } from "node:fs"; const path = "src/plugin/features/bookmarks/bookmark.entity.ts"; const original = readFileSync(path, "utf8"); const edited = original.replace("max: 120", "max: 100"); if (edited === original) throw new Error("CONSUMER_EDIT_NOT_APPLIED"); writeFileSync(path, edited);'
           node "$QUALIFIED_NPM" run make -- maker reminder --yes --no-interaction
           node "$QUALIFIED_NPM" run make -- reminder review --feature bookmarks --trust-custom --yes --no-interaction
           node "$QUALIFIED_NPM" run make -- entity rating --feature bookmarks --backend plugin-data --yes --no-interaction
@@ -248,7 +248,7 @@ jobs:
         run: |
           set -o pipefail
           node "$QUALIFIED_NPM" run verify -- --report-dir reports/template-authoring/verify-summary 2>&1 | tee reports/template-authoring/verify.txt
-          node scripts/quality/check-artifacts.mjs > reports/template-authoring/assets.json
+          node tooling/quality/check-artifacts.mjs > reports/template-authoring/assets.json
       - &label-run-build
         name: Build only the plugin and served harness the browser steps need (e2e label run)
         if: github.event.action == 'labeled'
@@ -272,13 +272,13 @@ jobs:
             !reports/**/*.otf
             !reports/**/*.woff
             !reports/**/*.woff2
-            src/features/bookmarks/
-            src/bootstrap/events.ts
-            src/bootstrap/event-catalog.ts
-            src/bootstrap/authoring.ts
-            src/bootstrap/features.ts
-            scripts/makers/custom/
-            tests/runtime/generated/
+            src/plugin/features/bookmarks/
+            src/plugin/bootstrap/events.ts
+            src/plugin/bootstrap/event-catalog.ts
+            src/plugin/bootstrap/authoring.ts
+            src/plugin/bootstrap/features.ts
+            tooling/makers/custom/
+            src/plugin/tests/unit/generated/
             tests/fixtures/entities/bookmarks-bookmark.md
             PROJECT-IDENTITY.md
             .template-state/setup.json
@@ -315,12 +315,12 @@ jobs:
           export GIT_CEILING_DIRECTORIES="$RUNNER_TEMP"
           cd "$ARCHIVE_ROOT"
           if git rev-parse --show-toplevel; then exit 1; fi
-          node scripts/setup.mjs --id archive-notes --name "Archive Notes" --author "Archive Qualification" --repo example/archive-notes --version 1.0.0 --profile browser --dry-run --json > "$GITHUB_WORKSPACE/reports/template-authoring/archive-dry-run.json"
+          node tooling/setup.mjs --id archive-notes --name "Archive Notes" --author "Archive Qualification" --repo example/archive-notes --version 1.0.0 --profile browser --dry-run --json > "$GITHUB_WORKSPACE/reports/template-authoring/archive-dry-run.json"
           set -o pipefail
           node "$QUALIFIED_NPM" run setup -- --id archive-notes --name "Archive Notes" --author "Archive Qualification" --repo example/archive-notes --version 1.0.0 --profile browser --defer-verify --yes --no-interaction 2>&1 | tee "$GITHUB_WORKSPACE/reports/template-authoring/archive-setup.txt"
           node "$QUALIFIED_NPM" run verify -- --only suites-check,build,typecheck,repository,projects,source,artifacts 2>&1 | tee "$GITHUB_WORKSPACE/reports/template-authoring/archive-verify.txt"
-          node scripts/testing/evidence-cli.mjs run runtime
-          node scripts/testing/evidence-cli.mjs run artifact
+          node tooling/testing/evidence-cli.mjs run runtime
+          node tooling/testing/evidence-cli.mjs run artifact
           cp -R reports "$GITHUB_WORKSPACE/reports/template-authoring/archive-reports"
       - name: Retain source-archive evidence
         if: always()
@@ -364,7 +364,7 @@ jobs:
       - name: Remove reviewed examples while preserving the consumer feature
         run: |
           set -o pipefail
-          sha256sum src/features/bookmarks/bookmark.entity.ts > reports/template-authoring/consumer-before.sha256
+          sha256sum src/plugin/features/bookmarks/bookmark.entity.ts > reports/template-authoring/consumer-before.sha256
           node "$QUALIFIED_NPM" run examples:remove -- --dry-run --json > reports/template-authoring/removal-plan.json
           node "$QUALIFIED_NPM" run examples:remove -- --yes --no-interaction --json > reports/template-authoring/removal.json
           sha256sum --check reports/template-authoring/consumer-before.sha256
@@ -387,7 +387,7 @@ jobs:
       # example-owned files; generator and the maker suite run by maker coverage
       # assert every consumer state). Left out, because removal changes none of
       # their inputs: dependency-policy (lockfile), the full tooling step,
-      # workbench-suite/workbench-check (plugins/) and analyzer-after-tooling.
+      # workbench-suite/workbench-check (src/cli/sdk/) and analyzer-after-tooling.
       # The coverage evidence session runs every runtime test (the runtime suite's
       # include list), so a separate runtime session would run them a third time.
       - name: Qualify the requalified consumer with every gate removal touches
@@ -395,17 +395,17 @@ jobs:
         run: |
           set -o pipefail
           node "$QUALIFIED_NPM" run verify -- --only suites-check,build,analyzer,typecheck,lint-source,eslint-source,maker-types,maker-coverage-gate,eslint-tests,test-quality,repository,projects,source,presentation,architecture,maintainability,entities,events,selected-core-coverage,style-tokens,style-literals,artifacts,baseline,harness-build --report-dir reports/template-authoring/extended-foundation-verify-summary 2>&1 | tee reports/template-authoring/extended-foundation-verify.txt
-          node scripts/testing/suites.mjs native makers generator 2>&1 | tee reports/template-authoring/removal-suites.txt
-          node scripts/testing/evidence-cli.mjs run coverage
-          node scripts/testing/evidence-cli.mjs run artifact
+          node tooling/testing/suites.mjs native makers generator 2>&1 | tee reports/template-authoring/removal-suites.txt
+          node tooling/testing/evidence-cli.mjs run coverage
+          node tooling/testing/evidence-cli.mjs run artifact
       - *label-run-build
       - name: Capture served browser evidence of the requalified consumer
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
-        run: node scripts/testing/evidence-cli.mjs run browser
+        run: node tooling/testing/evidence-cli.mjs run browser
       - name: Report every evidence session of the requalified consumer
         run: |
           for session in reports/evidence/*; do
-            node scripts/testing/evidence-cli.mjs report "$session" > "reports/template-authoring/consumer-acceptance-$(basename "$session").json"
+            node tooling/testing/evidence-cli.mjs report "$session" > "reports/template-authoring/consumer-acceptance-$(basename "$session").json"
           done
       - name: Retain removal evidence and the generated source
         if: always()
@@ -419,14 +419,14 @@ jobs:
             !reports/**/*.otf
             !reports/**/*.woff
             !reports/**/*.woff2
-            src/features/bookmarks/
-            src/features/reading/
-            src/bootstrap/events.ts
-            src/bootstrap/event-catalog.ts
-            src/bootstrap/authoring.ts
-            src/bootstrap/features.ts
-            scripts/makers/custom/
-            tests/runtime/generated/
+            src/plugin/features/bookmarks/
+            src/plugin/features/reading/
+            src/plugin/bootstrap/events.ts
+            src/plugin/bootstrap/event-catalog.ts
+            src/plugin/bootstrap/authoring.ts
+            src/plugin/bootstrap/features.ts
+            tooling/makers/custom/
+            src/plugin/tests/unit/generated/
             tests/fixtures/entities/bookmarks-bookmark.md
             PROJECT-IDENTITY.md
             .template-state/setup.json
@@ -460,25 +460,25 @@ jobs:
       - name: Install locked build dependencies
         run: |
           node "$QUALIFIED_NPM" ci --no-fund
-          node scripts/bundling/build-cli.mjs
+          node tooling/bundling/build-cli.mjs
       - name: Verify real framework reporters and candidate-bound evidence transport
         run: |
           mkdir -p reports/framework-cli
           set -o pipefail
-          node --test --test-concurrency=1 --test-reporter=tap tests/tooling/evidence-adapters.checks.mjs tests/tooling/evidence-browser-transport.checks.mjs tests/tooling/evidence-cli.checks.mjs tests/tooling/evidence-failure.checks.mjs 2>&1 | tee reports/framework-cli/evidence-contracts.txt
+          node --test --test-concurrency=1 --test-reporter=tap tooling/tests/evidence-adapters.checks.mjs tooling/tests/evidence-browser-transport.checks.mjs tooling/tests/evidence-cli.checks.mjs tooling/tests/evidence-failure.checks.mjs 2>&1 | tee reports/framework-cli/evidence-contracts.txt
       - name: Typecheck and exercise actual CLI, plans, data and archive contracts
         run: |
           node "$QUALIFIED_NPM" run typecheck:framework
-          node --test --test-concurrency=1 tests/tooling/framework-*.checks.mjs tests/tooling/capability-discovery.checks.mjs
-          node scripts/testing/suites.mjs prototypes prototypes:python
-          node scripts/quality/check-source.mjs
+          node --test --test-concurrency=1 src/cli/tests/framework-*.checks.mjs src/shared/tests/framework-*.checks.mjs tooling/tests/framework-*.checks.mjs tooling/tests/capability-discovery.checks.mjs
+          node tooling/testing/suites.mjs prototypes prototypes:python
+          node tooling/quality/check-source.mjs
       - name: Typecheck and verify canonical sitemap authoring and project intake
         shell: bash
         run: |
           node "$QUALIFIED_NPM" run typecheck:sitemap
-          node --test --test-concurrency=1 tests/tooling/companion-sitemap-*.checks.mjs tests/tooling/companion-concept-intake.checks.mjs
+          node --test --test-concurrency=1 src/cli/tests/companion-sitemap-*.checks.mjs src/shared/tests/companion-sitemap-*.checks.mjs src/shared/tests/companion-concept-intake.checks.mjs
       - name: Extract the actual ZIP and build independent generated consumers
-        run: node tests/tooling/framework-journey.mjs
+        run: node src/cli/tests/framework-journey.mjs
       - name: Record exact source revision
         if: always()
         run: |
@@ -506,7 +506,7 @@ jobs:
       - name: Install exact dependencies
         run: |
           node "$QUALIFIED_NPM" ci --no-fund
-          node scripts/bundling/build-cli.mjs
+          node tooling/bundling/build-cli.mjs
       - name: Install Electron system libraries (no browser download)
         run: node node_modules/@playwright/test/cli.js install-deps chromium
       - name: Restore the pinned Obsidian host download
@@ -523,7 +523,7 @@ jobs:
         if: always()
         run: |
           mkdir -p reports/obsidian
-          node scripts/dev/obsidian-dev.mjs --json > reports/obsidian/dev-once.json
+          node tooling/dev/obsidian-dev.mjs --json > reports/obsidian/dev-once.json
       - name: Retain real-Obsidian evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -548,31 +548,31 @@ jobs:
       - name: Install the framework
         run: |
           node "$QUALIFIED_NPM" ci --no-fund
-          node scripts/bundling/build-cli.mjs
+          node tooling/bundling/build-cli.mjs
       - name: Verify generator integration with unchanged repository gates
         run: |
-          node scripts/bundling/build.mjs
-          node scripts/quality/check-analyzer.mjs
-          node scripts/quality/check-repository.mjs
-          node scripts/quality/check-source.mjs
-          node --test --test-name-pattern=ANALYZER-ARCHIVE tests/tooling/gates.checks.mjs
+          node tooling/bundling/build.mjs
+          node tooling/quality/check-analyzer.mjs
+          node tooling/quality/check-repository.mjs
+          node tooling/quality/check-source.mjs
+          node --test --test-name-pattern=ANALYZER-ARCHIVE tooling/tests/gates.checks.mjs
       - name: Type-check the compiler and test ownership, contracts and the read-only handoff
         run: |
           node "$QUALIFIED_NPM" run typecheck:generator
-          node --test tests/tooling/project-generator*.checks.mjs tests/tooling/project-starters.checks.mjs tests/tooling/file-plan*.checks.mjs tests/tooling/companion-project.checks.mjs
+          node --test src/cli/tests/project-generator*.checks.mjs tooling/tests/project-generator*.checks.mjs src/cli/tests/project-starters.checks.mjs src/shared/tests/file-plan*.checks.mjs tooling/tests/file-plan*.checks.mjs tooling/tests/companion-project.checks.mjs
           node "$QUALIFIED_NPM" run test:visual
       - name: Generate, independently install, build and test the companion project
         run: |
-          node scripts/companion-tools/qualify-project.mjs
-          node scripts/companion-tools/qualify-project.mjs --boundary-fixture
-          node scripts/companion-tools/qualify-project.mjs --provider-fixture
+          node tooling/companion-tools/qualify-project.mjs
+          node tooling/companion-tools/qualify-project.mjs --boundary-fixture
+          node tooling/companion-tools/qualify-project.mjs --provider-fixture
       - *playwright-version
       - *playwright-cache
       - name: Exercise generated stylesheet against real Nuxt UI components
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
           node node_modules/@playwright/test/cli.js install --with-deps chromium
-          node scripts/companion-tools/qualify-styles.mjs
+          node tooling/companion-tools/qualify-styles.mjs
       - name: Retain exact source and generated project without dependencies or machine state
         if: always()
         run: |
@@ -618,7 +618,7 @@ jobs:
       - name: Install and build the framework used by the starter compiler
         run: |
           node "$QUALIFIED_NPM" ci --no-fund
-          node scripts/bundling/build-cli.mjs
+          node tooling/bundling/build-cli.mjs
       - name: Generate and independently install, build, typecheck and test each starter
         env:
           STARTER_IDS: ${{ matrix.ids }}
@@ -626,7 +626,7 @@ jobs:
           failed=""
           for id in $STARTER_IDS; do
             echo "::group::Starter $id"
-            node scripts/companion-tools/qualify-starter.mjs "$id" || failed="$failed $id"
+            node tooling/companion-tools/qualify-starter.mjs "$id" || failed="$failed $id"
             echo "::endgroup::"
           done
           if [ -n "$failed" ]; then echo "::error::Starter qualification failed:$failed"; exit 1; fi

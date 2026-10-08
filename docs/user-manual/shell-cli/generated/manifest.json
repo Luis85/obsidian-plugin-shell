@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "frameworkVersion": "0.4.0",
-  "commandCount": 180,
+  "commandCount": 188,
   "sources": [
     {
       "path": "package.json",
@@ -10,11 +10,11 @@
     },
     {
       "path": "src/cli/adapters/framework/catalog.ts",
-      "sha256": "ea4c8183534f859de2821e1c9f5d21a5d7d7235f9c51908255a2f2db59216b8f"
+      "sha256": "ddb27b0e46335a6030ea40cf96577e56f61cc9e68b23646f41be54b16fd994b5"
     },
     {
       "path": "src/cli/adapters/framework/help-text.ts",
-      "sha256": "d7a18b495cf76f03bb3617ca547481ea7706c2a7ad43487d27f9995198d7fb68"
+      "sha256": "dadcb34a233230c62f6f85573cf4e58b7a0acd502054fd45a41deeca26742919"
     },
     {
       "path": "src/cli/adapters/framework/increment-catalog.ts",
@@ -29,26 +29,26 @@
       "sha256": "8cf40898f461b38aa39a7d5399a1e4108e65279611c6067831236270e9e364b6"
     },
     {
-      "path": "scripts/documentation/render.mjs",
-      "sha256": "1a0ec13785ff7dc640be5747d166f1d3cab35a7e009bcb2955b77b5e698703fc"
+      "path": "tooling/documentation/render.mjs",
+      "sha256": "edc2746a9b5bf7bb47d115798a5777222ef7c9a2b7230e5fc7a9f5ba0e605b86"
     },
     {
-      "path": "scripts/documentation/manual.mjs",
-      "sha256": "6eb7decc69eeb9b64ee4d31f0f1527fd465e1dad296b986845f63758fa430ab1"
+      "path": "tooling/documentation/manual.mjs",
+      "sha256": "9e92aae4ed71ca1abfb017a0be27a227c7cf24cbdbd19abcde4cb66547a86437"
     }
   ],
   "outputs": [
     {
       "path": "reference.md",
-      "sha256": "ee36192972ec05ce065fc0f71d647a9f1cde124f5c076c81fbbfde06249e30ae"
+      "sha256": "f39450c4b1362fa1ac4c8083aa79799a1e666f189eb79a7a95f5d03508719c87"
     },
     {
       "path": "diagnostics.md",
-      "sha256": "6be5f78b74ad5d3f02260870d34bdf3acfeec3f9464dd1e78d505ac8d7929c03"
+      "sha256": "fcfdc2c5cf997d0651a3026ed6e91f78f8bcf5f3153f29c448a69c886e3070cf"
     },
     {
       "path": "commands.json",
-      "sha256": "6239655bfdc193aae8d3fdd7f91aacbe673e19a5bfe383e49399b94a7ee916c8"
+      "sha256": "204b957a236c6dc6dd83ff6886d323617501f10f2d9d2e8ef187dbfb033d4bdd"
     }
   ]
 }

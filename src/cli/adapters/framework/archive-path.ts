@@ -1,4 +1,4 @@
-import { hasControls } from '../../domain/errors.ts';
+import { hasControls } from '#shared/contracts/sketch-errors.ts';
 /** Portable relative file identity. This validates names, not filesystem containment. */
 export function portableFile(path: string): boolean {
   return path.length > 0 && path.length <= 2048 && !path.includes('\\') && path.split('/').every(part =>

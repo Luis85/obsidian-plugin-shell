@@ -1,4 +1,4 @@
-import { isProtectedSegment } from '../../../../scripts/shared/protected-directories.ts';
+import { isProtectedSegment } from '#shared/platform/protected-directories.ts';
 import { docsPlan } from './docs.ts';
 import { prototypesPlan } from './prototypes.ts';
 import { adoptPlanPlan, adoptSkillPlan } from './adopt-plan.ts';
@@ -7,9 +7,9 @@ import { hostingPlan } from './hosting-plan.ts';
 import { siteCollectionsPlan, siteNewPlan } from './site-command.ts';
 import { communityPluginPlan } from '../community-plugins/operations.ts';
 import { handoutPlan } from './handout-adapter.ts';
-import { serializeJson as json } from '../../../../scripts/contracts/serialization.ts';
+import { serializeJson as json } from '#shared/contracts/serialization.ts';
 import { join, resolve, relative, isAbsolute, sep } from 'node:path';
-import { createFilePlan, applyFilePlan, type FilePlan, type FilePlanEntry } from '../../../../scripts/shared/file-plan.ts';
+import { createFilePlan, applyFilePlan, type FilePlan, type FilePlanEntry } from '#shared/platform/file-plan.ts';
 import { parseArguments as makerArguments, builtinRecipes } from '../makers/arguments.ts';
 import { canonicalRequest, validateRequest, descriptor } from './catalog.ts';
 import { configurationPlan, vaultPlan, releaseVersionPlan } from './changes.ts';
@@ -23,11 +23,13 @@ import { upgradePlan } from './kit.ts';
 import { configFile, object } from './configuration.ts';
 import { readConfiguration, readJson, readBounded, hash, exists } from './files.ts';
 import { OperationError, requireThat, stringOption, type Context, type Request } from './contracts.ts';
+import { makerLayout } from '../makers/target.ts';
 import { customRecipeNames } from '../makers/custom-registry.ts';
 import { pendingChecks } from './maker-checks.ts';
 import { didYouMean, suggestions } from './suggest.ts';
 import type { MakerCheck } from '../makers/plan.ts';
 import { incrementPlanners } from '../increments/planners.ts';
+import { sourcePlanners } from '../source-command.ts';
 /** `steps` are reviewed non-file steps bound into the plan hash; `prepare` runs before saving and `finalize` runs after saving (for example, a reviewed Git commit). */
 interface Planned { plan: FilePlan; summary: unknown; conflicts: string[]; hash?: string; checks?: readonly MakerCheck[]; steps?: readonly unknown[]; prepare?: () => Promise<unknown>; finalize?: () => Promise<unknown> }
 /** Built-in and registered custom recipes are resolved before trust: only a real custom recipe needs --trust-custom. */
@@ -35,14 +37,14 @@ async function resolveRecipe(request: Request, context: Context, recipe: string)
   if (builtinRecipes.includes(recipe)) return;
   const custom = await customRecipeNames(context.root);
   if (!custom.includes(recipe)) throw new OperationError('MAKER_UNKNOWN', `Unknown recipe: ${recipe}.${didYouMean(suggestions(recipe, [...builtinRecipes, ...custom]), value => `"${value}"`)}`, 'node bin/app make list');
-  requireThat(request.options['trust-custom'] === true, 'CUSTOM_TRUST_REQUIRED', `${recipe} is a local custom recipe that executes trusted project code; review scripts/makers/custom/${recipe}.mjs, then pass --trust-custom.`);
+  requireThat(request.options['trust-custom'] === true, 'CUSTOM_TRUST_REQUIRED', `${recipe} is a local custom recipe that executes trusted project code; review ${makerLayout(context.root).tooling}/makers/custom/${recipe}.mjs, then pass --trust-custom.`);
 }
 /** `make batch --input skeleton.json`: every step in one reviewed plan with one check run. */
 async function makerBatchPlan(request: Request, context: Context): Promise<Planned> {
   const input = stringOption(request.options, 'input');
   requireThat(input && request.args.length === 1, 'MAKER_BATCH_INPUT', 'Supply make batch --input <skeleton.json> with { "schemaVersion": 1, "steps": [{ "recipe": "feature", "name": "boards", "bare": true }, ...] }.');
   const { planMakerBatch } = await import('../makers/batch.ts');
-  const planned = await planMakerBatch(context.root, await readJson(resolve(context.root, input)));
+  const planned = await planMakerBatch(context.root, await readJson(resolve(context.root, input)), stringOption(request.options, 'source'));
   return { plan: planned.plan, checks: planned.checks, summary: { maker: planned.maker, steps: planned.steps, checks: pendingChecks(planned.checks), next: planned.next }, conflicts: [] };
 }
 async function makerPlan(request: Request, context: Context): Promise<Planned> {
@@ -109,6 +111,7 @@ const planners: Record<string, Planner> = {
   'release prepare': releaseVersionPlan,
   'framework upgrade': frameworkUpgradePlan,
   ...incrementPlanners,
+  ...sourcePlanners,
 };
 function plannerFor(command: string): Planner {
   if (Object.hasOwn(planners, command)) return planners[command]!;

@@ -1,6 +1,6 @@
 /** Human views of the adoption commands. The JSON result stays the authority; these never claim an integration happened. */
 import type { AdoptionReport, Severity } from '../../domain/adoption/contracts.ts';
-import type { Result } from '../../../../scripts/contracts/result.ts';
+import type { Result } from '#shared/contracts/result.ts';
 import { bold, marker, nextLine, rows, type Mark, type Style } from './terminal-style.ts';
 
 const marks: Record<Severity, Mark> = { block: 'fail', warn: 'warn', info: 'info' };

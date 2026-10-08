@@ -1,14 +1,14 @@
 /** Resolves what a design folder is prepared from: a managed prototype's variant or the saved sketch project. */
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { snapshotPath, type ManagedPrototype, type PrototypeSelection } from '../../../scripts/companion/prototypes/model.ts';
+import { snapshotPath, type ManagedPrototype, type PrototypeSelection } from '#shared/companion/prototypes/model.ts';
 import { loadPrototypeWorkspace } from './framework/prototype-workspace.ts';
 import { exists, hash, readBounded } from './framework/files.ts';
 import { savedProjectConfig } from './project-selection.ts';
 import { readSnapshot } from './storage.ts';
 import { guardedText } from './user-settings.ts';
 import { openDocument, type SketchDocument } from '../domain/document.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import type { DesignManifest, DesignSource } from '../domain/design-folder.ts';
 import { designTemplateNames, shellTarget, type DesignTarget, type DesignTemplates } from '../application/design-folder.ts';
 export interface ResolvedDesignSource { document: SketchDocument; source: DesignSource; title: string }

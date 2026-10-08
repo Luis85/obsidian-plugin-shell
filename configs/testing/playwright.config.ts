@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from '@playwright/test';
-import { resolveBrowserExecutable } from '../../scripts/testing/browser-executable.mjs';
+import { resolveBrowserExecutable } from '../../src/cli/tooling/testing/browser-executable.mjs';
 // Paths resolve from the project root, not from this config's folder.
 const root = fileURLToPath(new URL('../../', import.meta.url));
 // SHELL_CHROMIUM is the only browser override. A mismatched Chromium revision is reported, never picked up silently.
@@ -8,7 +8,7 @@ const browser = resolveBrowserExecutable({ root });
 if (browser.reason === 'override-missing') throw new Error(`BROWSER_UNAVAILABLE: ${browser.hint}`);
 if (browser.status === 'revision-mismatch') console.warn(`[playwright] ${browser.hint}`);
 export default defineConfig({
-  testDir: `${root}tests/e2e`, fullyParallel: false, workers: 1, retries: 0, timeout: 30000,
+  testDir: `${root}src/plugin/tests/e2e`, fullyParallel: false, workers: 1, retries: 0, timeout: 30000,
   reporter: [['list'], ['json', { outputFile: `${root}reports/e2e/results.json` }], ['html', { outputFolder: `${root}reports/e2e/html`, open: 'never' }]],
   outputDir: `${root}reports/e2e/artifacts`,
   use: { baseURL: 'http://127.0.0.1:4180', browserName: 'chromium', locale: 'en-US', timezoneId: 'Europe/Berlin', viewport: { width: 1360, height: 960 }, trace: 'retain-on-failure', screenshot: 'only-on-failure',

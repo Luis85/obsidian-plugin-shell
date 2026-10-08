@@ -1,5 +1,5 @@
 import { list, object, text } from '../domain/data.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { testWorkflowJson, type TestWorkflowDefinition } from '../domain/test-workflow.ts';
 import type { TestWorkflowRunRecord } from '../domain/test-workflow-docs.ts';
 import { hash } from './framework/files.ts';

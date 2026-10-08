@@ -2,7 +2,7 @@ import { posix } from 'node:path';
 import { checkNativeRegistration } from './native-registrations.ts';
 import { makerSymbol as symbol, title } from './arguments.ts';
 import { nativeDeclarationSource, nativeDeclarationTest } from '../../compiler/emitters/native-boilerplate.ts';
-import { validateNativeIntegrations } from '../../../../scripts/companion/native-contract.mjs';
+import { validateNativeIntegrations } from '#shared/companion/native-contract.mjs';
 import { fileEditorRecipe } from './file-editor.ts';
 import type { MakerContext, OwnedInput } from './contracts.ts';
 

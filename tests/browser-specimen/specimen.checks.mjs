@@ -96,7 +96,7 @@ export const specimenChecks = [
     assert.deepEqual(value,{ text:'rgb(31, 72, 113)',accent:'rgb(53, 107, 61)',padding:'23px' }); return value;
   } },
   { id: 'BRW-11', name: 'negative control detects missing plugin aliases while host remains', run: async ({ page }) => {
-    await page.locator('link[href*="src/styles/index.css"], style[data-plugin-tokens]').evaluateAll((els) => els.forEach((el) => el.remove()));
+    await page.locator('link[href*="styles/index.css"], style[data-plugin-tokens]').evaluateAll((els) => els.forEach((el) => el.remove()));
     const values = await page.locator('body').evaluate((el) => ({ host:getComputedStyle(el).getPropertyValue('--background-primary').trim(), alias:getComputedStyle(el).getPropertyValue('--plugin-shell-surface').trim() }));
     assert.ok(values.host); assert.equal(values.alias,''); assert.throws(() => assert.ok(values.alias)); return { missingAliasDetected:true };
   } },

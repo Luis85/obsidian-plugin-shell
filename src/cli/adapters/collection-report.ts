@@ -1,5 +1,5 @@
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { sortCollection } from '../domain/collection-query.ts';
 import { collectionBase, collectionRegister, mergeCollectionRegister } from '../domain/collection-register.ts';
 import { hash } from './framework/files.ts';

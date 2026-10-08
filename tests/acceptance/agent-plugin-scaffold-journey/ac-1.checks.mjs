@@ -4,8 +4,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { cp, mkdir, readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { makerFixture, makerSourceRoot, installMakerFoundation } from '../../tooling/maker-fixture.mjs';
-import { applyFilePlan } from '../../../scripts/shared/file-plan.ts';
+import { makerFixture, makerSourceRoot, installMakerFoundation } from '../../../src/cli/tests/support/maker-fixture.mjs';
+import { applyFilePlan } from '../../../src/shared/platform/file-plan.ts';
 import { planMakerBatch } from '../../../src/cli/adapters/makers/batch.ts';
 
 const skeleton = {
@@ -21,7 +21,7 @@ const skeleton = {
 test('[AC-1] make batch plans a whole plugin skeleton as one reviewed plan, applies it once and replays unchanged', { timeout: 180000 }, () => makerFixture(async root => {
   await installMakerFoundation(root);
   await mkdir(join(root, 'src/locales'), { recursive: true });
-  await cp(join(makerSourceRoot, 'src/locales/en.json'), join(root, 'src/locales/en.json'));
+  await cp(join(makerSourceRoot, 'src/plugin/locales/en.json'), join(root, 'src/locales/en.json'));
   const planned = await planMakerBatch(root, skeleton);
   assert.equal(planned.maker, 'batch');
   assert.deepEqual(planned.steps, skeleton.steps.map(({ recipe, name }) => ({ recipe, name })));

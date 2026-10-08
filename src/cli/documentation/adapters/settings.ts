@@ -1,5 +1,5 @@
-import { PROTECTED_PROJECT_SEGMENTS } from '../../../../scripts/shared/protected-directories.ts';
-import { hasPortableProjectSegments, hasProtectedProjectRoot } from '../../../../scripts/shared/project-path.ts';
+import { PROTECTED_PROJECT_SEGMENTS } from '#shared/platform/protected-directories.ts';
+import { hasPortableProjectSegments, hasProtectedProjectRoot } from '#shared/platform/project-path.ts';
 import { join } from 'node:path';
 import { DOC_TYPES, docsObject as object, array, insist, type DocType } from '../domain/contracts.ts';
 import { portable, readBytes, decode } from './filesystem.ts';

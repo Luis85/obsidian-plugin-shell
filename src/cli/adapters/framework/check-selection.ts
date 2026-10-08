@@ -3,7 +3,7 @@
  * protect, by change-type rules and (for the plan only) by workflow `paths:` filters; plus the narrowed
  * `check --fast` step list built from the same selection.
  */
-import { isWithinRoot } from '../../../../scripts/shared/project-roots.mjs';
+import { isWithinRoot } from '#shared/platform/project-roots.mjs';
 import type { CheckStep } from './check.ts';
 import type { Changes } from './check-changes.ts';
 import type { GateRules, Rule, SuiteDef, SuiteManifest, Toolkit, Workflow } from './gate-sources.ts';
@@ -126,8 +126,8 @@ function testStep(ctx: FastContext): CheckStep {
 function suiteStep(ctx: FastContext): CheckStep[] {
   if (ctx.project) return [];
   const names = ctx.suites.map(suite => suite.name);
-  const base: CheckStep = { id: 'suites', display: 'node scripts/testing/suites.mjs', entry: 'scripts/testing/suites.mjs', args: names, timeoutMs: suiteTimeoutMs };
-  if (!names.length) return [{ ...base, display: 'node scripts/testing/suites.mjs (no matching suites)', skip: 'No changed path selects a node --test or maker suite.' }];
+  const base: CheckStep = { id: 'suites', display: 'node tooling/testing/suites.mjs', entry: 'tooling/testing/suites.mjs', args: names, timeoutMs: suiteTimeoutMs };
+  if (!names.length) return [{ ...base, display: 'node tooling/testing/suites.mjs (no matching suites)', skip: 'No changed path selects a node --test or maker suite.' }];
   if (ctx.skipSuites) return [{ ...base, display: `${base.display} ${names.join(' ')} (left to CI)`, skip: `--skip-suites: ${names.join(', ')} run in CI's Integration tier, not here.` }];
   return [{ ...base, display: `${base.display} ${names.join(' ')}` }];
 }

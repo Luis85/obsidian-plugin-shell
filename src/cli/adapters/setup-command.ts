@@ -1,7 +1,7 @@
 import { loadSetupCheckpoint, setupCheckpointPlan, resumeSetupCheckpoint, discardSetupCheckpointPlan } from './setup-checkpoint.ts';
 import { settingsMigrationPlan } from './settings-migration.ts';
 import { settingsSchema, defaultSettings } from '../domain/user-settings.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { option, type Arguments } from '../domain/command-options.ts';
 import { applyPrepared } from './storage.ts';
 import { loadSettings, settingsPlan } from './user-settings.ts';

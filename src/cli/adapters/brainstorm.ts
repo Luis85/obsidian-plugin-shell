@@ -1,9 +1,9 @@
 import { join } from 'node:path';
-import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { hash, readBounded } from './framework/files.ts';
-import { readInput } from '../../../scripts/shared/input.ts';
+import { readInput } from '#shared/platform/input.ts';
 import { runNode } from './framework/process.ts';
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { firstRunInventory } from './first-run-inventory.ts';
 import { firstRunTool } from './first-run-plan.ts';
 import { compile } from './compiler.ts';
@@ -11,7 +11,7 @@ import { savedProjectSelection } from './project-selection.ts';
 import { outputBoundary } from './package-plan.ts';
 import { readData, readSnapshot, prepared, applyPrepared, type Entry, type Prepared } from './storage.ts';
 import { object, keys, text } from '../domain/data.ts';
-import { requireSketch, slug } from '../domain/errors.ts';
+import { requireSketch, slug } from '#shared/contracts/sketch-errors.ts';
 import { documentText } from '../domain/document.ts';
 import { brainstormGuide, brainstormSchema, featureConcept, readFeatureBrainstorm, type FeatureBrainstorm } from '../domain/brainstorm.ts';
 import { projectPath } from '../domain/user-settings.ts';
@@ -86,7 +86,8 @@ async function generatedEntries(request: FeatureBrainstorm, result: ReturnType<t
   const compiler = { outputKind: kind, fingerprint: emitted.compilation.fingerprint,
     readiness: emitted.compilation.readiness, artifacts: emitted.artifacts.length };
   const owned = emitted.artifacts.map(item => ({ path: item.path, sha256: hash(artifactBytes(item)) }));
-  const receipt = JSON.stringify({ schemaVersion: 1, files: owned }, null, 2) + '\n';
+  // Machine-owned provenance shares the bounded input inventory with the generated application.
+  const receipt = JSON.stringify({ schemaVersion: 1, files: owned }) + '\n';
   const entries = emitted.artifacts.map(item => artifactEntry(out, item));
   entries.push({ path: sourcePath(out) + '/.maker/receipt.json', content: receipt });
   return { entries, compiler, sourceReceiptSha256: hash(receipt) };

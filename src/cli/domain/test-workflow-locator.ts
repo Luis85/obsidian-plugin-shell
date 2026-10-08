@@ -1,5 +1,5 @@
 import { keys, object } from './data.ts';
-import { hasControls, requireSketch } from './errors.ts';
+import { hasControls, requireSketch } from '#shared/contracts/sketch-errors.ts';
 /**
  * Data-only, accessibility-first element locators for test workflows. A locator names exactly one strategy (ARIA role
  * with an optional accessible name, form label, placeholder, visible text or test id) and may be scoped `within` a

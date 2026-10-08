@@ -1,5 +1,5 @@
 import { applyPrepared, type Prepared } from '../adapters/storage.ts';
-import { confirm, type Prompts } from './prompts.ts';
+import { confirm, type Prompts } from '#tui/prompts.ts';
 /** Human approval is always after review, never implied by scrolling or Enter in a pager. */
 export async function review(ui: Prompts, value: Prepared, signal?: AbortSignal): Promise<boolean> {
   const changed = value.plan.changes.filter(item => item.status !== 'unchanged');

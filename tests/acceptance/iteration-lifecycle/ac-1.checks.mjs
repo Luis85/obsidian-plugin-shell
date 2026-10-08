@@ -1,7 +1,7 @@
 // iteration-lifecycle AC-1: planning remains local until readiness and branch commitment.
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createWorkspace, planThenApply, readyFragment } from '../../support/increment-workspace.mjs';
+import { createWorkspace, planThenApply, readyFragment } from '../../../src/cli/tests/support/increment-workspace.mjs';
 
 test('AC-1: scoped planning records become a committed iteration branch', async () => {
   const ws = createWorkspace({ delivery: true });

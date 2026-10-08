@@ -58,10 +58,10 @@ jobs:
       # Without the e2e opt-in the same journey stops before the browser (build-only evidence, labelled as such).
       - name: Run compiled kit, first run, edit and regeneration without the browser
         if: ${{ !(inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')) }}
-        run: node scripts/testing/qualify-angular-setup.mjs --no-browser
+        run: node tooling/testing/qualify-angular-setup.mjs --no-browser
       - name: Run compiled kit, first run, edit, regeneration and real browser acceptance
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
-        run: node scripts/testing/qualify-angular-setup.mjs
+        run: node tooling/testing/qualify-angular-setup.mjs
       - name: Retain candidate-specific results
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

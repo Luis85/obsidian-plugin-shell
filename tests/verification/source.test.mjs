@@ -5,14 +5,14 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { sourceInputs, physicalLines, lineLimit } from '../../scripts/testing/source-inputs.mjs';
-import { codeLines } from '../../scripts/testing/code-lines.mjs';
+import { sourceInputs, physicalLines, lineLimit } from '../../tooling/testing/source-inputs.mjs';
+import { codeLines } from '../../tooling/testing/code-lines.mjs';
 test('[SRC-01] code limits exclude comments and blanks but preserve literal and mixed-line code', () => {
   assert.equal(physicalLines(''), 0); assert.equal(physicalLines('x\n'), 1);
   assert.equal(physicalLines('x\r\n\r\n'), 2);
   assert.equal(physicalLines('// comment\n\nvalue'), 3);
-  assert.equal(lineLimit('src/main.ts'), 100);
-  assert.equal(lineLimit('harness/style-fixture/fixture.js'), 400);
+  assert.equal(lineLimit('src/plugin/main.ts'), 100);
+  assert.equal(lineLimit('src/plugin/harness/style-fixture/fixture.js'), 400);
   assert.equal(lineLimit('tests/a.test.mjs'), 450);
   const cases = [
     ['a.ts', '// comment\n\n/* block\n comment */\nconst n = 1; // inline\n', 1],
@@ -60,13 +60,13 @@ test('[SRC-02] dependency-free actual source gate enforces exact 100, 400 and 45
     if ((await lstat(join(project, path))).isDirectory()) await mkdir(join(dir, path), { recursive: true });
     else { await mkdir(dirname(join(dir, path)), { recursive: true }); await writeFile(join(dir, path), '{}'); }
   }
-  for (const path of ['scripts/quality/check-source.mjs', 'scripts/testing/source-inputs.mjs', 'scripts/testing/code-lines.mjs', 'scripts/styles/vendor-policy.mjs', 'scripts/shared/hash.ts', 'scripts/quality/thresholds.mjs', 'configs/quality/thresholds.json']) {
+  for (const path of ['tooling/quality/check-source.mjs', 'tooling/testing/source-inputs.mjs', 'tooling/testing/code-lines.mjs', 'tooling/styles/vendor-policy.mjs', 'src/shared/platform/hash.ts', 'tooling/quality/thresholds.mjs', 'configs/quality/thresholds.json']) {
     await mkdir(dirname(join(dir, path)), { recursive: true }); await writeFile(join(dir, path), await readFile(join(project, path)));
   }
-  await mkdir(join(dir, 'src/locales')); for (const locale of ['en', 'de']) await writeFile(join(dir, `src/locales/${locale}.json`), '{}');
+  await mkdir(join(dir, 'src/plugin/locales'), { recursive: true }); for (const locale of ['en', 'de']) await writeFile(join(dir, `src/plugin/locales/${locale}.json`), '{}');
   await mkdir(join(dir, 'docs/concepts/companion/test-kit'), { recursive: true });
-  const run = () => spawnSync(process.execPath, ['scripts/quality/check-source.mjs'], { cwd: dir, encoding: 'utf8', timeout: 10000 });
-  for (const [path, limit] of [['src/main.ts', 100], ['src/example.ts', 400], ['tests/example.mjs', 450], ['docs/concepts/companion/test-kit/example.mjs', 400]]) {
+  const run = () => spawnSync(process.execPath, ['tooling/quality/check-source.mjs'], { cwd: dir, encoding: 'utf8', timeout: 10000 });
+  for (const [path, limit] of [['src/plugin/main.ts', 100], ['src/example.ts', 400], ['tests/example.mjs', 450], ['docs/concepts/companion/test-kit/example.mjs', 400]]) {
     const code = 'void 0; /* inline */\n'.repeat(limit); const comments = '// comment only\n\n/* block\ncomment */\n'.repeat(100);
     await writeFile(join(dir, path), code); assert.equal(run().status, 0, path);
     await writeFile(join(dir, path), comments + code); assert.equal(run().status, 0, `${path} with comments`);

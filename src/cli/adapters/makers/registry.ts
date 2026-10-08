@@ -1,3 +1,4 @@
+import { makerTarget } from './target.ts';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import type TS from 'typescript';
@@ -67,9 +68,10 @@ function readRegistrations(ts: Typescript, { object, registerName }: Callback, i
   }
   return registrations;
 }
-export async function readRegistry(root: string, providedSource?: string): Promise<FeatureRegistry> {
+export async function readRegistry(root: string, providedSource?: string, sourcePath?: string): Promise<FeatureRegistry> {
   const ts = await loadTypescript();
-  const path = 'src/bootstrap/features.ts'; const source = providedSource ?? await readFile(resolve(root, path), 'utf8');
+  const base = sourcePath ?? (providedSource === undefined ? (await makerTarget(root)).path : 'src');
+  const path = `${base}/bootstrap/features.ts`; const source = providedSource ?? await readFile(resolve(root, path), 'utf8');
   const parsed = parseTypescript(ts, path, source);
   if (hasSyntaxErrors(parsed)) throw new Error('REGISTRY_PARSE_ERROR: repair src/bootstrap/features.ts first');
   const imports = featureImports(namedImports(ts, parsed));

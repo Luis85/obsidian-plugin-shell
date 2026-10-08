@@ -25,6 +25,7 @@ import { suggestions, didYouMean } from './suggest.ts';
 import { capabilityCatalog } from '../operations/catalog.ts';
 import { result, failure, requireThat, stringOption, OperationError, type Context, type Request, type Result } from './contracts.ts';
 import { runNode } from './process.ts';
+import { toolingPath } from './repository-scope.ts';
 import { fileOperation } from './file-operation.ts';
 import { processOperation } from './process-operation.ts';
 import { readOperation } from './read-operation.ts';
@@ -33,6 +34,7 @@ import { isUiCommand, uiOperation } from './ui-operation.ts';
 import { incrementRead, isIncrementRead } from '../increments/read-operation.ts';
 import { remoteOperation } from '../increments/remote-operation.ts';
 import { pluginsRead } from '../community-plugins/operations.ts';
+import { isSourceRead, sourceRead } from '../source-command.ts';
 
 /** One command page, a group of subcommands sharing a root word, every command, or the golden path. */
 function helpSelection(request: Request) {
@@ -78,16 +80,16 @@ function makerDiscovery(request: Request): Result {
   return result(request.command, { makers });
 }
 const isMakerCheck = (request: Request) => request.command === 'make' && request.options.check === true;
-const checkOptions = ['check', 'json', 'root', 'no-interaction', 'dry-run'];
+const checkOptions = ['source', 'check', 'json', 'root', 'no-interaction', 'dry-run'];
 /** make locale <name> --check compares the pending draft with the current base keys; it plans and writes nothing. */
 async function makerCheck(request: Request, context: Context): Promise<Result> {
   const [recipe, name] = request.args;
   requireThat(recipe === 'locale' && name, 'MAKER_CHECK_UNSUPPORTED', 'Only make locale <name> --check has a read-only check.');
   requireThat(Object.keys(request.options).every(key => checkOptions.includes(key)), 'MAKER_CHECK_OPTIONS', '--check is read-only; it accepts only --json, --root, --no-interaction and --dry-run.');
   const { slug } = await import('../makers/arguments.ts');
-  const { createMakerContext } = await import('../makers/engine.ts');
+  const { makerTarget, targetedMakerContext } = await import('../makers/target.ts');
   const { checkPendingLocale } = await import('../makers/pending-locale.ts');
-  const check = await checkPendingLocale(createMakerContext(context.root).read, slug(name, 'locale name'));
+  const check = await checkPendingLocale(targetedMakerContext(context.root, await makerTarget(context.root, 'plugin', typeof request.options.source === 'string' ? request.options.source : undefined)).read, slug(name, 'locale name'));
   if (!check.missing.length && !check.extra.length && check.selectable === false) return result(request.command, check);
   const drift = new OperationError('LOCALE_DRAFT_DRIFT', `Pending locale ${check.locale} differs from the base keys or is selectable.`, `Review make locale ${check.locale} --refresh --dry-run, which restores missing keys and removes extra keys, and keep the draft unselectable until its translation review.`);
   drift.details = check;
@@ -96,7 +98,7 @@ async function makerCheck(request: Request, context: Context): Promise<Result> {
 /** The registered entity catalog, bundled from checked-in definitions; the same handler serves source checkouts and kits. */
 async function entityCatalog(request: Request, context: Context): Promise<Result> {
   const { loadCatalog } = await import('../makers/load-catalog.ts');
-  return result(request.command, await loadCatalog(context.root));
+  return result(request.command, await loadCatalog(context.root, typeof request.options.source === 'string' ? request.options.source : undefined));
 }
 async function newProject(request: Request, context: Context): Promise<Result> {
   if (request.options.list) return starterListing(context);
@@ -125,7 +127,8 @@ async function releaseOperate(request: Request, context: Context): Promise<Resul
       publication: 'not-authorized',
     }, 'planned');
   }
-  const exit = await runNode(context, 'scripts/release/cli.mjs', releaseArgs(request, context, path));
+  // tooling/ in current projects, scripts/ in older generated consumers (repository-scope.ts).
+  const exit = await runNode(context, toolingPath(context.root, 'release/cli.mjs'), releaseArgs(request, context, path));
   requireThat(!exit.truncated, 'RELEASE_OUTPUT_LIMIT', 'Release output exceeded its bound; do not infer success or retry writes automatically.');
   return result(request.command, { execution: exit, receipt: JSON.parse(exit.stdout) });
 }
@@ -151,6 +154,7 @@ const routes: Route[] = [
   [prefixed('entities '), entityCatalog],
   [named('adopt analyze'), adoptAnalyze],
   [named('hosting show'), hostingShow],
+  [isSourceRead, sourceRead],
   [isIncrementRead, incrementRead],
   [named('setup status', 'setup resume'), (request, context) => setupProgress(request, context, executeOperation)],
   [named('new'), newProject],

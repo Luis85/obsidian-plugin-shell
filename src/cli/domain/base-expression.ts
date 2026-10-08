@@ -1,4 +1,4 @@
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import type { BaseNode } from './base-expression-parse.ts';
 
 /**

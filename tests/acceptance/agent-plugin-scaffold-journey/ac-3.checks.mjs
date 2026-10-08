@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { companionStarters, loadDefinitions } from '../../../src/cli/adapters/starters/repository.ts';
-import { customizeStarter } from '../../../src/cli/adapters/starters/customize.ts';
+import { customizeStarter } from '../../../src/shared/companion/starters/customize.ts';
 
 const root = await realpath(fileURLToPath(new URL('../../../', import.meta.url)));
 const catalog = companionStarters(await loadDefinitions(root));

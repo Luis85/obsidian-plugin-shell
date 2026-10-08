@@ -1,8 +1,8 @@
-import { validateAuthoringDocument, type AuthoringDocument } from '../../../scripts/companion/authoring-contract.ts';
-import { emptyVisualDesigns, type VisualDesigns } from '../../../scripts/companion/visual/visual-ir.mjs';
-import { validateVisualDesigns } from '../../../scripts/companion/visual/visual-validate.mjs';
-import { record } from '../../../scripts/companion/sitemap/safety.ts';
-import { requireSketch, slug, title } from './errors.ts';
+import { validateAuthoringDocument, type AuthoringDocument } from '#shared/companion/authoring-contract.ts';
+import { emptyVisualDesigns, type VisualDesigns } from '#shared/companion/visual/visual-ir.mjs';
+import { validateVisualDesigns } from '#shared/companion/visual/visual-validate.mjs';
+import { record } from '#shared/companion/sitemap/safety.ts';
+import { requireSketch, slug, title } from '#shared/contracts/sketch-errors.ts';
 
 export interface LibraryEntry { id: string; name: string; description?: string; [key: string]: unknown }
 export interface SketchDocument extends AuthoringDocument {

@@ -4,7 +4,7 @@ import { loadSettings } from '../adapters/user-settings.ts';
 import { designRoot } from '../domain/user-settings.ts';
 import { designFolderSlug } from '../domain/design-folder.ts';
 import { review } from './review.ts';
-import { confirm, reportError, type Prompts } from './prompts.ts';
+import { confirm, reportError, type Prompts } from '#tui/prompts.ts';
 /** briefFrom names a prepared design-brief.md outside the root; its text is kept inside the design folder. */
 export type DesignOffer = Omit<DesignFolderOptions, 'mode' | 'name' | 'briefFile'> & { title: string; briefFrom?: string };
 export async function offerDesignFolder(ui: Prompts, offer: DesignOffer): Promise<string | undefined> {

@@ -1,5 +1,5 @@
 import type * as Yaml from 'yaml';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 let loaded: typeof Yaml | undefined;
 /** Dependencies load lazily, so `node bin/app` keeps working before installation; call this before yamlRuntime(). */
 export async function loadYaml(): Promise<typeof Yaml> {

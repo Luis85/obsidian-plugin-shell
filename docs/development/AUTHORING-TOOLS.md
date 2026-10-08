@@ -3,8 +3,8 @@
 > Type: reference · Part of the [docs index](../README.md)
 
 The maker catalog generates ordinary, registered source through one reviewed file
-planner. Feature authors keep domain rules in `src/features/<owner>`; Vue markup
-stays in `src/presentation/components`, with behavior in composables and per-view
+planner. Feature authors keep domain rules in `src/plugin/features/<owner>`; Vue markup
+stays in `src/plugin/presentation/components`, with behavior in composables and per-view
 Pinia stores. The recipes use the existing services and exact installed toolchain.
 They never install dependencies, fetch templates, create user notes or publish.
 
@@ -26,6 +26,29 @@ report `plugin-data`. Unrelated recipes omit backend/folder/schema options. Defa
 view, command and input labels include the feature owner so multiple generated
 features remain distinguishable. Existing developer-owned scaffolds are preserved.
 
+## Choose the source project
+
+Plugin recipes resolve their destination from `workbench.sources.json`. With one
+plugin project, selection is automatic; this checkout uses `src/plugin/`. With
+several plugin projects, pass `--source <name>` using the manifest's project name,
+not a directory path. An unknown name, ambiguous selection or malformed manifest
+fails before files are written.
+
+```sh
+node bin/app source list
+npm run make -- feature bookmarks --entity bookmark --source plugin --dry-run
+```
+
+The selected project owns the generated feature, registrations and tests under
+its own `tests/` directory. A legacy flat project without a manifest keeps its
+`src/` and `tests/runtime/` layout. The `maker` and Workbench `plugin` recipes
+extend repository tooling and the CLI SDK respectively; they do not create an
+Obsidian feature in a source project.
+
+A batch uses the same source selection: `node bin/app make batch --input skeleton.json --source plugin --dry-run` sets the default project for all steps. A step's JSON
+`source` field overrides that default. Feature ownership is scoped to the source
+project, so two plugin projects may each contain a feature with the same name.
+
 ## Recipes and integration
 
 All child recipes take `<name> --feature <existing-owner>` unless stated otherwise.
@@ -45,8 +68,8 @@ All child recipes take `<name> --feature <existing-owner>` unless stated otherwi
 | `listener` | Requires `--event <existing-name>` in the same feature. Subscribes to that typed event through the shared runtime bus, displays localized feedback and unsubscribes on disposal. |
 | `style` | Requires `--view <existing-generated-view>`. Adds an owned CSS module and an actual SFC stylesheet import. No unused CSS output or global host reset. |
 | `locale` | Takes only a locale name. Copies every base and explicitly registered feature key into a pending translation skeleton, with nonselectable status metadata and a completeness test. Review and translate before deliberately enabling a language. Later added keys make the test fail until the draft is updated. |
-| `maker` | Takes only a recipe name. Creates a trusted local recipe in `scripts/makers/custom`, explicitly registers it and generates a composition test. The default custom recipe composes a real localized command. Running the new recipe needs `--trust-custom`. |
-| `plugin` | Takes only a plugin name. Creates and registers a self-contained Workbench TypeScript plugin under `plugins/<name>` with manifest, config, source, tests and event/CLI/TUI examples. Its checks add the plugin registry check, the maker type check (`configs/types/tsconfig.maker.json`) and the `workbench-plugins` suite. |
+| `maker` | Takes only a recipe name. Creates a trusted local recipe in `tooling/makers/custom`, explicitly registers it and generates a composition test. The default custom recipe composes a real localized command. Running the new recipe needs `--trust-custom`. |
+| `plugin` | Takes only a plugin name. Creates and registers a self-contained Workbench TypeScript plugin under `src/cli/sdk/<name>` with manifest, config, source, tests and event/CLI/TUI examples. Its checks add the plugin registry check, the maker type check (`configs/types/tsconfig.maker.json`) and the `workbench-plugins` suite. |
 | `file-extension` | Requires `--extension <ext>` (optional `--format json\|text`). Registers a custom text/JSON file extension with a dedicated native editor, a create command and file/folder menu entries, owned by the feature and tested. |
 | `context-menu` | Requires `--extensions <a,b>`. Registers a file-explorer action filtered by those extensions, with an editable domain handler and tests. |
 
@@ -82,10 +105,10 @@ IDs remain in frontmatter. Changing an existing entity title preserves its path.
 
 ## Registries and ownership
 
-`src/bootstrap/features.ts` constructs typed repositories once. Domain-only schemas
-join `src/bootstrap/authoring-domains.ts`. Runtime action factories and static Vue
-panel imports join `src/bootstrap/authoring.ts`; locale modules join
-`src/bootstrap/authoring-locales.ts`. No business code enters `main.ts` and no source
+`src/plugin/bootstrap/features.ts` constructs typed repositories once. Domain-only schemas
+join `src/plugin/bootstrap/authoring-domains.ts`. Runtime action factories and static Vue
+panel imports join `src/plugin/bootstrap/authoring.ts`; locale modules join
+`src/plugin/bootstrap/authoring-locales.ts`. No business code enters `main.ts` and no source
 scan discovers features at runtime.
 
 Each registered panel has an exact identity-derived native view type and an open
@@ -182,8 +205,10 @@ works in a source checkout and in an extracted kit. The context has no `root`,
 `edit` or `finish`. The runner owns review, formatting, hashes, locking, writes
 and checks.
 
-A generated recipe's test checks this contract with a recording context. The
-framework's own recipe tests prove the composed command and its registrations.
+A generated recipe's test in `tooling/tests/custom-<name>.checks.mjs` checks this
+contract with a recording context. Legacy projects using `scripts/` retain
+`tests/tooling/custom-<name>.checks.mjs`. The framework's own recipe tests prove the
+composed command and its registrations.
 `make locale <name>` writes a test that runs the project's own CLI:
 `node bin/app make locale <name> --check --json`. The `--check` flag is
 read-only. It compares the pending draft keys with the current base keys and
@@ -197,8 +222,10 @@ the obsolete keys. The reviewed refresh path, `make locale <name> --refresh --dr
 and then `--yes`, adds the missing keys (with their English values to translate),
 drops the obsolete keys and updates the key count; every translation of a surviving
 key is kept. `--refresh` refuses a missing or already selectable draft, and a key that
-changed between a message and a group (`LOCALE_DRAFT_SHAPE`) is left for manual review. `node bin/app check` runs every generated
-`tests/tooling/locale-*.checks.mjs` and `custom-*.checks.mjs`.
+changed between a message and a group (`LOCALE_DRAFT_SHAPE`) is left for manual review.
+`node bin/app check` runs generated locale tests in `src/<project>/tests/tooling/`
+and custom recipe tests in `tooling/tests/`; flat legacy layouts keep their
+`tests/tooling/` tests.
 
 Local recipe code is trusted developer code, not a sandbox. There is no remote
 loader, JSON command hook or automatic package installation. Recipes must return

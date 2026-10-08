@@ -1,5 +1,5 @@
 import { option, type Arguments } from '../domain/command-options.ts';
-import { requireSketch, SketchError } from '../domain/errors.ts';
+import { requireSketch, SketchError } from '#shared/contracts/sketch-errors.ts';
 import { collectionField } from '../domain/collection-definition.ts';
 import { collectionCheck, collectionRow, filterCollection, sortCollection } from '../domain/collection-query.ts';
 import { collectionOverdue, type CollectionRecord } from '../domain/collection-record.ts';

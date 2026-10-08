@@ -30,9 +30,9 @@ No native `dist/` build or generated business acceptance is implied by HTML comp
 The adapter calls `src/cli/adapters/framework/catalog.ts`, `operations.ts` and `process.ts` (or
 their compiled-kit equivalents). These own command contracts, plans/approvals, process
 cancellation and toolchain selection. Vite compilation reuses
-`scripts/bundling/vite-shared.mjs`, CSS ownership, hash-guarded Nuxt UI replacements and
+`tooling/bundling/vite-shared.mjs`, CSS ownership, hash-guarded Nuxt UI replacements and
 bundled-license notices. A concept save calls the same scanner as ZIP packaging, then
-`scripts/shared/file-plan.ts` for containment, fresh preconditions, locking and rollback.
+`src/shared/platform/file-plan.ts` for containment, fresh preconditions, locking and rollback.
 
 `src/cli/adapters/framework/prototype-skill.ts` verifies the bounded package inventory. The project compiler emits
 these files as extension-owned developer-kit entries; the framework archive includes

@@ -75,11 +75,11 @@ See [JSON to clickdummy](docs/development/COMPANION-CLICKDUMMY.md).
 | Path | Contents |
 | --- | --- |
 | `{{sourceRoot}}/` | Generated product code: domain, application use cases, sources, stores, Vue screens |
-| `src/features/` | Hand-written features on the shell API (`src/features/api.ts`) |
-| `src/main.ts` | Plugin entry; lifecycle composition only |
+| `src/plugin/features/` | Hand-written features on the shell API (`src/plugin/features/api.ts`) |
+| `src/plugin/main.ts` | Plugin entry; lifecycle composition only |
 | `{{testRoot}}/` | Product tests; `acceptance/` holds one TODO test per requirement |
-| `tests/runtime/generated/` | Tests that `npm run make` writes for new features (part of `npm test`/`check`) |
-| `tests/obsidian/` | Real-Obsidian specs (`*.obsidian.ts`) and their fixture vault |
+| `src/plugin/tests/unit/generated/` | Tests that `npm run make` writes for new features (part of `npm test`/`check`) |
+| `tooling/tests/obsidian/` | Real-Obsidian specs (`*.obsidian.ts`) and their fixture vault |
 | `design/` | The design export, requirement traceability and design system |
 | `src/` (rest) | The reusable shell foundation: services, adapters, logging, UI kit |
 
@@ -100,7 +100,7 @@ Agent and editor setup: `AGENTS.md` (all coding agents), `CLAUDE.md` and `.claud
    `reports/obsidian/`. Guide: [dev loop and E2E](docs/testing/OBSIDIAN-DEV-LOOP.md).
 
 The in-memory host is a fast approximation, not Obsidian. Behaviour that depends on
-the real host belongs in a `tests/obsidian/*.obsidian.ts` spec.
+the real host belongs in a `tooling/tests/obsidian/*.obsidian.ts` spec.
 
 ## Logging and debugging
 

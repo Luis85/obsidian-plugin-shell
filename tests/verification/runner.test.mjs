@@ -3,12 +3,12 @@ import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, copyFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { runNodeTests, evaluateRecords } from '../../scripts/testing/run-node-tests.mjs';
+import { runNodeTests, evaluateRecords } from '../../tooling/testing/run-node-tests.mjs';
 async function fixture(t, body) {
   const root = await mkdtemp(join(tmpdir(), 'shell runner é-'));
   t.after(() => rm(root, { recursive: true, force: true }));
-  await mkdir(join(root, 'scripts/testing'), { recursive: true });
-  await copyFile(new URL('../../scripts/testing/node-reporter.mjs', import.meta.url), join(root, 'scripts/testing/node-reporter.mjs'));
+  await mkdir(join(root, 'tooling/testing'), { recursive: true });
+  await copyFile(new URL('../../tooling/testing/node-reporter.mjs', import.meta.url), join(root, 'tooling/testing/node-reporter.mjs'));
   await writeFile(join(root, 'case.test.mjs'), `import { test } from 'node:test';\n${body}`);
   return root;
 }

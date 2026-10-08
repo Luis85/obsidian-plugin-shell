@@ -1,8 +1,8 @@
 import { relative, resolve, sep, extname } from 'node:path';
-import { parseConcept, conceptRequire, type Concept } from '../../../../scripts/companion/concepts/contract.ts';
-import { companionRelativeFolder } from '../../../../scripts/companion/authoring-contract.ts';
+import { parseConcept, conceptRequire, type Concept } from '#shared/companion/concepts/contract.ts';
+import { companionRelativeFolder } from '#shared/companion/authoring-contract.ts';
 import { hash, readBounded } from './files.ts';
-import { record } from '../../../../scripts/companion/sitemap/safety.ts';
+import { record } from '#shared/companion/sitemap/safety.ts';
 import type { Context } from './contracts.ts';
 
 type Decoded = { status: 'data'; encoding: 'project-json' | 'concept-json' | 'prototype-base64'; payloadSha256: string; concept: Concept }

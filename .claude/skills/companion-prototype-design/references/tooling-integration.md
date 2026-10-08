@@ -87,7 +87,7 @@ isolated TypeScript entry under `harness/prototype/`; start from
 `assets/templates/browser-entry.ts.tmpl`, replacing all placeholders and supplying the
 real root Vue SFC, typed injections and original synthetic host-token defaults. All
 reusable SFCs stay under the project's presentation components; the entry only composes.
-Use `src/bootstrap/mount-ui.ts` for the project's disposal/injection/portal conventions.
+Use `src/plugin/bootstrap/mount-ui.ts` for the project's disposal/injection/portal conventions.
 The scaffold template is not a complete application or acceptance result.
 
 ```sh

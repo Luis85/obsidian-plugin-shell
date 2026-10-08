@@ -1,10 +1,10 @@
 import { defaultVaultConfigDirectory } from '../domain/host-paths.ts';
 import { lstat, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { hash, readBounded } from './framework/files.ts';
 import { projectPath } from '../domain/user-settings.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 export interface MigrationFile { path: string; bytes: Buffer; sha256: string }
 const rebuildable = new Set(['node_modules', 'dist', '.compiled', '.prototype-build']);
 async function inspect(root: string, path: string) {

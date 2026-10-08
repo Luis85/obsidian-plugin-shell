@@ -1,10 +1,10 @@
 import { preserveResolvedLock } from './resolved-lock.ts';
 import { join, resolve, relative, isAbsolute } from 'node:path';
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { hash, readBounded } from './framework/files.ts';
-import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { object, list, text, keys } from '../domain/data.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { prepared, type Entry, type Prepared } from './storage.ts';
 import { reservedOutputFolder } from '../compiler/domain/template-inputs.ts';
 function receipt(value: unknown): Map<string, string> {

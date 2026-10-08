@@ -1,5 +1,5 @@
 import { object, keys } from './data.ts';
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 export interface FirstRunPreferences {
   install: 'auto' | 'install' | 'ci'; port: number; openBrowser: boolean;
   stepTimeoutMs: number; readyTimeoutMs: number; showcaseDurationMs: number;

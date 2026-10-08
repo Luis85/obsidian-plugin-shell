@@ -10,12 +10,12 @@ Use this before reporting a change as done or opening a pull request. Read `AGEN
 ## Steps
 
 1. Plan the gates for your diff: `node bin/app check --plan --base origin/main`. Read which gates your changed files select, and which it skips and why.
-2. Run the gates and keep the real output: `node bin/app check`, then `npm run verify -- --json` (the report is `reports/verify/summary.md`). For touched areas run `node scripts/testing/suites.mjs <suite>` for each relevant suite. Run `npm run test:e2e` for served UI changes and native smoke only when it is explicitly provisioned in its isolated scratch vault; end-to-end is opt-in until the Release tier, so say whether the pull request carries the `e2e` label. A gate you did not run is "not run" with a reason, never "passed".
+2. Run the gates and keep the real output: `node bin/app check`, then `npm run verify -- --json` (the report is `reports/verify/summary.md`). For touched areas run `node tooling/testing/suites.mjs <suite>` for each relevant suite. Run `npm run test:e2e` for served UI changes and native smoke only when it is explicitly provisioned in its isolated scratch vault; end-to-end is opt-in until the Release tier, so say whether the pull request carries the `e2e` label. A gate you did not run is "not run" with a reason, never "passed".
 3. Run `npm run check:self-review` (add `-- --base <ref>` when the base is not `origin/main`; `--json` for machine output). It reads only added lines of your diff and flags loosened thresholds or ignores, lint/type suppressions and unsafe casts, screenshot baselines, unclassified new test files, focused or skipped tests, over-limit files and retired launcher references. Fix findings; do not rephrase code to dodge a pattern. `--warn-only` is for exploration, not for the final result. A clean run is a heuristic, not proof.
 4. Re-read the full diff adversarially, as a reviewer who wants to reject it. Check each rule that applies:
-   - Domain and application import no Obsidian, Vue, Pinia, browser, Node or concrete adapters; features depend only on feature, application and domain contracts through `src/features/api.ts`.
-   - `src/main.ts` stays at or under 100 code lines; bootstrap constructs and wires; no manually detached leaves on unload.
-   - Vue files live under `src/presentation/components` with thin scripts (imports, props, bindings); behavior is in composables and stores; `npm run check:presentation` agrees.
+   - Domain and application import no Obsidian, Vue, Pinia, browser, Node or concrete adapters; features depend only on feature, application and domain contracts through `src/plugin/features/api.ts`.
+   - `src/plugin/main.ts` stays at or under 100 code lines; bootstrap constructs and wires; no manually detached leaves on unload.
+   - Vue files live under `src/plugin/presentation/components` with thin scripts (imports, props, bindings); behavior is in composables and stores; `npm run check:presentation` agrees.
    - One `PluginDataStore` owns plugin data; no parallel `saveData` path; untouched raw records and revisions are preserved.
    - Features never construct host UI classes; modals and notices go through `services.modals` and `services.notices`.
    - Facts are published only after successful persistence; subscriber failures never relabel a committed write; observers hold no publish or acquire method.

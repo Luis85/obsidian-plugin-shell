@@ -1,4 +1,4 @@
-import { assertJsonData } from '../../../../scripts/contracts/json-data.ts';
+import { assertJsonData } from '#shared/contracts/json-data.ts';
 import { capabilityCatalog, catalogDigest, type CapabilityCatalog } from './catalog.ts';
 
 const errors = Object.freeze({

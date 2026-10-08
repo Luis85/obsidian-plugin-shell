@@ -1,6 +1,6 @@
-import { createFilePlan } from '../../../../scripts/shared/file-plan.ts';
-import { serializeJson as json } from '../../../../scripts/contracts/serialization.ts';
-import { parseJsonData } from '../../../../scripts/contracts/json-data.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { serializeJson as json } from '#shared/contracts/serialization.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { storybookFlags } from './storybook-options.ts';
 import { join, resolve } from 'node:path';
 import { planProject } from '../../compiler/adapters/project-plan.ts';
@@ -21,7 +21,9 @@ async function inPlaceKit(request: Request, context: Context, input: string) {
   const kit = await verifyKit(context.root);
   const { model } = await inspectDesign(context, input);
   const identityMatches = Object.entries(config.project).every(([key, value]) => model.project[key] === value);
-  const pathsMatch = model.sourceRoot === config.paths.codebaseFolder + '/generated' && model.testRoot === config.paths.testsFolder + '/project';
+  // Compare the imported settings themselves: compiler output roots may canonicalize legacy src/tests layouts.
+  const settings = object(model.document.settings);
+  const pathsMatch = settings.codebaseFolder === config.paths.codebaseFolder && settings.testsFolder === config.paths.testsFolder;
   requireThat(identityMatches && pathsMatch, 'IMPORT_CONFIG_DRIFT', 'Re-import and resolve the design/configuration differences before generation.');
   return kit;
 }

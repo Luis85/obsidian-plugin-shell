@@ -79,7 +79,7 @@ The owner's target is a single release ZIP that extracts to `bin/`, `docs/`,
 starter writes the project's `configs/<project-id>-config.json` (see
 [project configuration](../../src/cli/PROJECT-STARTERS.md#project-configuration)). Observed
 from a kit packed with `node bin/app framework pack` and extracted, then the starters ZIP
-extracted on top, and checked by `tests/tooling/framework-journey.mjs`
+extracted on top, and checked by `src/cli/tests/framework-journey.mjs`
 (`project-starter-layout.json` in its evidence):
 
 | Stage | Top level of the extracted folder |

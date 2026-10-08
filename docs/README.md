@@ -49,7 +49,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Release items and release candidates](development/RELEASE-CANDIDATES.md) | Release items, candidate folders per version, freezing, docs regeneration and the path to release approval. |
 | [Typed-note collections](development/NOTE-COLLECTIONS.md) | Engine API and the steps to add a collection (a JSON definition, a settings path, forms/wizards and a command root). |
 | [Generate fake data](development/FAKE-DATA.md) | Generate seeded sample notes, Bases tables and reusable generation configs with `node bin/app fake-data`. |
-| [Data-driven forms in the plugin runtime](development/RUNTIME-FORMS.md) | Render a JSON form inside the plugin from `src/features/<feature>/forms` and receive validated values. |
+| [Data-driven forms in the plugin runtime](development/RUNTIME-FORMS.md) | Render a JSON form inside the plugin from `src/plugin/features/<feature>/forms` and receive validated values. |
 | [Shell CLI user manual](user-manual/shell-cli/index.md) | Task pages for design-to-project, daily development, automation, maintenance and troubleshooting. |
 
 **Design, prototype and generate**
@@ -137,7 +137,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Declarative actions](development/GENERATOR-DECLARATIVE-ACTIONS.md) | Action declarations and native note generation. |
 | [Providers and relationships](development/GENERATOR-PROVIDERS-AND-RELATIONSHIPS.md) | Declaration-to-code mapping for providers, relationships and test data. |
 | [Generated project plugins](development/GENERATED-PROJECT-PLUGINS.md) | The plugin system emitted into generated applications. |
-| [Workbench plugins](development/WORKBENCH-PLUGINS.md) | The SDK for extending Workbench itself ([`plugins/`](../plugins/README.md)). |
+| [Workbench plugins](development/WORKBENCH-PLUGINS.md) | The SDK for extending Workbench itself ([`src/cli/sdk/`](../src/cli/sdk/README.md)). |
 | [UI implementation status](development/UI-STATUS.md) | What `node bin/app ui status` reads and reports. |
 
 **Testing and evidence**
@@ -154,6 +154,8 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | --- | --- |
 | [GitHub Actions workflows](development/WORKFLOWS.md) | Every workflow's tier, triggers, jobs, permissions, artifacts, required checks and the repository policy. |
 | [Increments reference](development/INCREMENTS-REFERENCE.md) | Increment, PullRequest and Issue documents, statuses and transitions, edit locks, branches, the sync record, error codes and JSON results of `increment`, `pr` and `issue`. |
+| [Source project split increment](increments/source-project-split.md) | Scope, acceptance criteria and delivery status for the source-project migration. |
+| [Source project split kick-off](pull-requests/source-project-split-kickoff.md) | Pull-request plan and refinement tasks for the source-project increment. |
 | [Definition of Ready and Done](development/DEFINITION-OF-READY-AND-DONE.md) | Every DOR and DOD rule with its severity, kind-aware gate selection, exemptions, acceptance stubs, configuration and workflows. |
 | [Quality assurance](development/QUALITY-ASSURANCE.md) | Source assurance checks, `npm run verify` steps and reports, and the self-review guard rules. |
 | [Maintenance and release contract](development/MAINTENANCE-AND-RELEASE.md) | Dependency, freshness and release requirements (normative). |
@@ -230,10 +232,10 @@ These record intended work and acceptance; they are not implementation evidence.
 - [`memory/`](memory/README.md): reviewed decision records for optional project memory.
 - [`licenses/`](licenses/): retained third-party license texts and their provenance.
 
-Docs next to the code: [`src/features`](../src/features/README.md),
-[`plugins`](../plugins/README.md), [`scripts`](../scripts/README.md),
-[`harness/styles`](../harness/styles/README.md) and the CLI guides in
-[`bin/`](../src/cli/README.md) (for example [project starters](../src/cli/PROJECT-STARTERS.md)).
+Docs next to the code: [`src/plugin/features`](../src/plugin/features/README.md),
+[`src/cli/sdk`](../src/cli/sdk/README.md), [`tooling`](../tooling/README.md),
+[`src/plugin/harness/styles`](../src/plugin/harness/styles/README.md) and the CLI guides in
+[`src/cli/`](../src/cli/README.md) (for example [project starters](../src/cli/PROJECT-STARTERS.md)).
 
 ## Skills
 

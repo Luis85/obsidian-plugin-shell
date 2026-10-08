@@ -3,7 +3,7 @@
  * uses, and only its identity may be overridden before the unchanged compiler plans
  * it. Nothing in the document is evaluated, imported or executed. */
 import { basename, resolve } from 'node:path';
-import { COMPANION_FORMAT, COMPANION_MAX_BYTES, AUTHORING_VERSION as COMPANION_VERSION, validateAuthoringDocument as validateCompanionDocument, type AuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
+import { COMPANION_FORMAT, COMPANION_MAX_BYTES, AUTHORING_VERSION as COMPANION_VERSION, validateAuthoringDocument as validateCompanionDocument, type AuthoringDocument } from '#shared/companion/authoring-contract.ts';
 import { exists, hash, readBounded } from './files.ts';
 import { OperationError, requireThat, stringOption, type Context, type Request } from './contracts.ts';
 export type CompanionDocument = AuthoringDocument;

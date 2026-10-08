@@ -1,8 +1,8 @@
 import { readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { option, type Arguments } from '../domain/command-options.ts';
-import { requireSketch, SketchError } from '../domain/errors.ts';
+import { requireSketch, SketchError } from '#shared/contracts/sketch-errors.ts';
 import { testWorkflowJson, type TestWorkflowDefinition } from '../domain/test-workflow.ts';
 import type { TestWorkflowRunRecord } from '../domain/test-workflow-docs.ts';
 import { describeTestWorkflowTarget, testWorkflowTargetOverride } from '../domain/test-workflow-target.ts';

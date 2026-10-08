@@ -1,9 +1,9 @@
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { hash, readBounded } from './framework/files.ts';
 import { join } from 'node:path';
-import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { object, list } from '../domain/data.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import type { Entry } from './storage.ts';
 function same(value: unknown, expected: unknown): boolean {
   const a = object(value ?? {}), b = object(expected ?? {});

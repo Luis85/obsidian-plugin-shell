@@ -1,4 +1,4 @@
-import { hasControls } from '../../domain/errors.ts';
+import { hasControls } from '#shared/contracts/sketch-errors.ts';
 /** The Markdown transport is a projection, never a second executable project format. */
 export type ObjectData = Record<string, unknown>;
 export const DOC_TYPES = ['project', 'page', 'component', 'interaction', 'journey', 'route', 'transition', 'layout', 'component-revision', 'library-component', 'feature', 'prd'] as const;

@@ -3,8 +3,8 @@ import { delimiter, dirname, join, resolve } from 'node:path';
 import { realpath } from 'node:fs/promises';
 import { exists } from './files.ts';
 import { requireThat, OperationError, type Context } from './contracts.ts';
-import { projectInstallEnvironment } from '../../../../scripts/shared/npm-install.mjs';
-import { NodeProcessFailure, runNodeProcess } from '../../../../scripts/shared/process.ts';
+import { projectInstallEnvironment } from '#shared/platform/npm-install.mjs';
+import { NodeProcessFailure, runNodeProcess } from '#shared/platform/process.ts';
 /** npm entries found on PATH; a Windows npm.cmd shim maps to the npm-cli.js beside it. */
 async function pathNpmEntries(): Promise<string[]> {
   const found: string[] = [];

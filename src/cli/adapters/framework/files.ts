@@ -1,10 +1,10 @@
 import { open, lstat, realpath, type FileHandle } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { sha256 } from '../../../../scripts/shared/hash.ts';
-import { exists } from '../../../../scripts/shared/fs-presence.ts';
-import { createFilePlan } from '../../../../scripts/shared/file-plan.ts';
-import { parseJsonData } from '../../../../scripts/contracts/json-data.ts';
+import { sha256 } from '#shared/platform/hash.ts';
+import { exists } from '#shared/platform/fs-presence.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { configuration, configFile, type Configuration } from './configuration.ts';
 import { requireThat, OperationError } from './contracts.ts';
 export const hash = (bytes: string | Uint8Array): string => sha256(bytes);

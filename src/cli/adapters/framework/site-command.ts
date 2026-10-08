@@ -1,13 +1,13 @@
 import { lstat, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { SketchError, requireSketch } from '../../domain/errors.ts';
+import { SketchError, requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { collectRecords } from '../../domain/base-collection.ts';
 import { selectView } from '../../domain/obsidian-base.ts';
 import { readSiteSection, snapshotDecisions, SNAPSHOT_FOLDER, snapshotPath, snapshotState, snapshotText, type SiteCollectionEntry, type SnapshotFile } from '../../domain/site-collections.ts';
 import { record, renderTemplate, selectTemplate, siteManifest, siteNextSteps, siteProjectName, siteTitle } from '../../domain/site-template.ts';
 import type { BaseNote } from '../../domain/base-expression.ts';
 import type { LoadedBase, VaultScan } from '../obsidian-base.ts';
-import { createFilePlan, type FilePlan, type FilePlanEntry } from '../../../../scripts/shared/file-plan.ts';
+import { createFilePlan, type FilePlan, type FilePlanEntry } from '#shared/platform/file-plan.ts';
 import { loadSiteTemplates, templateFiles } from '../site-templates.ts';
 import { exists, hash, readBounded, readJson } from './files.ts';
 import { OperationError, result, stringOption, type Context, type Request, type Result } from './contracts.ts';
@@ -52,7 +52,7 @@ export function siteNewPlan(request: Request, context: Context): Promise<Planned
     return { plan: await createFilePlan(context.root, entries), conflicts: [], summary: {
       site: name, title: site.title, template: template.id, astro: templates.catalog.astro, files: entries.map(entry => entry.path),
       // Only the maintainer checkout carries the projects tooling; kits and generated projects wire the site's CI by hand.
-      next: siteNextSteps(target, await exists(join(context.root, 'scripts/projects/projects.mjs'))),
+      next: siteNextSteps(target, await exists(join(context.root, 'tooling/projects/projects.mjs'))),
       notPerformed: 'Nothing is installed or built: Astro is a dependency of the generated site only.',
     } };
   });

@@ -1,6 +1,6 @@
 import { loadSetupCheckpoint, resumeSetupCheckpoint, setupCheckpointPlan } from '../adapters/setup-checkpoint.ts';
 import type { SetupDraft } from '../domain/setup-checkpoint.ts';
-import { choose, confirm, type Prompts } from './prompts.ts';
+import { choose, confirm, type Prompts } from '#tui/prompts.ts';
 import { review } from './review.ts';
 export async function beginSetupDraft(ui: Prompts, root: string): Promise<SetupDraft | undefined> {
   if (!(await loadSetupCheckpoint(root)).checkpoint) return { schemaVersion: 1, operations: [] };

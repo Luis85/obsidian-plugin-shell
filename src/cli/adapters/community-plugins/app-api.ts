@@ -1,8 +1,8 @@
 import { resolve } from 'node:path';
-import { definePluginEvent, type PluginEventDefinition } from '../../../../plugins/api.ts';
-import type { WorkbenchEventBus } from '../../../../plugins/runtime.ts';
-import { applyFilePlan, createFilePlan, type ApplyFilePlanReport, type FilePlan, type FilePlanEntry } from '../../../../scripts/shared/file-plan.ts';
-import { assertJsonData } from '../../../../scripts/contracts/json-data.ts';
+import { definePluginEvent, type PluginEventDefinition } from '../../sdk/api.ts';
+import type { WorkbenchEventBus } from '../../sdk/runtime.ts';
+import { applyFilePlan, createFilePlan, type ApplyFilePlanReport, type FilePlan, type FilePlanEntry } from '#shared/platform/file-plan.ts';
+import { assertJsonData } from '#shared/contracts/json-data.ts';
 import { commands as frameworkCommands } from '../framework/catalog.ts';
 import { OperationError, requireThat, type Context, type Request, type Result } from '../framework/contracts.ts';
 import { appEventIds } from './app-events.ts';

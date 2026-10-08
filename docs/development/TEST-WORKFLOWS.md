@@ -208,10 +208,10 @@ a snapshot directory. Regenerate the spec instead of editing it.
 
 ## Evidence and scope
 
-The `workflows:browser` suite (`node scripts/testing/suites.mjs workflows:browser`) runs the shipped example with its
+The `workflows:browser` suite (`node tooling/testing/suites.mjs workflows:browser`) runs the shipped example with its
 screenshots, a failing locator, blocked remote requests, a masked capture, loopback URL and prototype targets and the
 exported spec in the Playwright test runner. It needs the `chromium` prerequisite and reports `not-run` without it. Browser resolution goes through
-`scripts/testing/browser-executable.mjs`: the pinned Playwright revision, or an explicit `SHELL_CHROMIUM` override
+`src/cli/tooling/testing/browser-executable.mjs`: the pinned Playwright revision, or an explicit `SHELL_CHROMIUM` override
 that the run report and the recorded note label as non-pinned. A workflow run is evidence for that workflow's steps
 against that target only; it is not native Obsidian evidence, an accessibility audit or visual acceptance
 (screenshots are for people to look at and are never compared with baselines).

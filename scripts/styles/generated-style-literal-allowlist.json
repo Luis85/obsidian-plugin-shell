@@ -1,9 +1,0 @@
-{
-  "schemaVersion": 1,
-  "description": "Exact emitted files of a generated project (feature-showcase and quick-capture starters) that may carry raw colours. Used only by the generated-project style test; the plugin shell's own allowlist is style-literal-allowlist.json.",
-  "entries": [
-    { "path": "src/generated/styles/design-system/colors.css", "reason": "Compiler-generated design-system token definitions: the author's saved colour tokens are the single place a palette is declared." },
-    { "path": "src/generated/presentation/journey/editor.css", "reason": "KNOWN GAP: verbatim copy of docs/concepts/companion/editor/editor.css, whose var(--host-token, #fallback) values keep the standalone concept readable outside Obsidian. Needs a host-token-only emitter variant." },
-    { "path": "src/generated/presentation/journey/prototypes.css", "reason": "KNOWN GAP: verbatim copy of docs/concepts/companion/editor/prototypes.css with var(--muted, #hex) concept fallbacks. Needs a host-token-only emitter variant." }
-  ]
-}

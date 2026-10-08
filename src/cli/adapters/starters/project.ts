@@ -1,21 +1,22 @@
-import { parseJsonData } from '../../../../scripts/contracts/json-data.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join, resolve } from 'node:path';
-import { createFilePlan } from '../../../../scripts/shared/file-plan.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { planProject } from '../../compiler/adapters/project-plan.ts';
-import { customizeStarter } from './customize.ts';
-import { withAirshipOption } from '../../../../scripts/companion/tooling-options.ts';
+import { customizeStarter } from '#shared/companion/starters/customize.ts';
+import { withAirshipOption } from '#shared/companion/tooling-options.ts';
 import { hostingFlags, hostingSummary, withHostingFlags } from '../framework/hosting-options.ts';
 import { hash, readJson } from '../framework/files.ts';
 import { derivedPluginId, pluginIdProblem } from '../framework/plugin-id.ts';
 import { storybookFlags } from '../framework/storybook-options.ts';
 import { requireThat, stringOption, type Context, type Request } from '../framework/contracts.ts';
 import { loadDefinitions } from './repository.ts';
-import { renderFiles, renderProcesses, resolveValues, interpolate } from './render.ts';
-import { record, readProcesses } from './validation.ts';
-import type { InputValue, StarterReceipt, LoadedStarter, StarterDefinition, StarterProcess } from './types.ts';
-import type { FilePlan } from '../../../../scripts/shared/file-plan.ts';
+import { renderFiles, renderProcesses, resolveValues, interpolate } from '#shared/companion/starters/render.ts';
+import { record, readProcesses } from '#shared/companion/starters/validation.ts';
+import type { InputValue, StarterDefinition, StarterProcess } from '#shared/companion/starters/types.ts';
+import type { StarterReceipt, LoadedStarter } from './types.ts';
+import type { FilePlan } from '#shared/platform/file-plan.ts';
 export const receiptFile = '.workbench/starter.json';
 export interface Placement { directory: string; vault: string; target: string }
 async function selectedStarter(request: Request, context: Context): Promise<LoadedStarter> {

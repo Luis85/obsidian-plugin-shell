@@ -1,5 +1,5 @@
 import { object } from './data.ts';
-import { hasControls, requireSketch } from './errors.ts';
+import { hasControls, requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { collectionReleaseVersion } from './collection-reference.ts';
 import { isCollectionDate, type CollectionIssue, type CollectionValues } from './collection-record.ts';
 /**

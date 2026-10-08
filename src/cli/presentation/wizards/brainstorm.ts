@@ -1,5 +1,5 @@
 import { brainstormContext, brainstormFeaturePlan } from '../../adapters/brainstorm.ts';
-import { slug } from '../../domain/errors.ts';
+import { slug } from '#shared/contracts/sketch-errors.ts';
 import type { BrainstormPage, FeatureBrainstorm } from '../../domain/brainstorm.ts';
 import type { FormValues } from '../../domain/form-model.ts';
 import { approveCapturedRequest, navigation, optionalImport, optionalVerification, pages, type BrainstormWizardOptions } from '../brainstorm-steps.ts';

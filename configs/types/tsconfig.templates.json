@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.node.json",
+  "compilerOptions": {
+    "rootDir": "../../templates/companion/runtime",
+    "declarationDir": "../../.cache/tsbuild/templates",
+    "tsBuildInfoFile": "../../.cache/tsbuild/templates.tsbuildinfo"
+  },
+  "include": [
+    "../../templates/companion/runtime/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../../src/shared"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 import type { Workspace } from '../application/workspace.ts';
 import { outline } from '../application/summary.ts';
-import type { Prompts } from './prompts.ts';
+import type { Prompts } from '#tui/prompts.ts';
 /** The context column is a projection, never a second editable document. */
 export function workspaceContext(ui: Prompts, workspace: Workspace, location = 'Workspace', pageId?: string): void {
   if (!ui.rich) return;

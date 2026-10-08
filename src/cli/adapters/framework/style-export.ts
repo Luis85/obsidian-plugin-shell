@@ -1,5 +1,5 @@
-import { assertJsonData } from '../../../../scripts/contracts/json-data.ts';
-import { compileDesignSystem } from '../../../../scripts/companion/design-system-css.mjs';
+import { assertJsonData } from '#shared/contracts/json-data.ts';
+import { compileDesignSystem } from '#shared/companion/design-system-css.mjs';
 import { requireThat } from './contracts.ts';
 /** Data-only renderer: same scoped compiler as project generation; never evaluates imported CSS or URLs. */
 export function exportDesignSystem(system: unknown, pluginId: string, format: string) {

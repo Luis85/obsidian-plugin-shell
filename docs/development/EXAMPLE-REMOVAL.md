@@ -24,15 +24,15 @@ in-place regeneration reports the removed example files as conflicts instead of
 restoring them.
 
 Template maintainers who change an example-owned file review its new bytes and refresh its
-`sha256` in `scripts/examples/ownership.json`; a new example-only file is listed there too.
-`tests/tooling/example-removal-rehearsal.checks.mjs` applies the manifest to a copy of the
+`sha256` in `tooling/examples/ownership.json`; a new example-only file is listed there too.
+`tooling/tests/example-removal-rehearsal.checks.mjs` applies the manifest to a copy of the
 checkout. It fails on a stale hash, an import of a removed file, a runtime module that only
 removed examples used, or missing shared `form.*` messages. It is example-owned itself.
 
 The replacement UI retains preferences, feedback, native view ownership and the
 extension host. Task, Project and Items registrations and the showcase panels disappear,
 including the Forms page and its example definition. The shared `DataForm` component, its `form.*`
-messages and `src/styles/forms.css` remain for your own forms.
+messages and `src/plugin/styles/forms.css` remain for your own forms.
 The example event registry and its catalog metadata become empty; custom event
 and listener registrations remain in their separate explicit registries.
 Shared service tests keep test-owned schemas, while example-only UI tests are

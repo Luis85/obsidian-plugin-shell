@@ -67,7 +67,7 @@ export const builtinHandlers: Readonly<Record<string, Handler>> = Object.freeze(
   'file-editor': (context, input) => fileEditorRecipe(context, { ...owned(input), fileType: slug(input.options['--file-type'], 'file type id (--file-type is required)') }),
   feature, entity: async (context, input) => { await entityRecipe(context, withEntity(input)); }, view: surface, component: surface, store: surface,
   usecase: primitive, command: primitive, modal: primitive, setting, event: primitive, listener: primitive, style,
-  locale: (context, { name, options }) => localeRecipe(context, name, options['--refresh'] === true),
+  locale: (context, { name, options }) => localeRecipe(context, name, options['--refresh'] === true, options['--source']),
   maker: (context, { name }) => customMaker(context, name),
   plugin: (context, { name }) => pluginRecipe(context, name),
 } satisfies Record<string, Handler>);

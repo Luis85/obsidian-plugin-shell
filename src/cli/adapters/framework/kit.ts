@@ -1,10 +1,10 @@
 import { bundledNoticeFiles } from './docs-vendor.ts';
 import { cliArtifact } from './cli-artifact.ts';
 import { bundleReleaseCli } from './release-bundle.ts';
-import { serializeJson as json } from '../../../../scripts/contracts/serialization.ts';
+import { serializeJson as json } from '#shared/contracts/serialization.ts';
 import { prototypeSkillFiles } from './prototype-skill.ts';
 import { join, dirname, basename, resolve, relative, sep } from 'node:path';
-import { createFilePlan, applyFilePlan } from '../../../../scripts/shared/file-plan.ts';
+import { createFilePlan, applyFilePlan } from '#shared/platform/file-plan.ts';
 import { readBounded, hash, readJson, exists } from './files.ts';
 import { bootstrapFiles, launcherFiles, listFiles, pluginConfigFiles, readPluginConfig, verifyKit, type Kit, type KitFile } from './kit-integrity.ts';
 import { zip, type ArchiveFile } from './zip.ts';
@@ -12,7 +12,7 @@ import { object } from './configuration.ts';
 import { included, kitRootReadme, standaloneSource, updateOwnership } from './distribution.ts';
 import { OperationError, requireThat, type Context } from './contracts.ts';
 import { stat } from 'node:fs/promises';
-import { isProtectedSegment } from '../../../../scripts/shared/protected-directories.ts';
+import { isProtectedSegment } from '#shared/platform/protected-directories.ts';
 import { templateRootFiles as templateFiles, templateRoots } from '../../compiler/domain/template-inputs.ts';
 import { communityPluginsFolder } from '../../domain/community-plugin.ts';
 export interface Compiler { version: string; compile: (source: string, path: string) => string }
@@ -68,10 +68,11 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
     // Templates stay editable source data; runtime code is shipped only in the bundled CLI.
     // The bundle reads each Workbench plugin's config.json beside app.js, so enabling a plugin stays a data edit:
     // that copy is schema-checked editable data, not inventory; its fingerprinted default is the template copy.
-    if (/^plugins\/[^/]+\/config\.json$/.test(path)) files.push({ path: 'bin/' + path, bytes });
+    const pluginConfig = /^src\/cli\/sdk\/([^/]+)\/config\.json$/.exec(path);
+    if (pluginConfig) files.push({ path: `bin/plugins/${pluginConfig[1]}/config.json`, bytes });
     if (path === pluginGuideSource) files.push({ path: pluginGuide, bytes });
   }
-  const ownership = files.find(file => file.path === 'bin/template/scripts/examples/ownership.json')!;
+  const ownership = files.find(file => file.path === 'bin/template/tooling/examples/ownership.json')!;
   const shipped = new Map(files.filter(file => file.path.startsWith('bin/template/')).map(file => [file.path.slice('bin/template/'.length), file.bytes]));
   ownership.bytes = updateOwnership(originals, shipped, ownership.bytes);
   // The runtime is now a single bundle. Only the editable template copy of
@@ -129,7 +130,7 @@ async function extractedKitRoot(context: Context, from: string): Promise<string>
 }
 export async function upgradePlan(context: Context, from: string) {
   const nextRoot = await extractedKitRoot(context, from), current = await verifyKit(context.root), next = await verifyKit(nextRoot);
-  const { compareVersions } = await import('../../../../scripts/release/prepare.mjs');
+  const { compareVersions } = await import('../../tooling/release/prepare.mjs');
   requireThat(compareVersions(next.version, current.version) >= 0, 'KIT_DOWNGRADE', 'Downgrades require separate migration review.');
   requireThat(next.version !== current.version || (next.sourceHash === current.sourceHash && JSON.stringify(next.files) === JSON.stringify(current.files)), 'KIT_VERSION_REUSED', 'A different kit must have a new version.');
   const entries: Array<{path: string; content: string | null; encoding?: 'base64'}> = [];

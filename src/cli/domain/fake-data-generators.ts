@@ -1,5 +1,5 @@
 import { object } from './data.ts';
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 /** Obsidian property types a fake-data entity can declare. */
 export type FakePropertyType = 'text' | 'number' | 'checkbox' | 'date' | 'datetime' | 'list' | 'tags' | 'link';
 export const fakePropertyTypes: readonly FakePropertyType[] = ['text', 'number', 'checkbox', 'date', 'datetime', 'list', 'tags', 'link'];

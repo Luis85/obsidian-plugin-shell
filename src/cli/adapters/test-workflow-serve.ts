@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import { join } from 'node:path';
-import { parseJsonData } from '../../../scripts/contracts/json-data.ts';
-import { hasPortableProjectSegments } from '../../../scripts/shared/project-path.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
+import { hasPortableProjectSegments } from '#shared/platform/project-path.ts';
 import { getPath } from '../domain/form-model.ts';
 import type { TestWorkflowTarget } from '../domain/test-workflow-target.ts';
 import { readBounded } from './framework/files.ts';

@@ -93,7 +93,8 @@ async function projectRegistrations(scan: Scan): Promise<Registered[]> {
     if (!isMissing(error)) throw error;
     return [];
   }
-  return registrations(scan, codebaseFolder(project) + '/generated/bootstrap/native-integrations.ts', ['projectFileTypes', 'projectContextMenus']);
+  const context = { ...scan.context, read: scan.context.readRepository ?? scan.context.read };
+  return registrations({ ...scan, context }, codebaseFolder(project) + '/generated/bootstrap/native-integrations.ts', ['projectFileTypes', 'projectContextMenus']);
 }
 function checkConflict(candidate: Candidate, source: string, entry: Registered): void {
   if (entry.source === source) return;

@@ -1,7 +1,7 @@
-import { PRD_LIMITS } from '../../../scripts/companion/prd-limits.mjs';
-export { PRD_LIMITS } from '../../../scripts/companion/prd-limits.mjs';
+import { PRD_LIMITS } from '#shared/companion/prd-limits.mjs';
+export { PRD_LIMITS } from '#shared/companion/prd-limits.mjs';
 import { object } from './data.ts';
-import { requireSketch, slug } from './errors.ts';
+import { requireSketch, slug } from '#shared/contracts/sketch-errors.ts';
 import { text } from './data.ts';
 export interface PrdMarkdown { id: string; title: string; markdown: string; requirements: never[] }
 function doubleQuoted(raw: string): unknown {

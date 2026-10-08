@@ -1,12 +1,13 @@
 import { resolve } from 'node:path';
-import { parseJsonData } from '../../../../scripts/contracts/json-data.ts';
-import { validateNativeIntegrations } from '../../../../scripts/companion/native-contract.mjs';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
+import { validateNativeIntegrations } from '#shared/companion/native-contract.mjs';
 import { readJson } from '../../adapters/framework/files.ts';
 import { requireThat, type Request } from '../../adapters/framework/contracts.ts';
 import { companionStarterSet, derivedName, invocationDirectory } from '../../adapters/framework/starter-project.ts';
 import { loadDefinitions } from '../../adapters/starters/repository.ts';
-import { record } from '../../adapters/starters/validation.ts';
-import type { LoadedStarter, StarterDefinition } from '../../adapters/starters/types.ts';
+import { record } from '#shared/companion/starters/validation.ts';
+import type { StarterDefinition } from '#shared/companion/starters/types.ts';
+import type { LoadedStarter } from '../../adapters/starters/types.ts';
 import type { FormChoice } from '../../domain/form.ts';
 import { getPath, type FormValues } from '../../domain/form-model.ts';
 import { runForm } from '../form-runner.ts';

@@ -73,9 +73,9 @@ Each push runs "Dev checks". Run the same commands locally first; replace
 
 ```sh
 node bin/app check --fast --skip-suites --base origin/main
-node scripts/testing/suites.mjs --check
+node tooling/testing/suites.mjs --check
 npm run check:repository
-node scripts/release/changelog.mjs check
+node src/cli/tooling/release/changelog.mjs check
 npm run check:self-review -- --base origin/main --warn-only
 node bin/app increment check <id>
 ```
@@ -97,7 +97,7 @@ For a change a user or a generated project would notice, add a line to
 `CHANGELOG.md` under `## [Unreleased]`, in the matching `### Added`, `### Changed`,
 `### Deprecated`, `### Removed`, `### Fixed` or `### Security` group (Keep a
 Changelog 1.1.0). Write what changed for the reader, not the commit history.
-`node scripts/release/changelog.mjs check` validates the structure; the release
+`node src/cli/tooling/release/changelog.mjs check` validates the structure; the release
 cut later turns `[Unreleased]` into the version's notes. Internal refactors and
 test-only changes need no entry.
 
@@ -110,7 +110,7 @@ your change and paste their real output into the template:
 node bin/app check
 npm run verify -- --json --keep-going
 npm run check:self-review -- --base origin/main
-node scripts/testing/suites.mjs <suite>
+node tooling/testing/suites.mjs <suite>
 npm run test:e2e
 ```
 
@@ -124,7 +124,7 @@ npm run test:e2e
 - Reproduce a specific Integration job with `node bin/app ci --job <workflow>/<job>`
   (dry run) and, where allowed, `--execute` in a scratch copy.
 - Run the Definition of Done for this pull request:
-  `node scripts/delivery/done.mjs --base origin/<base>` (`--write` generates the
+  `node tooling/delivery/done.mjs --base origin/<base>` (`--write` generates the
   Completion record, the Unreleased entries and the docs index rows; review them
   before committing). A change pull request is checked against its PullRequest
   document, the kick-off against the whole increment.

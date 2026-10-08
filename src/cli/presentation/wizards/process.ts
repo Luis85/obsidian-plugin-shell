@@ -1,12 +1,12 @@
 import { healthyDefinition, loadProcesses, processCatalogContext, type ProcessEntry } from '../../adapters/process-catalog.ts';
 import { processSavePlan } from '../../adapters/process-command.ts';
-import { requireSketch, slug } from '../../domain/errors.ts';
+import { requireSketch, slug } from '#shared/contracts/sketch-errors.ts';
 import type { FormChoice } from '../../domain/form.ts';
 import { getPath, type FormValues } from '../../domain/form-model.ts';
 import type { ProcessDefinition, ProcessRole, ProcessRule, ProcessStep } from '../../domain/process.ts';
 import { editCollection, roleFromView, roleView, ruleFromView, ruleView, stepFromView, stepView } from '../process-editor.ts';
 import { walkProcess } from '../process-run.ts';
-import { choose, type Prompts } from '../prompts.ts';
+import { choose, type Prompts } from '#tui/prompts.ts';
 import { review } from '../review.ts';
 import type { WizardModule } from './module.ts';
 /** The draft being authored: a partial definition until process.save validates it. */

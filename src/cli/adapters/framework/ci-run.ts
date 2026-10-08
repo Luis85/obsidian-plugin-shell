@@ -6,7 +6,7 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { delimiter, join, relative, resolve, isAbsolute } from 'node:path';
-import { projectInstallEnvironment } from '../../../../scripts/shared/npm-install.mjs';
+import { projectInstallEnvironment } from '#shared/platform/npm-install.mjs';
 import { parseCommandFile, shellInvocation } from '../../domain/ci-shell.ts';
 import { replanStep, skipReason, type JobPlan, type PlannedStep } from '../../domain/ci-plan.ts';
 import type { CiJob, CiWorkflow } from '../../domain/ci-workflow.ts';

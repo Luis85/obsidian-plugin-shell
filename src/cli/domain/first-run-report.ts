@@ -1,5 +1,5 @@
 import { object, keys } from './data.ts';
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 const states = ['running', 'passed', 'failed', 'cancelled'];
 const validHash = (value: unknown) => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 function check(value: unknown, message = 'Invalid first-run result; original bytes are preserved.'): asserts value {

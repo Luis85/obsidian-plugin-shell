@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { validatePlan, acceptanceEvidence, releaseDecision } from '../../scripts/testing/test-plan.mjs';
+import { validatePlan, acceptanceEvidence, releaseDecision } from '../../tooling/testing/test-plan.mjs';
 const fresh = async () => JSON.parse(await readFile(new URL('../../docs/testing/test-plan.json', import.meta.url), 'utf8'));
 test('[POL-01] inventory covers every acceptance ID exactly once', async () => {
   const plan = validatePlan(await fresh());

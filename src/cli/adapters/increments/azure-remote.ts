@@ -10,9 +10,9 @@
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { validateHosting } from '../../../../scripts/companion/schema/hosting.mjs';
+import { validateHosting } from '#shared/companion/schema/hosting.mjs';
 import { parseAzureVersion } from '../framework/hosting-cli.ts';
-import { hasControls } from '../../domain/errors.ts';
+import { hasControls } from '#shared/contracts/sketch-errors.ts';
 import { azureRemoteState } from '../../domain/increments/remote-state.ts';
 import { bodySize } from '../../domain/increments/remote-body.ts';
 import type { LinkTarget } from '../../domain/increments/remote-model.ts';

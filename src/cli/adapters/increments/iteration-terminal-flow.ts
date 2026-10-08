@@ -1,6 +1,6 @@
 /** Offer hosted draft publication only after an approved iteration branch/record commit. */
 import type { Context, Request, Result } from '../framework/contracts.ts';
-import { classifyRemote } from '../../../../scripts/companion/schema/hosting.mjs';
+import { classifyRemote } from '#shared/companion/schema/hosting.mjs';
 import { interactiveRun, type InteractiveRunDependencies } from '../../presentation/terminal/cli-interactive.ts';
 import { readTargetSources } from './hosting-target.ts';
 import { Session } from './session.ts';

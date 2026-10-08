@@ -57,12 +57,12 @@ jobs:
         run: |
           node "$QUALIFIED_NPM" run check:compiler-architecture
           node "$QUALIFIED_NPM" run test:airship
-          node scripts/testing/suites.mjs --check
-          python -B scripts/concepts/build-companion.py --check
+          node tooling/testing/suites.mjs --check
+          python -B tooling/concepts/build-companion.py --check
       # E2E: the generated preview served to Chromium; opt-in, always in the release tier.
       - name: Qualify actual generated preview and pinned Airship
         if: runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e'))
-        run: node scripts/airship/qualify.mjs
+        run: node tooling/airship/qualify.mjs
       - name: Retain named compatibility evidence
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

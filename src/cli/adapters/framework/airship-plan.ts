@@ -1,9 +1,9 @@
 import { join } from 'node:path';
-import { createFilePlan } from '../../../../scripts/shared/file-plan.ts';
-import { parseAuthoringDocument, validateAuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
-import { withAirshipOption } from '../../../../scripts/companion/tooling-options.ts';
-import { airshipConfig, airshipOptions } from '../../../../scripts/companion/tooling-contract.mjs';
-import { serializeJson as json } from '../../../../scripts/contracts/serialization.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { parseAuthoringDocument, validateAuthoringDocument } from '#shared/companion/authoring-contract.ts';
+import { withAirshipOption } from '#shared/companion/tooling-options.ts';
+import { airshipConfig, airshipOptions } from '#shared/companion/tooling-contract.mjs';
+import { serializeJson as json } from '#shared/contracts/serialization.ts';
 import { readBounded, readJson, exists } from './files.ts';
 import { object, designFile } from './configuration.ts';
 import { receiptEntries, type Entry } from './design-receipts.ts';

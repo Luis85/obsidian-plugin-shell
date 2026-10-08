@@ -91,7 +91,7 @@ jobs:
           set -o pipefail
           VERSION=$(node -p "require('./manifest.json').version")
           node "$QUALIFIED_NPM" run release:rehearse -- --commit "$GITHUB_SHA" --version "$VERSION" 2>&1 | tee reports/candidate-qualification/verify.txt
-          node scripts/quality/check-artifacts.mjs > reports/candidate-qualification/candidate-assets.json
+          node tooling/quality/check-artifacts.mjs > reports/candidate-qualification/candidate-assets.json
       - name: Retain the built candidate for independent platform qualification
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -106,14 +106,14 @@ jobs:
       - name: Repeat deterministic runtime suites in fresh processes with no retries
         run: |
           set -o pipefail
-          for run in 1 2 3; do node scripts/testing/evidence-cli.mjs run runtime 2>&1 | tee "reports/candidate-qualification/runtime-$run.txt"; done
+          for run in 1 2 3; do node tooling/testing/evidence-cli.mjs run runtime 2>&1 | tee "reports/candidate-qualification/runtime-$run.txt"; done
       - name: Record separately scoped coverage
         run: |
           set -o pipefail
           node "$QUALIFIED_NPM" run test:coverage 2>&1 | tee reports/candidate-qualification/coverage-core.txt
-          node scripts/testing/evidence-cli.mjs run coverage 2>&1 | tee reports/candidate-qualification/coverage-production.txt
-          node scripts/testing/evidence-cli.mjs run artifact
-          node scripts/testing/asset-sizes.mjs > reports/candidate-qualification/asset-sizes.json
+          node tooling/testing/evidence-cli.mjs run coverage 2>&1 | tee reports/candidate-qualification/coverage-production.txt
+          node tooling/testing/evidence-cli.mjs run artifact
+          node tooling/testing/asset-sizes.mjs > reports/candidate-qualification/asset-sizes.json
       - name: Resolve the pinned Playwright version
         id: playwright
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
@@ -133,7 +133,7 @@ jobs:
           sudo apt-get install -y xdotool
       - name: Exercise actual served components and capture scope-labeled screenshots
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
-        run: node scripts/testing/evidence-cli.mjs run browser
+        run: node tooling/testing/evidence-cli.mjs run browser
       - name: Provision isolated native host provider
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: node "$QUALIFIED_NPM" install --prefix .native-runner --save-exact obsidian-launcher@3.2.1
@@ -141,18 +141,18 @@ jobs:
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
         run: |
           for run in 1 2 3; do
-            xvfb-run -a -s '-screen 0 2200x1400x24' node scripts/testing/evidence-cli.mjs run native --allow-download
+            xvfb-run -a -s '-screen 0 2200x1400x24' node tooling/testing/evidence-cli.mjs run native --allow-download
             mv reports/native "reports/native-run-$run"
           done
           cp -R reports/native-run-3 reports/native
       - name: Retain shared-runner timing samples separately from reference budgets
         if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
-        run: xvfb-run -a -s '-screen 0 2200x1400x24' node scripts/testing/check-native.mjs --allow-download --performance
+        run: xvfb-run -a -s '-screen 0 2200x1400x24' node tooling/testing/check-native.mjs --allow-download --performance
       - name: Reconcile every registered evidence attempt and retain all acceptance gaps
         if: always()
         run: |
           for session in reports/evidence/*; do
-            node scripts/testing/evidence-cli.mjs report "$session" > "reports/candidate-qualification/acceptance-$(basename "$session").json" || exit $?
+            node tooling/testing/evidence-cli.mjs report "$session" > "reports/candidate-qualification/acceptance-$(basename "$session").json" || exit $?
           done
       - name: Live security gate, all installed dependency categories
         if: always()
@@ -160,10 +160,10 @@ jobs:
       - name: Confirm accepted asset identity and archive source
         if: success()
         run: |
-          node scripts/quality/check-artifacts.mjs > reports/candidate-qualification/final-assets.json
+          node tooling/quality/check-artifacts.mjs > reports/candidate-qualification/final-assets.json
           cmp reports/candidate-qualification/candidate-assets.json reports/candidate-qualification/final-assets.json
           git diff --exit-code -- package-lock.json
-          PLUGIN_ID=$(node --input-type=module -e 'import { readNativeIdentity } from "./scripts/testing/native-identity.mjs"; console.log((await readNativeIdentity()).id)')
+          PLUGIN_ID=$(node --input-type=module -e 'import { readNativeIdentity } from "./tooling/testing/native-identity.mjs"; console.log((await readNativeIdentity()).id)')
           mkdir -p "package/$PLUGIN_ID"
           cp dist/main.js dist/manifest.json dist/styles.css "package/$PLUGIN_ID/"
           cd package && zip -r ../candidate-plugin.zip "$PLUGIN_ID"

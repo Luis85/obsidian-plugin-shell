@@ -1,5 +1,5 @@
-import { editorBindings } from '../../../../scripts/companion/sitemap/editor-bindings.ts';
-import type { SitemapDesign } from '../../../../scripts/companion/sitemap/model.ts';
+import { editorBindings } from '#shared/companion/sitemap/editor-bindings.ts';
+import type { SitemapDesign } from '#shared/companion/sitemap/model.ts';
 import { relationshipScope } from './relationship-model.ts';
 import { literal, type Model } from './model.ts';
 import { relativeImport, when, type Add } from './file-code.ts';
@@ -8,17 +8,17 @@ export function hostCode(m: Model, add: Add): void {
   const root = m.sourceRoot; const init = `${root}/bootstrap/install.ts`;
   const ref = (path: string) => literal(relativeImport(init,path));
   add(init,`import { Modal, PluginSettingTab, type Plugin } from 'obsidian';
-import { createServices } from ${ref('src/bootstrap/services.ts')};
-import { bindNativeIntegrations } from ${ref('src/infrastructure/obsidian/native-integrations.ts')};
-import { nativeFileTypes, nativeContextMenus, nativeFileEditors } from ${ref('src/bootstrap/native-integrations.ts')};
-import { nativeFileEditorMounts } from ${ref('src/bootstrap/mount-file-editor.ts')};
+import { createServices } from ${ref('src/plugin/bootstrap/services.ts')};
+import { bindNativeIntegrations } from ${ref('src/plugin/infrastructure/obsidian/native-integrations.ts')};
+import { nativeFileTypes, nativeContextMenus, nativeFileEditors } from ${ref('src/plugin/bootstrap/native-integrations.ts')};
+import { nativeFileEditorMounts } from ${ref('src/plugin/bootstrap/mount-file-editor.ts')};
 import { projectFileTypes, projectContextMenus } from './native-integrations.ts';
-import { nativeAdapters } from ${ref('src/infrastructure/obsidian/adapters.ts')};
-import { nativeViewClass, type ShowcaseView } from ${ref('src/infrastructure/obsidian/showcase-view.ts')};
-import { bindHostEvents } from ${ref('src/infrastructure/obsidian/event-bridge.ts')};
-import { bindCommands } from ${ref('src/infrastructure/obsidian/commands.ts')};
-import { CommandService } from ${ref('src/application/command-service.ts')};
-import { createDebugCommands } from ${ref('src/features/debugging/commands.ts')};
+import { nativeAdapters } from ${ref('src/plugin/infrastructure/obsidian/adapters.ts')};
+import { nativeViewClass, type ShowcaseView } from ${ref('src/plugin/infrastructure/obsidian/showcase-view.ts')};
+import { bindHostEvents } from ${ref('src/plugin/infrastructure/obsidian/event-bridge.ts')};
+import { bindCommands } from ${ref('src/plugin/infrastructure/obsidian/commands.ts')};
+import { CommandService } from ${ref('src/plugin/application/command-service.ts')};
+import { createDebugCommands } from ${ref('src/plugin/features/debugging/commands.ts')};
 import { screens } from '../domain/screens.ts';
 import { createSources } from './sources.ts';
 ${when(integrity, "import { disposeRelationshipIntegrity } from './relationships.ts';")}
@@ -98,7 +98,7 @@ export async function initializeProject(plugin: Plugin) {
 }
 `);
   const providerFile = `${root}/bootstrap/source-providers.ts`;
-  add(providerFile,`import type { Services } from ${literal(relativeImport(providerFile,'src/bootstrap/services.ts'))};
+  add(providerFile,`import type { Services } from ${literal(relativeImport(providerFile,'src/plugin/bootstrap/services.ts'))};
 import type { SourcePorts } from '../application/sources.ts';
 /** Developer-owned runtime configuration. Portable JSON never authorizes network access.
  * Return complete source ports. Dispose each configured provider on plugin unload. */
@@ -108,8 +108,8 @@ export const configureSourceProviders: (shell: Services) => {ports: Partial<Sour
   add(mount,`import { createApp } from 'vue';
 import ui from '@nuxt/ui/vue-plugin';
 import { createPinia, disposePinia } from 'pinia';
-import type { Services } from ${literal(relativeImport(mount,'src/bootstrap/services.ts'))};
-import { bindHostTheme } from ${literal(relativeImport(mount,'src/infrastructure/ui/host-theme.ts'))};
+import type { Services } from ${literal(relativeImport(mount,'src/plugin/bootstrap/services.ts'))};
+import { bindHostTheme } from ${literal(relativeImport(mount,'src/plugin/infrastructure/ui/host-theme.ts'))};
 import Workbench from '../presentation/components/ProjectWorkbench.vue';
 import { projectKey } from '../presentation/context/project.ts';
 import type { Sources } from '../application/sources.ts';
@@ -129,7 +129,7 @@ export function mountProject(root: HTMLElement,shell: Services,sources: Sources,
   } catch (error) { close(); throw error; }
 }
 `);
-  add('src/main.ts',`import { Plugin } from 'obsidian';\nimport { initializeProject } from ${literal(relativeImport('src/main.ts',init))};\nimport './styles/app.css';\nimport ${literal(relativeImport('src/main.ts',`${root}/styles/project.css`))};\nexport default class GeneratedPlugin extends Plugin {\n  private runtime?: Awaited<ReturnType<typeof initializeProject>>;\n  async onload(): Promise<void> { this.runtime = await initializeProject(this); }\n  onunload(): void { this.runtime?.dispose(); }\n}\n`);
+  add('src/plugin/main.ts',`import { Plugin } from 'obsidian';\nimport { initializeProject } from ${literal(relativeImport('src/plugin/main.ts',init))};\nimport './styles/app.css';\nimport ${literal(relativeImport('src/plugin/main.ts',`${root}/styles/project.css`))};\nexport default class GeneratedPlugin extends Plugin {\n  private runtime?: Awaited<ReturnType<typeof initializeProject>>;\n  async onload(): Promise<void> { this.runtime = await initializeProject(this); }\n  onunload(): void { this.runtime?.dispose(); }\n}\n`);
   add(`${root}/styles/layout.css`,`.generated-workbench { display: flex; min-width: 0; gap: var(--plugin-shell-space-lg); padding: var(--plugin-shell-space-lg); color: var(--plugin-shell-text); background: var(--plugin-shell-surface); }
 .generated-workbench nav { display: flex; flex-direction: column; flex: 0 0 12rem; gap: var(--plugin-shell-space-xs); }
 .generated-workbench nav button { white-space: normal; text-align: start; }

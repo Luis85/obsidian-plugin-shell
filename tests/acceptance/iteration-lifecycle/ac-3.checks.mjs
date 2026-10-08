@@ -1,7 +1,7 @@
 // iteration-lifecycle AC-3: carry unfinished items forward without losing source history.
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createWorkspace, planThenApply } from '../../support/increment-workspace.mjs';
+import { createWorkspace, planThenApply } from '../../../src/cli/tests/support/increment-workspace.mjs';
 import { parseIssue } from '../../../src/cli/domain/increments/issue-document.ts';
 
 test('AC-3: a cancelled iteration carries open issues into the next plan exactly once', async () => {

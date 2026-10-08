@@ -1,4 +1,4 @@
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 /**
  * Generated Markdown lives between two marker lines; the start marker records the SHA-256 of what it wrote. Text
  * outside the markers is hand-authored and kept byte for byte. A block whose text no longer matches its recorded hash

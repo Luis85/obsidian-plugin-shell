@@ -6,8 +6,8 @@
  */
 import { join } from 'node:path';
 import { readBounded } from '../framework/files.ts';
-import { planStubs as generatorPlan } from '../../../../scripts/delivery/acceptance-stubs.mjs';
-import { parseHandoff } from '../../../../scripts/delivery/handoff.mjs';
+import { planStubs as generatorPlan } from '../../tooling/delivery/acceptance-stubs.mjs';
+import { parseHandoff } from '../../tooling/delivery/handoff.mjs';
 import type { Session } from './session.ts';
 
 export interface StubReport { created: string[]; existing: string[]; orphans: string[]; evidence: string[] }

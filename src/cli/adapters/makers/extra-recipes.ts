@@ -1,3 +1,4 @@
+import { makerLayout } from './target.ts';
 import { pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { makerSymbol as symbol, title, builtinRecipes } from './arguments.ts';
@@ -19,7 +20,7 @@ export async function customMaker(context: MakerContext, name: string): Promise<
 }
 export async function runCustom(context: MakerContext, request: MakerInput): Promise<void> {
   await context.read('scripts/makers/custom/registry.mjs');
-  const imported: unknown = await import(`${pathToFileURL(resolve(context.root, 'scripts/makers/custom/registry.mjs')).href}?recipe=${encodeURIComponent(request.maker)}`);
+  const imported: unknown = await import(`${pathToFileURL(resolve(context.root, makerLayout(context.root).tooling, 'makers/custom/registry.mjs')).href}?recipe=${encodeURIComponent(request.maker)}`);
   const recipes: unknown = isRecord(imported) ? imported.customMakers : undefined;
   if (!Array.isArray(recipes)) throw new Error('CUSTOM_REGISTRY_INVALID');
   const matches = recipes.filter(recipe => isRecord(recipe) && recipe.name === request.maker);
@@ -41,7 +42,7 @@ async function existingDraft(context: MakerContext, path: string): Promise<strin
   try { return await context.read(path); }
   catch (error) { if (error instanceof Error && 'code' in error && error.code === 'ENOENT') return undefined; throw error; }
 }
-export async function localeRecipe(context: MakerContext, name: string, refresh = false): Promise<void> {
+export async function localeRecipe(context: MakerContext, name: string, refresh = false, source?: string): Promise<void> {
   const base = await localeSkeleton(context.read);
   const draftPath = `src/locales/pending/${name}.json`, statusPath = `src/locales/pending/${name}.status.json`;
   const draft = await existingDraft(context, draftPath);
@@ -53,7 +54,7 @@ export async function localeRecipe(context: MakerContext, name: string, refresh 
   } else await refreshDraft(context, name, base, refresh);
   const path = `tests/tooling/locale-${name}.checks.mjs`;
   // The consumer test asks the project's own CLI (source launcher or extracted kit bundle) for a read-only key comparison.
-  await context.add(path, `import { test } from 'node:test';\nimport assert from 'node:assert/strict';\nimport { spawnSync } from 'node:child_process';\nimport { fileURLToPath } from 'node:url';\n\nconst root = fileURLToPath(new URL('../../', import.meta.url));\ntest('${name} pending translation preserves every checked base key and is not selectable', () => {\n  const run = spawnSync(process.execPath, ['bin/app', 'make', 'locale', '${name}', '--check', '--json'], { cwd: root, encoding: 'utf8', timeout: 120000, maxBuffer: 4 * 1024 * 1024 });\n  assert.equal(run.error, undefined, run.error?.message); assert.equal(run.status, 0, run.stdout + run.stderr);\n  const { status, data } = JSON.parse(run.stdout);\n  assert.equal(status, 'ok'); assert.deepEqual([data.missing, data.extra, data.selectable], [[], [], false]);\n});\n`);
+  await context.add(path, `import { test } from 'node:test';\nimport assert from 'node:assert/strict';\nimport { spawnSync } from 'node:child_process';\nimport { fileURLToPath } from 'node:url';\n\nconst root = fileURLToPath(new URL('../../', import.meta.url));\ntest('${name} pending translation preserves every checked base key and is not selectable', () => {\n  const run = spawnSync(process.execPath, ['bin/app', 'make', 'locale', '${name}', '--check', '--json'${source ? `, '--source', ${JSON.stringify(source)}` : ''}], { cwd: root, encoding: 'utf8', timeout: 120000, maxBuffer: 4 * 1024 * 1024 });\n  assert.equal(run.error, undefined, run.error?.message); assert.equal(run.status, 0, run.stdout + run.stderr);\n  const { status, data } = JSON.parse(run.stdout);\n  assert.equal(status, 'ok'); assert.deepEqual([data.missing, data.extra, data.selectable], [[], [], false]);\n});\n`);
   context.tests.add(path);
 }
 /**

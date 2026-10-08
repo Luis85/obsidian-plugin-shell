@@ -5,7 +5,7 @@ import { readConfiguration } from '../../adapters/framework/files.ts';
 import { readOriginUrl } from '../../adapters/framework/adopt-git.ts';
 import { requireThat, type Context, type Request, type Result } from '../../adapters/framework/contracts.ts';
 import type { FormValues } from '../../domain/form-model.ts';
-import { confirm } from '../prompts.ts';
+import { confirm } from '#tui/prompts.ts';
 import type { ActionContext, WizardOptions } from '../wizard-runner.ts';
 import type { WizardModule } from './module.ts';
 import { hostingNote, prepareHosting } from './hosting.ts';

@@ -1,14 +1,14 @@
-import { parseConfirmation } from '../../../scripts/shared/confirmation.ts';
+import { parseConfirmation } from '#shared/platform/confirmation.ts';
 import type { LearningCatalog } from '../adapters/learning-catalog.ts';
 import type { DefinitionCatalog } from '../adapters/wizard-catalog.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { setPath, type FormCondition } from '../domain/form-model.ts';
 import { learningAnswersAt, learningStepForm, learningWizardId } from '../domain/learning-conditions.ts';
 import type { LearningAction, LearningPath, LearningStep } from '../domain/learning-path.ts';
 import type { LearningProgress } from '../domain/learning-progress.ts';
 import type { WizardDefinition, WizardStep } from '../domain/wizard.ts';
 import { formDefinition, runForm, type FormEnvironment } from './form-runner.ts';
-import { input, selectMany, type Prompts } from './prompts.ts';
+import { input, selectMany, type Prompts } from '#tui/prompts.ts';
 import { runWizard, type WizardAction, type WizardOptions, type WizardRegistry } from './wizard-runner.ts';
 import { wizardCatalog, wizardRegistry } from './wizards/registry.ts';
 /** The state one interactive learning run edits. Nothing here is written until the learner reviews a save plan. */

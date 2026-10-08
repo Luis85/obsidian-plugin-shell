@@ -1,9 +1,10 @@
 import { renderStarterProject } from './adapters/project/emitter.ts';
-import { validateProjectSelection, type ProjectSelection } from './domain/project-starter.ts';
+import type { CompilerProjectSelection as ProjectSelection } from './domain/project-starter.ts';
+import { validateCompilerProjectSelection as validateProjectSelection } from './adapters/project/selection.ts';
 import { CompilerError, diagnostic } from './domain/diagnostics.ts';
 /** Dedicated compiler API. Loading a template, compiling, planning and applying are distinct operations. */
 import { createHash } from 'node:crypto';
-import { withStorybookOptions } from '../../../scripts/companion/tooling-contract.ts';
+import { withStorybookOptions } from '#shared/companion/tooling-contract.ts';
 import { lowerTarget } from './adapters/target-lowering.ts';
 import { runCompiler } from './application/pipeline.ts';
 import type { CompileRequest } from './application/ports.ts';
@@ -48,7 +49,7 @@ export async function compileProject(request:CompileRequest,control:Control={},e
         if (request.projectSelection) throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID', 'lower', 'A project selection requires outputKind project.'));
         return lowerTarget(model,template,kind,sourceName);
       }
-      if (model.sourceRoot !== 'src/generated' || model.testRoot !== 'tests/project') throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID', 'lower', 'Project starters currently require src/ and tests/ roots.'));
+      if (model.sourceRoot !== 'src/plugin/generated' || model.testRoot !== 'src/plugin/tests/project') throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID', 'lower', 'Project starters require src/plugin and src/plugin/tests roots.'));
       const selection = validateProjectSelection(request.projectSelection);
       try { requireFrameworkAdapter(selection.framework, extensions.frameworkAdapters); }
       catch { throw new CompilerError(diagnostic('COMPILER_SCHEMA_INVALID', 'lower', 'Project starter needs an installed framework adapter for ' + selection.framework + '.')); }

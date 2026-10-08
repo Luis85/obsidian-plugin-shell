@@ -5,5 +5,5 @@
     "allowImportingTsExtensions": true, "allowJs": true, "checkJs": false,
     "skipLibCheck": true, "types": ["node", "vite/client"], "lib": ["ES2022", "DOM", "DOM.Iterable"]
   },
-  "include": ["../../docs/concepts/companion/editor/**/*.ts", "../../docs/concepts/companion/editor/**/*.vue", "../../scripts/companion/authoring-contract.ts", "../../scripts/concepts/concept-contract.ts"]
+  "include": ["../../src/companion/editor/**/*.ts", "../../src/companion/editor/**/*.vue", "../../src/shared/companion/authoring-contract.ts", "../../tooling/concepts/concept-contract.ts"]
 }

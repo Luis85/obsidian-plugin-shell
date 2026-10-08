@@ -29,7 +29,7 @@ node bin/app make file-extension board --feature documents --extension board --f
 node bin/app make context-menu inspect --feature documents --extensions md,board --yes
 ```
 
-`make feature <name> --bare` creates only the feature folder, without the example entity, workspace and command. `--editor vue` (or a later `make file-editor board --feature documents --file-type documents-board`) replaces the raw text editor with a generated Vue editor: a composable, a component in `src/presentation/components/generated`, styles, messages and a test. The editor reads and writes through the shared file editor context, so the native view still owns saving.
+`make feature <name> --bare` creates only the feature folder, without the example entity, workspace and command. `--editor vue` (or a later `make file-editor board --feature documents --file-type documents-board`) replaces the raw text editor with a generated Vue editor: a composable, a component in `src/plugin/presentation/components/generated`, styles, messages and a test. The editor reads and writes through the shared file editor context, so the native view still owns saving.
 
 ### One plan for a whole skeleton
 
@@ -48,7 +48,7 @@ node bin/app make context-menu inspect --feature documents --extensions md,board
 
 Step fields map one-to-one to maker options (`fileType` is `--file-type`; arrays join with commas). `maker`, `plugin` and `locale` are never batched, and a batch has at most 40 steps. Preview first, then apply with `--apply <planHash>` or `--yes`.
 
-Use `--format text` for plain text with an empty initial file. JSON starts with a valid versioned object. Edit `src/features/documents/board.file-extension.ts` or `inspect.context-menu.ts` to define your format, domain validation, and behavior. Matching generated unit tests live in `tests/runtime/generated`. Makers update the explicit arrays in `src/bootstrap/native-integrations.ts`; they do not patch `main.ts` or register arbitrary strings as executable code.
+Use `--format text` for plain text with an empty initial file. JSON starts with a valid versioned object. Edit `src/plugin/features/documents/board.file-extension.ts` or `inspect.context-menu.ts` to define your format, domain validation, and behavior. Matching generated unit tests live in `src/plugin/tests/unit/generated`. Makers update the explicit arrays in `src/plugin/bootstrap/native-integrations.ts`; they do not patch `main.ts` or register arbitrary strings as executable code.
 
 Makers reuse the existing file planner and AST-aware registration editor. Duplicate IDs/extensions fail before writes. Source declarations read during planning are pinned to the reviewed file hashes; a concurrent edit invalidates apply. Replaying an identical recipe is a no-op. Edited source is not overwritten. Dynamic registry expressions require manual review rather than executing project code during planning. A generated project also checks its project-native registry for conflicts with new maker declarations.
 
@@ -80,9 +80,9 @@ Project compilation uses the same declaration templates as makers. The managed r
 
 ## Architecture and lifecycle
 
-`src/domain/native-integrations.ts` defines host-independent file/menu contracts and validation. Domain callbacks receive `{path, name, extension}`, never `App`, `Vault`, `TFile`, or a DOM element. For business writes, introduce application ports and explicit confirmation rather than adding Obsidian IO to the domain handler.
+`src/plugin/domain/native-integrations.ts` defines host-independent file/menu contracts and validation. Domain callbacks receive `{path, name, extension}`, never `App`, `Vault`, `TFile`, or a DOM element. For business writes, introduce application ports and explicit confirmation rather than adding Obsidian IO to the domain handler.
 
-`src/infrastructure/obsidian/native-integrations.ts` binds plugin-owned views, commands and `file-menu` events. `custom-file-view.ts` uses public `TextFileView` methods: `getViewData`, `setViewData`, `clear`, `requestSave` and `save`. View identity is captured outside subclass fields because the host can call virtual methods in the base constructor. The adapter preserves exact text, whitespace and malformed JSON rather than parsing and reserializing the user's buffer. Validation is advisory; invalid JSON can be saved as text for recovery.
+`src/plugin/infrastructure/obsidian/native-integrations.ts` binds plugin-owned views, commands and `file-menu` events. `custom-file-view.ts` uses public `TextFileView` methods: `getViewData`, `setViewData`, `clear`, `requestSave` and `save`. View identity is captured outside subclass fields because the host can call virtual methods in the base constructor. The adapter preserves exact text, whitespace and malformed JSON rather than parsing and reserializing the user's buffer. Validation is advisory; invalid JSON can be saved as text for recovery.
 
 `create-custom-file.ts` asks for a single basename, rejects traversal/hidden/reserved filenames, and calls `vault.create` only after confirmation. It never calls `modify` to create a file. Duplicate creation leaves the existing file untouched. A successful write followed by an open failure is reported as **created**, with no automatic second write. Closing a pending dialog or unloading the integration suppresses a late view opening, but cannot cancel a create already committed by the host.
 
@@ -91,9 +91,9 @@ Disposal removes owned event callbacks and commands, closes owned dialogs, disab
 ## Verification and limits
 
 ```sh
-node node_modules/vitest/vitest.mjs run tests/runtime/native-file-domain.test.ts tests/runtime/native-file-integration.test.ts
+node node_modules/vitest/vitest.mjs run src/plugin/tests/unit/native-file-domain.test.ts src/plugin/tests/unit/native-file-integration.test.ts
 node --test tests/tooling/native-integrations.checks.mjs
-python3 tests/concepts/companion-project-starters.browser.py
+python3 src/companion/tests/concepts/companion-project-starters.browser.py
 ```
 
 Use the repository's qualified Node/npm versions. The browser test requires Python Playwright and Chromium. The host test kit provides deterministic in-memory file/menu lifecycle tests; it is not proof of native Obsidian disk synchronization, external-edit conflict behavior, mobile behavior or host debounce timing. Each starter also participates in plan/apply/replay tests and isolated generated-project build/typecheck/test qualification in CI.

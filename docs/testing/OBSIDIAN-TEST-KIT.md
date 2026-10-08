@@ -2,7 +2,7 @@
 
 > Type: how-to guide · Part of the [docs index](../README.md)
 
-`tests/support/obsidian/` is an in-memory double of the `obsidian` module for Vitest.
+`src/plugin/tests/support/obsidian/` is an in-memory double of the `obsidian` module for Vitest.
 It gives plugin code a real-enough vault, metadata cache, workspace, plugin lifecycle,
 settings DOM, notices, modals and menus, so tests exercise your actual commands and
 adapters instead of hand-written mocks. It is test support only: it never enters the
@@ -20,7 +20,7 @@ import { App, TFile } from 'obsidian';          // runtime: kit classes; types: 
 import { createTestApp } from '@test/obsidian';  // kit helpers and kit-typed handles
 ```
 
-`@test/obsidian` is an alias for `tests/support/obsidian/index.ts` in
+`@test/obsidian` is an alias for `src/plugin/tests/support/obsidian/index.ts` in
 `vitest.config.mjs` and `tsconfig.json` (`paths`). A relative import such as
 `../support/obsidian` works the same way.
 
@@ -107,12 +107,12 @@ expect(leaf.view.containerEl.querySelector('[data-testid="my-panel"]')).not.toBe
 
 Leaves really construct registered views, run `onOpen`/`onClose`, and keep their leaf
 (with a placeholder view) when the plugin unloads. The shell itself is proven against
-the kit in `tests/runtime/obsidian-test-kit-shell-entry.test.ts`, which loads `src/main.ts`,
+the kit in `src/plugin/tests/unit/obsidian-test-kit-shell-entry.test.ts`, which loads `src/plugin/main.ts`,
 opens the Vue showcase and toggles a native setting, and in
-`tests/runtime/obsidian-test-kit-shell.test.ts`, which writes, updates and trashes task
-notes through `src/infrastructure/obsidian` with exact Markdown assertions. A generated
-project replaces `src/main.ts` with its own entry, so it does not receive the entry test
-(nor `tests/runtime/shell-entry-lifecycle.test.ts`); its `test:framework` runs every other
+`src/plugin/tests/unit/obsidian-test-kit-shell.test.ts`, which writes, updates and trashes task
+notes through `src/plugin/infrastructure/obsidian` with exact Markdown assertions. A generated
+project replaces `src/plugin/main.ts` with its own entry, so it does not receive the entry test
+(nor `src/plugin/tests/unit/shell-entry-lifecycle.test.ts`); its `test:framework` runs every other
 framework runtime test.
 
 ## What the kit does not prove

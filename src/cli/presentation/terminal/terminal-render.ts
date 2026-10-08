@@ -8,6 +8,7 @@ import { adoptAnalyzeView, adoptPlanView } from './adopt-view.ts';
 import { checkPlanView } from './check-plan-view.ts';
 import { ciJobView, ciListView } from './ci-view.ts';
 import { uiStatusView } from './ui-status-view.ts';
+import { isSourceView, sourceView } from './source-view.ts';
 import { isMakerResult, makerChecksView } from './maker-view.ts';
 import { deliveryPlanDetails, incrementCheckView, incrementReadView, isDeliveryPlan } from './increment-view.ts';
 import { lifecycleView, publishView, pullRequestReadView, syncView, uncertainView } from './pull-request-view.ts';
@@ -195,6 +196,7 @@ const views: Array<[View, boolean]> = [
   [(style, value, data) => value.command === 'ci' && Array.isArray(data.workflows) ? ciListView(style, value) : undefined, true],
   [(style, value) => value.command === 'ui status' ? uiStatusView(style, value.data as UiStatusReport) : undefined, false],
   [(style, value) => value.command === 'adopt analyze' ? adoptAnalyzeView(style, value) : undefined, false],
+  [(style, value) => isSourceView(value) ? sourceView(style, value) : undefined, true],
   [(style, value, data) => value.command === 'adopt plan' && typeof data.planHash === 'string' ? adoptPlanView(style, value) : undefined, false],
   [(style, value) => value.command === 'increment check' ? incrementCheckView(style, value) : undefined, true],
   [(style, value) => incrementReadView(style, value) ?? pullRequestReadView(style, value), false],

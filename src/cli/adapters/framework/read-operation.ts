@@ -1,7 +1,7 @@
 import { sourceCheckout } from '../template-root.ts';
 import { join } from 'node:path';
-import { conceptSchema } from '../../../../scripts/companion/concepts/contract.ts';
-import { inspectSitemapSummary } from '../../../../scripts/companion/sitemap/summary.ts';
+import { conceptSchema } from '#shared/companion/concepts/contract.ts';
+import { inspectSitemapSummary } from '#shared/companion/sitemap/summary.ts';
 import { handoutRead } from './handout-adapter.ts';
 import { inspectDesign } from './changes.ts';
 import { readConfiguration, readJson, exists } from './files.ts';

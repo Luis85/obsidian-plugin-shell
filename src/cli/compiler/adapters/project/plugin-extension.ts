@@ -20,7 +20,7 @@ export function pluginExtensionFiles(): Record<string, string> {
     "export interface PluginObject { readonly manifest: PluginManifest; readonly config: PluginConfig; activate(context: PluginContext): void | (() => void) }",
   );
   const runtime = lines(
-    "import { pluginRegistry } from '../../plugins/registry.ts';",
+    "import { pluginRegistry } from '../../../plugins/registry.ts';",
     "import { project } from './project.ts';",
     "import type { AppHost, PluginObject } from './plugin-api.ts';",
     "const visualHosts: readonly AppHost[] = ['obsidian-plugin', 'webapp', 'website', 'preview'];",
@@ -65,14 +65,14 @@ export function pluginExtensionFiles(): Record<string, string> {
     "}",
   );
   const registry = lines(
-    "import type { PluginObject as AppPluginObject } from '../src/core/plugin-api.ts';",
+    "import type { PluginObject as AppPluginObject } from '../src/plugin/core/plugin-api.ts';",
     "import { PluginObject as StarterExtension } from './starter-extension/src/index.ts';",
     "export const pluginRegistry: readonly AppPluginObject[] = [StarterExtension];",
   );
   const extension = lines(
     "import manifest from '../manifest.json' with { type: 'json' };",
     "import config from '../config.json' with { type: 'json' };",
-    "import type { PluginObject as AppPluginObject } from '../../../src/core/plugin-api.ts';",
+    "import type { PluginObject as AppPluginObject } from '../../../src/plugin/core/plugin-api.ts';",
     "export const PluginObject = {",
     "  manifest,",
     "  config,",
@@ -93,8 +93,8 @@ export function pluginExtensionFiles(): Record<string, string> {
     "import { test } from 'node:test';",
     "import manifest from '../manifest.json' with { type: 'json' };",
     "import config from '../config.json' with { type: 'json' };",
-    "import { project } from '../../../src/core/project.ts';",
-    "import { activatePluginSet } from '../../../src/core/plugin-runtime.ts';",
+    "import { project } from '../../../src/plugin/core/project.ts';",
+    "import { activatePluginSet } from '../../../src/plugin/core/plugin-runtime.ts';",
     "import { PluginObject } from '../src/index.ts';",
     "test('PluginObject is backed by plugin manifest/config and cleans up its extension', () => {",
     "  assert.deepEqual(PluginObject.manifest, manifest);",
@@ -145,7 +145,7 @@ export function pluginExtensionFiles(): Record<string, string> {
     "  tests/*.test.ts",
     "```",
     "",
-    "Every plugin is TypeScript and exports a named `PluginObject` implementing `src/core/plugin-api.ts`. The manifest supplies stable identity/version metadata; `config.json` contains project-owned configuration, including optional `enabled: false`.",
+    "Every plugin is TypeScript and exports a named `PluginObject` implementing `src/plugin/core/plugin-api.ts`. The manifest supplies stable identity/version metadata; `config.json` contains project-owned configuration, including optional `enabled: false`.",
     "",
     "Add the plugin's `PluginObject` to `plugins/registry.ts` to activate it. Registration is explicit and statically bundled so Obsidian, web apps, websites and terminal applications use the same deterministic extension set without runtime filesystem discovery.",
     "",
@@ -156,8 +156,8 @@ export function pluginExtensionFiles(): Record<string, string> {
     "The generated `starter-extension` is an executable example. Replace or remove it when establishing the product's real plugin set; if removed, delete its registry import/entry as well.",
   );
   return {
-    'src/core/plugin-api.ts': api,
-    'src/core/plugin-runtime.ts': runtime,
+    'src/plugin/core/plugin-api.ts': api,
+    'src/plugin/core/plugin-runtime.ts': runtime,
     'plugins/registry.ts': registry,
     'plugins/starter-extension/manifest.json': json(manifest),
     'plugins/starter-extension/config.json': json(config),

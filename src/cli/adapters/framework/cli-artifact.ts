@@ -5,7 +5,7 @@ import { hash, readBounded, readJson } from './files.ts';
 import { exactKeys, object } from './configuration.ts';
 import { portableFile } from './archive-path.ts';
 import { requireThat } from './contracts.ts';
-import { serializeJson } from '../../../../scripts/contracts/serialization.ts';
+import { serializeJson } from '#shared/contracts/serialization.ts';
 import type { ArchiveFile } from './zip.ts';
 
 const runtimePath = (path: string) => ['bin/app', 'bin/app.js', 'bin/package.json', 'bin/README.md', 'bin/LICENSE'].includes(path) || /^bin\/(?:tools|licenses)\//.test(path);

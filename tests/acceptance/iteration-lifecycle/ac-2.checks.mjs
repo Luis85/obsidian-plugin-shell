@@ -1,8 +1,8 @@
 // iteration-lifecycle AC-2: hosted lifecycle writes require verified outcomes.
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createWorkspace, planThenApply } from '../../support/increment-workspace.mjs';
-import { createFakeHostingRemote } from '../../support/fake-hosting-remote.mjs';
+import { createWorkspace, planThenApply } from '../../../src/cli/tests/support/increment-workspace.mjs';
+import { createFakeHostingRemote } from '../../../src/cli/tests/support/fake-hosting-remote.mjs';
 
 test('AC-2: uncertain rejection is reported and a fresh remote read recovers without repeating it', async () => {
   const ws = createWorkspace({ delivery: true, origin: true }), fake = createFakeHostingRemote();

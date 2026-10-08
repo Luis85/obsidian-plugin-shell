@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { mkdir, lstat, readdir } from 'node:fs/promises';
-import { parseAuthoringDocument } from '../../../../scripts/companion/authoring-contract.ts';
-import { AIRSHIP_VERSION, airshipOptions, airshipConfig } from '../../../../scripts/companion/tooling-contract.mjs';
+import { parseAuthoringDocument } from '#shared/companion/authoring-contract.ts';
+import { AIRSHIP_VERSION, airshipOptions, airshipConfig } from '#shared/companion/tooling-contract.mjs';
 import { readBounded, readJson, exists } from './files.ts';
 import { object } from './configuration.ts';
 import { npmEntry, runNode } from './process.ts';

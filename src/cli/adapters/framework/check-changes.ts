@@ -5,7 +5,7 @@
 import { execFile } from 'node:child_process';
 import { join } from 'node:path';
 import { exists } from './files.ts';
-import { codeRoots, isWithinRoot } from '../../../../scripts/shared/project-roots.mjs';
+import { codeRoots, isWithinRoot } from '#shared/platform/project-roots.mjs';
 import { OperationError } from './contracts.ts';
 
 export type Git = (root: string, args: string[]) => Promise<string | null>;

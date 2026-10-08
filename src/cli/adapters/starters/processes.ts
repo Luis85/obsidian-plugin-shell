@@ -1,13 +1,13 @@
 import { join, resolve } from 'node:path';
-import { createFilePlan } from '../../../../scripts/shared/file-plan.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
 import { exists, hash, readBounded } from '../framework/files.ts';
 import { npmEntry, runNode } from '../framework/process.ts';
-import { parseJsonData } from '../../../../scripts/contracts/json-data.ts';
+import { parseJsonData } from '#shared/contracts/json-data.ts';
 import { result, OperationError, requireThat, stringOption, type Context, type Request, type Result } from '../framework/contracts.ts';
-import { array, record, fields, identifier, readProcesses, text } from './validation.ts';
+import { array, record, fields, identifier, readProcesses, text } from '#shared/companion/starters/validation.ts';
 import { checkDirectoryChain } from './repository.ts';
 import { receiptFile } from './project.ts';
-import type { StarterProcess, StarterStep } from './types.ts';
+import type { StarterProcess, StarterStep } from '#shared/companion/starters/types.ts';
 /** Requested processes plus their dependencies, each once, in dependency order. */
 function orderedProcesses(processes: StarterProcess[], requested: string[]): StarterProcess[] {
   const ordered: StarterProcess[] = [], visited = new Set<string>();

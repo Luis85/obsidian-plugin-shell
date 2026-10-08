@@ -30,22 +30,22 @@ abbreviated **ready-gate** below. Retention is the `retention-days` of each
 | File (name) | Tier | Triggers | Jobs (gate) | Artifacts (days) |
 | --- | --- | --- | --- | --- |
 | `dev.yml` (Dev) | Dev | `pull_request` | `fast` "Dev checks", ubuntu-24.04, 20 min, no gate | none |
-| `definition-of-ready.yml` (Definition of Ready) | Dev | `pull_request` (`opened`, `synchronize`, `reopened`, `edited`, `ready_for_review`), no branch filter | `ready` "Definition of Ready", ubuntu-24.04, 5 min, no install, full history; skips `release/*` heads; `node scripts/delivery/ready.mjs --base origin/<base>` | `definition-of-ready-<attempt>` (7): the refinement brief |
-| `definition-of-done.yml` (Definition of Done) | Integration | `pull_request` (the same plus `labeled`, `unlabeled`), no branch filter | `done` "Definition of Done", ubuntu-24.04, 5 min, no install, full history; skips drafts and `release/*` heads; `node scripts/delivery/done.mjs --base origin/<base>` | `definition-of-done-<attempt>` (7): the generated Completion record, changelog entries and index rows |
+| `definition-of-ready.yml` (Definition of Ready) | Dev | `pull_request` (`opened`, `synchronize`, `reopened`, `edited`, `ready_for_review`), no branch filter | `ready` "Definition of Ready", ubuntu-24.04, 5 min, no install, full history; skips `release/*` heads; `node tooling/delivery/ready.mjs --base origin/<base>` | `definition-of-ready-<attempt>` (7): the refinement brief |
+| `definition-of-done.yml` (Definition of Done) | Integration | `pull_request` (the same plus `labeled`, `unlabeled`), no branch filter | `done` "Definition of Done", ubuntu-24.04, 5 min, no install, full history; skips drafts and `release/*` heads; `node tooling/delivery/done.mjs --base origin/<base>` | `definition-of-done-<attempt>` (7): the generated Completion record, changelog entries and index rows |
 | `ci.yml` (CI) | Integration | `pull_request` (+ `labeled`), push `main`, `workflow_call` (`tier`, `e2e`), `workflow_dispatch` (`tier`, `e2e`) | `baseline` (ubuntu-24.04, windows-latest), `showcase` (pull request and push: windows-latest; dispatch and `tier: release`: ubuntu-24.04 + windows-latest): ready-gate. `renamed-feature` (complete verify), `source-archive` and `example-removal` (targeted verify, see [Template authoring](#template-authoring-in-ciyml)), `framework-cli` (Linux; all three OSes for `tier: release`), `generated-companion`, `starter` (3 groups): ready-gate and not on push. `real-obsidian`: end-to-end, only when opted in (always for `tier: release`). `self-review`, `security-audit` (continue-on-error, informational): pull requests only, not draft, not `release/*`. `ci-result` "CI result" ("E2E result" in a run started by the `e2e` label): `always()`, `checks: read`; on a `release/*` head green only after "Release result" succeeded on that commit | `baseline-<os>-<attempt>`, `showcase-<os>-<attempt>`, `renamed-template-authoring`, `template-authoring-source-archive`, `template-authoring-example-removal`, `framework-cli-<os>`, `real-obsidian-evidence`, `project-generator-evidence`, `starters-<group>-evidence` (7); `ui-review-gallery`, `security-audit` (14) |
 | `airship-compatibility.yml` | Integration | `pull_request`, `workflow_call`, `workflow_dispatch` (`tier`) | `contracts`: ready-gate; Linux, all three OSes for `tier: release` | `airship-compatibility-<os>` (7) |
 | `angular-setup-acceptance.yml` | Integration | `pull_request`, `workflow_call`, `workflow_dispatch` (`tier`) | `generated-app`: ready-gate; Linux, all three OSes for `tier: release` | `angular-setup-acceptance-<os>` (7) |
-| `application-docs.yml` (Typed Markdown documentation) | Integration | `pull_request` (20 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `qualify` (ubuntu-24.04, windows-latest), `site` "Command handbook site" (needs `qualify`): ready-gate | `shell-cli-manual-markdown-<os>`, `application-docs-qualification-<os>` (7); `shell-cli-manual-site` (14) |
-| `companion-concept-verification.yml` | Integration | `pull_request` and push `main` (34 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `source`, `browser`, `journey-editor`, `journey-native`, `jev-typescript6`: ready-gate | `companion-review-source`, `companion-browser-evidence`, `companion-mvp-authoring`, `generated-journey-native-evidence`, `jev-typescript6-evidence` (7) |
+| `application-docs.yml` (Typed Markdown documentation) | Integration | `pull_request` (22 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `qualify` (ubuntu-24.04, windows-latest), `site` "Command handbook site" (needs `qualify`): ready-gate | `shell-cli-manual-markdown-<os>`, `application-docs-qualification-<os>` (7); `shell-cli-manual-site` (14) |
+| `companion-concept-verification.yml` | Integration | `pull_request` and push `main` (42 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `source`, `browser`, `journey-editor`, `journey-native`, `jev-typescript6`: ready-gate | `companion-review-source`, `companion-browser-evidence`, `companion-mvp-authoring`, `generated-journey-native-evidence`, `jev-typescript6-evidence` (7) |
 | `compiler-qualification.yml` | Integration | `pull_request`, `workflow_call`, `workflow_dispatch` (`tier`) | `contracts`: ready-gate; Linux, all three OSes for `tier: release` | `compiler-qualification-<os>` (7) |
 | `hindsight-tooling.yml` (Optional memory tooling contracts) | Integration | `pull_request` and push `main` (13 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `contracts`: ready-gate; Linux, all three OSes for `tier: release` | none |
 | `interactive-maker.yml` | Integration | `pull_request`, `workflow_call`, `workflow_dispatch` (`tier`) | `maker`: ready-gate; Linux, all three OSes for `tier: release` | `maker-qualification-<os>` (7) |
 | `native-integration-verification.yml` | Integration | `pull_request` (11 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `contracts-and-adapters`, `generated-starters` (2 starters): ready-gate | `native-starter-<starter>` (7) |
-| `optional-storybook.yml` | Integration | `pull_request` (12 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `optional-workspace`: ready-gate | `optional-storybook-evidence` (7) |
+| `optional-storybook.yml` | Integration | `pull_request` (15 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `optional-workspace`: ready-gate | `optional-storybook-evidence` (7) |
 | `project-starter-qualification.yml` | Integration | `pull_request`, `workflow_call`, `workflow_dispatch` (`tier`) | `generated-project` (4 groups), `project-handoff`: ready-gate | `project-starters-<group>`, `project-handoff-<starter>` (7) |
 | `setup-compatibility.yml` (Setup npm policy compatibility) | Integration | `pull_request` and push `main` (12 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `setup`: four legs (Node 24.15.0/npm 12.0.2 and Node 24.21.0/npm 11.19.1 on ubuntu-24.04 and windows-latest), ready-gate; every leg runs a cold fresh setup and the npm policy fixture; only Ubuntu Node 24.15.0/npm 12 runs the complete verify, Windows Node 24.15.0/npm 12 runs `verify --only dependency-policy,build,typecheck,artifacts` and the `setup` suite, and the qualified legs defer verify to `ci.yml` | `setup-policy-<os>-npm-<npm>` (7) |
-| `starter-distribution.yml` (Independent Workbench distributions) | Integration | `pull_request` (21 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `package`: ready-gate | `companion-starter-evidence-<sha>`, `workbench-distributions-<source>` (14) |
-| `projects-boundary.yml` (Projects boundary) | Integration | `pull_request` and push `main` (14 path filters; the only shell workflow that watches `projects/**`), `workflow_call`, `workflow_dispatch` (`tier`) | `boundary` "Projects boundary": ready-gate; `node scripts/projects/projects.mjs check` and `check-repository.mjs` | none |
+| `starter-distribution.yml` (Independent Workbench distributions) | Integration | `pull_request` (25 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `package`: ready-gate | `companion-starter-evidence-<sha>`, `workbench-distributions-<source>` (14) |
+| `projects-boundary.yml` (Projects boundary) | Integration | `pull_request` and push `main` (14 path filters; the only shell workflow that watches `projects/**`), `workflow_call`, `workflow_dispatch` (`tier`) | `boundary` "Projects boundary": ready-gate; `node tooling/projects/projects.mjs check` and `check-repository.mjs` | none |
 | `site-templates.yml` (Site templates) | Integration | `pull_request` and push `main` (9 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `build` "Render and build every site template": ready-gate | `site-templates` (7) |
 | `candidate-qualification.yml` | Integration (post-merge) and Release | push `main` (all paths except narrative docs), `workflow_call` (`tier` default `release`, `e2e`), `workflow_dispatch` (`tier`, `e2e`) | `candidate`: fixed-source rehearsal, repeated runtime suites, coverage, blocking live audit; served browser and three native sessions only for `tier: release` or `e2e`; no job gate | `candidate-recovery-source`, `retained-build`, `qualified-candidate` (7) |
 | `release.yml` (Release) | Release | push `release/**`, `workflow_dispatch` | `metadata` "Release metadata"; 16 reusable calls (below); `release-result` "Release result"; aliases `dev-checks` "Dev checks", `ci-result` "CI result", `definition-of-ready` "Definition of Ready" and `definition-of-done` "Definition of Done" | the called workflows' artifacts, in this run |
@@ -105,14 +105,14 @@ They run when this expression is true, written the same way in every workflow:
 if: inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e')
 ```
 
-What counts as end-to-end is listed once, in `scripts/quality/e2e-policy.mjs`
+What counts as end-to-end is listed once, in `tooling/quality/e2e-policy.mjs`
 (`e2eCommands`), which `npm run check:repository` applies:
 
 | Kind | Commands |
 | --- | --- |
 | Served UI in Chromium (Playwright) | `npm run test:e2e`, `test:ui-quality` |
 | UI review gallery | `npm run ui:gallery` |
-| Real Obsidian host | `npm run test:obsidian`, `scripts/dev/obsidian-dev.mjs`, `evidence-cli.mjs run native`, `check-native.mjs`, installing `obsidian-launcher` |
+| Real Obsidian host | `npm run test:obsidian`, `tooling/dev/obsidian-dev.mjs`, `evidence-cli.mjs run native`, `check-native.mjs`, installing `obsidian-launcher` |
 | Served browser evidence | `evidence-cli.mjs run browser` |
 | Browser suites | `*.browser.mjs`, `*.browser.py`, `run-browser-checks.py`, Jev `tests/browser.test.py`, `qualify-styles.mjs`, `check-browser-specimen.mjs` |
 | Browser provisioning | `@playwright/test/cli.js install` (and `install-deps`), `python -m playwright install`, `pip install playwright==`, the `playwright` input of `setup-qualified` |
@@ -169,7 +169,7 @@ candidate qualification runs the blocking live audit).
 
 | Job | Does | Passes when |
 | --- | --- | --- |
-| `metadata` "Release metadata" | Derives `X.Y.Z` from the branch name, runs `node scripts/release/branch.mjs verify --version X.Y.Z`, prints the changelog section to the run summary. | The branch is `release/X.Y.Z` with a stable version and every verify check passes. |
+| `metadata` "Release metadata" | Derives `X.Y.Z` from the branch name, runs `node tooling/release/branch.mjs verify --version X.Y.Z`, prints the changelog section to the run summary. | The branch is `release/X.Y.Z` with a stable version and every verify check passes. |
 | `release-result` "Release result" | Aggregates `metadata` and all 16 calls. | Every needed job is `success`; unlike "CI result", a skipped job fails it. |
 | `dev-checks` "Dev checks", `ci-result` "CI result", `definition-of-ready` "Definition of Ready", `definition-of-done` "Definition of Done" | Report the required checks on the release head (a release pull request carries the release template, not an Increment). | "Release result" succeeded. |
 
@@ -183,7 +183,7 @@ candidate qualification runs the blocking live audit).
 | Definition of Done | `definition-of-done.yml` › `done` (skips drafts); on a release head `release.yml` › `definition-of-done` | Branch protection on `main` |
 | all four above, projects-only | `projects-required-checks.yml` › `report`, only when a pull request changes nothing outside `projects/**` (every shell workflow ignores `projects/`); otherwise it reports "<check> (shell changes)", which nothing requires | Branch protection on `main` (the same four names) |
 | E2E result | `ci.yml` › `ci-result` in a run started by the `e2e` label | nowhere: it reports the opted-in end-to-end jobs and never stands in for "CI result" |
-| Release result | `release.yml` › `release-result` | `scripts/release/publish.mjs` refuses without a green one on the release head |
+| Release result | `release.yml` › `release-result` | `tooling/release/publish.mjs` refuses without a green one on the release head |
 
 "CI result" passes when each gate job succeeded or was skipped by its own
 condition, so it is green on a draft. On a `release/*` pull request it fails on
@@ -225,12 +225,12 @@ referenced. Every checkout sets `persist-credentials: false`.
 
 ## Repository policy (`npm run check:repository`)
 
-`scripts/quality/check-repository.mjs` with the scoped allowances in
-`scripts/quality/workflow-policy.mjs` and the end-to-end policy in
-`scripts/quality/e2e-policy.mjs` (this repository only: `inspectWorkflow` stays the
+`tooling/quality/check-repository.mjs` with the scoped allowances in
+`tooling/quality/workflow-policy.mjs` and the end-to-end policy in
+`tooling/quality/e2e-policy.mjs` (this repository only: `inspectWorkflow` stays the
 portable subset that also reviews generated projects' workflows); negative fixtures
-are in `tests/tooling/repository.checks.mjs` and
-`tests/tooling/qualification-e2e-opt-in.checks.mjs`.
+are in `tooling/tests/repository.checks.mjs` and
+`tooling/tests/qualification-e2e-opt-in.checks.mjs`.
 
 | Rule | Failure code |
 | --- | --- |

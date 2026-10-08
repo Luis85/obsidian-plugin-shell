@@ -1,5 +1,5 @@
 import { option, type Arguments } from '../domain/command-options.ts';
-import { requireSketch, SketchError } from '../domain/errors.ts';
+import { requireSketch, SketchError } from '#shared/contracts/sketch-errors.ts';
 import { readCandidateInput, readCandidateVersion } from '../domain/release-candidate.ts';
 import { applyPrepared, type Prepared } from './storage.ts';
 import { candidateViews, candidateWorld, candidateWorldFindings, openCandidates, type CandidateContext } from './release-candidate-store.ts';

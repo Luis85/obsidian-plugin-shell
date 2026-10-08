@@ -1,5 +1,5 @@
-import { hasPortableProjectSegments, hasProtectedProjectRoot } from '../../../scripts/shared/project-path.ts';
-import { requireSketch } from './errors.ts';
+import { hasPortableProjectSegments, hasProtectedProjectRoot } from '#shared/platform/project-path.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 /**
  * Reference kinds a frontmatter text or list field may `accept`: `path` (a portable project-relative path outside
  * protected roots, such as `prototypes/checkout`), `release-version` (`1.2.3` or `1.2.3-rc.1`) and id prefixes such as

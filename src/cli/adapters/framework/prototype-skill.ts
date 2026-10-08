@@ -2,7 +2,7 @@
 import type { Stats } from 'node:fs';
 import { lstat, readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { sha256 } from '../../../../scripts/shared/hash.ts';
+import { sha256 } from '#shared/platform/hash.ts';
 export const prototypeSkillRoot = '.claude/skills/companion-prototype-design';
 export const prototypeCodexSkillPath = '.agents/skills/companion-prototype-design/SKILL.md';
 export interface SkillFile { path: string; bytes: Buffer }

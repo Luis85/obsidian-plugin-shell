@@ -1,5 +1,5 @@
 import { option, type Arguments } from '../../domain/command-options.ts';
-import { choose, type Prompts } from '../prompts.ts';
+import { choose, type Prompts } from '#tui/prompts.ts';
 import type { WizardOptions } from '../wizard-runner.ts';
 import { startWizard } from './registry.ts';
 /** `node bin/app workflow [new | edit --name <id>]` in a terminal; bare `workflow` asks which. */

@@ -1,9 +1,9 @@
 import { join } from 'node:path';
-import type { ProjectSelection } from '../../compiler/domain/project-starter.ts';
+import type { CompilerProjectSelection as ProjectSelection } from '../../compiler/domain/project-starter.ts';
 import { frameworkAdapter } from '../../compiler/adapters/project/framework-registry.ts';
-import { pluginFrameworkAdapters } from '../../../../plugins/runtime.ts';
+import { pluginFrameworkAdapters } from '../../sdk/runtime.ts';
 import { projectGuide, projectPlan, projectStarters } from '../../adapters/projects.ts';
-import { requireSketch } from '../../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import type { Guide } from '../../domain/guide.ts';
 import type { FormChoice } from '../../domain/form.ts';
 import type { FormValues } from '../../domain/form-model.ts';

@@ -1,4 +1,4 @@
-import { requireSketch } from './errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { collectionField, collectionStatus, type CollectionDefinition, type CollectionSort } from './collection-definition.ts';
 import { collectionOverdue, type CollectionIssue, type CollectionRecord, type CollectionValue } from './collection-record.ts';
 /** A note as listed and checked: its path, the readable record (if any) and every issue found while reading it. */

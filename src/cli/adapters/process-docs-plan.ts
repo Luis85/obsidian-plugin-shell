@@ -1,7 +1,7 @@
 import { posix } from 'node:path';
-import { createFilePlan } from '../../../scripts/shared/file-plan.ts';
-import { hasPortableProjectSegments } from '../../../scripts/shared/project-path.ts';
-import { requireSketch } from '../domain/errors.ts';
+import { createFilePlan } from '#shared/platform/file-plan.ts';
+import { hasPortableProjectSegments } from '#shared/platform/project-path.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import { readGeneratedBlock, requireIntactBlock, wrapGeneratedBlock, type GeneratedBlockFormat } from '../domain/generated-block.ts';
 import { renderProcessDocs } from '../domain/process-docs.ts';
 import type { ProcessDefinition } from '../domain/process.ts';

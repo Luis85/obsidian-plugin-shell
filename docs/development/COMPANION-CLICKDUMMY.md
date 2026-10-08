@@ -69,7 +69,7 @@ To look at every surface, state and scenario in light and dark at wide and narro
 | Existing page/component/compiler modules | Generate the shared runtime UI, bindings, effects and contracts |
 | `src/cli/adapters/framework/clickdummy.ts` | Validate generated-project context and invoke the fixed shipped build worker |
 | `.claude/skills/companion-prototype-design/scripts/lib/build-worker.mjs` | Reuse the pinned Vue/Nuxt UI build, CSS ownership, license notices and single-file assembler |
-| `scripts/companion-tools/authoring-evidence.mjs` | Bind qualification to the exact modern companion HTML and full exported JSON |
+| `tooling/companion-tools/authoring-evidence.mjs` | Bind qualification to the exact modern companion HTML and full exported JSON |
 
 Browser host CSS is the original shell harness simulation, not an extracted Obsidian stylesheet. It is imported only by the browser entry. Native styles retain the existing ownership pipeline. No font binaries, live vault adapter, Obsidian module or Node module may enter the browser bundle. The worker's existing CSP/static checks and browser suite verify the boundary separately.
 
@@ -80,7 +80,7 @@ Generated browser files follow existing ownership rules: preserve consumer edits
 The modern integrated authoring build is produced by:
 
 ```sh
-node scripts/concepts/build-mvp.mjs
+node tooling/concepts/build-mvp.mjs
 ```
 
 It writes the empty authoring workspace `reports/companion-mvp/index.html` (and the same page as `companion-journey-lens.html`) plus the `build.json` hash receipt, and removes any stale `companion-project.json`/`companion-project-v6.json`: it emits no project export. Load `configs/starters/companion-plugin.json` separately. The checked-in schema 6 concept must pass `build-companion.py --check` before the editor islands are mounted into it.
@@ -88,8 +88,8 @@ It writes the empty authoring workspace `reports/companion-mvp/index.html` (and 
 With the qualified npm explicitly selected and browser tooling provisioned:
 
 ```sh
-node scripts/companion-tools/qualify-project.mjs --authoring-fixture
-python -B tests/concepts/companion-mvp.browser.py --clickdummy
+node tooling/companion-tools/qualify-project.mjs --authoring-fixture
+python -B src/companion/tests/concepts/companion-mvp.browser.py --clickdummy
 ```
 
 Qualification verifies the current HTML/JSON receipt before generation, writes into a separate temporary workspace, installs its exact lockfile, runs its own build/typecheck/tests, then builds and exercises its actual clickdummy. Evidence is retained under `reports/companion-mvp/generation` with the exact input, logs, generated JSON and output HTML. A hash-matching receipt is reproducibility evidence, not a trust or publication grant.

@@ -61,7 +61,7 @@ runs:
     - name: Build the standalone CLI from source
       if: inputs.install == 'true'
       shell: bash
-      run: node scripts/bundling/build-cli.mjs
+      run: node tooling/bundling/build-cli.mjs
     - name: Resolve the pinned Playwright version
       id: playwright
       if: inputs.playwright != ''

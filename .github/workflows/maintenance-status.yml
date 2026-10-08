@@ -21,7 +21,7 @@ jobs:
           node-version-file: .nvmrc
           package-manager-cache: false
       - name: Discover stable versions and explicit unavailable sources
-        run: node scripts/maintenance/status.mjs
+        run: node tooling/maintenance/status.mjs
       - name: Retain discovery including failures
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

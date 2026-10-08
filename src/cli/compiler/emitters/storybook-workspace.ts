@@ -16,7 +16,7 @@ export function storybookWorkspace(template: TemplateSnapshot, paths: string[]):
       scripts: { storybook: 'node ../bin/app storybook dev --root ..', 'build-storybook': 'node ../bin/app storybook build --root ..',
         typecheck: 'node ../bin/app storybook check --root ..' }, devDependencies: dependencies })),
     add('.gitignore', 'node_modules/\nstorybook-static/\n*.log\n'),
-    add('tsconfig.json', json({ extends: '../tsconfig.json', compilerOptions: { allowImportingTsExtensions: true },
+    add('tsconfig.json', json({ extends: '../configs/types/tsconfig.project.json', compilerOptions: { allowImportingTsExtensions: true },
       files: paths.map(path => path.slice('storybook/'.length)), include: ['custom/**/*.ts', '.storybook/**/*.ts'] })),
     add('.storybook/generated.json', json(paths.map(path => '../' + path.slice('storybook/'.length)))),
     add('.storybook/main.ts', `import type { StorybookConfig } from '@storybook/vue3-vite';
@@ -62,7 +62,7 @@ export default preview;
 `, 'extension'),
     add('vite.config.mjs', `// Reuse the framework's hash-guarded Nuxt UI adaptation, local icons and scoped CSS.
 // shell storybook commands run from the project root, never from this workspace.
-import { sharedConfig } from '../scripts/bundling/vite-shared.mjs';
+import { sharedConfig } from '../tooling/bundling/vite-shared.mjs';
 export default () => {
   const config = sharedConfig();
   return { ...config, resolve: { ...config.resolve, dedupe: ['vue', 'pinia'] }, server: { ...config.server, host: '127.0.0.1' } };

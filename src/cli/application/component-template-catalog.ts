@@ -1,4 +1,4 @@
-import { requireSketch } from '../domain/errors.ts';
+import { requireSketch } from '#shared/contracts/sketch-errors.ts';
 import type { ComponentTemplate, ComponentTemplateEntry, ComponentTemplateQuery } from '../domain/component-template.ts';
 
 function same(value: string, expected?: string): boolean {

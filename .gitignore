@@ -50,3 +50,6 @@ __pycache__/
 # Optional source-preview/agent tooling; never part of production assets.
 .airship-tooling/
 .airship/
+
+# TypeScript project build output (declarations and build info of tsc -b).
+.cache/

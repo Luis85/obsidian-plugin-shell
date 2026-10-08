@@ -10,7 +10,7 @@ import { insistRemote, isAmendmentId, isTaskId, viewLimits as limits, normalizeT
 import type { HostingPlatform } from './model.ts';
 import type { LinkResolver, LinkTarget, RemoteDocumentLink, RemotePullRequestView } from './remote-model.ts';
 import { blobUrl, remoteToWikilinks, wikilinksToRemote } from './remote-links.ts';
-import { hasControls } from '../errors.ts';
+import { hasControls } from '#shared/contracts/sketch-errors.ts';
 
 export type MarkerStyle = 'html' | 'reference';
 export interface BodyOptions { links: LinkTarget; resolve?: LinkResolver; markers?: MarkerStyle }

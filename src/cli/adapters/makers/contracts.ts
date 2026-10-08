@@ -1,7 +1,7 @@
-import type { FilePlan } from '../../../../scripts/shared/file-plan.ts';
+import type { FilePlan } from '#shared/platform/file-plan.ts';
 
 export const flagOptions = ['--dry-run', '--yes', '--no-interaction', '--json', '--help', '--list', '--document', '--refresh', '--bare'] as const;
-export const valueOptions = ['--feature', '--entity', '--folder', '--preset', '--backend', '--event', '--view', '--preference', '--extension', '--format', '--extensions', '--editor', '--file-type'] as const;
+export const valueOptions = ['--source', '--feature', '--entity', '--folder', '--preset', '--backend', '--event', '--view', '--preference', '--extension', '--format', '--extensions', '--editor', '--file-type'] as const;
 export type FlagOption = typeof flagOptions[number];
 export type ValueOption = typeof valueOptions[number];
 /** Parsed maker options: flags are `true`, value options carry their string. */
@@ -12,6 +12,8 @@ export interface RegistryImport { readonly local: string; readonly from: string;
 /** What every recipe, including a trusted local custom recipe, may use: declared outputs only, never direct writes. */
 export interface RecipeContext {
   read(path: string): Promise<string>;
+  /** Explicit repository paths from project configuration bypass logical source relocation, keeping the same read guards. */
+  readRepository?(path: string): Promise<string>;
   add(path: string, content: string): Promise<void>;
   editArray(path: string, name: string, expression: string, imports?: readonly RegistryImport[]): Promise<void>;
   readonly tests: Set<string>;

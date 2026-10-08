@@ -20,7 +20,7 @@ The shell never imports the companion. Generated plugins never import the compan
 
 ## Existing extension points to preserve
 
-Start from `src/features/api.ts`, explicit `src/bootstrap` registries, `src/application`, `src/domain`, infrastructure adapters, and `scripts` tooling. Keep the current Vue/Vite/Pinia/Nuxt UI foundation; this is not a Nuxt-framework migration. Use logical product composition before requiring a repository-wide package move.
+Start from `src/plugin/features/api.ts`, explicit `src/plugin/bootstrap` registries, `src/plugin/application`, `src/plugin/domain`, infrastructure adapters, and `tooling/`. Keep the current Vue/Vite/Pinia/Nuxt UI foundation; this is not a Nuxt-framework migration. Use logical product composition before requiring a repository-wide package move.
 
 | Responsibility | Owner |
 | --- | --- |

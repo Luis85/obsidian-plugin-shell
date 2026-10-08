@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { makerFixture, installMakerFoundation } from '../../tooling/maker-fixture.mjs';
+import { makerFixture, installMakerFoundation } from '../../../src/cli/tests/support/maker-fixture.mjs';
 import { planMakerBatch } from '../../../src/cli/adapters/makers/batch.ts';
 
 const batch = (...steps) => ({ schemaVersion: 1, steps });

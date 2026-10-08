@@ -1,5 +1,5 @@
 /** `pr sync`: three-way merge of a published pull request with the platform; conflicts block before any write. */
-import { serializeJson as json } from '../../../../scripts/contracts/serialization.ts';
+import { serializeJson as json } from '#shared/contracts/serialization.ts';
 import { hash } from '../framework/files.ts';
 import { OperationError, result, type Context, type Request, type Result } from '../framework/contracts.ts';
 import { setPullRequestBinding } from '../../domain/increments/pull-request-document.ts';
