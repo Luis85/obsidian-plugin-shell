@@ -5,7 +5,9 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const root = resolve(import.meta.dirname, '../..');
-const build = project => spawnSync(process.execPath, ['node_modules/vue-tsc/bin/vue-tsc.js', '-b', project],
+// TypeScript forces pretty (ANSI) diagnostics for any non-empty FORCE_COLOR, including the evidence
+// runner's FORCE_COLOR=0, so request plain output to keep the asserted text independent of the runner.
+const build = project => spawnSync(process.execPath, ['node_modules/vue-tsc/bin/vue-tsc.js', '-b', project, '--pretty', 'false'],
   { cwd: root, encoding: 'utf8', timeout: 900_000, maxBuffer: 512 * 1024 * 1024 });
 
 test('[TYPES-01] importing a source project that is not referenced fails the TypeScript build with TS6307', () => {
