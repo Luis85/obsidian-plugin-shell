@@ -39,6 +39,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - Fake-data generator: `node bin/app fake-data` creates seeded, reproducible Markdown notes with YAML frontmatter from built-in presets (contact, task, project, book, meeting), project definitions or saved-project entities, optionally with an Obsidian Bases table, through one reviewed file plan. Runs can be saved and re-run as generation configs in `configs/fake-data/generations`. Adds the exact dependency `@faker-js/faker` 10.6.0 (MIT), bundled into the kit with its license notice.
 - Data-driven forms in the plugin runtime: a feature ships a JSON form in `src/features/<feature>/forms/`, declares it with `defineForm` from the feature API and renders it with the shared `DataForm` component, which validates the draft and returns typed values without persisting anything. The runtime reads the same format as `configs/forms` but rejects CLI-only hooks and kinds; the showcase gains a Forms page.
 - Source project management and explicit maker source selection for self-contained TypeScript projects.
+- Release preparation and the release cut take a reviewed `--min-app-version` that raises the Obsidian host floor in `manifest.json` and the new `versions.json` entry; the native and real-Obsidian tests now run Obsidian 1.14.4.
 
 ### Changed
 
