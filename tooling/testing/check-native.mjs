@@ -30,7 +30,7 @@ if (!flags.includes('--allow-download') || new Set(flags).size !== flags.length 
   console.error('Native smoke needs explicitly provisioned obsidian-launcher 3.2.1 in .native-runner plus --allow-download. Optional flags: --performance [--controlled-reference]. This may download the host. No test was run.'); process.exit(2);
 }
 const output = resolve('reports/native/attempts', `${new Date().toISOString().replaceAll(':', '-')}-${process.pid}`); await mkdir(output, { recursive: true });
-const report = { mode: 'native-obsidian', status: 'not-run', sourceCommit: process.env.GITHUB_SHA ?? null, targetApp: '1.13.7', attemptDirectory: output, assets: [], checks: [], errors: [], launchResources: [] };
+const report = { mode: 'native-obsidian', status: 'not-run', sourceCommit: process.env.GITHUB_SHA ?? null, targetApp: '1.14.4', attemptDirectory: output, assets: [], checks: [], errors: [], launchResources: [] };
 const diagnostics = createNativeDiagnosticObserver(report);
 const contextObservers = [];
 const scratch = await nativeScratch();
@@ -56,7 +56,7 @@ try {
   const vault = join(scratch, 'vault'); await mkdir(vault);
   const server = createServer(); await new Promise(ok => server.listen(0, '127.0.0.1', ok));
   const port = server.address().port; await new Promise(ok => server.close(ok));
-  report.resolvedVersions = await launcher.resolveVersion('1.13.7', 'latest');
+  report.resolvedVersions = await launcher.resolveVersion('1.14.4', 'latest');
   const [appVersion, installerVersion] = report.resolvedVersions;
   for (const file of ['main.js', 'styles.css', 'manifest.json']) report.assets.push({ file, sha256: createHash('sha256').update(await readFile(`dist/${file}`)).digest('hex') });
   const witness = await createNativeForeignNotice(scratch, identity.id);

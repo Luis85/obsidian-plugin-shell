@@ -513,7 +513,7 @@ jobs:
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: .native-cache
-          key: obsidian-host-${{ runner.os }}-app-1.13.7-launcher-3.2.1
+          key: obsidian-host-${{ runner.os }}-app-1.14.4-launcher-3.2.1
       - name: Real-Obsidian Vitest suite (private Xvfb display, no retries)
         env:
           OBSIDIAN_ALLOW_DOWNLOAD: '1'
