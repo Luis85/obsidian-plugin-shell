@@ -3,7 +3,10 @@
  * manifest.json, versions.json and CHANGELOG.md. The changelog's Unreleased section (merged with an optional
  * --notes-file) becomes "## [X.Y.Z] - date" and link references are rewritten. Never commits, tags or pushes.
  *
- *   npm run release:prepare -- --version X.Y.Z [--date YYYY-MM-DD] [--notes-file notes.md] [--dry-run]
+ *   npm run release:prepare -- --version X.Y.Z [--date YYYY-MM-DD] [--notes-file notes.md] [--min-app-version A.B.C] [--dry-run]
+ *
+ * The host floor (manifest minAppVersion) carries forward unchanged unless --min-app-version names a reviewed, higher
+ * floor; then manifest.json and the new versions.json entry change together. Released entries are never rewritten.
  */
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
@@ -24,9 +27,19 @@ export function compareVersions(a, b) {
   return 0;
 }
 export const today = (now = new Date()) => now.toISOString().slice(0, 10);
-/** notes is optional extra Markdown; Unreleased plus notes must not be empty (RELEASE_NOTES_EMPTY). */
-export async function prepareVersion(root, version, notes = '', { beforeFinalize, date = today() } = {}) {
+/** A reviewed new host floor: a stable x.y.z version, or HOST_FLOOR_INVALID. */
+export function hostFloor(value) {
+  try { return stableVersion(value); } catch { throw new Error(`HOST_FLOOR_INVALID: ${String(value)}`); }
+}
+/** notes is optional extra Markdown; Unreleased plus notes must not be empty (RELEASE_NOTES_EMPTY).
+ * minAppVersion is an explicit, reviewed host floor that must be higher than the current one (HOST_FLOOR_NOT_RAISED).
+ * @param {string} root
+ * @param {string} version
+ * @param {string} [notes]
+ * @param {{ beforeFinalize?: () => unknown, date?: string, minAppVersion?: string }} [options] */
+export async function prepareVersion(root, version, notes = '', { beforeFinalize, date = today(), minAppVersion } = {}) {
   stableVersion(version);
+  if (minAppVersion !== undefined) hostFloor(minAppVersion);
   if (typeof notes !== 'string') throw new Error('RELEASE_NOTES_INVALID');
   if (!validDate(date)) throw new Error('RELEASE_DATE_INVALID');
   const dependencyPins = await checkDependencyPins(root);
@@ -46,8 +59,11 @@ export async function prepareVersion(root, version, notes = '', { beforeFinalize
   if (compareVersions(version, pkg.version) <= 0 || Object.hasOwn(versions, version)) throw new Error('VERSION_NOT_NEW');
   stableVersion(manifest.minAppVersion);
   if (versions[pkg.version] !== manifest.minAppVersion) throw new Error('UNREVIEWED_HOST_FLOOR_CHANGE');
+  const previousMinAppVersion = manifest.minAppVersion;
+  if (minAppVersion !== undefined && compareVersions(minAppVersion, previousMinAppVersion) <= 0) throw new Error(`HOST_FLOOR_NOT_RAISED: ${minAppVersion} is not above ${previousMinAppVersion}`);
   const changelog = promoteUnreleased(originals[4], { version, date, notes, repository: repositoryUrl(pkg) });
   pkg.version = version; lock.version = version; lock.packages[''].version = version; manifest.version = version;
+  if (minAppVersion !== undefined) manifest.minAppVersion = minAppVersion;
   versions[version] = manifest.minAppVersion;
   const entries = Object.entries({ 'package.json': pkg, 'package-lock.json': lock, 'manifest.json': manifest, 'versions.json': versions }).map(([path, value]) => ({ path, content: JSON.stringify(value, null, 2) + '\n' }));
   entries.push({ path: 'CHANGELOG.md', content: changelog.text });
@@ -56,7 +72,7 @@ export async function prepareVersion(root, version, notes = '', { beforeFinalize
   for (const change of plan.changes) if (hashes.get(change.path) !== change.beforeHash) throw new Error(`RELEASE_STALE_INPUT: ${change.path}`);
   const finalPins = await checkDependencyPins(root);
   if (JSON.stringify(finalPins) !== JSON.stringify(dependencyPins)) throw new Error('DEPENDENCY_PINS_STALE: Dependency manifests or lockfile changed while preparing the release.');
-  return { plan, version, date, minAppVersion: manifest.minAppVersion, hostFloorChanged: false, dependencyPins,
+  return { plan, version, date, minAppVersion: manifest.minAppVersion, previousMinAppVersion, hostFloorChanged: manifest.minAppVersion !== previousMinAppVersion, dependencyPins,
     changelog: { section: changelog.section, linkReferences: changelog.linkReferences } };
 }
 export function parsePrepareArguments(args) {
@@ -66,24 +82,26 @@ export function parsePrepareArguments(args) {
     if (seen.has(flag)) throw new Error(`DUPLICATE_ARGUMENT: ${flag}`); seen.add(flag);
     if (flag === '--dry-run') options.dryRun = true;
     else if (flag === '--help') options.help = true;
-    else if (flag === '--version' || flag === '--notes-file' || flag === '--date') {
+    else if (flag === '--version' || flag === '--notes-file' || flag === '--date' || flag === '--min-app-version') {
       const value = args[++i];
       if (!value || value.startsWith('--')) throw new Error(`MISSING_ARGUMENT_VALUE: ${flag}`);
-      options[{ '--version': 'version', '--notes-file': 'notes', '--date': 'date' }[flag]] = value;
+      options[{ '--version': 'version', '--notes-file': 'notes', '--date': 'date', '--min-app-version': 'minAppVersion' }[flag]] = value;
     } else throw new Error(`UNKNOWN_ARGUMENT: ${flag}`);
   }
   if (!args.length) return { help: true };
   if (options.help) { if (args.length !== 1) throw new Error('HELP_MUST_BE_USED_ALONE'); return options; }
   if (!options.version) throw new Error('VERSION_REQUIRED');
   if (options.date !== undefined && !validDate(options.date)) throw new Error('RELEASE_DATE_INVALID');
+  if (options.minAppVersion !== undefined) hostFloor(options.minAppVersion);
   stableVersion(options.version); return options;
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const options = parsePrepareArguments(process.argv.slice(2));
-    if (options.help) { console.log('npm run release:prepare -- --version X.Y.Z [--date YYYY-MM-DD] [--notes-file <file>] [--dry-run]\nPromotes CHANGELOG [Unreleased] (plus optional notes) into the version and reviews or applies consistent source metadata only. No commit, tag, push or publication.'); process.exit(0); }
+    if (options.help) { console.log('npm run release:prepare -- --version X.Y.Z [--date YYYY-MM-DD] [--notes-file <file>] [--min-app-version A.B.C] [--dry-run]\nPromotes CHANGELOG [Unreleased] (plus optional notes) into the version and reviews or applies consistent source metadata only. --min-app-version raises the reviewed host floor in manifest.json and the new versions.json entry. No commit, tag, push or publication.'); process.exit(0); }
     const notes = options.notes ? await readFile(resolve(options.notes), 'utf8') : '';
-    const result = await prepareVersion(process.cwd(), options.version, notes, options.date ? { date: options.date } : {});
+    const { date, minAppVersion } = options;
+    const result = await prepareVersion(process.cwd(), options.version, notes, { ...(date ? { date } : {}), ...(minAppVersion ? { minAppVersion } : {}) });
     console.log(JSON.stringify({ ...result, mode: options.dryRun ? 'dry-run' : 'apply' }, null, 2));
     if (!options.dryRun) console.log(JSON.stringify(await applyFilePlan(result.plan)));
   } catch (error) { console.error(error.message); process.exitCode = 1; }

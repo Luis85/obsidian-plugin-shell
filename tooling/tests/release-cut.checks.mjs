@@ -70,8 +70,41 @@ test('the pull request body fills the release template, with a fallback when it 
     assert.equal(bodies.length, 1);
     assert.equal(bodies[0], withTemplate
       ? `## Release 0.4.0\n\nBranch \`release/0.4.0\` from \`main\` at ${result.baseSha} (2026-10-01).\n\n### Added\n\n- Pending capability.\n\n- [ ] Release result is green\n`
-      : `## Release 0.4.0\n\nRelease branch \`release/0.4.0\` cut from \`main\` at ${result.baseSha} on 2026-10-01.\n\n### Changelog\n\n### Added\n\n- Pending capability.\n`);
+      : `## Release 0.4.0\n\nRelease branch \`release/0.4.0\` cut from \`main\` at ${result.baseSha} on 2026-10-01.\nHost floor: 1.13.7 (unchanged).\n\n### Changelog\n\n### Added\n\n- Pending capability.\n`);
   }
+});
+
+test('a reviewed host floor shows in the plan, lands in the release commit and the pull request, and resumes only unchanged', async t => {
+  const fixture = await gitFixture(t, { withTemplate: false });
+  const floor = { ...options(fixture), minAppVersion: '1.14.4' };
+  const plan = await cutRelease(floor);
+  assert.equal(plan.status, 'planned'); assert.deepEqual(plan.hostFloor, { from: '1.13.7', to: '1.14.4', changed: true });
+  assert.match(plan.steps.find(step => step.id === 'prepare').detail, /host floor 1\.13\.7 -> 1\.14\.4 \(reviewed raise; promotion needs native acceptance on 1\.14\.4\)\.$/);
+  assert.equal(JSON.parse(await readFile(join(fixture.root, 'manifest.json'))).minAppVersion, '1.13.7');
+  assert.equal((await cutRelease(options(fixture))).hostFloor.changed, false);
+  const bodies = [];
+  fixture.gh.responses = { 'pr list': ok('[]'), 'run list': ok('[]'), 'pr create': args => { bodies.push(readFileSync(args[args.indexOf('--body-file') + 1], 'utf8')); return ok('url'); } };
+  const result = await cutRelease({ ...floor, execute: true, remote: true });
+  assert.equal(result.status, 'pushed'); assert.deepEqual(result.hostFloor, { from: '1.13.7', to: '1.14.4', changed: true });
+  assert.deepEqual(JSON.parse(fixture.git('show', 'HEAD:versions.json')), { '0.3.0': '1.13.7', '0.4.0': '1.14.4' });
+  assert.equal(JSON.parse(fixture.git('show', 'HEAD:manifest.json')).minAppVersion, '1.14.4');
+  assert.deepEqual(JSON.parse(fixture.git('show', 'main:versions.json')), { '0.3.0': '1.13.7' });
+  assert.match(bodies[0], /\nHost floor: 1\.13\.7 -> 1\.14\.4 \(reviewed raise; promotion needs native acceptance on 1\.14\.4\)\.\n/);
+  assert.equal((await cutRelease({ ...floor, execute: true })).status, 'committed');
+  await assert.rejects(cutRelease({ ...options(fixture), minAppVersion: '1.15.0', execute: true }), /CUT_HOST_FLOOR_MISMATCH: release\/0\.4\.0 records host floor 1\.14\.4, not 1\.15\.0/);
+});
+
+test('cut refuses an invalid, lowered or unreviewed host floor before any branch or write', async t => {
+  const fixture = await gitFixture(t);
+  await assert.rejects(cutRelease({ ...options(fixture), minAppVersion: '1.14' }), /HOST_FLOOR_INVALID/);
+  await assert.rejects(cutRelease({ ...options(fixture), minAppVersion: '1.13.7', execute: true }), /HOST_FLOOR_NOT_RAISED/);
+  const blocked = await cutRelease({ ...options(fixture), minAppVersion: '1.12.0' });
+  assert.equal(blocked.status, 'blocked'); assert.match(blocked.blockers[0], /^HOST_FLOOR_NOT_RAISED/); assert.equal(blocked.hostFloor, null);
+  const manifest = JSON.parse(await readFile(join(fixture.root, 'manifest.json'))); manifest.minAppVersion = '1.14.4';
+  await writeFile(join(fixture.root, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
+  fixture.git('commit', '--quiet', '-am', 'Unreviewed floor'); fixture.git('push', '--quiet', 'origin', 'main'); fixture.git('fetch', '--quiet', 'origin');
+  await assert.rejects(cutRelease({ ...options(fixture), execute: true }), /UNREVIEWED_HOST_FLOOR_CHANGE/);
+  assert.equal(fixture.git('rev-parse', '--abbrev-ref', 'HEAD'), 'main'); assert.equal(fixture.git('branch', '--list', 'release/*'), ''); assert.deepEqual(fixture.gh.calls, []);
 });
 
 test('cut refuses a dirty tree, another branch, a stale base, existing branch or tag and empty notes', async t => {
@@ -135,6 +168,9 @@ test('cut arguments require a stable version and reject unsafe values', () => {
   assert.deepEqual(parseCutArguments([]), { help: true });
   assert.deepEqual(parseCutArguments(['--version', '1.0.0', '--execute', '--remote', '--base', 'main', '--date', '2026-10-01', '--repository', 'Owner/repo']),
     { version: '1.0.0', execute: true, remote: true, base: 'main', date: '2026-10-01', repository: 'Owner/repo' });
+  assert.deepEqual(parseCutArguments(['--version', '1.0.0', '--min-app-version', '1.14.4']), { version: '1.0.0', minAppVersion: '1.14.4' });
+  assert.throws(() => parseCutArguments(['--version', '1.0.0', '--min-app-version', 'latest']), /HOST_FLOOR_INVALID/);
+  assert.throws(() => parseCutArguments(['--version', '1.0.0', '--min-app-version']), /MISSING_ARGUMENT_VALUE/);
   assert.throws(() => parseCutArguments(['--execute']), /INVALID_STABLE_VERSION/);
   assert.throws(() => parseCutArguments(['--version', 'v1.0.0']), /INVALID_STABLE_VERSION/);
   assert.throws(() => parseCutArguments(['--version', '1.0.0', '--date', '2026-02-30']), /RELEASE_DATE_INVALID/);

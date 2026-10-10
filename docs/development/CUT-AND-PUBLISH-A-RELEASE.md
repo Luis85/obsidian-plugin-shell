@@ -41,6 +41,15 @@ Read `## [Unreleased]` in `CHANGELOG.md`: breaking changes need a major, new
 features a minor, fixes only a patch. Unreleased must not be empty; add the
 missing entries through an ordinary pull request first.
 
+Decide whether the release raises the Obsidian host floor (`minAppVersion`). By
+default it carries forward. To raise it, name the reviewed new floor with
+`--min-app-version A.B.C` (the `min_app_version` input of Release cut). It must be
+above the current floor; released `versions.json` entries never change, and only
+the new version's entry records the new floor. Promotion then needs native
+acceptance on that host. Never edit `minAppVersion` on `main` directly: release
+preparation refuses that with `UNREVIEWED_HOST_FLOOR_CHANGE`, and setup refuses a
+released version with a different floor.
+
 Avoid merging user-facing pull requests into `main` between the cut and Publish.
 A new `[Unreleased]` entry on `main` makes the release pull request conflict in
 `CHANGELOG.md`.
@@ -51,12 +60,13 @@ On an up-to-date `main` checkout with a clean tree:
 
 ```sh
 git switch main && git pull --ff-only
-node tooling/release/cut.mjs --version X.Y.Z
+node tooling/release/cut.mjs --version X.Y.Z [--min-app-version A.B.C]
 ```
 
 The dry run prints the planned branch, the files release preparation changes
 (`package.json`, `package-lock.json`, `manifest.json`, `versions.json`,
-`CHANGELOG.md`), the promoted changelog section and every blocker
+`CHANGELOG.md`), the host floor (`FLOOR    minAppVersion 1.13.7 -> 1.14.4 (reviewed
+raise; ...)` or `... (unchanged)`), the promoted changelog section and every blocker
 (`CUT_NOT_ON_BASE`, `CUT_TREE_NOT_CLEAN`, `CUT_BASE_NOT_CURRENT`,
 `CUT_BRANCH_EXISTS`, `CUT_TAG_EXISTS`, `VERSION_NOT_NEW`, ...). It exits 1 when
 blocked and writes nothing.
@@ -65,8 +75,10 @@ blocked and writes nothing.
 
 Dispatch **Release cut** from `main`:
 
-- GitHub UI: Actions → Release cut → Run workflow → branch `main`, version `X.Y.Z`.
-- GitHub CLI: `gh workflow run release-cut.yml --ref main -f version=X.Y.Z`.
+- GitHub UI: Actions → Release cut → Run workflow → branch `main`, version `X.Y.Z`
+  and, only to raise the host floor, `min_app_version`.
+- GitHub CLI: `gh workflow run release-cut.yml --ref main -f version=X.Y.Z`
+  (add `-f min_app_version=A.B.C` to raise the floor).
 
 A reviewer of the `release` environment approves the run. The job creates
 `release/X.Y.Z` from `main`, commits `release: X.Y.Z` with the prepared metadata,

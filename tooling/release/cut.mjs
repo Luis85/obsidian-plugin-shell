@@ -1,8 +1,11 @@
 /**
  * Cut a release branch from the base branch. Default: a read-only plan (dry run).
  *
- *   node tooling/release/cut.mjs --version X.Y.Z [--date YYYY-MM-DD] [--base main] [--repository owner/repo] [--execute] [--remote] [--json]
+ *   node tooling/release/cut.mjs --version X.Y.Z [--date YYYY-MM-DD] [--min-app-version A.B.C] [--base main] [--repository owner/repo] [--execute] [--remote] [--json]
  *
+ * --min-app-version raises the host floor (manifest minAppVersion) to that reviewed version in the release commit: the
+ * plan shows the change and the new versions.json entry records it; released entries never change. Without it the
+ * floor carries forward. Promotion then needs native acceptance on the new minimum host.
  * A dry run lists every blocker (exit 1) next to the plan. --execute: requires a clean tree on <base> matching origin/<base> (when fetched), no release/X.Y.Z branch
  * and no X.Y.Z tag; creates release/X.Y.Z, runs release preparation in-process (Unreleased -> X.Y.Z) and
  * commits "release: X.Y.Z". Rerunning on that branch resumes after the commit.
@@ -18,17 +21,27 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { applyFilePlan } from '../../src/shared/platform/file-plan.ts';
-import { prepareVersion, stableVersion, today } from '../../src/cli/tooling/release/prepare.mjs';
+import { hostFloor, prepareVersion, stableVersion, today } from '../../src/cli/tooling/release/prepare.mjs';
 import { extractNotes, validDate } from '../../src/cli/tooling/release/changelog.mjs';
 import { verifyReleaseBranch } from './branch.mjs';
 import { createRunner, gitSucceeds, gitText, safeDetail } from './commands.mjs';
 
 const releaseFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'CHANGELOG.md'];
 const refusal = (code, message) => Object.assign(new Error(`${code}: ${message}`), { code });
-const fallbackBody = '## Release {{version}}\n\nRelease branch `{{release_branch}}` cut from `{{base}}` at {{base_sha}} on {{date}}.\n\n### Changelog\n\n{{changelog}}\n';
+const fallbackBody = '## Release {{version}}\n\nRelease branch `{{release_branch}}` cut from `{{base}}` at {{base_sha}} on {{date}}.\nHost floor: {{host_floor}}.\n\n### Changelog\n\n{{changelog}}\n';
 
 export function releaseBody(template, values) {
-  return (template ?? fallbackBody).replace(/\{\{\s*(version|base|base_sha|release_branch|date|changelog)\s*\}\}/g, (_, key) => values[key]);
+  return (template ?? fallbackBody).replace(/\{\{\s*(version|base|base_sha|release_branch|date|changelog|host_floor)\s*\}\}/g, (_, key) => values[key]);
+}
+
+/** The host floor before (base) and after (release commit) the cut, read from the committed manifests. */
+function committedFloor(run) {
+  const floor = revision => JSON.parse(gitText(run, ['show', `${revision}:manifest.json`])).minAppVersion;
+  const from = floor('HEAD^'); const to = floor('HEAD');
+  return { from, to, changed: from !== to };
+}
+export function hostFloorText({ from, to, changed }) {
+  return changed ? `${from} -> ${to} (reviewed raise; promotion needs native acceptance on ${to})` : `${to} (unchanged)`;
 }
 
 function remoteSha(run, kind, name) {
@@ -45,7 +58,7 @@ function localState(run, version, branch) {
 }
 
 /** --execute refuses at the first blocker; a dry run lists every blocker and still shows the plan. */
-async function preflight({ run, root, version, base, branch, execute, remote, date, steps, warnings, blockers }) {
+async function preflight({ run, root, version, base, branch, execute, remote, date, minAppVersion, steps, warnings, blockers }) {
   const state = localState(run, version, branch);
   if (state.resumed) {
     for (const id of ['create-branch', 'prepare', 'commit']) steps.push({ id, status: 'skipped', detail: `Already on ${branch} with "release: ${version}".` });
@@ -65,12 +78,16 @@ async function preflight({ run, root, version, base, branch, execute, remote, da
     if (remoteSha(run, 'tag', version)) throw refusal('CUT_TAG_EXISTS', `origin has tag ${version}.`);
   }
   let prepared;
-  try { prepared = await prepareVersion(root, version, '', { date }); }
+  try { prepared = await prepareVersion(root, version, '', { date, ...(minAppVersion === undefined ? {} : { minAppVersion }) }); }
   catch (error) { if (execute) throw error; blockers.push(error.message); return null; }
   steps.push({ id: 'create-branch', status: 'planned', detail: `git switch -c ${branch}` },
-    { id: 'prepare', status: 'planned', detail: `Update ${prepared.plan.changes.map(change => change.path).join(', ')}.` },
+    { id: 'prepare', status: 'planned', detail: `Update ${prepared.plan.changes.map(change => change.path).join(', ')}; host floor ${hostFloorText(preparedFloor(prepared))}.` },
     { id: 'commit', status: 'planned', detail: `git commit -m "release: ${version}"` });
   return prepared;
+}
+
+function preparedFloor(prepared) {
+  return { from: prepared.previousMinAppVersion, to: prepared.minAppVersion, changed: prepared.hostFloorChanged };
 }
 
 async function pushBranch({ run, env, branch, head }) {
@@ -113,17 +130,19 @@ function dispatchRelease({ run, repoArgs, branch, head }) {
   return { id: 'dispatch-release', status: 'done', detail: `Dispatched release.yml on ${branch}.` };
 }
 
-export async function cutRelease({ root = process.cwd(), version, date, base = 'main', repository, execute = false, remote = false,
+export async function cutRelease({ root = process.cwd(), version, date, minAppVersion, base = 'main', repository, execute = false, remote = false,
   env = process.env, run = createRunner({ cwd: root }) }) {
   stableVersion(version); root = resolve(root); date ??= today();
+  if (minAppVersion !== undefined) hostFloor(minAppVersion);
   if (!validDate(date)) throw refusal('RELEASE_DATE_INVALID', date);
   const branch = `release/${version}`; const steps = []; const warnings = []; const blockers = [];
   const result = { schemaVersion: 1, mode: execute ? 'execute' : 'dry-run', version, date, base, branch, steps, warnings };
-  const prepared = await preflight({ run, root, version, base, branch, execute, remote, date, steps, warnings, blockers });
+  const prepared = await preflight({ run, root, version, base, branch, execute, remote, date, minAppVersion, steps, warnings, blockers });
   const remoteIds = remote ? ['push', 'pull-request', 'dispatch-release'] : [];
   if (!execute) {
     for (const id of remoteIds) steps.push({ id, status: 'planned', detail: 'Runs with --execute --remote; checks remote state first.' });
-    return { ...result, status: blockers.length ? 'blocked' : 'planned', blockers, changelog: prepared?.changelog.section ?? null };
+    return { ...result, status: blockers.length ? 'blocked' : 'planned', blockers, hostFloor: prepared ? preparedFloor(prepared) : null,
+      changelog: prepared?.changelog.section ?? null };
   }
   if (prepared) {
     gitText(run, ['switch', '--quiet', '-c', branch]); steps.find(item => item.id === 'create-branch').status = 'done';
@@ -134,11 +153,14 @@ export async function cutRelease({ root = process.cwd(), version, date, base = '
   const check = await verifyReleaseBranch({ root, version, branch, base, run, env: {} });
   if (check.status !== 'passed') throw refusal('CUT_SELF_CHECK_FAILED', check.checks.filter(item => item.status === 'failed').map(item => item.code).join(', '));
   const head = gitText(run, ['rev-parse', 'HEAD']); const baseSha = gitText(run, ['rev-parse', 'HEAD^']);
-  Object.assign(result, { head, baseSha });
+  const floor = committedFloor(run);
+  // A resumed cut must not silently keep a floor other than the reviewed one it was asked for.
+  if (minAppVersion !== undefined && floor.to !== minAppVersion) throw refusal('CUT_HOST_FLOOR_MISMATCH', `${branch} records host floor ${floor.to}, not ${minAppVersion}.`);
+  Object.assign(result, { head, baseSha, hostFloor: floor });
   if (!remote) return { ...result, status: 'committed', next: `Review, then rerun with --execute --remote (or push ${branch} yourself).` };
   const repoArgs = repository ? ['--repo', repository] : [];
   const changelog = await readFile(join(root, 'CHANGELOG.md'), 'utf8');
-  const values = { version, base, base_sha: baseSha, release_branch: branch, date, changelog: extractNotes(changelog, version) };
+  const values = { version, base, base_sha: baseSha, release_branch: branch, date, changelog: extractNotes(changelog, version), host_floor: hostFloorText(floor) };
   try {
     steps.push(await pushBranch({ run, env, branch, head }));
     steps.push(await openPullRequest({ run, root, repoArgs, branch, base, values }));
@@ -158,14 +180,15 @@ export function parseCutArguments(args) {
     if (seen.has(flag)) throw new Error(`DUPLICATE_ARGUMENT: ${flag}`);
     seen.add(flag);
     if (['--execute', '--remote', '--json'].includes(flag)) options[flag.slice(2)] = true;
-    else if (['--version', '--date', '--base', '--repository'].includes(flag)) {
+    else if (['--version', '--date', '--min-app-version', '--base', '--repository'].includes(flag)) {
       const value = args[++index];
       if (!value || value.startsWith('--')) throw new Error(`MISSING_ARGUMENT_VALUE: ${flag}`);
-      options[flag.slice(2)] = value;
+      options[flag === '--min-app-version' ? 'minAppVersion' : flag.slice(2)] = value;
     } else throw new Error(`UNKNOWN_ARGUMENT: ${flag}`);
   }
   stableVersion(options.version);
   if (options.date && !validDate(options.date)) throw new Error('RELEASE_DATE_INVALID');
+  if (options.minAppVersion !== undefined) hostFloor(options.minAppVersion);
   if (options.base && !/^[A-Za-z0-9][A-Za-z0-9._/-]*$/.test(options.base)) throw new Error('INVALID_BASE_BRANCH');
   if (options.repository && !/^[A-Za-z0-9][A-Za-z0-9-]*\/[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(options.repository)) throw new Error('INVALID_REPOSITORY');
   return options;
@@ -174,7 +197,7 @@ export function parseCutArguments(args) {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const options = parseCutArguments(process.argv.slice(2));
-    if (options.help) console.log('node tooling/release/cut.mjs --version X.Y.Z [--date YYYY-MM-DD] [--base main] [--repository owner/repo] [--execute] [--remote] [--json]\nDefault: a dry-run plan. --execute creates release/X.Y.Z and commits the prepared release; --remote also pushes, opens a draft PR and dispatches release.yml.');
+    if (options.help) console.log('node tooling/release/cut.mjs --version X.Y.Z [--date YYYY-MM-DD] [--min-app-version A.B.C] [--base main] [--repository owner/repo] [--execute] [--remote] [--json]\nDefault: a dry-run plan. --execute creates release/X.Y.Z and commits the prepared release; --remote also pushes, opens a draft PR and dispatches release.yml.\n--min-app-version raises the reviewed host floor in manifest.json and the new versions.json entry.');
     else {
       const result = await cutRelease({ ...options, repository: options.repository ?? process.env.GITHUB_REPOSITORY });
       if (options.json) console.log(JSON.stringify(result, null, 2));
@@ -182,6 +205,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
         for (const item of result.steps) console.log(`${item.status.toUpperCase().padEnd(8)} ${item.id}: ${item.detail}`);
         for (const warning of result.warnings) console.log(`WARNING  ${warning}`);
         for (const blocker of result.blockers ?? []) console.log(`BLOCKED  ${blocker}`);
+        if (result.hostFloor) console.log(`FLOOR    minAppVersion ${hostFloorText(result.hostFloor)}`);
         if (result.changelog) console.log(`\n## [${result.version}] - ${result.date}\n\n${result.changelog}\n`);
         console.log(`Release cut ${result.status}: ${result.branch}${result.recovery ? `\n${result.error}\n${result.recovery}` : ''}`);
       }
