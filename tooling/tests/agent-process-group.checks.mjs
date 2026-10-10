@@ -24,6 +24,15 @@ function alive(pid) {
   try { return !/^\d+ \(.*\) Z/.test(readFileSync(`/proc/${pid}/stat`, 'utf8')); } catch { return true; }
 }
 const gone = async pid => { for (let attempt = 0; attempt < 40 && alive(pid); attempt += 1) await new Promise(resolve => setTimeout(resolve, 100)); return !alive(pid); };
+/** writeFileSync creates the pid file before its bytes land; an empty read would be pid 0, which signals our own group and never dies. */
+async function waitForPid(pidFile) {
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    const pid = existsSync(pidFile) ? Number(readFileSync(pidFile, 'utf8')) : 0;
+    if (Number.isInteger(pid) && pid > 0) return pid;
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+  assert.fail('the spawner never recorded a grandchild pid');
+}
 async function workdir(t) {
   const root = await mkdtemp(join(tmpdir(), 'process group ü-'));
   t.after(() => rm(root, { recursive: true, force: true }));
@@ -66,12 +75,18 @@ test('[PROCESS-GROUP-04] a terminated hook takes its group down with it', { skip
   await writeFile(script, `import { runInProcessGroup } from ${JSON.stringify(new URL('process-group.mjs', `file://${hooks}`).href)};
 await runInProcessGroup(process.execPath, ['-e', ${JSON.stringify(spawner(pidFile))}], { cwd: ${JSON.stringify(root)}, timeout: 60000, env: process.env });`);
   const host = spawn(process.execPath, [script], { stdio: 'ignore' });
-  for (let attempt = 0; attempt < 100 && !existsSync(pidFile); attempt += 1) await new Promise(resolve => setTimeout(resolve, 50));
-  const grandchild = Number(await readFile(pidFile, 'utf8'));
+  const grandchild = await waitForPid(pidFile);
   assert.ok(alive(grandchild));
   host.kill('SIGTERM');
   await new Promise(resolve => host.once('exit', resolve));
   assert.ok(await gone(grandchild), 'the hook\'s own termination does not orphan the check');
+});
+
+test('[PROCESS-GROUP-08] a pid file that exists but is still empty is not read as pid 0', async t => {
+  const root = await workdir(t); const pidFile = join(root, 'pid');
+  await writeFile(pidFile, '');
+  setTimeout(() => { writeFile(pidFile, String(process.pid)).catch(() => {}); }, 200);
+  assert.equal(await waitForPid(pidFile), process.pid);
 });
 
 /** A generated-project shape whose check and vitest commands start a grandchild and then hang. */
