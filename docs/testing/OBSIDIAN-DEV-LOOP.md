@@ -22,7 +22,7 @@ only contained vaults inside this checkout; they never open a personal vault.
   `.native-runner/` (never globally, never into the project lockfile) and
   downloads Obsidian into `.native-cache/`. Without the opt-in and a complete
   cache, the commands exit with code 2 and download nothing. `OBSIDIAN_VERSION`
-  selects the host version (default `1.13.7`, the manifest floor).
+  selects the host version (default `1.14.4`, the manifest floor).
 - Linux only: Chromium's singleton socket path must fit into 107 bytes. The
   commands refuse checkouts whose path is too long before building. Use a
   shorter checkout path if you see `NATIVE_SOCKET_PATH_TOO_LONG`.

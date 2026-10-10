@@ -1,41 +1,44 @@
 ---
 type: Increment
 id: obsidian-api-1-14
-title: "Obsidian API declarations 1.14.4"
+title: "Obsidian 1.14.4 API declarations and host floor"
 owner: "Claude"
-size: S
+size: M
 status: In progress
-e2e: optional
+e2e: required
 refs: []
 pullRequests: [obsidian-api-1-14-kickoff]
 branch: "increment/obsidian-api-1-14"
 base: main
 ---
 
-# Obsidian API declarations 1.14.4
+# Obsidian 1.14.4 API declarations and host floor
 
 <!-- Developer handoff for one pull request. `npm run dor` checks it before implementation,
 `npm run dod` after it. Replace every <placeholder>; delete these comments when done. -->
 
 ## Summary
 
-Updates the `obsidian` API declarations dev dependency from 1.13.1 to 1.14.4, the registry's latest release. 1.14.4 depends on the patched `moment@2.31.0`, so the root API package no longer carries the Moment advisory; its exact CodeMirror peers move with it. The declared host floor stays at `minAppVersion` 1.13.7.
+Moves the plugin to Obsidian 1.14.4, the current public desktop release (2026-10-10): the `obsidian` API declarations dev dependency goes from 1.13.1 to 1.14.4 with its exact CodeMirror peers, and the declared host floor `minAppVersion` plus the host the real-Obsidian tooling launches go from 1.13.7 to 1.14.4. 1.14.4 depends on the patched `moment@2.31.0`, so the root API package no longer carries the Moment advisory.
 
 ## Outcome
 
-The plugin type-checks, lints, tests and builds against the 1.14.4 declarations from a strict `npm ci`, the root dependency graph resolves the patched Moment, and the advisory record names the lint plugin's own pinned copy as the only remaining source of the finding.
+The plugin type-checks, lints, tests and builds against the 1.14.4 declarations from a strict `npm ci`, declares 1.14.4 as its minimum app version, and the real-Obsidian suite passes on host 1.14.4. Released versions keep their recorded 1.13.7 floors in `versions.json`; the next release records the new floor.
 
 ## Scope
 
 ### In scope
 
 - Exact pin `obsidian` 1.14.4 in `package.json` and the matching lockfile, including its CodeMirror peers.
-- Update the Moment advisory record, the developer guide's audit note and the docs index row.
+- `minAppVersion` 1.14.4 in `manifest.json`.
+- The default real-Obsidian host, the native smoke target and evidence identity, the CI host cache key and the generated devkit cache keys move to 1.14.4, with the native report fixtures and refreshed example ownership hashes.
+- Update the Moment advisory record, the developer guide, README, dev-loop, maintenance and test-suite docs.
 
 ### Out of scope
 
-- Raising `minAppVersion` or the tested host 1.13.7; host qualification is a separate decision.
+- Historical `versions.json` entries and dated records of earlier qualification runs.
 - `eslint-plugin-obsidianmd` and its nested `obsidian@1.12.3`, which keep the advisory open.
+- The standalone companion project under `projects/companion`, which keeps its own host pins.
 - Any `overrides` entry or audit ignore.
 
 ## Acceptance criteria
@@ -43,8 +46,10 @@ The plugin type-checks, lints, tests and builds against the 1.14.4 declarations 
 <!-- One `- [ ] AC-n: text` per criterion. At completion tick it and add
 `Evidence: \`path\`` (a test file, doc or report that exists). -->
 
-- [x] AC-1: The lockfile resolves the root `obsidian` to 1.14.4 with a patched `moment` (2.31.0 or later) while `manifest.json` keeps `minAppVersion` 1.13.7.
+- [x] AC-1: The lockfile resolves the root `obsidian` API package to 1.14.4 with a patched `moment` (2.31.0 or later) and its exact CodeMirror peers.
   Evidence: `tests/acceptance/obsidian-api-1-14/ac-1.checks.mjs`
+- [x] AC-2: The manifest floor, the default real-Obsidian host and the native smoke target are all 1.14.4, and released versions keep their recorded floors.
+  Evidence: `tests/acceptance/obsidian-api-1-14/ac-2.checks.mjs`
 
 ## Affected areas
 
@@ -52,10 +57,19 @@ The plugin type-checks, lints, tests and builds against the 1.14.4 declarations 
 
 - `package.json`: the exact `obsidian` pin.
 - `package-lock.json`: the resolved API package, Moment and CodeMirror peers.
-- `docs/development/MOMENT-ADVISORY-EXCEPTION.md`: the dated update and remaining dependent.
-- `DEVELOPER_GUIDE.md`: the audit advisory note.
+- `manifest.json`: the declared minimum app version.
+- `tooling/testing/*.mjs`: the default host, native smoke target, evidence identity and witness manifest.
+- `tooling/tests/*.checks.mjs`: the host default and native report fixtures.
+- `tooling/examples/ownership.json`: refreshed hashes of the changed example-owned files.
+- `templates/examples/scripts__testing__check-native.mjs.txt`: the replacement native smoke target.
+- `templates/companion/devkit/*.tmpl`: the generated projects' host cache keys.
+- `.github/workflows/ci.yml`: the real-Obsidian host cache key.
+- `README.md`: the stated host minimum.
+- `DEVELOPER_GUIDE.md`: the host version and the audit note.
+- `docs/development/*.md`: the Moment advisory record and the maintenance snapshot.
+- `docs/testing/*.md`: the dev-loop default host and the measured real-Obsidian suite.
 - `CHANGELOG.md`: the Unreleased entry.
-- `tests/acceptance/obsidian-api-1-14/ac-1.checks.mjs`: the AC-1 acceptance test.
+- `tests/acceptance/obsidian-api-1-14/*.checks.mjs`: the acceptance tests.
 - `docs/increments/obsidian-api-1-14.md`: this handoff.
 - `docs/pull-requests/obsidian-api-1-14-kickoff.md`: the kick-off pull request record.
 
@@ -64,28 +78,33 @@ The plugin type-checks, lints, tests and builds against the 1.14.4 declarations 
 <!-- Lines: - Suite `name`: …  - Gate `command`: …  - New test `tests/…`: …
      - No test change — reason   - E2E: reason for the e2e decision in the frontmatter -->
 
-- Suite `acceptance`: runs the AC-1 acceptance test against the committed lockfile and manifest.
-- New test `tests/acceptance/obsidian-api-1-14/ac-1.checks.mjs`: proves the resolved API package, its Moment and the unchanged host floor.
+- Suite `acceptance`: runs the AC-1 and AC-2 acceptance tests.
+- Suite `obsidian`: the real-Obsidian suite (load, commands, views, unload and reload) on host 1.14.4; locally and through the `e2e` label in CI.
+- Suite `native`: native report, identity and host tooling units with the 1.14.4 fixtures.
+- Suite `quality`: example ownership and repository gates.
+- New test `tests/acceptance/obsidian-api-1-14/ac-2.checks.mjs`: the floor, the default host and the native target agree.
 - Gate `npm run check:security`: the live audit, expected to keep reporting the lint plugin's copy.
 - Gate `npm run check:self-review`: no findings on the diff.
-- E2E: optional — the declarations change types only; native host qualification is out of scope.
+- E2E: required — raising the host floor needs the real-Obsidian suite on the new host.
 
 ## Docs impact
 
 <!-- - `docs/path.md` (how-to): what changes   — or —   None — reason -->
 
 - `docs/development/MOMENT-ADVISORY-EXCEPTION.md` (explanation): record the 1.14.4 update and the remaining dependent.
-- `DEVELOPER_GUIDE.md` (how-to): the audit note names the lint plugin's pinned API package.
+- `DEVELOPER_GUIDE.md` (how-to): the host version and the audit note.
+- `docs/development/MAINTENANCE-AND-RELEASE.md` (reference): the dated public snapshot.
+- `docs/testing/OBSIDIAN-DEV-LOOP.md` (how-to): the default host.
 
 ## Changelog
 
 <!-- - Added: text  (Added, Changed, Deprecated, Removed, Fixed or Security)  — or —  None — reason -->
 
-- Changed: The `obsidian` API declarations are now 1.14.4, which uses the patched `moment` 2.31.0; the minimum Obsidian app version stays 1.13.7.
+- Changed: The minimum Obsidian app version is now 1.14.4 (was 1.13.7), and the `obsidian` API declarations are 1.14.4, which uses the patched `moment` 2.31.0; the real-Obsidian tooling launches host 1.14.4 by default.
 
 ## Risks and rollback
 
-New declarations could type APIs that host 1.13.7 lacks; the floor is unchanged and the code only uses APIs it already used, which the full type-check proves still exist. Roll back by reverting this pull request.
+Users on Obsidian 1.13.x no longer get new plugin versions once a release records the 1.14.4 floor; 1.14.4 is the public desktop release and the plugin is desktop-only. The full type-check proves the code still compiles against the new declarations, and the real-Obsidian suite proves load, commands, views and reload on host 1.14.4. Roll back by reverting this pull request before a release records the floor.
 
 ## Dependencies
 

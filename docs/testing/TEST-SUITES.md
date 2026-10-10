@@ -74,7 +74,7 @@ or split after that run.
 | `e2e` | e2e | Served harness in Chromium via Playwright: showcase, modals, persistence lifecycle, accessibility and design system. | 11 | `npm run test:e2e` | Playwright `configs/testing/playwright.config.ts` | `chromium`, `harness-build` | opt-in | 78 s |
 | `project` | component | Generated product tests (tests/project) that exist only in a project created by the companion compiler. | 0 | `node tooling/testing/suites.mjs project` | Vitest `configs/testing/vitest.project.config.mjs` | none | opt-in | n/a here |
 | `project:ui-effects` | component | Generated composition/UI-effect checks of a companion-generated project. | 0 | `node tooling/testing/suites.mjs project:ui-effects` | `node --test` | none | opt-in | n/a here |
-| `obsidian` | e2e | Vitest-driven end-to-end tests against a real sandboxed Obsidian host. | 4 | `npm run test:obsidian` | npm script `test:obsidian` | `native-runner` | opt-in | ~30 s, 4 cases (Obsidian 1.13.7 under Xvfb) |
+| `obsidian` | e2e | Vitest-driven end-to-end tests against a real sandboxed Obsidian host. | 4 | `npm run test:obsidian` | npm script `test:obsidian` | `native-runner` | opt-in | ~16 s, 4 cases (Obsidian 1.14.4 under Xvfb) |
 
 `npm run test:generator` and `npm run test:framework-cli` remain as aliases of
 the `generator` and `cli` suites (both now include their whole responsibility:
