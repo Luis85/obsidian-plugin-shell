@@ -258,8 +258,9 @@ Never do any of the following:
   [the dependency exception](docs/development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md)
   before proposing dependency updates.
 - **Audit advisories.** `npm ci` may report moderate advisories that come
-  through the locked `obsidian` API package (for example `moment`). Do not run
-  `npm audit fix --force`; it would downgrade `obsidian`. The open `moment`
+  through the `obsidian` API package that `eslint-plugin-obsidianmd` pins (for
+  example `moment`). Do not run `npm audit fix --force`; it would downgrade the
+  lint plugin. The open `moment`
   advisory is recorded in
   [the moment advisory exception](docs/development/MOMENT-ADVISORY-EXCEPTION.md).
   Use `npm run check:security` for the current result.
