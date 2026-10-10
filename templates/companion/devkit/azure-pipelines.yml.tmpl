@@ -147,7 +147,7 @@ stages:
           - task: Cache@2
             displayName: Restore the pinned Obsidian download
             inputs:
-              key: 'obsidian-host | "$(Agent.OS)" | app-1.14.4-launcher-3.2.1'
+              key: 'obsidian-host | "$(Agent.OS)" | app-1.13.7-launcher-3.2.1'
               path: .native-cache
           - script: node "$(PINNED_NPM)" run test:obsidian
             displayName: Real-Obsidian tests (private Xvfb display, fresh vault per test)

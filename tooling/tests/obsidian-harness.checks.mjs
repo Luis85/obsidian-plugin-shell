@@ -85,7 +85,7 @@ test('[OBSIDIAN-HARNESS-05] provisioning never downloads without explicit opt-in
   await assert.rejects(provisionHost({ root }), /Obsidian version index in \.native-cache/);
   assert.equal(downloadAllowed(['--allow-download'], {}), true); assert.equal(downloadAllowed([], { OBSIDIAN_ALLOW_DOWNLOAD: '1' }), true);
   assert.equal(downloadAllowed([], { OBSIDIAN_ALLOW_DOWNLOAD: 'true' }), false);
-  assert.equal(requestedAppVersion({}), '1.14.4'); assert.equal(requestedAppVersion({ OBSIDIAN_VERSION: 'latest' }), 'latest');
+  assert.equal(requestedAppVersion({}), '1.13.7'); assert.equal(requestedAppVersion({ OBSIDIAN_VERSION: 'latest' }), 'latest');
   assert.throws(() => requestedAppVersion({ OBSIDIAN_VERSION: '1.13.7; rm -rf /' }), /OBSIDIAN_VERSION_INVALID/);
   const viaNpm = launcherInstallCommand({ npm_execpath: '/opt/npm/bin/npm-cli.js' });
   assert.deepEqual(viaNpm.args.slice(0, 5), ['/opt/npm/bin/npm-cli.js', 'install', '--prefix', '.native-runner', '--save-exact']);

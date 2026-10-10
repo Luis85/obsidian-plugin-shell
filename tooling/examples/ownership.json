@@ -272,7 +272,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "f82794381386c656c749a29d59cd5b70054da03f715e800717a8ccbb1e723fc3",
+      "sha256": "c92f41c802da1809c4f31782f5455d66bde4ac7a8750a3f750ad5b35d6ab05fc",
       "template": "README.md.txt",
       "generated": "retain"
     },
@@ -298,7 +298,7 @@
     },
     {
       "path": "tooling/testing/check-native.mjs",
-      "sha256": "da7e1c4d3e26a117359bf04fd8fc3b4d5f9f099fe20fcd8727a8ace58b334835",
+      "sha256": "b1517d5831c4daa832f644f9b9f4cd5d58098852b6d04912f9dfaeeb4414dc2a",
       "template": "scripts__testing__check-native.mjs.txt"
     },
     {
@@ -437,7 +437,7 @@
     },
     {
       "path": "tooling/testing/native-foreign-notice.mjs",
-      "sha256": "9677d64b56b464de22d6336b474c28b2179496154922b28482718ce448adc136"
+      "sha256": "596f23330b675751a263534ba62448819998b28187521e047de1d6c96c15b52f"
     },
     {
       "path": "tooling/tests/native-foreign-notice.checks.mjs",

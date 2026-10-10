@@ -29,7 +29,7 @@ export async function createNativeForeignNotice(scratch, candidateId, root = pro
   if (candidateId === id) throw new Error('NATIVE_FOREIGN_ID_COLLISION');
   scratch = await nativeScratchDirectory(scratch, root);
   const directory = join(scratch, 'foreign-owner-plugin'); await mkdir(directory);
-  const manifest = `${JSON.stringify({ id, name: 'Qualification notice witness', version: '0.0.0', minAppVersion: '1.14.4',
+  const manifest = `${JSON.stringify({ id, name: 'Qualification notice witness', version: '0.0.0', minAppVersion: '1.13.7',
     description: 'Independent notice owner for isolated qualification only.', author: 'Qualification fixture', isDesktopOnly: true }, null, 2)}\n`;
   const assets = [];
   for (const [file, source] of [['main.js', main], ['manifest.json', manifest]]) {

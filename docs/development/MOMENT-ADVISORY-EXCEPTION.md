@@ -25,7 +25,7 @@ findings, all from one advisory:
 
 `obsidian@1.14.4` (published 2026-10-08) depends on `"moment": "2.31.0"`, the patched
 release. The root API package moved from 1.13.1 to 1.14.4 through the reviewed dependency
-process, and the declared host floor (`minAppVersion`) moved with it to 1.14.4. The live audit
+process; the declared host floor (`minAppVersion` 1.13.7) is unchanged. The live audit
 still reports the same three moderate findings, now only through the lint plugin's own
 `obsidian@1.12.3`, so the finding stays open until `eslint-plugin-obsidianmd` follows.
 

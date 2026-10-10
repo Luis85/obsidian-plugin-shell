@@ -97,8 +97,8 @@ test('trusted native producer accepts independently derived legacy diagnostics a
   const legacy = 'native-items-controlled-adapter-rejection-retains-draft-no-success';
   const expected = [...checks, legacy];
   const assets = ['main.js', 'manifest.json', 'styles.css'].map(file => ({ file, sha256: 'a'.repeat(64) }));
-  const raw = { ...value, mode: 'native-obsidian', status: 'passed', sourceCommit: 'b'.repeat(40), targetApp: '1.14.4',
-    launcherVersion: '3.2.1', resolvedVersions: ['1.14.4', '1.14.4'], assets, installedAssets: assets, checks: expected, errors: [],
+  const raw = { ...value, mode: 'native-obsidian', status: 'passed', sourceCommit: 'b'.repeat(40), targetApp: '1.13.7',
+    launcherVersion: '3.2.1', resolvedVersions: ['1.13.7', '1.13.7'], assets, installedAssets: assets, checks: expected, errors: [],
     items: { mode: 'real-native-io-with-read-only-call-observer', restartQueryWrites: { calls: 0, active: 0, maximumActive: 0, failures: 0 } } };
   assert.equal(nativeReport(raw, expected).frameworkPassed, true);
   for (const field of ['itemOwnership', 'resourceOwnership']) {
@@ -136,8 +136,8 @@ test('enhanced native recovery claims require cancelled progress, pending availa
 test('trusted native producer accepts enhanced recovery evidence and rejects a false retained-handler invocation count', () => {
   const value = enhancedFixture(); const expected = [...enhancedChecks, 'native-items-controlled-adapter-rejection-retains-draft-no-success'];
   const assets = ['main.js', 'manifest.json', 'styles.css'].map(file => ({ file, sha256: 'a'.repeat(64) }));
-  const raw = { ...value, mode: 'native-obsidian', status: 'passed', sourceCommit: 'b'.repeat(40), targetApp: '1.14.4',
-    launcherVersion: '3.2.1', resolvedVersions: ['1.14.4', '1.14.4'], assets, installedAssets: assets, checks: expected, errors: [],
+  const raw = { ...value, mode: 'native-obsidian', status: 'passed', sourceCommit: 'b'.repeat(40), targetApp: '1.13.7',
+    launcherVersion: '3.2.1', resolvedVersions: ['1.13.7', '1.13.7'], assets, installedAssets: assets, checks: expected, errors: [],
     items: { mode: 'real-native-io-with-read-only-call-observer', restartQueryWrites: { calls: 0, active: 0, maximumActive: 0, failures: 0 } } };
   assert.equal(nativeReport(raw, expected).frameworkPassed, true);
   raw.resourceOwnership.retainedActionCalls.afterClose = 0;

@@ -27,7 +27,7 @@ Maintain four related but separate records: the latest public Obsidian target, t
 | Direct dependencies | Exact stable versions, updated through PRs. |
 | Installer/runtime | Record separately; installing new API declarations does not update Electron/WebView. |
 
-The dated Obsidian public snapshot (2026-10-10) is 1.14.4 desktop, which is also the early-access build. Re-resolve the official public feed during implementation and maintenance. Do not use an unrestricted highest-tag search. [R01–R04]
+The dated Obsidian public snapshot is 1.13.7 desktop, while 1.14.2 is early access. Re-resolve the official public feed during implementation and maintenance. Do not use an unrestricted highest-tag search. [R01–R04]
 
 ## 2. Default dependency updater
 

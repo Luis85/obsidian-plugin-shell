@@ -9,7 +9,7 @@ import { assertNativeSocketBudget } from './native-isolation.mjs';
 /** Provision and drive a real Obsidian host for the contained dev loop and E2E harness.
  * The launcher lives only in .native-runner and the host only in .native-cache. */
 const LAUNCHER_VERSION = '3.2.1';
-const DEFAULT_APP_VERSION = '1.14.4';
+const DEFAULT_APP_VERSION = '1.13.7';
 const versionPattern = /^(?:\d+\.\d+\.\d+|latest|earliest)$/;
 
 export function downloadAllowed(args = [], env = process.env) {

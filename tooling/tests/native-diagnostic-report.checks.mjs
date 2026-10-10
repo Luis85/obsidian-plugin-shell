@@ -6,8 +6,8 @@ import { createNativeDiagnosticObserver, noteNativePhase } from '../testing/nati
 
 function fixture(withErrors = false) {
   const assets = ['main.js', 'manifest.json', 'styles.css'].map(file => ({ file, sha256: 'a'.repeat(64) }));
-  const report = { mode: 'native-obsidian', status: 'passed', sourceCommit: 'b'.repeat(40), targetApp: '1.14.4',
-    launcherVersion: '3.2.1', resolvedVersions: ['1.14.4', '1.14.4'], assets, installedAssets: assets,
+  const report = { mode: 'native-obsidian', status: 'passed', sourceCommit: 'b'.repeat(40), targetApp: '1.13.7',
+    launcherVersion: '3.2.1', resolvedVersions: ['1.13.7', '1.13.7'], assets, installedAssets: assets,
     checks: ['fixture-only'], errors: [] };
   const observer = createNativeDiagnosticObserver(report); const page = new EventEmitter();
   page.url = () => 'app://obsidian.md/index.html'; observer.observe(page);

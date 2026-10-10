@@ -54,7 +54,6 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - `npm run setup` asks its identity, MCP and hosting-platform questions from `configs/forms/setup-identity.json` (shared form format) through a dependency-free reader, `scripts/setup/form.mjs`. Only `text`/`confirm` fields whose ids match the unchanged `--answers` keys are accepted; any other kind, key or id stops setup before a question is asked. Prompts now show human labels and help, e.g. `Plugin ID (id) [plugin-shell]: `.
 - `npm run verify` and the interactive-maker workflow run the 174 maker test files once, under coverage (`maker-coverage-run`), instead of a second time in the node --test tooling step; the `maker` suite now uses Vitest, and `suites.mjs --check` fails if a tooling file stops running in verify.
 - Develop the Workbench CLI under src/cli and build a portable standalone bin distribution.
-- The minimum Obsidian app version is now 1.14.4 (was 1.13.7), and the `obsidian` API declarations are 1.14.4, which uses the patched `moment` 2.31.0; the real-Obsidian tooling launches host 1.14.4 by default.
 
 ### Fixed
 

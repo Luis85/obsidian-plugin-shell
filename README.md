@@ -152,7 +152,7 @@ The native profile copies only `main.js`, `manifest.json`, and `styles.css` into
 
 Open `.dev-vault` in desktop Obsidian, deliberately enable your plugin, then run
 **Open capability showcase** or use the Blocks ribbon button. The initial identity
-is Plugin Shell. The host minimum is **1.14.4**, desktop-only pending mobile
+is Plugin Shell. The host minimum remains **1.13.7**, desktop-only pending mobile
 qualification. Setup does not change Restricted Mode or create Task notes.
 
 Identity flags, data-only answers, dry-run/JSON, `--resume`, and explicit

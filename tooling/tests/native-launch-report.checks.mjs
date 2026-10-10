@@ -94,8 +94,8 @@ test('current native profiles require launch provenance and exact separate forei
     assert.ok(profiles[profile].includes(marker));
     const assets = ['main.js', 'manifest.json', 'styles.css'].map(file => ({ file, sha256: 'a'.repeat(64) }));
     const value = { ...nativeOwnershipFixture(true), ...nativeLaunchFixture(), ...(profile === 'showcase' ? nativeForeignNoticeFixture() : {}),
-      mode: 'native-obsidian', status: 'passed', profile, sourceCommit: 'd'.repeat(40), targetApp: '1.14.4',
-      launcherVersion: '3.2.1', resolvedVersions: ['1.14.4', '1.14.4'], assets, installedAssets: assets, checks: profiles[profile], errors: [],
+      mode: 'native-obsidian', status: 'passed', profile, sourceCommit: 'd'.repeat(40), targetApp: '1.13.7',
+      launcherVersion: '3.2.1', resolvedVersions: ['1.13.7', '1.13.7'], assets, installedAssets: assets, checks: profiles[profile], errors: [],
       items: { mode: 'real-native-io-with-read-only-call-observer', restartQueryWrites: { calls: 0, active: 0, maximumActive: 0, failures: 0 } } };
     assert.equal(nativeReport(value, profiles[profile]).frameworkPassed, true);
     const missing = structuredClone(value); delete missing.launchResources;

@@ -10,7 +10,7 @@ const usage = `Usage: npm run test:obsidian -- [--allow-download] [--no-build] [
 Builds the plugin, then runs tooling/tests/obsidian/**/*.obsidian.ts against real Obsidian. Each case gets a
 fresh copy of tooling/tests/obsidian/vault under .nq/ with the built plugin enabled there only.
 Provisioning (obsidian-launcher into .native-runner, Obsidian into .native-cache) needs --allow-download
-or OBSIDIAN_ALLOW_DOWNLOAD=1. OBSIDIAN_VERSION selects the host (default 1.14.4). Evidence: reports/obsidian/.`;
+or OBSIDIAN_ALLOW_DOWNLOAD=1. OBSIDIAN_VERSION selects the host (default 1.13.7). Evidence: reports/obsidian/.`;
 
 /** Split runner flags from arguments forwarded to Vitest. */
 export function parseRunnerArguments(argv) {
