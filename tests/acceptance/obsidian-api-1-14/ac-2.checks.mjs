@@ -4,7 +4,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { requestedAppVersion } from '../../../tooling/testing/obsidian-host.mjs';
 
 const root = resolve(import.meta.dirname, '../../..');
 const text = path => readFile(resolve(root, path), 'utf8');
@@ -12,7 +11,9 @@ const text = path => readFile(resolve(root, path), 'utf8');
 test('[AC-2] the declared floor is the host the real-Obsidian tooling launches', async () => {
   const manifest = JSON.parse(await text('manifest.json'));
   assert.equal(manifest.minAppVersion, '1.14.4');
-  assert.equal(requestedAppVersion({}), manifest.minAppVersion, 'test:obsidian and dev:obsidian default to the floor');
+  // Read as text: root tests must not import tooling (the analyzer rejects the package cycle).
+  const host = await text('tooling/testing/obsidian-host.mjs');
+  assert.match(host, new RegExp(`const DEFAULT_APP_VERSION = '${manifest.minAppVersion.replaceAll('.', '\\.')}';`), 'test:obsidian and dev:obsidian default to the floor');
   const native = await text('tooling/testing/check-native.mjs');
   assert.match(native, /targetApp: '1\.14\.4'/);
   assert.match(native, /resolveVersion\('1\.14\.4', 'latest'\)/);
