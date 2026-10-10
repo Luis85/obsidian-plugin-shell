@@ -48,11 +48,11 @@ A maintainer cuts the next release with `node tooling/release/cut.mjs --version 
 <!-- One `- [ ] AC-n: text` per criterion. At completion tick it and add
 `Evidence: \`path\`` (a test file, doc or report that exists). -->
 
-- [ ] AC-1: Given a release source whose floor is 1.13.7 When the cut runs with the reviewed --min-app-version 1.14.4 Then the plan shows 1.13.7 -> 1.14.4, and the release commit sets manifest minAppVersion 1.14.4 and versions.json records the new version at 1.14.4 while every released entry keeps 1.13.7
+- [x] AC-1: Given a release source whose floor is 1.13.7 When the cut runs with the reviewed --min-app-version 1.14.4 Then the plan shows 1.13.7 -> 1.14.4, and the release commit sets manifest minAppVersion 1.14.4 and versions.json records the new version at 1.14.4 while every released entry keeps 1.13.7
   Evidence: `tests/acceptance/reviewed-host-floor/ac-1.checks.mjs`
-- [ ] AC-2: Given an invalid, unchanged or lower --min-app-version, or a floor edited in the source without review When release preparation or the cut runs Then it refuses (HOST_FLOOR_INVALID, HOST_FLOOR_NOT_RAISED, UNREVIEWED_HOST_FLOOR_CHANGE) without creating a branch or writing a file
+- [x] AC-2: Given an invalid, unchanged or lower --min-app-version, or a floor edited in the source without review When release preparation or the cut runs Then it refuses (HOST_FLOOR_INVALID, HOST_FLOOR_NOT_RAISED, UNREVIEWED_HOST_FLOOR_CHANGE) without creating a branch or writing a file
   Evidence: `tests/acceptance/reviewed-host-floor/ac-2.checks.mjs`
-- [ ] AC-3: The tested-host pins (host default, native smoke target and template, evidence guard, foreign-notice witness, real-Obsidian runner, CI and devkit cache keys) name 1.14.4 and the example ownership hashes match the changed example-owned files
+- [x] AC-3: The tested-host pins (host default, native smoke target and template, evidence guard, foreign-notice witness, real-Obsidian runner, CI and devkit cache keys) name 1.14.4 and the example ownership hashes match the changed example-owned files
   Evidence: `tests/acceptance/reviewed-host-floor/ac-3.checks.mjs`
 
 ## Affected areas
@@ -99,9 +99,8 @@ A maintainer cuts the next release with `node tooling/release/cut.mjs --version 
 <!-- - `docs/path.md` (how-to): what changes   — or —   None — reason -->
 
 - `docs/development/CUT-AND-PUBLISH-A-RELEASE.md` (how-to): choosing and passing a reviewed host floor.
-- `docs/development/MAINTENANCE-AND-RELEASE.md` (explanation): the reviewed floor rule next to [R25].
+- `docs/development/MAINTENANCE-AND-RELEASE.md` (reference): the reviewed floor rule next to [R25].
 - `docs/testing/OBSIDIAN-DEV-LOOP.md` (how-to): the default host 1.14.4.
-- `docs/testing/TEST-SUITES.md` (reference): the real-Obsidian suite host.
 
 ## Changelog
 

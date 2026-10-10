@@ -98,7 +98,7 @@ export function parsePrepareArguments(args) {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const options = parsePrepareArguments(process.argv.slice(2));
-    if (options.help) { console.log('npm run release:prepare -- --version X.Y.Z [--date YYYY-MM-DD] [--notes-file <file>] [--min-app-version A.B.C] [--dry-run]\nPromotes CHANGELOG [Unreleased] (plus optional notes) into the version and reviews or applies consistent source metadata only. --min-app-version raises the reviewed host floor in manifest.json and the new versions.json entry. No commit, tag, push or publication.'); process.exit(0); }
+    if (options.help) { process.stdout.write('npm run release:prepare -- --version X.Y.Z [--date YYYY-MM-DD] [--notes-file <file>] [--min-app-version A.B.C] [--dry-run]\nPromotes CHANGELOG [Unreleased] (plus optional notes) into the version and reviews or applies consistent source metadata only. --min-app-version raises the reviewed host floor in manifest.json and the new versions.json entry. No commit, tag, push or publication.\n'); process.exit(0); }
     const notes = options.notes ? await readFile(resolve(options.notes), 'utf8') : '';
     const { date, minAppVersion } = options;
     const result = await prepareVersion(process.cwd(), options.version, notes, { ...(date ? { date } : {}), ...(minAppVersion ? { minAppVersion } : {}) });
