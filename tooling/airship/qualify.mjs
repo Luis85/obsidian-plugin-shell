@@ -75,7 +75,7 @@ try {
   const selected = page.locator('[data-design-node][data-v-inspector]').first();
   await selected.waitFor();
   const location = await selected.evaluate(element => window.__airshipResolver.resolveSource(element));
-  assert.ok(location.filePath.startsWith('src/generated/'), JSON.stringify(location));
+  assert.ok(location.filePath.startsWith('src/plugin/generated/'), JSON.stringify(location));
   assert.ok(Number.isInteger(location.lineNumber) && location.lineNumber > 0);
   assert.ok(Number.isInteger(location.columnNumber) && location.columnNumber > 0);
   evidence.sourceLocation = location; evidence.checks.push('real element-source Vue file/line/column');
