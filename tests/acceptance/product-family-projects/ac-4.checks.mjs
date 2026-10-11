@@ -4,6 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { parse } from 'yaml';
 
 const root = resolve(import.meta.dirname, '../../..');
@@ -14,7 +15,7 @@ for (const [name, appId] of Object.entries(FAMILY)) {
   const folder = resolve(root, 'projects', name);
 
   test(`[AC-4] ${name} builds only its own editor`, async () => {
-    const { APP } = await import(resolve(folder, 'app.config.mjs'));
+    const { APP } = await import(pathToFileURL(resolve(folder, 'app.config.mjs')).href);
     assert.equal(APP.appId, appId);
     assert.deepEqual(await readdir(resolve(folder, 'editors')), [APP.file]);
     const index = await readFile(resolve(folder, 'index.html'), 'utf8');

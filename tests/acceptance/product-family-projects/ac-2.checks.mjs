@@ -4,6 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
 import { join, relative, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 const root = resolve(import.meta.dirname, '../../..');
 const FAMILY = ['component-atlas', 'storyloom', 'sitemap-atlas', 'dissect-canvas'];
@@ -59,7 +60,7 @@ test('[AC-2] no code file in the four projects uses a U-prefixed Nuxt UI compone
 
 test('[AC-2] each project registers its Nuxt UI components under the Pf prefix', async () => {
   for (const name of FAMILY) {
-    const { COMPONENT_PREFIX } = await import(resolve(root, 'projects', name, 'app.config.mjs'));
+    const { COMPONENT_PREFIX } = await import(pathToFileURL(resolve(root, 'projects', name, 'app.config.mjs')).href);
     assert.equal(COMPONENT_PREFIX, 'Pf', name);
     const vite = await readFile(resolve(root, 'projects', name, 'vite.config.mjs'), 'utf8');
     assert.match(vite, /ui\(\{prefix:COMPONENT_PREFIX,/, `${name} passes the prefix to Nuxt UI`);
