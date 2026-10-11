@@ -94,8 +94,18 @@ updates:
       semver-patch-days: 3
       semver-minor-days: 3
       semver-major-days: 7
+  - package-ecosystem: npm
+    directory: /projects/resource-atlas
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    cooldown:
+      semver-patch-days: 3
+      semver-minor-days: 3
+      semver-major-days: 7
   - package-ecosystem: github-actions
-    directories: [/, /projects/companion, /projects/workbench-site, /projects/component-atlas, /projects/storyloom, /projects/sitemap-atlas, /projects/dissect-canvas]
+    directories: [/, /projects/companion, /projects/workbench-site, /projects/component-atlas, /projects/storyloom, /projects/sitemap-atlas, /projects/dissect-canvas, /projects/resource-atlas]
     schedule:
       interval: weekly
     open-pull-requests-limit: 5

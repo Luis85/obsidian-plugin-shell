@@ -2,7 +2,7 @@
 
 > Type: explanation · Part of the [docs index](../../README.md)
 
-Four focused browser tools that work alone and exchange records through one reviewed package format:
+Five focused browser tools that work alone and exchange records through one reviewed package format:
 
 | Tool | Responsibility | Delivered prototype | Project |
 | --- | --- | --- | --- |
@@ -10,11 +10,16 @@ Four focused browser tools that work alone and exchange records through one revi
 | Storyloom | Journeys, stories, backlog and release slices | [`storyloom`](../storyloom/README.md) | [`projects/storyloom`](../../../projects/storyloom/README.md) |
 | Sitemap Atlas | Page hierarchy, routes, content inventory and navigation | [`sitemap-atlas`](../sitemap-atlas/README.md) | [`projects/sitemap-atlas`](../../../projects/sitemap-atlas/README.md) |
 | Dissect | Interface review, annotations and interaction scenarios | [`dissect-canvas`](../dissect-canvas/README.md) | [`projects/dissect-canvas`](../../../projects/dissect-canvas/README.md) |
+| Resource Atlas | Roles, FTE and person-days over time | [`resource-atlas`](../resource-atlas/README.md) | [`projects/resource-atlas`](../../../projects/resource-atlas/README.md) |
 
 The delivery was one archive: four self-contained HTML files and one shared source tree that built
 all four. The source tree is split into four standalone projects. Each project carries the same
 shared shell (`src/`), only its own editor engine, and its own lock, tests and CI. A change to the
 shell or the exchange protocol (`src/protocol.mjs`) is a family change: make it in all four projects.
+
+Resource Atlas, the fifth tool, was delivered later as its own source project. It has its own Vue
+shell and shares the exchange protocol (`src/family-protocol.mjs`), which all five projects now carry
+byte for byte. A protocol change is made in all five.
 
 ## What is kept here
 
