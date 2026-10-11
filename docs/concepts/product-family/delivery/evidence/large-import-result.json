@@ -1,0 +1,82 @@
+{
+  "status": "passed",
+  "pageErrors": [],
+  "externalRequests": [],
+  "checks": [
+    "390px shared Import and Export retain accessible names.",
+    "Malformed substantial clipboard data clears the previous valid review and disables Import context without applying anything.",
+    "Real file input stages an actual exported Component Atlas package without applying records or changing Sitemap.",
+    "Actual 245KB pretty export stages from clipboard for review; records remain unchanged until explicit Import context.",
+    "Shared Connections attaches a selected source definition to the native selected page, saves provenance and family link, and preserves Atlas ownership.",
+    "Light mode settles to the intended shared palette with enabled actions; all requests blocked, zero attempted external requests and zero page errors."
+  ],
+  "mobileActions": "- button \"Link selected record\"\n- button \"Import\"\n- button \"Export\"\n- button \"Add page\"",
+  "package": {
+    "source": {
+      "appId": "component-atlas",
+      "workspaceId": "atlas-renovation-planner",
+      "workspaceTitle": "Renovation Planner"
+    },
+    "records": 28,
+    "bytes": 245550
+  },
+  "filePreview": "28\nnew records\n0\nchanged snapshots\n0\nconnections\n0\nmissing at source",
+  "malformedError": "This file is not valid JSON. Choose a Product Family package.",
+  "pasteHandled": true,
+  "adopted": {
+    "page": "Projects",
+    "component": "Plan canvas",
+    "bindingCount": 46,
+    "links": 1
+  },
+  "lightButtons": [
+    {
+      "text": "",
+      "label": "Undo editor change",
+      "disabled": false,
+      "color": "rgb(37, 35, 43)",
+      "background": "rgba(0, 0, 0, 0)",
+      "opacity": "1"
+    },
+    {
+      "text": "",
+      "label": "Redo editor change",
+      "disabled": true,
+      "color": "rgb(37, 35, 43)",
+      "background": "rgba(0, 0, 0, 0)",
+      "opacity": "0.75"
+    },
+    {
+      "text": "Link",
+      "label": "Link selected record",
+      "disabled": false,
+      "color": "rgb(37, 35, 43)",
+      "background": "rgb(246, 245, 248)",
+      "opacity": "1"
+    },
+    {
+      "text": "Import",
+      "label": "Import",
+      "disabled": false,
+      "color": "rgb(37, 35, 43)",
+      "background": "rgb(246, 245, 248)",
+      "opacity": "1"
+    },
+    {
+      "text": "Export",
+      "label": "Export",
+      "disabled": false,
+      "color": "rgb(37, 35, 43)",
+      "background": "rgb(246, 245, 248)",
+      "opacity": "1"
+    },
+    {
+      "text": "Add page",
+      "label": null,
+      "disabled": false,
+      "color": "rgb(255, 255, 255)",
+      "background": "rgb(115, 84, 189)",
+      "opacity": "1"
+    }
+  ]
+}

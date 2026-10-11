@@ -1,0 +1,98 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "component-atlas boots offline with a genuine Nuxt UI shell",
+      "entities": 28,
+      "workspace": "atlas-renovation-planner"
+    },
+    {
+      "name": "storyloom boots offline with a genuine Nuxt UI shell",
+      "entities": 50,
+      "workspace": "storyloom-map-renovation"
+    },
+    {
+      "name": "sitemap-atlas boots offline with a genuine Nuxt UI shell",
+      "entities": 36,
+      "workspace": "sitemap-renovation-planner"
+    },
+    {
+      "name": "dissect boots offline with a genuine Nuxt UI shell",
+      "entities": 12,
+      "workspace": "workspace-mv3pnki7-1"
+    },
+    {
+      "name": "storyloom → component-atlas imports real data without mutating native owner"
+    },
+    {
+      "name": "sitemap-atlas → component-atlas imports real data without mutating native owner"
+    },
+    {
+      "name": "dissect → component-atlas imports real data without mutating native owner"
+    },
+    {
+      "name": "component-atlas → storyloom imports real data without mutating native owner"
+    },
+    {
+      "name": "sitemap-atlas → storyloom imports real data without mutating native owner"
+    },
+    {
+      "name": "dissect → storyloom imports real data without mutating native owner"
+    },
+    {
+      "name": "component-atlas → sitemap-atlas imports real data without mutating native owner"
+    },
+    {
+      "name": "storyloom → sitemap-atlas imports real data without mutating native owner"
+    },
+    {
+      "name": "dissect → sitemap-atlas imports real data without mutating native owner"
+    },
+    {
+      "name": "component-atlas → dissect imports real data without mutating native owner"
+    },
+    {
+      "name": "storyloom → dissect imports real data without mutating native owner"
+    },
+    {
+      "name": "sitemap-atlas → dissect imports real data without mutating native owner"
+    },
+    {
+      "name": "storyloom adopts a real UI definition into a locally owned entity",
+      "entityId": "story-e37843f54b378c9912"
+    },
+    {
+      "name": "dissect adopts a real UI definition into a locally owned entity",
+      "entityId": "node-mv3pnm83-b"
+    },
+    {
+      "name": "Shared import dialog validates, reviews, and applies a real source package"
+    },
+    {
+      "name": "Mismatched native identity is rejected before mutation"
+    },
+    {
+      "name": "Cross-plugin links survive forwarding and repeated import"
+    },
+    {
+      "name": "component-atlas independent browser persistence reload"
+    },
+    {
+      "name": "storyloom independent browser persistence reload"
+    },
+    {
+      "name": "sitemap-atlas independent browser persistence reload"
+    },
+    {
+      "name": "dissect independent browser persistence reload"
+    },
+    {
+      "name": "Shared family export produces an actual downloadable JSON file"
+    },
+    {
+      "name": "No browser page errors or external network requests"
+    }
+  ],
+  "errors": [],
+  "requests": []
+}

@@ -29,7 +29,8 @@ const maintainerFiles: ReadonlySet<string> = new Set(['DEVELOPER_GUIDE.md', '.gi
   // Site template qualification builds the framework's own templates/sites from a maintainer fixture vault.
   '.github/workflows/site-templates.yml', 'tooling/testing/qualify-site-templates.mjs', 'tooling/tests/site-templates-qualification.checks.mjs']);
 const maintainerPrefixes = ['configs/starters/', '.github/scripts/', deliveryPipelineFolder, '.github/workflows/projects--', 'tooling/projects/',
-  'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'docs/concepts/agents-prototype-0.15/', 'tooling/testing/handoff-', 'tests/fixtures/sites/'];
+  'docs/concepts/sitemap-editor/', 'docs/concepts/jev-prompt-editor/', 'docs/concepts/agents-prototype-0.15/',
+  'docs/concepts/product-family/', 'docs/concepts/component-atlas/', 'docs/concepts/storyloom/', 'docs/concepts/sitemap-atlas/', 'docs/concepts/dissect-canvas/', 'tooling/testing/handoff-', 'tests/fixtures/sites/'];
 export function maintainerOnly(path: string): boolean {
   return frameworkOnlyPath(path) || maintainerFiles.has(path) || maintainerPrefixes.some(prefix => path.startsWith(prefix));
 }

@@ -1,0 +1,16 @@
+{
+  "pass": true,
+  "app": "dissect",
+  "registryKey": "opf.connections.v1.dissect/workspace-mv3pyvmu-1",
+  "recoveryDownloadBytes": 131,
+  "exactRawBytesPreserved": true,
+  "warningDisplayed": true,
+  "normalImportBlocked": true,
+  "cancelPreservedRaw": true,
+  "startFreshChangedOnlyRegistry": true,
+  "nativeUnchangedAcrossAllSteps": true,
+  "importedRecordsAfterRecovery": 28,
+  "importedNativeSources": 1,
+  "pageErrors": [],
+  "externalRequests": []
+}

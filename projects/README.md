@@ -10,6 +10,10 @@ into the shell.
 | Project | Prototypes | Workflows |
 | --- | --- | --- |
 | [`companion`](companion/README.md) | `docs/concepts/companion`, `docs/concepts/sitemap-editor` | `ci.yml`, `obsidian.yml` |
+| [`component-atlas`](component-atlas/README.md) | `docs/concepts/component-atlas`, `docs/concepts/product-family` | `ci.yml` |
+| [`storyloom`](storyloom/README.md) | `docs/concepts/storyloom`, `docs/concepts/product-family` | `ci.yml` |
+| [`sitemap-atlas`](sitemap-atlas/README.md) | `docs/concepts/sitemap-atlas`, `docs/concepts/product-family` | `ci.yml` |
+| [`dissect-canvas`](dissect-canvas/README.md) | `docs/concepts/dissect-canvas`, `docs/concepts/product-family` | `ci.yml` |
 
 ## The contract
 
@@ -137,9 +141,12 @@ Never edit a synced copy. Edit the project's workflow and run `npm run projects:
 - **Known coupling:** the shell build's Nuxt UI component detection scans the whole
   checkout, and its ignore list is not configurable. A project that uses a Nuxt UI
   component the shell does not use would add that component's styles to the shell
-  plugin's CSS. With `companion` today, `dist/styles.css` and `dist/main.js` are
-  byte-identical with and without `projects/`. Re-check this when a project adopts
-  new Nuxt UI components.
+  plugin's CSS. The detection looks for the default `U` prefix in `.vue`, `.ts` and `.js`
+  files and skips only `node_modules/`, `dist/` and `.nuxt/`. A project that uses Nuxt UI
+  components the shell does not use registers them under its own prefix (the Product
+  Family projects use `ui({ prefix: 'Pf' })` and `<PfButton>`) and keeps build output under
+  `dist/`. With every project today, `dist/styles.css` and `dist/main.js` are byte-identical
+  with and without `projects/`. Re-check this when a project adopts new Nuxt UI components.
 - **Branch protection:** a pull request that only touches `projects/<name>` does not
   run the shell's **CI result**. Require the project's own checks and
   **Projects boundary** for such pull requests, for example with a path-scoped ruleset.
