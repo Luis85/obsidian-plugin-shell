@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "name": "sitemap-atlas",
+  "title": "Sitemap Atlas",
+  "summary": "Shape information architecture: the Sitemap Atlas member of the Obsidian Product Family, a self-contained browser prototype built from its own Vue 3 + Nuxt UI source.",
+  "prototypes": [
+    {
+      "path": "docs/concepts/sitemap-atlas",
+      "role": "Delivered Sitemap Atlas prototype (sitemap-atlas.html, version 2.0.0) this project rebuilds"
+    },
+    {
+      "path": "docs/concepts/product-family",
+      "role": "Product family delivery: shared exchange format, original family-wide verification and sample package"
+    }
+  ]
+}

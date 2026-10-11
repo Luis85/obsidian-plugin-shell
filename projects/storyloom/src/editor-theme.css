@@ -1,0 +1,9 @@
+/* Shared visual contract: all specialized engines consume the same shell tokens. */
+html.family-editor{--bg:#1c1c22;--panel:#222229;--secondary:#222229;--surface:#292930;--raised:#303039;--hover:#35353f;--border:#3c3b46;--text:#ecebf1;--muted:#b7b5c3;--faint:#93909f;--subtle:#93909f;--accent:#b5a3f4;--accent-bg:#3d3456;--accent-solid:#b5a3f4;--primary:#b5a3f4;--canvas:#202026;--card:#303039;--success:#9cd5bb;--danger:#f0a2a8;--shadow:0 12px 40px #0005;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+html.family-editor[data-theme=light]{--bg:#f6f5f8;--panel:#eeedf2;--secondary:#eeedf2;--surface:#fff;--raised:#f7f6fa;--hover:#e9e6f0;--border:#d8d4df;--text:#25232b;--muted:#655f70;--faint:#756e80;--subtle:#756e80;--accent:#7354bd;--accent-bg:#e9e1fa;--accent-solid:#7354bd;--primary:#7354bd;--canvas:#f3f1f7;--card:#fff;--success:#2c7658;--danger:#a82c3d;--shadow:0 12px 40px #30224520}
+html.family-editor button,html.family-editor input,html.family-editor select,html.family-editor textarea{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+html.family-editor .primary,html.family-editor .btn.primary,html.family-editor .btn-primary{background:var(--accent);color:#211932;border-color:var(--accent)}
+html.family-editor[data-theme=light] .primary,html.family-editor[data-theme=light] .btn.primary,html.family-editor[data-theme=light] .btn-primary{color:#fff}
+html.family-editor button:focus-visible,html.family-editor a:focus-visible,html.family-editor [tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+html.family-editor body{margin:0}
+@media(prefers-reduced-motion:reduce){html.family-editor *,html.family-editor *::before,html.family-editor *::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}

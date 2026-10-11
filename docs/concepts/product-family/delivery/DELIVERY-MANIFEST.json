@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "uiVersion": "4.11.3",
+  "files": {
+    "component-atlas.html": {
+      "bytes": 1274884,
+      "sha256": "9a754409f10f69a77cf4ce14506d4b840401eebe164da2eba3781845b6a1990e"
+    },
+    "dissect-canvas.html": {
+      "bytes": 1794847,
+      "sha256": "b1405ebe3b4232815864ea95460590ede10143e02fc9a3bab0d84d7897fef164"
+    },
+    "storyloom-prototype.html": {
+      "bytes": 1164088,
+      "sha256": "de6671361ee5f92ffabe3630d74425f4c66c51f5a24b15a4b40c7c64c2f7a5fc"
+    },
+    "sitemap-atlas.html": {
+      "bytes": 1438394,
+      "sha256": "be3a23a86f1a4f33a350e1fcaf68e752fa4c433586ba9be854c90d0781c05ce8"
+    }
+  },
+  "sourceFiles": 25,
+  "verification": {
+    "protocolTests": 26,
+    "directedExchanges": 12,
+    "integratedChecks": 27
+  }
+}

@@ -1,0 +1,74 @@
+name: CI
+# `check` (build and protocol tests) always runs. The `browser` job opens the built prototype in Chromium; it is
+# end-to-end, so it runs on `main` and, on a pull request or manual run, only when opted in (the `e2e` label, or the
+# `e2e` input of a manual run).
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+  workflow_dispatch:
+    inputs:
+      e2e:
+        description: Also run the browser verification of the built prototype
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}${{ github.event.action == 'labeled' && format('-label-{0}', github.event.label.name) || '' }}
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Select the pinned npm
+        run: |
+          npm install --prefix "$RUNNER_TEMP/pinned-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "PINNED_NPM=$RUNNER_TEMP/pinned-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+      - name: Install exact dependencies
+        run: node "$PINNED_NPM" ci --no-fund
+      - name: Gate (build the self-contained HTML, protocol tests)
+        run: node "$PINNED_NPM" run check
+  browser:
+    if: github.event_name == 'push' || inputs.e2e == true || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && contains(github.event.pull_request.labels.*.name, 'e2e'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Select the pinned npm
+        run: |
+          npm install --prefix "$RUNNER_TEMP/pinned-npm" --ignore-scripts --no-fund --package-lock=false npm@11.19.1
+          echo "PINNED_NPM=$RUNNER_TEMP/pinned-npm/node_modules/npm/bin/npm-cli.js" >> "$GITHUB_ENV"
+      - name: Install exact dependencies
+        run: node "$PINNED_NPM" ci --no-fund
+      - name: Install Chromium and its system libraries
+        run: node node_modules/playwright/cli.js install --with-deps chromium
+      - name: Build the prototype
+        run: node "$PINNED_NPM" run build
+      - name: Browser verification
+        run: node "$PINNED_NPM" run test:e2e
+      - name: Keep the browser result
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browser-result
+          path: test-results/
+          retention-days: 14
+          if-no-files-found: warn

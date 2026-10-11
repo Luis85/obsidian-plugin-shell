@@ -1,0 +1,10 @@
+# Dependencies and build output (dist/shell is the intermediate Vite build). Tailwind's source detection honours
+# this file, so build output never feeds the CSS.
+node_modules/
+dist/
+test-results/
+
+# Local environment
+.env
+.env.*
+.DS_Store

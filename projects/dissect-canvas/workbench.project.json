@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "name": "dissect-canvas",
+  "title": "Dissect",
+  "summary": "Explore interfaces & interactions: the Dissect member of the Obsidian Product Family, a self-contained browser prototype built from its own Vue 3 + Nuxt UI source.",
+  "prototypes": [
+    {
+      "path": "docs/concepts/dissect-canvas",
+      "role": "Delivered Dissect prototype (dissect-canvas.html, version 2.0.0) this project rebuilds"
+    },
+    {
+      "path": "docs/concepts/product-family",
+      "role": "Product family delivery: shared exchange format, original family-wide verification and sample package"
+    }
+  ]
+}
