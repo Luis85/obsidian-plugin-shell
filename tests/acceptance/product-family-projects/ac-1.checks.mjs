@@ -2,16 +2,19 @@
 // AC-1: `checkProjects` passes and lists `component-atlas`, `storyloom`, `sitemap-atlas` and `dissect-canvas`, each linking `docs/concepts/<name>` and `docs/concepts/product-family`, with its CI workflow synced and an npm Dependabot entry.
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { parse } from 'yaml';
-import { checkProjects } from '../../../tooling/projects/projects.mjs';
 
 const root = resolve(import.meta.dirname, '../../..');
 const FAMILY = ['component-atlas', 'storyloom', 'sitemap-atlas', 'dissect-canvas'];
 
-test('[AC-1] the four product family projects pass the standalone project contract', async () => {
-  const result = await checkProjects(root);
+test('[AC-1] the four product family projects pass the standalone project contract', () => {
+  // The real gate, run as `npm run check:projects` runs it; tests never import tooling (that would close a package cycle).
+  const run = spawnSync(process.execPath, [resolve(root, 'tooling/projects/projects.mjs'), 'check', '--json'], { cwd: root, encoding: 'utf8' });
+  assert.equal(run.status, 0, run.stderr || run.stdout);
+  const result = JSON.parse(run.stdout);
   assert.deepEqual(result.failures, []);
   assert.equal(result.status, 'passed');
   for (const name of FAMILY) {

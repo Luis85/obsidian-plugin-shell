@@ -33,6 +33,7 @@ Adds the four Obsidian Product Family prototypes (Component Atlas, Storyloom, Si
 - The delivered HTML files, byte for byte, as prototypes in `docs/concepts/<name>/`, and the family-wide delivery (manifest, guide, original verification, sample package) once in `docs/concepts/product-family/`.
 - Root wiring: synced project workflows, Dependabot entries, the projects and concepts indexes, the changelog.
 - Isolation from the shell's Nuxt UI component detection: the `Pf` component prefix and build output under `dist/`, recorded in `projects/README.md`.
+- Keeping the five prototype folders out of the developer kit and generated projects, like the other large concepts (`distribution.ts`, `framework-docs.ts`).
 
 ### Out of scope
 
@@ -77,6 +78,9 @@ Adds the four Obsidian Product Family prototypes (Component Atlas, Storyloom, Si
 - `tests/acceptance/product-family-projects/**`: the acceptance tests.
 - `docs/increments/product-family-projects.md`: this handoff.
 - `docs/pull-requests/product-family-projects-kickoff.md`: the pull request record.
+- `src/cli/adapters/framework/distribution.ts`: keeps the five product family concept folders out of the developer kit.
+- `src/cli/compiler/emitters/framework-docs.ts`: keeps the same folders out of generated projects (maintainer-only).
+- `src/cli/tests/interactive-maker-compiler-emitters-kit.checks.mjs`: proves those folders stay maintainer-only.
 
 ## Test plan
 
