@@ -1,5 +1,7 @@
 # Obsidian Product Family — delivery 2.0.0
 
+> Type: explanation · Part of the [docs index](../../README.md)
+
 Four focused browser tools that work alone and exchange records through one reviewed package format:
 
 | Tool | Responsibility | Delivered prototype | Project |

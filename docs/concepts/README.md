@@ -1,5 +1,7 @@
 # Design concepts
 
+> Type: reference · Part of the [docs index](../README.md)
+
 Source packages and executable design references retained for development.
 Each concept documents its own verification scope and integration status.
 

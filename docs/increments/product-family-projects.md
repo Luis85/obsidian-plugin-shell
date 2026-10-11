@@ -96,7 +96,6 @@ Adds the four Obsidian Product Family prototypes (Component Atlas, Storyloom, Si
 
 <!-- - `docs/path.md` (how-to): what changes   — or —   None — reason -->
 
-- `projects/README.md` (reference): the four projects in the table and the Nuxt UI detection rule for projects.
 - `docs/concepts/README.md` (reference): the product family and its four prototypes.
 - `docs/concepts/product-family/README.md` (explanation): the family, its delivery and what was and was not re-verified.
 
@@ -104,7 +103,7 @@ Adds the four Obsidian Product Family prototypes (Component Atlas, Storyloom, Si
 
 <!-- - Added: text  (Added, Changed, Deprecated, Removed, Fixed or Security)  — or —  None — reason -->
 
-- Added: Obsidian Product Family prototypes as four standalone projects, each building its self-contained browser prototype from its own Vue 3 + Nuxt UI source with its own lock, tests and CI.
+- Added: Obsidian Product Family prototypes as four standalone projects: `projects/component-atlas`, `projects/storyloom`, `projects/sitemap-atlas` and `projects/dissect-canvas`. Each builds its self-contained browser prototype from its own Vue 3 + Nuxt UI source, with its own lock, protocol tests, opt-in browser verification and CI, and links its delivered prototype in `docs/concepts/<name>` and the shared delivery in `docs/concepts/product-family`.
 
 ## Risks and rollback
 
