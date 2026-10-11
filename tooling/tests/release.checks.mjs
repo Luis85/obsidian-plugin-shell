@@ -89,6 +89,40 @@ test('prepare rejects invalid, reused and lower versions, missing notes and conf
   manifest.version = '0.2.0'; await writeFile(path, JSON.stringify(manifest));
   await assert.rejects(prepareVersion(root, '0.4.0', 'Notes'), /SOURCE_VERSION_MISMATCH/);
 });
+test('prepare raises a reviewed host floor in manifest.json and the new versions.json entry only', async t => {
+  const { root } = await fixture(t);
+  const result = await prepareVersion(root, '0.4.0', 'Raise the host floor.', { date: '2026-10-10', minAppVersion: '1.14.4' });
+  assert.equal(result.hostFloorChanged, true); assert.equal(result.previousMinAppVersion, '1.13.7'); assert.equal(result.minAppVersion, '1.14.4');
+  assert.equal(JSON.parse(await readFile(join(root, 'manifest.json'))).minAppVersion, '1.13.7');
+  const planned = path => JSON.parse(result.plan.changes.find(change => change.path === path).content);
+  assert.deepEqual(planned('manifest.json'), { id: 'different-plugin', name: 'Different Plugin', version: '0.4.0', minAppVersion: '1.14.4', isDesktopOnly: true });
+  await applyFilePlan(result.plan);
+  assert.equal(JSON.parse(await readFile(join(root, 'manifest.json'))).minAppVersion, '1.14.4');
+  assert.deepEqual(JSON.parse(await readFile(join(root, 'versions.json'))), { '0.1.0': '1.13.7', '0.3.0': '1.13.7', '0.4.0': '1.14.4' });
+  const log = join(root, 'CHANGELOG.md'); await writeFile(log, (await readFile(log, 'utf8')).replace('## [Unreleased]\n\n', '## [Unreleased]\n\n### Fixed\n\n- Next.\n\n'));
+  const next = await prepareVersion(root, '0.5.0', '', { date: '2026-10-11' });
+  assert.equal(next.hostFloorChanged, false); assert.equal(next.previousMinAppVersion, '1.14.4');
+  assert.deepEqual(JSON.parse(next.plan.changes.find(change => change.path === 'versions.json').content), { '0.1.0': '1.13.7', '0.3.0': '1.13.7', '0.4.0': '1.14.4', '0.5.0': '1.14.4' });
+});
+test('prepare refuses an unreviewed, invalid, unchanged or lowered host floor without writing', async t => {
+  const { root } = await fixture(t);
+  const names = ['manifest.json', 'versions.json', 'package.json', 'CHANGELOG.md'];
+  const snapshot = () => Promise.all(names.map(name => readFile(join(root, name), 'utf8')));
+  const before = await snapshot();
+  for (const floor of ['1.14', 'v1.14.4', 'latest', '', 1.14]) await assert.rejects(prepareVersion(root, '0.4.0', 'Notes', { minAppVersion: floor }), /HOST_FLOOR_INVALID/, String(floor));
+  for (const floor of ['1.13.7', '1.12.0']) await assert.rejects(prepareVersion(root, '0.4.0', 'Notes', { minAppVersion: floor }), /HOST_FLOOR_NOT_RAISED: .* is not above 1\.13\.7/, floor);
+  assert.deepEqual(await snapshot(), before);
+  const path = join(root, 'manifest.json'); const manifest = JSON.parse(await readFile(path));
+  manifest.minAppVersion = '1.14.4'; await writeFile(path, JSON.stringify(manifest));
+  // A floor edited in the source without the reviewed option stays refused, with or without the option.
+  for (const extra of [{}, { minAppVersion: '1.14.4' }, { minAppVersion: '1.15.0' }]) await assert.rejects(prepareVersion(root, '0.4.0', 'Notes', extra), /UNREVIEWED_HOST_FLOOR_CHANGE/);
+});
+test('prepare arguments accept only a stable reviewed host floor', () => {
+  assert.deepEqual(parsePrepareArguments(['--version', '0.4.0', '--min-app-version', '1.14.4', '--dry-run']), { version: '0.4.0', minAppVersion: '1.14.4', dryRun: true });
+  assert.throws(() => parsePrepareArguments(['--version', '0.4.0', '--min-app-version', '1.14']), /HOST_FLOOR_INVALID/);
+  assert.throws(() => parsePrepareArguments(['--version', '0.4.0', '--min-app-version']), /MISSING_ARGUMENT_VALUE: --min-app-version/);
+  assert.throws(() => parsePrepareArguments(['--version', '0.4.0', '--min-app-version', '1.14.4', '--min-app-version', '1.14.5']), /DUPLICATE_ARGUMENT/);
+});
 async function retained(t) {
   const { root, commit } = await fixture(t); const version = '0.3.0';
   const input = join(root, 'dist'); const output = join(root, 'reports/release/candidate');

@@ -1,7 +1,9 @@
 name: Release cut
 # Owner-dispatched: creates release/X.Y.Z from main, runs release:prepare (version
 # bump and changelog promotion), commits, pushes, opens the draft release pull
-# request and dispatches the Release workflow on the new branch.
+# request and dispatches the Release workflow on the new branch. The optional
+# min_app_version input is a reviewed host-floor raise: the release commit writes
+# it to manifest.json and the new versions.json entry; released entries never change.
 # Privileged by a scoped, reviewed allowance (tooling/quality/workflow-policy.mjs):
 # manual dispatch only, read-only top level, and the one write job waits for the
 # reviewers of the protected "release" environment.
@@ -19,6 +21,11 @@ on:
         description: Stable version X.Y.Z to cut from main
         required: true
         type: string
+      min_app_version:
+        description: Optional reviewed new host floor A.B.C (manifest minAppVersion); empty keeps the current floor
+        required: false
+        type: string
+        default: ''
 permissions:
   contents: read
 concurrency:
@@ -36,6 +43,7 @@ jobs:
       actions: write
     env:
       VERSION: ${{ inputs.version }}
+      MIN_APP_VERSION: ${{ inputs.min_app_version }}
       GH_TOKEN: ${{ secrets.RELEASE_TOKEN || github.token }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -45,6 +53,7 @@ jobs:
       - name: Require a stable version and a dispatch from main
         run: |
           if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "::error::version must be X.Y.Z"; exit 1; fi
+          if [ -n "$MIN_APP_VERSION" ] && ! [[ "$MIN_APP_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "::error::min_app_version must be A.B.C or empty"; exit 1; fi
           if [ "$GITHUB_REF" != "refs/heads/main" ]; then echo "::error::Dispatch Release cut from main, not $GITHUB_REF"; exit 1; fi
       # Write-scoped job: never restore a cache that another run could have saved.
       - uses: ./.github/actions/setup-qualified
@@ -63,13 +72,16 @@ jobs:
         run: |
           mkdir -p reports/release-cut
           set -o pipefail
-          node tooling/release/cut.mjs --version "$VERSION" --execute --remote 2>&1 | tee reports/release-cut/cut.log
+          floor=()
+          if [ -n "$MIN_APP_VERSION" ]; then floor=(--min-app-version "$MIN_APP_VERSION"); fi
+          node tooling/release/cut.mjs --version "$VERSION" "${floor[@]}" --execute --remote 2>&1 | tee reports/release-cut/cut.log
       - name: Summarize the cut
         if: always()
         run: |
           {
             echo "## Release cut $VERSION"
             echo "Source: $GITHUB_SHA on $GITHUB_REF_NAME. Next: wait for Release result on release/$VERSION, then dispatch Publish."
+            if [ -n "$MIN_APP_VERSION" ]; then echo "Requested host floor: $MIN_APP_VERSION (native acceptance on this host is required before promotion)."; fi
             if [ -f reports/release-cut/cut.log ]; then echo '```'; tail -n 40 reports/release-cut/cut.log; echo '```'; fi
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Retain the cut log

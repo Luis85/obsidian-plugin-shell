@@ -6048,6 +6048,7 @@ node bin/app release prepare [options]
 | --- | --- | --- | --- |
 | --version | value | Release version x.y.z. | See command semantics |
 | --notes-file | value | Release-notes Markdown file. | See command semantics |
+| --min-app-version | value | Reviewed new host floor x.y.z (manifest minAppVersion), higher than the current one; written with the new versions.json entry. Omit it to keep the floor. | See command semantics |
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --apply | value | Apply only if the rebuilt plan still has this reviewed SHA-256 hash. | See command semantics |

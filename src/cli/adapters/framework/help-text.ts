@@ -162,6 +162,7 @@ const specific: Record<string, OptionHelp> = {
   profile: { description: 'Execution profile.' },
   from: { description: 'Extracted replacement kit folder.' },
   'notes-file': { description: 'Release-notes Markdown file.' },
+  'min-app-version': { description: 'Reviewed new host floor x.y.z (manifest minAppVersion), higher than the current one; written with the new versions.json entry. Omit it to keep the floor.' },
   commit: { description: 'Fixed source commit to rehearse.' },
   authorize: { description: 'Separately reviewed candidate authorization digest.' },
   execute: { description: 'Request candidate writes (still requires --authorize).' },

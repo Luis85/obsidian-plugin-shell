@@ -39,6 +39,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - Fake-data generator: `node bin/app fake-data` creates seeded, reproducible Markdown notes with YAML frontmatter from built-in presets (contact, task, project, book, meeting), project definitions or saved-project entities, optionally with an Obsidian Bases table, through one reviewed file plan. Runs can be saved and re-run as generation configs in `configs/fake-data/generations`. Adds the exact dependency `@faker-js/faker` 10.6.0 (MIT), bundled into the kit with its license notice.
 - Data-driven forms in the plugin runtime: a feature ships a JSON form in `src/features/<feature>/forms/`, declares it with `defineForm` from the feature API and renders it with the shared `DataForm` component, which validates the draft and returns typed values without persisting anything. The runtime reads the same format as `configs/forms` but rejects CLI-only hooks and kinds; the showcase gains a Forms page.
 - Source project management and explicit maker source selection for self-contained TypeScript projects.
+- Release preparation and the release cut take a reviewed `--min-app-version` that raises the Obsidian host floor in `manifest.json` and the new `versions.json` entry; the native and real-Obsidian tests now run Obsidian 1.14.4.
 
 ### Changed
 
@@ -54,6 +55,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - `npm run setup` asks its identity, MCP and hosting-platform questions from `configs/forms/setup-identity.json` (shared form format) through a dependency-free reader, `scripts/setup/form.mjs`. Only `text`/`confirm` fields whose ids match the unchanged `--answers` keys are accepted; any other kind, key or id stops setup before a question is asked. Prompts now show human labels and help, e.g. `Plugin ID (id) [plugin-shell]: `.
 - `npm run verify` and the interactive-maker workflow run the 174 maker test files once, under coverage (`maker-coverage-run`), instead of a second time in the node --test tooling step; the `maker` suite now uses Vitest, and `suites.mjs --check` fails if a tooling file stops running in verify.
 - Develop the Workbench CLI under src/cli and build a portable standalone bin distribution.
+- The `obsidian` API declarations are now 1.14.4, which uses the patched `moment` 2.31.0; the minimum Obsidian app version stays 1.13.7.
 
 ### Fixed
 

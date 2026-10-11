@@ -1,5 +1,7 @@
 # Unresolved upstream advisory: moment via the Obsidian API package
 
+> Type: explanation · Part of the [docs index](../README.md)
+
 **Status: open. `npm run check:security` fails, and that result is correct.** The audit
 gate was not weakened, no advisory was ignored and no override was adopted.
 Investigation date: 2026-10-04. Like the
@@ -16,8 +18,16 @@ findings, all from one advisory:
 | Advisory | [GHSA-4p3w-j4w9-5jqw](https://github.com/advisories/GHSA-4p3w-j4w9-5jqw): moment path traversal through a crafted non-string locale name |
 | Vulnerable range | moment `2.29.2 - 2.30.1` |
 | Installed | `node_modules/moment@2.29.4` (dev) |
-| Dependents | `node_modules/obsidian@1.13.1` (root dev dependency) and `node_modules/eslint-plugin-obsidianmd/node_modules/obsidian@1.12.3` (pinned by `eslint-plugin-obsidianmd@0.4.2`) |
-| npm's proposed fix | `npm audit fix --force`, which installs `obsidian@0.14.5`: a host-API downgrade, refused |
+| Dependents | `node_modules/eslint-plugin-obsidianmd/node_modules/obsidian@1.12.3` (pinned by `eslint-plugin-obsidianmd@0.4.2`). The root `obsidian@1.14.4` uses the patched `moment@2.31.0` (see the update below). |
+| npm's proposed fix | `npm audit fix --force`, which installs `eslint-plugin-obsidianmd@0.1.8`: a lint-preset downgrade, refused |
+
+## Update — 2026-10-10
+
+`obsidian@1.14.4` (published 2026-10-08) depends on `"moment": "2.31.0"`, the patched
+release. The root API package moved from 1.13.1 to 1.14.4 through the reviewed dependency
+process; the declared host floor (`minAppVersion` 1.13.7) is unchanged. The live audit
+still reports the same three moderate findings, now only through the lint plugin's own
+`obsidian@1.12.3`, so the finding stays open until `eslint-plugin-obsidianmd` follows.
 
 ## Why no override was adopted
 
