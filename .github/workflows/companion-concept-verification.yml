@@ -302,7 +302,7 @@ jobs:
         run: |
           target=$(cat reports/companion-mvp/generation/target.txt)
           case "$target" in /tmp/companion-qualification-*/companion) ;; *) echo "Unexpected generated target"; exit 1;; esac
-          test -f "$target/tests/obsidian/journey-lens.obsidian.ts"
+          test -f "$target/tooling/tests/obsidian/journey-lens.obsidian.ts"
           cd "$target"
           node "$QUALIFIED_NPM" run test:obsidian -- --allow-download journey-lens
       - name: Collect exact generated/native evidence without dependencies or host downloads

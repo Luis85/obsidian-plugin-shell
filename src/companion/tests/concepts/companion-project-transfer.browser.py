@@ -15,6 +15,7 @@ OUT.mkdir(parents=True, exist_ok=True)
 # The self-project is the external golden starter's schema 6 document; there is no bundled example project.
 SEED = OUT / 'companion-project.json'
 SEED.write_text(json.dumps(json.loads((ROOT / 'configs/starters/companion-plugin.json').read_text())['generator']['document'], indent=2) + '\n')
+SEEDED_FOLDERS = json.loads(SEED.read_text())['settings']
 checks, errors, requests = [], [], []
 fatal = None
 STORAGE = """<script>window.__saved={};Object.defineProperty(window,'localStorage',{value:{getItem:k=>__saved[k]??null,setItem:(k,v)=>{__saved[k]=v},removeItem:k=>delete __saved[k]}});</script>"""
@@ -69,7 +70,7 @@ with sync_playwright() as pw:
         page.locator('#project-import-confirm').check(); act('project-import-apply')
         check('Confirmed example loads exactly one project', js('project().id==="workbench-companion" && !Object.hasOwn(state,"projects")'))
         check('Example loading does not prepare or trust a plugin', js('project().phase==="planning" && !project().trusted && !project().enabled && !state.wizard'))
-        check('Source and test folder defaults are src and tests', js('JSON.stringify(companionFolders())===JSON.stringify(COMPANION_DEFAULT_FOLDERS)'))
+        check('The imported starter keeps its own source and test folders', js('folders => JSON.stringify(companionFolders())===JSON.stringify(folders)', SEEDED_FOLDERS))
         check('Imported state meets existing persistence validators', js('validState(state)'))
         original = js('companionJson()')
         check('First import/export round trip preserves every portable field', json.loads(original) == json.loads(SEED.read_text()))
@@ -89,11 +90,11 @@ with sync_playwright() as pw:
             check('Read-only shell returns the exact schema 6 export bytes', run.returncode == 0 and run.stdout == (OUT / 'project.companion.json').read_bytes() and not run.stderr, 'Actual CLI subprocess on exported browser bytes')
             check('Shell handoff creates no files or target directory', list(vault.iterdir()) == [vault / 'keep.md'] and (vault / 'keep.md').read_text() == 'preserve', 'Actual isolated filesystem before/after')
         act('close', '#modal'); act('settings'); act('project-folders', '#modal')
-        check('Folder settings start with the current defaults', page.locator('#f-project-codebase-folder').input_value() == 'src')
+        check('Folder settings start with the imported folders', page.locator('#f-project-codebase-folder').input_value() == SEEDED_FOLDERS['codebaseFolder'])
         page.locator('#f-project-codebase-folder').fill('../outside'); act('project-folders-save')
-        check('Invalid folder leaves saved settings unchanged', js('companionFolders().codebaseFolder==="src"') and 'relative' in page.locator('#project-folders-error').inner_text())
-        page.locator('#f-project-codebase-folder').fill('app/src'); page.locator('#f-project-tests-folder').fill('APP/src/tests'); act('project-folders-save')
-        check('Overlapping folders are rejected without state mutation', 'overlap' in page.locator('#project-folders-error').inner_text() and js('companionFolders().testsFolder==="tests"'))
+        check('Invalid folder leaves saved settings unchanged', js('folder => companionFolders().codebaseFolder===folder', SEEDED_FOLDERS['codebaseFolder']) and 'relative' in page.locator('#project-folders-error').inner_text())
+        page.locator('#f-project-codebase-folder').fill('app/src'); page.locator('#f-project-tests-folder').fill('APP/src/specs'); act('project-folders-save')
+        check('Overlapping folders are rejected without state mutation', 'overlap' in page.locator('#project-folders-error').inner_text() and js('folder => companionFolders().testsFolder===folder', SEEDED_FOLDERS['testsFolder']))
         page.locator('#f-project-tests-folder').fill('app/tests'); shot('03-folder-settings.png'); act('project-folders-save')
         check('Custom folder settings are saved together', js('companionFolders().codebaseFolder==="app/src" && companionFolders().testsFolder==="app/tests"'))
         check('Custom folder settings are retained by browser persistence', js('JSON.parse(__saved[STORAGE_KEY]).project.folders.codebaseFolder==="app/src"'))
@@ -123,7 +124,7 @@ with sync_playwright() as pw:
         check('Actual file input is parsed and reviewed', js('projectTransferUi.candidate.id==="workbench-companion"') and 'companion-project.json' in page.locator('#modal').inner_text())
         check('Reviewing a file does not replace current folders', js('companionFolders().codebaseFolder==="app/src"'))
         page.locator('#project-import-confirm').check(); act('project-import-apply')
-        check('Confirmed file import restores its own settings', js('companionFolders().codebaseFolder==="src"'))
+        check('Confirmed file import restores its own settings', js('folder => companionFolders().codebaseFolder===folder', SEEDED_FOLDERS['codebaseFolder']))
         check('File-import/export round trip preserves every authored subsystem', json.loads(js('companionJson()')) == json.loads(SEED.read_text()))
         act('project-import', '#content')
         page.locator('#project-import-file').set_input_files({'name': 'oversized.json', 'mimeType': 'application/json', 'buffer': b' ' * 4_000_001})

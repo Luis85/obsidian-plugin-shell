@@ -1,8 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, readFile, rm, rename, symlink } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { planExampleRemoval } from '../examples/plan.mjs';
 import { applyFilePlan } from '../../src/shared/platform/file-plan.ts';
@@ -162,4 +164,16 @@ test('registry parent redirects are rejected before registry source is read or e
     assert.equal(await readFile(join(target, 'features.ts'), 'utf8'), original);
     assert.equal(await readFile(join(root, 'example.txt'), 'utf8'), 'reviewed example\n');
   });
+});
+test('[EXAMPLES-SERVED-HARNESS] the planned foundation browser test opens the URL the harness preview serves', async () => {
+  const root = fileURLToPath(new URL('../../', import.meta.url));
+  const spec = 'src/plugin/tests/e2e/foundation.spec.ts';
+  const planned = (await planExampleRemoval(root)).plan.changes.find(change => change.path === spec);
+  assert.equal(typeof planned?.content, 'string', `${spec} is planned from its reviewed template`);
+  const served = new URL(/webServer:.*?url: '([^']+)'/s.exec(await readFile(join(root, 'configs/testing/playwright.config.ts'), 'utf8'))[1]).pathname;
+  const visited = [...planned.content.matchAll(/page\.goto\('([^']+)'\)/g)].map(match => match[1]);
+  assert.ok(visited.length > 0, 'the foundation test visits the harness');
+  assert.deepEqual([...new Set(visited)], [served]);
+  for (const [, path] of planned.content.matchAll(/^import '(\.[^']+)';$/gm))
+    assert.ok(existsSync(join(root, dirname(spec), path + '.ts')), `${path} resolves next to ${spec}`);
 });

@@ -150,7 +150,7 @@ export async function planExampleRemoval(root, { beforeFinalize } = {}) {
       inputs.set(path, digest(content));
       if (sourcePath !== 'src' && item.path.startsWith(`${sourcePath}/tests/`)) {
         content = content.replaceAll('../../src/', '../../').replaceAll('../../../src/', '../../../')
-          .replaceAll('../../manifest.json', '../../../../manifest.json').replace(/(['"])\/harness\/app\//g, '$1/src/plugin/harness/app/');
+          .replaceAll('../../manifest.json', '../../../../manifest.json');
       }
     }
     const targetHash = content === null ? null : digest(content);
