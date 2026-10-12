@@ -14,6 +14,7 @@ into the shell.
 | [`storyloom`](storyloom/README.md) | `docs/concepts/storyloom`, `docs/concepts/product-family` | `ci.yml` |
 | [`sitemap-atlas`](sitemap-atlas/README.md) | `docs/concepts/sitemap-atlas`, `docs/concepts/product-family` | `ci.yml` |
 | [`dissect-canvas`](dissect-canvas/README.md) | `docs/concepts/dissect-canvas`, `docs/concepts/product-family` | `ci.yml` |
+| [`resource-atlas`](resource-atlas/README.md) | `docs/concepts/resource-atlas`, `docs/concepts/product-family` | `ci.yml` |
 
 ## The contract
 
