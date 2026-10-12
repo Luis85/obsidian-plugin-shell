@@ -75,7 +75,7 @@ jobs:
         with:
           persist-credentials: false
       - &setup-node
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           package-manager-cache: false
@@ -83,7 +83,7 @@ jobs:
         run: node tooling/testing/verify-baseline.mjs --repeat 3 --json
       - name: Retain scope-labeled verification evidence
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: baseline-${{ matrix.os }}-${{ github.run_attempt }}
           path: reports/verification/
@@ -165,7 +165,7 @@ jobs:
       - name: Retain the UI review gallery
         id: ui-gallery
         if: always() && runner.os == 'Linux' && (inputs.tier == 'release' || inputs.e2e == true || contains(github.event.pull_request.labels.*.name, 'e2e'))
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ui-review-gallery
           path: reports/ui-gallery/
@@ -180,7 +180,7 @@ jobs:
         run: git archive --format=zip --output=candidate-source.zip HEAD
       - name: Retain candidate and scope-labeled evidence
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: showcase-${{ matrix.os }}-${{ github.run_attempt }}
           path: |
@@ -262,7 +262,7 @@ jobs:
           node "$QUALIFIED_NPM" run test:e2e
       - name: Retain authoring evidence and the generated source
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: renamed-template-authoring
           path: |
@@ -324,7 +324,7 @@ jobs:
           cp -R reports "$GITHUB_WORKSPACE/reports/template-authoring/archive-reports"
       - name: Retain source-archive evidence
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: template-authoring-source-archive
           path: |
@@ -409,7 +409,7 @@ jobs:
           done
       - name: Retain removal evidence and the generated source
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: template-authoring-example-removal
           path: |
@@ -484,7 +484,7 @@ jobs:
         run: |
           mkdir -p reports/framework-cli
           git rev-parse HEAD > reports/framework-cli/source-commit.txt
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: framework-cli-${{ matrix.os }}
@@ -526,7 +526,7 @@ jobs:
           node tooling/dev/obsidian-dev.mjs --json > reports/obsidian/dev-once.json
       - name: Retain real-Obsidian evidence
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: real-obsidian-evidence
           path: |
@@ -585,7 +585,7 @@ jobs:
               tar --exclude=node_modules --exclude=dist --exclude=reports --exclude='*.ttf' --exclude='*.otf' --exclude='*.woff' --exclude='*.woff2' -czf "$DIR/${pair#*:}.tar.gz" -C "$(cat "$DIR/target.txt")" .
             fi
           done
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: project-generator-evidence
@@ -630,7 +630,7 @@ jobs:
             echo "::endgroup::"
           done
           if [ -n "$failed" ]; then echo "::error::Starter qualification failed:$failed"; exit 1; fi
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: starters-${{ matrix.group }}-evidence
@@ -682,7 +682,7 @@ jobs:
         run: |
           echo "::warning title=Security audit::check:security reported findings; see docs/development/MOMENT-ADVISORY-EXCEPTION.md and the security-audit artifact."
           echo "### Security audit: findings reported (informational)" >> "$GITHUB_STEP_SUMMARY"
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: security-audit
