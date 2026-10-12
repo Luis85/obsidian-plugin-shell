@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "name": "resource-atlas",
+  "title": "Resource Atlas",
+  "summary": "Plan roles and effort: the Resource Atlas member of the Obsidian Product Family, a self-contained browser prototype built from its own Vue 3 + Nuxt UI source.",
+  "prototypes": [
+    {
+      "path": "docs/concepts/resource-atlas",
+      "role": "Delivered Resource Atlas prototype (resource-atlas.html, version 1.0.0) this project rebuilds"
+    },
+    {
+      "path": "docs/concepts/product-family",
+      "role": "Product family delivery: shared exchange format and sample package"
+    }
+  ]
+}

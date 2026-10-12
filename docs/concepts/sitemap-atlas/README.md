@@ -16,7 +16,7 @@ styles, icons, demo data and third-party notices are embedded.
 The source is the standalone project [`projects/sitemap-atlas`](../../../projects/sitemap-atlas/README.md).
 Family-wide material is in [`product-family`](../product-family/README.md): the delivery manifest,
 the original verification and the sample package. The other family members are
-[Component Atlas](../component-atlas/README.md), [Storyloom](../storyloom/README.md), [Dissect](../dissect-canvas/README.md).
+[Component Atlas](../component-atlas/README.md), [Storyloom](../storyloom/README.md), [Dissect](../dissect-canvas/README.md), [Resource Atlas](../resource-atlas/README.md).
 
 ## Rebuilt file versus this file
 
