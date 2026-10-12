@@ -1,6 +1,6 @@
 # Agent instructions: Sitemap Atlas
 
-This is a standalone browser prototype, one of the four Obsidian Product Family tools. Work in this
+This is a standalone browser prototype, one of the five Obsidian Product Family tools. Work in this
 folder as if it were its own repository. The delivered prototype it rebuilds is
 `docs/concepts/sitemap-atlas` in the Workbench repository.
 
@@ -18,8 +18,9 @@ folder as if it were its own repository. The delivered prototype it rebuilds is
 ## Structure
 
 - `src/` is the shared family shell (Vue 3 + Nuxt UI) and `src/protocol.mjs` the exchange
-  format. The same files exist in the other three family projects; a change to the shell or the
-  protocol is a family change. Make it in all four, or record why one differs.
+  format. The same shell exists in the other three embedded-editor projects, and the same protocol in all
+  five family projects (Resource Atlas has its own Vue shell). A change to the shell or the protocol is a
+  family change: make it wherever it applies, or record why one differs.
 - `editors/sitemap-atlas.html` is the Sitemap Atlas editor engine, embedded behind the adapter in
   `ADAPTER-CONTRACT.md`. It owns its native data and undo history.
 - `app.config.mjs` names the one editor this project builds and the Nuxt UI component prefix.

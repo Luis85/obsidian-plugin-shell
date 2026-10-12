@@ -1,0 +1,5 @@
+﻿"Plan";"Plan-ID";"Von";"Bis";"Rollen-ID";"Rolle";"Standard-FTE";"Brutto-PT";"Gesperrte PT";"Geplante PT";"Geplante Stunden";"Kapazität PT";"Überlast PT"
+"ERP-Projekt · Beispiel";"resource-plan-erp-demo";"2026-10-05";"2027-02-19";"role-ux";"UX / UI Design";1;35;0;35;280;90;0
+"ERP-Projekt · Beispiel";"resource-plan-erp-demo";"2026-10-05";"2027-02-19";"role-re";"Requirements Engineering";1;35;0;35;280;90;0
+"ERP-Projekt · Beispiel";"resource-plan-erp-demo";"2026-10-05";"2027-02-19";"role-dev";"Entwicklung";1;80;0;80;640;90;0
+"ERP-Projekt · Beispiel";"resource-plan-erp-demo";"2026-10-05";"2027-02-19";"role-dm";"Delivery Management";0,2;14;0;14;112;18;0
