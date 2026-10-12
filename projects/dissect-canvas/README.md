@@ -2,7 +2,7 @@
 
 **Explore interfaces & interactions.** Dissect owns review instances, local property overrides, canvas arrangement, annotations, groups and interaction scenarios. Places supported UI and information architecture records as local, data-only review snapshots. Its built-in demonstration components render for real and run executable scenarios.
 
-Dissect is one of the four tools in the **Obsidian Product Family**. Each tool works alone. They
+Dissect is one of the five tools in the **Obsidian Product Family**. Each tool works alone. They
 share a compiled Vue 3 + Nuxt UI shell, Storyloom's dark and light theme, and a reviewed exchange
 format for carrying records and connections between them:
 
@@ -12,6 +12,7 @@ format for carrying records and connections between them:
 | [Storyloom](../storyloom/README.md) | Map the user’s journey |
 | [Sitemap Atlas](../sitemap-atlas/README.md) | Shape information architecture |
 | **Dissect** (this project) | Explore interfaces & interactions |
+| [Resource Atlas](../resource-atlas/README.md) | Plan roles and effort |
 
 The delivered prototype is [`docs/concepts/dissect-canvas`](../../docs/concepts/dissect-canvas/README.md).
 This project is its source. It builds the same self-contained HTML file.
@@ -30,7 +31,7 @@ npm run dev        # http://127.0.0.1:4173
 `npm run build` compiles the shared shell with Vite into `dist/shell/`, then `scripts/package.mjs` embeds the shell, its
 CSS and icons, the Dissect editor engine and the third-party notices into one file:
 `dist/dissect-canvas.html`. Open it directly in a modern browser. It needs no server, account, CDN or other
-family file. Keep the four family files in one folder to use the family shortcuts. Each shortcut
+family file. Keep the family files in one folder to use the family shortcuts. Each shortcut
 opens a sibling file in a new tab. The development server serves only this editor.
 
 Browser verification uses Playwright's Chromium, or the Chromium at `FAMILY_CHROMIUM_PATH`.
@@ -41,8 +42,8 @@ delivered shell source, besides building one editor per project.
 
 ## What the checks cover
 
-- `npm test` runs the pure exchange-protocol tests. They cover all twelve producer and consumer
-  directions between the four tools, ownership, identity, keep and update choices, missing
+- `npm test` runs the pure exchange-protocol tests. They cover all twenty producer and consumer
+  directions between the five tools, ownership, identity, keep and update choices, missing
   sources, links, malformed input, the 32 MB limit and Markdown connection notes.
 - `npm run test:e2e` opens `dist/dissect-canvas.html` with every external request blocked. It checks the
   offline boot, import of [`examples/product-family-example.json`](examples/product-family-example.json)

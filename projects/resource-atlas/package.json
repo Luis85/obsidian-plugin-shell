@@ -1,0 +1,31 @@
+{
+  "name": "resource-atlas",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Resource Atlas: plan roles, FTE and person-days over time. A self-contained Obsidian Product Family browser prototype built with Vue 3 and Nuxt UI.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build && node scripts/package.mjs",
+    "test": "node --test tests/domain.test.mjs tests/io.test.mjs",
+    "verify": "node tests/browser.mjs",
+    "verify:edge-cases": "node tests/browser.mjs --final",
+    "test:e2e": "node tests/browser.mjs",
+    "check": "npm run build && npm test"
+  },
+  "dependencies": {
+    "@nuxt/ui": "4.11.3",
+    "vue": "3.5.22",
+    "vue-router": "4.6.3"
+  },
+  "devDependencies": {
+    "@iconify-json/lucide": "1.2.142",
+    "@vitejs/plugin-vue": "6.0.10",
+    "tailwindcss": "4.3.3",
+    "vite": "7.3.7",
+    "playwright": "1.64.0"
+  }
+}
