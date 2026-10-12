@@ -6,7 +6,8 @@ export const APPS = Object.freeze({
   'component-atlas': {name:'Component Atlas',purpose:'Define the building blocks',file:'component-atlas.html',icon:'i-lucide-boxes'},
   'storyloom': {name:'Storyloom',purpose:'Map the user’s journey',file:'storyloom-prototype.html',icon:'i-lucide-panels-top-left'},
   'sitemap-atlas': {name:'Sitemap Atlas',purpose:'Shape information architecture',file:'sitemap-atlas.html',icon:'i-lucide-network'},
-  'dissect': {name:'Dissect',purpose:'Explore interfaces & interactions',file:'dissect-canvas.html',icon:'i-lucide-scan'}
+  'dissect': {name:'Dissect',purpose:'Explore interfaces & interactions',file:'dissect-canvas.html',icon:'i-lucide-scan'},
+  'resource-atlas': {name:'Resource Atlas',purpose:'Plan roles and effort',file:'resource-atlas.html',icon:'i-lucide-calendar-range'}
 });
 const object = v => v !== null && typeof v === 'object' && !Array.isArray(v);
 const fail = message => {throw new Error(message);};

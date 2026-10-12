@@ -41,6 +41,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - Data-driven forms in the plugin runtime: a feature ships a JSON form in `src/features/<feature>/forms/`, declares it with `defineForm` from the feature API and renders it with the shared `DataForm` component, which validates the draft and returns typed values without persisting anything. The runtime reads the same format as `configs/forms` but rejects CLI-only hooks and kinds; the showcase gains a Forms page.
 - Source project management and explicit maker source selection for self-contained TypeScript projects.
 - Release preparation and the release cut take a reviewed `--min-app-version` that raises the Obsidian host floor in `manifest.json` and the new `versions.json` entry; the native and real-Obsidian tests now run Obsidian 1.14.4.
+- Resource Atlas as the fifth Obsidian Product Family project (`projects/resource-atlas`): roles, FTE and person-day planning as a self-contained browser prototype built from its own Vue 3 + Nuxt UI source, with its own lock, tests and CI. The other four family projects now list it in their shared exchange protocol.
 
 ### Changed
 

@@ -1,0 +1,18 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const read=p=>fs.readFile(path.join(root,p),'utf8');
+let html=await read('dist/shell/index.html');
+const script=html.match(/<script\b[^>]*src="([^"]+)"[^>]*><\/script>/)?.[1];
+const sheets=[...html.matchAll(/<link\b[^>]*rel="stylesheet"[^>]*href="([^"]+)"[^>]*>/g)].map(m=>m[1]);
+if(!script||!sheets.length)throw new Error('Build incomplete: missing compiled script or styles.');
+const js=await read('dist/shell/'+script.replace(/^\.\//,''));
+const css=(await Promise.all(sheets.map(s=>read('dist/shell/'+s.replace(/^\.\//,''))))).join('\n');
+const notices=await read('dist/shell/THIRD-PARTY-NOTICES.txt');
+html=html.replace(/<script\b[^>]*src="[^"]+"[^>]*><\/script>/g,'').replace(/<link\b[^>]*rel="(?:stylesheet|modulepreload)"[^>]*>/g,'');
+html=html.replace('</head>',()=>'<style>'+css+'</style></head>');
+html=html.replace('</body>',()=>'<script type="text/plain" id="third-party-notices">'+notices.replace(/<\/script/gi,'<\\/script')+'</script><script type="module">'+js.replace(/<\/script/gi,'<\\/script')+'</script></body>');
+await fs.mkdir(path.join(root,'dist'),{recursive:true});
+await fs.writeFile(path.join(root,'dist/resource-atlas.html'),html);
+console.log('resource-atlas.html: '+Math.round(Buffer.byteLength(html)/1024)+'KB, self-contained.');
