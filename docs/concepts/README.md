@@ -12,8 +12,9 @@ Each concept documents its own verification scope and integration status.
 - [Iteration Planner](iteration-planner/README.md): iteration planning.
 - [Sitemap Editor](sitemap-editor/README.md): sitemap and page design.
 - [Concept intake example](concept-intake-example/README.md): intake reference.
-- [Obsidian Product Family](product-family/README.md): four tools that exchange records through one package format, each delivered as a self-contained prototype and built by its own project:
+- [Obsidian Product Family](product-family/README.md): five tools that exchange records through one package format, each delivered as a self-contained prototype and built by its own project:
   - [Component Atlas](component-atlas/README.md): C4 architecture and UI definitions.
   - [Storyloom](storyloom/README.md): journeys, stories and release slices.
   - [Sitemap Atlas](sitemap-atlas/README.md): information architecture and navigation.
   - [Dissect](dissect-canvas/README.md): interface review, annotations and interaction scenarios.
+  - [Resource Atlas](resource-atlas/README.md): roles, FTE and person-days over time.

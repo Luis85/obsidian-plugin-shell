@@ -16,7 +16,8 @@ const kinds={
   'component-atlas':['ui.component','architecture.component'],
   'storyloom':['story.story','story.map'],
   'sitemap-atlas':['ia.page','ia.navigation'],
-  'dissect':['dissect.instance','dissect.scenario']
+  'dissect':['dissect.instance','dissect.scenario'],
+  'resource-atlas':['resource.plan','resource.role']
 };
 function snapshot(appId,workspaceId='renovation-planner'){
   return {
