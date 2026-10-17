@@ -913,7 +913,10 @@
     ]
   },
   "ignoreDependencies": [
-    "obsidian"
+    "obsidian",
+    "fontless",
+    "oxlint",
+    "vue-tsc"
   ],
   "ignoreUnresolvedImports": [
     "/__host.css",
