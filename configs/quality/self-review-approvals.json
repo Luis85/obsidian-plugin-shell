@@ -3464,6 +3464,22 @@
         "import { loadThresholds } from '../../scripts/quality/thresholds.mjs';",
         "  coverage: { provider: 'v8', thresholds: { ...loadThresholds().coverage.production }, include: ['src/main.ts', 'src/{application,bootstrap,domain,features,infrastructure,presentation}/**/*.{ts,vue}'], exclude: [],"
       ]
+    },
+    {
+      "rule": "SR-QUALITY-CONFIG",
+      "file": "configs/quality/fallow.json",
+      "approvedBy": "@Luis85",
+      "pullRequest": 149,
+      "reason": "Explicitly approved by @Luis85 in this conversation on 2026-10-17, including recording this owner-only approval: adopt Fallow 3.33.1 (dead-code report schema 10). 3.33 no longer credits oxlint and vue-tsc, which the repository runs through node_modules/<tool>/bin paths, and newly reports fontless, the reviewed transitive dependency that tooling/security/check-dependencies.mjs resolves on purpose. All three are genuinely used, so they join obsidian in ignoreDependencies; no other analyzer setting changes.",
+      "added": [
+        "    \"obsidian\",",
+        "    \"fontless\",",
+        "    \"oxlint\",",
+        "    \"vue-tsc\""
+      ],
+      "removed": [
+        "    \"obsidian\""
+      ]
     }
   ]
 }
