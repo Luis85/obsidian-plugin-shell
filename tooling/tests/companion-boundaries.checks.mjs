@@ -4,6 +4,7 @@ import { mkdtemp, writeFile, readFile, mkdir, rm } from 'node:fs/promises';
 import { join, dirname, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
+import { fallowSchemas } from '../quality/fallow-contract.mjs';
 
 // Use the repository's real zone contract and pinned analyzer. No exclusions,
 // suppressions or production threshold changes are needed for concept sources.
@@ -26,7 +27,7 @@ async function probe(sources, transform = value => value, { full = false, entry 
     assert.ifError(run.error);
     const report = JSON.parse(run.stdout);
     assert.equal(report.kind, 'dead-code');
-    assert.equal(report.schema_version, 9);
+    assert.equal(report.schema_version, fallowSchemas['dead-code']);
     return { status: run.status, summary: report.summary, unusedFiles: report.unused_files, diagnostic: run.stdout + run.stderr };
   } finally {
     await rm(root, { recursive: true, force: true });
