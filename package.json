@@ -40,8 +40,8 @@
   "dependencies": {
     "@faker-js/faker": "10.6.0",
     "@nuxt/ui": "4.11.3",
-    "pinia": "4.0.3",
-    "vue": "3.5.43",
+    "pinia": "4.1.0",
+    "vue": "3.5.44",
     "vue-i18n": "11.4.14",
     "yaml": "2.9.1"
   },
