@@ -11,7 +11,7 @@
     "obs-shell": "bin/app"
   },
   "devDependencies": {
-    "@axe-core/playwright": "4.13.0",
+    "@axe-core/playwright": "4.14.0",
     "@iconify-json/lucide": "1.2.142",
     "@playwright/test": "1.64.0",
     "@types/node": "26.6.5",
