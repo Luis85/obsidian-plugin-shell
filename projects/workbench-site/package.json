@@ -14,7 +14,7 @@
     "check": "npm run build"
   },
   "dependencies": {
-    "astro": "7.3.8"
+    "astro": "7.4.0"
   },
   "allowScripts": {
     "esbuild@0.28.2": true,
