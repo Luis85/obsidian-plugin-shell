@@ -22,7 +22,7 @@
   "devDependencies": {
     "@iconify-json/lucide": "1.2.142",
     "@vitejs/plugin-vue": "6.0.10",
-    "playwright": "1.64.0",
+    "playwright": "1.64.1",
     "tailwindcss": "4.3.3",
     "vite": "8.3.4"
   }
