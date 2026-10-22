@@ -4,14 +4,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { thresholdFloors } from '../../../tooling/quality/thresholds.mjs';
 
 const root = resolve(import.meta.dirname, '../../..');
 const text = path => readFile(resolve(root, path), 'utf8');
 const BUDGET = 168 * 1024;
 
 test('[AC-3] the artifacts check, the threshold floors and the configured threshold agree on 168 KiB', async () => {
-  assert.equal(thresholdFloors.performance.stylesCssBytes, BUDGET);
+  // Read as text: importing tooling from tests would close a package cycle with tooling/testing/check-browser-specimen.mjs.
+  assert.match(await text('tooling/quality/thresholds.mjs'), new RegExp(`stylesCssBytes: ${BUDGET}\\b`));
   assert.equal(JSON.parse(await text('configs/quality/thresholds.json')).performance.stylesCssBytes, BUDGET);
   const artifacts = await text('tooling/quality/check-artifacts.mjs');
   assert.match(artifacts, /Buffer\.byteLength\(css\) > 168 \* 1024\) throw new Error\('ARTIFACT_SIZE_BUDGET'\)/);
