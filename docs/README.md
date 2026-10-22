@@ -250,6 +250,7 @@ receive it and carry their own skill set.
 - [Release](../.claude/skills/release/SKILL.md): choose the version, dispatch the cut, follow the Release tier, publish on explicit request and verify the result.
 - [Self-review](../.claude/skills/self-review/SKILL.md): check a change against AGENTS.md and run the real gates before handover.
 - [Adopt an existing project](../.claude/skills/adopt-existing-project/SKILL.md): write an adoption plan for an existing project.
+- [Cloud project handoff](../.claude/skills/cloud-project-handoff/SKILL.md): generate and verify a new plugin project in a cloud session, then hand it over as a zip, its project JSON and a takeover prompt for a local session.
 - [Companion prototype design](../.claude/skills/companion-prototype-design/SKILL.md): design-first discovery and prototype prompts (framework only).
 - [Project memory](../.claude/skills/project-memory/SKILL.md): use optional Hindsight without silent opt-in.
 

@@ -42,9 +42,11 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - Source project management and explicit maker source selection for self-contained TypeScript projects.
 - Release preparation and the release cut take a reviewed `--min-app-version` that raises the Obsidian host floor in `manifest.json` and the new `versions.json` entry; the native and real-Obsidian tests now run Obsidian 1.14.4.
 - Resource Atlas as the fifth Obsidian Product Family project (`projects/resource-atlas`): roles, FTE and person-day planning as a self-contained browser prototype built from its own Vue 3 + Nuxt UI source, with its own lock, tests and CI. The other four family projects now list it in their shared exchange protocol.
+- `cloud-project-handoff` skill that turns an idea into a generated, checked plugin project in a cloud session and hands it over as a zip, project JSON and takeover prompt.
 
 ### Changed
 
+- Generated projects no longer receive the framework's increment pull request and issue records or acceptance tests (`docs/pull-requests`, `docs/issues`, `tests/acceptance`), like its increment handoffs; this also keeps the generated brainstorm source within its 32 MB inventory bound.
 - Repository layout by concern: `src/` holds five self-contained TypeScript projects (`shared`, `tui`, `cli`, `companion`, `plugin`), each with its own `tsconfig.json` and `tests/`, joined by project references and `#shared/*`/`#tui/*` imports; repository tooling moved from `scripts/` to `tooling/`, the plugin runtime to `src/plugin` (with the harness), the Workbench extension SDK from `plugins/` to `src/cli/sdk`, and the companion editor and app sources to `src/companion`. Root `tests/` keeps only cross-project suites. A project boundary gate enforces the dependency graph (`shared` ← `tui` ← `cli`; `shared` ← `companion`, `plugin`; no project imports `tooling/` or root `tests/`).
 - Move Workbench CLI development to `src/cli`; `npm run build:cli` creates the portable `bin` product with compiled authoring tools, templates, plugin defaults, notices and verified inventories.
 - Group companion Vitest updates with their coverage provider and synchronize Actions updates across project workflow directories.
@@ -59,6 +61,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - Develop the Workbench CLI under src/cli and build a portable standalone bin distribution.
 - The `obsidian` API declarations are now 1.14.4, which uses the patched `moment` 2.31.0; the minimum Obsidian app version stays 1.13.7.
 - The repository analyzer now runs the reviewed Fallow 3.33.1 contract (dead-code report schema 10). Fallow 3.33 no longer counts tools started through their `node_modules/<tool>/bin` path, so `oxlint` and `vue-tsc` join `obsidian` in `ignoreDependencies`, together with `fontless`, the reviewed transitive dependency that the dependency check resolves on purpose.
+- Nuxt UI is now 4.12.0 for the plugin shell and for projects generated from the Companion, the shipped stylesheet budget is 168 KiB (owner-reviewed) to fit its theme output, and the prototype bundle gate accepts a lazy import that the bundler inlined into the entry chunk while still rejecting any second chunk or other dynamic import target.
 
 ### Fixed
 
