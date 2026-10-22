@@ -124,7 +124,7 @@ test('every project starter compiles through shared v6 validation into actual ta
       assert.equal(JSON.parse(files.get('configs/types/tsconfig.angular.json')).angularCompilerOptions.compilationMode, 'full');
     }
     if (selected.framework === 'nuxtui') {
-      assert.equal(pkg.dependencies['@nuxt/ui'], '4.11.3'); assert.ok(!pkg.dependencies.nuxt);
+      assert.equal(pkg.dependencies['@nuxt/ui'], '4.12.0'); assert.ok(!pkg.dependencies.nuxt);
       assert.match(files.get('tooling/bundling/vite-shared.mjs'), /Unqualified Nuxt UI module/);
       assert.ok(files.has('src/plugin/ui/Starter.vue'));
       for (const [, imported] of files.get('tooling/bundling/vite-shared.mjs').matchAll(/from ['"](\.\/[^'"]+)['"]/g)) assert.ok(files.has('tooling/bundling/' + imported.slice(2)), imported);
