@@ -3480,6 +3480,32 @@
       "removed": [
         "    \"obsidian\""
       ]
+    },
+    {
+      "rule": "SR-QUALITY-CONFIG",
+      "file": "configs/quality/thresholds.json",
+      "approvedBy": "@Luis85",
+      "pullRequest": 205,
+      "reason": "Explicitly approved by @Luis85 in this conversation on 2026-10-22, in answer to a direct question that gave the measurement and the alternatives, including recording this owner-only approval: raise the shipped stylesheet budget from 160 KiB to 168 KiB (163,840 to 172,032 bytes) for Nuxt UI 4.12.0. In the CI source-archive build with the same 33 detected components, main on 4.11.3 is 163,320 B (520 B under the old limit) and 4.12.0 is 165,755 B; the growth is Nuxt UI's own theme output (Chart colour roles, wider checkbox and radio selectors), not new component use. The artifacts check, the performance report and the docs move to the same value in this pull request; no other threshold changes.",
+      "added": [
+        "  \"performance\": { \"warmInitializationMs\": 200, \"itemsReadinessMs\": 500, \"mainJsBytes\": 1048576, \"stylesCssBytes\": 172032 }"
+      ],
+      "removed": [
+        "  \"performance\": { \"warmInitializationMs\": 200, \"itemsReadinessMs\": 500, \"mainJsBytes\": 1048576, \"stylesCssBytes\": 163840 }"
+      ]
+    },
+    {
+      "rule": "SR-QUALITY-CONFIG",
+      "file": "tooling/quality/thresholds.mjs",
+      "approvedBy": "@Luis85",
+      "pullRequest": 205,
+      "reason": "Explicitly approved by @Luis85 in this conversation on 2026-10-22, in answer to a direct question that gave the measurement and the alternatives, including recording this owner-only approval: raise the shipped stylesheet budget from 160 KiB to 168 KiB (163,840 to 172,032 bytes) for Nuxt UI 4.12.0. In the CI source-archive build with the same 33 detected components, main on 4.11.3 is 163,320 B (520 B under the old limit) and 4.12.0 is 165,755 B; the growth is Nuxt UI's own theme output (Chart colour roles, wider checkbox and radio selectors), not new component use. The artifacts check, the performance report and the docs move to the same value in this pull request; no other threshold changes.",
+      "added": [
+        "  performance: { warmInitializationMs: 200, itemsReadinessMs: 500, mainJsBytes: 1048576, stylesCssBytes: 172032 },"
+      ],
+      "removed": [
+        "  performance: { warmInitializationMs: 200, itemsReadinessMs: 500, mainJsBytes: 1048576, stylesCssBytes: 163840 },"
+      ]
     }
   ]
 }
