@@ -84,7 +84,8 @@ and `SHELL_SESSION_START_INSTALL=0` apply here too.
 ## Start in the cloud, continue locally
 
 A cloud session cannot write to a folder on your machine. To start a new plugin project from an idea there,
-use the [`cloud-project-handoff`](../../.claude/skills/cloud-project-handoff/SKILL.md) skill. It generates the
+use the `cloud-project-handoff` skill of the plugin-shell framework checkout
+(`.claude/skills/cloud-project-handoff/SKILL.md` there; generated projects do not carry it). It generates the
 project in the session scratchpad with `node bin/app new --from <id>.companion.json --install`, optionally
 removes the framework examples, runs the project's gates, and delivers three files: `<id>.zip` (without
 `node_modules` and `dist`, with its git history), `<id>.companion.json` and `<id>-TAKEOVER.md`. Put all three
