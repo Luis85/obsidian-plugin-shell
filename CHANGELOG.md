@@ -8,7 +8,6 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ### Added
 
-- `cloud-project-handoff` skill: a cloud session turns an idea into a generated, installed and checked plugin project, then hands it over as a downloadable zip, its companion project JSON and a filled-in takeover prompt for a local Claude Code session. The documented project-JSON recipe is tested against the real `project validate` and `new --from` commands.
 - Obsidian Product Family prototypes as four standalone projects: `projects/component-atlas`, `projects/storyloom`, `projects/sitemap-atlas` and `projects/dissect-canvas`. Each builds its self-contained browser prototype from its own Vue 3 + Nuxt UI source, with its own lock, protocol tests, opt-in browser verification and CI, and links its delivered prototype in `docs/concepts/<name>` and the shared delivery in `docs/concepts/product-family`.
 - Makers accept `--source <name>` to target a declared plugin source project, select a sole plugin automatically, and reject ambiguous targets before writing. New native plugin starters use `src/plugin` with project-owned tests; existing flat-source projects remain supported.
 - Source projects: `workbench.sources.json` declares the TypeScript projects under `src/` (name, kind, path, references), and `node bin/app source list|graph|check [--fix]|add|link|unlink|rename|remove` manages them through reviewed plans. `source check` reports schema errors, cycles, missing paths, tsconfig and `#alias` drift, imports into unreferenced projects and projects outside the lint, coverage or analyzer gates.
@@ -43,6 +42,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - Source project management and explicit maker source selection for self-contained TypeScript projects.
 - Release preparation and the release cut take a reviewed `--min-app-version` that raises the Obsidian host floor in `manifest.json` and the new `versions.json` entry; the native and real-Obsidian tests now run Obsidian 1.14.4.
 - Resource Atlas as the fifth Obsidian Product Family project (`projects/resource-atlas`): roles, FTE and person-day planning as a self-contained browser prototype built from its own Vue 3 + Nuxt UI source, with its own lock, tests and CI. The other four family projects now list it in their shared exchange protocol.
+- `cloud-project-handoff` skill that turns an idea into a generated, checked plugin project in a cloud session and hands it over as a zip, project JSON and takeover prompt.
 
 ### Changed
 
