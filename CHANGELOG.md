@@ -59,7 +59,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - Develop the Workbench CLI under src/cli and build a portable standalone bin distribution.
 - The `obsidian` API declarations are now 1.14.4, which uses the patched `moment` 2.31.0; the minimum Obsidian app version stays 1.13.7.
 - The repository analyzer now runs the reviewed Fallow 3.33.1 contract (dead-code report schema 10). Fallow 3.33 no longer counts tools started through their `node_modules/<tool>/bin` path, so `oxlint` and `vue-tsc` join `obsidian` in `ignoreDependencies`, together with `fontless`, the reviewed transitive dependency that the dependency check resolves on purpose.
-- Nuxt UI 4.12.0 (was 4.11.3) for the plugin shell and for projects generated from the Companion (`VISUAL_NUXT_UI_VERSION`), with the reviewed adaptation, dependency policy, README ownership hash and version assertions updated together; the two hash-guarded runtime modules are unchanged. The prototype bundle gate (`singleBundle` in the `companion-prototype-design` skill) now accepts a lazy import that the bundler inlined into the entry chunk (Nuxt UI's Toaster loads `Toast.vue` that way) and still rejects any second chunk or other dynamic-import target.
+- Nuxt UI is now 4.12.0 for the plugin shell and for projects generated from the Companion, and the prototype bundle gate accepts a lazy import that the bundler inlined into the entry chunk while still rejecting any second chunk or other dynamic import target.
 
 ### Fixed
 
