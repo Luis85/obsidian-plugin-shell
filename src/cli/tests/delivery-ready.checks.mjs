@@ -39,6 +39,12 @@ test('negative: each defect fails exactly its own rule with a hint', () => {
   }
 });
 
+test('DOR-09 accepts the configured gate prefixes, such as the template\'s own `node bin/app` example, and still rejects unknown commands', () => {
+  for (const gate of ['node bin/app check --fast --base origin/main', 'node bin/app check', 'actionlint', 'shellcheck tooling/x.sh'])
+    assert.deepEqual(failing(ready(replace('Gate `node scripts/tool.mjs --flag`', `Gate \`${gate}\``))), [], gate);
+  for (const gate of ['node scripts/missing.mjs', 'node bin/appx', 'node --flag', 'npm run chekc', 'rm -rf build'])
+    assert.deepEqual(failing(ready(replace('Gate `node scripts/tool.mjs --flag`', `Gate \`${gate}\``))), ['DOR-09'], gate);
+});
 test('size budgets, missing sections and the template placeholders are reported with details', () => {
   const big = replace('size: S', 'size: S').replace('- [ ] AC-2:', ['- [ ] AC-2: b.', '- [ ] AC-3: c.', '- [ ] AC-4: d.', '- [ ] AC-5: e.', '- [ ] AC-6: f.', '- [ ] AC-7:'].map(line => line.endsWith('.') ? `${line} Evidence: \`tests/greeting.checks.mjs\`` : line).join('\n'));
   const outcome = ready(big);
