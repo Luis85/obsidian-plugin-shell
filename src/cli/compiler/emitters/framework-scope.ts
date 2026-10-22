@@ -1,5 +1,5 @@
 /** What of the framework repository a generated project receives. A generated project is a product: the
- * framework's own backlog, PRDs, increment handoffs, reviews, research, milestone plans and evidence records, its repo-specific
+ * framework's own backlog, PRDs, increment handoffs (with their pull request and issue records and acceptance tests), reviews, research, milestone plans and evidence records, its repo-specific
  * prototype skill and its maintainer-only npm scripts are not copied, so an agent asked "what should I build?"
  * can only find this project's BRIEF.md, design/ and docs/project-tasks/. The framework reference docs that
  * remain live under docs/framework/ behind a banner. Policy lives here; framework-docs.ts applies it. */
@@ -8,7 +8,7 @@ import { posix } from 'node:path';
 const underFolder = (path: string, folder: string) => path === folder || path.startsWith(folder + '/');
 /** Whole folders that only describe the framework's own work; docs/_archive holds its retired plans, reviews and records. */
 const maintainerFolders = ['docs/_archive', 'docs/tasks', 'docs/prds', 'docs/reviews', 'docs/research', 'docs/superpowers', 'docs/product',
-  'docs/requirements', 'docs/increments', 'docs/memory', 'docs/testing/evidence', 'docs/project-setup/evidence', 'docs/development/compiler',
+  'docs/requirements', 'docs/increments', 'docs/pull-requests', 'docs/issues', 'tests/acceptance', 'docs/memory', 'docs/testing/evidence', 'docs/project-setup/evidence', 'docs/development/compiler',
   '.claude/skills/companion-prototype-design', '.agents/skills/companion-prototype-design'];
 /** Dated records, milestone plans, reviews, ledgers, release/maintenance and Hindsight (project memory tool) notes. */
 const developmentRecord = /^docs\/development\/(?:ITERATION-|ACCEPTANCE-CLOSURE-|HINDSIGHT|MAINTENANCE-|RELEASE-|MILESTONE-|PR\d+-|PUBLISHED-DISTRIBUTION-|SCRIPTS-CONSOLIDATION|TEMPLATE-READINESS-|SHELL-CAPABILITY-INVENTORY|LOCAL-MCP|EXTRACTED-KIT-SETUP|DELIVERY-PIPELINE|DELIVER-A-CHANGE|CUT-AND-PUBLISH-A-RELEASE|WORKFLOWS\.md$|[A-Z0-9-]+-(?:PLAN|REVIEW(?:-[A-Z])?|CHECKPOINT|RESEARCH|EXCEPTION)\.md$)/;
