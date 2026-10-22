@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
-    "@iconify-json/lucide": "1.2.142",
+    "@iconify-json/lucide": "1.2.145",
     "@playwright/test": "1.64.0",
     "@types/node": "26.6.4",
     "@vitejs/plugin-vue": "6.0.10",
@@ -35,8 +35,8 @@
   },
   "dependencies": {
     "@nuxt/ui": "4.11.3",
-    "pinia": "4.0.3",
-    "vue": "3.5.43",
+    "pinia": "4.1.0",
+    "vue": "3.5.44",
     "vue-i18n": "11.4.14",
     "yaml": "2.9.1"
   },
