@@ -46,6 +46,19 @@ jobs:
       - name: Community-review rules (manifest, lint, bundle; advisory)
         continue-on-error: true
         run: node "$PINNED_NPM" run check:submission
+      # Advisory: Obsidian's own community-directory checks (manifest, versions.json, README, license, the built
+      # main.js and the directory scanner's lint rules). Policy findings are warnings while strict is 'false'; a
+      # correctness error (an unusable manifest, a missing license) still fails the step, never the job.
+      # verify:artifacts has built dist/ already, so the action does not install or build again.
+      - name: Obsidian community-directory validation (advisory)
+        continue-on-error: true
+        uses: obsidianmd/obsidian-workflows@8167caed39664214d82c86fdfa32e06d8d55f61d # v1.2.3
+        with:
+          type: plugin
+          mode: pr
+          build: 'false'
+          scanner-lint: 'true'
+          strict: 'false'
   # Browser journeys and the UI review gallery: end-to-end, so opt-in except on `main`. The gallery is evidence for
   # human review, never acceptance. A step is skipped, with a warning, when its npm script does not exist.
   ui:
