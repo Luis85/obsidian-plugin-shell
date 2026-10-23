@@ -46,7 +46,8 @@ Besides the framework copy and the generated product code, every project gets a 
 | `.github/copilot-instructions.md`, `.cursor/rules/project.mdc` | One-line pointers to `AGENTS.md` |
 | `.vscode/` | Recommended extensions, Vitest pointed at `configs/testing/vitest.project.config.mjs`, "Attach to Obsidian (dev:obsidian)" on port 9222, "Debug current Vitest file", tasks for `dev:obsidian`, `check`, `test:watch` |
 | `.editorconfig` | Two-space, LF, UTF-8 |
-| `.github/workflows/ci.yml`, `obsidian.yml` | Product CI: `check` + `verify:project` on every push/PR; real-Obsidian tests on `main` and on demand, with cached host download and uploaded evidence |
+| `.github/workflows/ci.yml`, `obsidian.yml` | Product CI: `check` + `verify:project` on every push/PR, plus advisory Obsidian community-directory validation; real-Obsidian tests on `main` and on demand, with cached host download and uploaded evidence |
+| `.github/workflows/obsidian-release.yml` | Draft GitHub release from a tag, validated and attested by Obsidian's own action (see below) |
 | `configs/testing/vitest.project.config.mjs` | Product tests with the shared build config, the `@test/obsidian` in-memory host and the throwing `obsidian` boundary; default reporters (agents get Vitest's `agent` reporter) |
 | `configs/types/tsconfig.project.json`, `configs/bundling/vite.preview.config.mjs` | Project typecheck scope (`typecheck:project`) and the source preview (`dev:preview`); `configs/types/tsconfig.clickdummy.json` joins them for click-dummy output |
 | `<tests>/project/plugin-host.test.ts` | Example kit test: loads `src/plugin/main.ts`, opens the workbench, toggles debug logging, unloads, and proves fixture notes are untouched |
@@ -58,6 +59,20 @@ The framework's own `README.md`, `AGENTS.md`, `TEMPLATE-GUIDE.md` and `SHELL-FIR
 Generated plugins also register the shell's `debug-toggle` and `debug-report` commands (the dev loop enables debug logging after each load), use `<id>-view-*` view types that the shell's view-header binding accepts, and name Vue component files with multiple words so `npm run check` is lint-clean for every starter.
 
 The original `npm run companion:generate` and `tooling/companion-tools/generate.mjs` **remain byte-exact read-only JSON echo tools** for backward compatibility. The prototype's existing Prepare handoff is that v1 reader; use the new scaffold command above to generate implementation files.
+
+### Release a generated plugin
+
+GitHub-hosted projects release through `obsidian-release.yml`, which runs the official
+[`obsidianmd/obsidian-workflows`](https://github.com/obsidianmd/obsidian-workflows) action in `release` mode:
+
+1. Create a `release` environment with required reviewers in the repository settings (once).
+2. Set the new `X.Y.Z` in `manifest.json` and add it to `versions.json`; run `npm run check` and merge.
+3. Push the tag `X.Y.Z` (it must equal the manifest version).
+4. In Actions, run "Obsidian release" with "Use workflow from" set to that tag, and approve the environment.
+5. Review the draft release (`main.js`, `manifest.json`, `styles.css`, with build attestations) and publish it.
+
+Pull requests already show the same community-directory findings as warnings in the `ci.yml` `check` job. Rules
+and permissions: [workflows](WORKFLOWS.md#generated-projects-workflows).
 
 ## Generated implementation contracts
 

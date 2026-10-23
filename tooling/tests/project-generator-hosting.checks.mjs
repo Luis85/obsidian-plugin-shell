@@ -37,7 +37,7 @@ test('[GENERATOR-HOSTING-01] an explicit github choice emits exactly the files o
   const changed = [...github.keys()].filter(path => github.get(path).content !== explicit.get(path).content);
   assert.ok(changed.length > 0 && changed.every(path => path.startsWith('design/')), changed.join());
   assert.deepEqual(JSON.parse(text(explicit, 'design/project.json')).tooling.hosting, { platform: 'github' });
-  for (const path of ['.github/workflows/ci.yml', '.github/workflows/obsidian.yml', '.github/pull_request_template.md', '.github/copilot-instructions.md', '.github/dependabot.yml'])
+  for (const path of ['.github/workflows/ci.yml', '.github/workflows/obsidian.yml', '.github/workflows/obsidian-release.yml', '.github/pull_request_template.md', '.github/copilot-instructions.md', '.github/dependabot.yml'])
     assert.ok(github.has(path), path);
   assert.ok(!github.has('azure-pipelines.yml') && !github.has('.azuredevops/pull_request_template.md') && !github.has('docs/project-tasks/CHANGE-SUMMARY.md'));
 });

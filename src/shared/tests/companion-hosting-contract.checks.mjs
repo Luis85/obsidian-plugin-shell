@@ -19,7 +19,8 @@ test('[COMPANION-HOSTING-01] absent hosting is GitHub with today\'s files and no
   const profile = hostingProfile(undefined);
   assert.deepEqual(profile, hostingProfile({ platform: 'github' }));
   assert.equal(profile.platform, 'github'); assert.equal(profile.prTemplatePath, '.github/pull_request_template.md');
-  assert.deepEqual(profile.ciFiles, [['.github/workflows/ci.yml', 'workflow-ci.yml.tmpl'], ['.github/workflows/obsidian.yml', 'workflow-obsidian.yml.tmpl']]);
+  assert.deepEqual(profile.ciFiles, [['.github/workflows/ci.yml', 'workflow-ci.yml.tmpl'], ['.github/workflows/obsidian.yml', 'workflow-obsidian.yml.tmpl'],
+    ['.github/workflows/obsidian-release.yml', 'workflow-obsidian-release.yml.tmpl']]);
   assert.deepEqual(profile.prune, []); assert.equal(profile.remoteUrl, null);
   assert.deepEqual(profile.claudePermissions, { allow: [], ask: [], deny: [] });
   assert.match(profile.cliHints, /^## Hosting and pull requests\n/); assert.match(profile.cliHints, /gh pr create --draft/);
