@@ -13,6 +13,8 @@ const hostBoundary = { name: 'vitest-obsidian-boundary',
 const testKit = { '@test/obsidian': fileURLToPath(new URL('../../src/plugin/tests/support/obsidian/index.ts', import.meta.url)) };
 export default defineConfig({ ...shared, resolve: { ...shared.resolve, alias: { ...shared.resolve?.alias, ...testKit } }, plugins: [...shared.plugins, hostBoundary], test: {
   include: ['src/plugin/tests/unit/**/*.test.ts'], environment: 'node',
+  // happy-dom 21 no longer creates an iframe's window unless page loading is enabled; the pop-out document tests need `contentDocument`.
+  environmentOptions: { happyDOM: { settings: { enableIframePageLoading: true } } },
   fileParallelism: false, testTimeout: 5000, hookTimeout: 5000,
   coverage: { provider: 'v8', thresholds: { ...loadThresholds().coverage.selectedCore }, include: ['src/plugin/domain/**/*.ts', 'src/plugin/application/**/*.ts', 'src/plugin/features/**/*.ts', 'src/plugin/infrastructure/events/*.ts', 'src/plugin/infrastructure/diagnostics.ts', 'src/plugin/infrastructure/markdown.ts'], reporter: ['text', 'json-summary', 'html'], reportsDirectory: 'reports/runtime-coverage' },
 } });
