@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { publishRelease } from '../release/publish.mjs';
 import { sha256 } from '../../src/cli/tooling/release/candidate.mjs';
-import { publishFixture, candidateFiles, repository, version, head, other, changelog } from '../../src/cli/tests/support/release-publish-fixture.mjs';
+import { publishFixture, candidateFiles, distributionFiles, repository, version, head, other, changelog } from '../../src/cli/tests/support/release-publish-fixture.mjs';
 
 /** Every refusal happens during read-only discovery: no write is attempted, in plan or execute mode. */
 async function refuses(t, mutate, expected, { execute = true } = {}) {
@@ -31,9 +31,38 @@ test('a missing, expired or misplaced candidate artifact blocks publication; ret
   await refuses(t, state => { state.artifacts[0].expired = true; }, /CANDIDATE_ARTIFACT_MISSING/);
   await refuses(t, state => { state.artifactFiles = { dist: {} }; }, /CANDIDATE_ARTIFACT_MISSING: qualified-candidate has no reports\/release\/0\.5\.0-a{40}/);
   const fixture = await publishFixture(t);
-  fixture.state.artifacts = [{ id: 2, name: 'retained-build', expired: false }, { id: 3, name: 'unrelated', expired: false }];
+  fixture.state.artifacts = [{ id: 3, name: 'retained-build', expired: false }, { id: 4, name: 'unrelated', expired: false }, fixture.state.artifacts[1]];
   const plan = await publishRelease({ repository, version, run: fixture.run, lockDirectory: fixture.folder });
   assert.equal(plan.candidate.artifact, 'retained-build'); assert.deepEqual(fixture.state.writes, []);
+});
+
+test('a missing, expired or empty CLI distribution artifact blocks publication in plan and execute mode', async t => {
+  for (const execute of [false, true]) {
+    const missing = { execute };
+    await refuses(t, state => { state.artifacts = state.artifacts.slice(0, 1); }, new RegExp(`DISTRIBUTION_ARTIFACT_MISSING: Release run 900 has no unexpired workbench-distributions-${head} artifact`), missing);
+    await refuses(t, state => { state.artifacts[1].expired = true; }, /DISTRIBUTION_ARTIFACT_MISSING/, missing);
+    await refuses(t, state => { state.artifacts[1].name = `workbench-distributions-${other}`; }, /DISTRIBUTION_ARTIFACT_MISSING/, missing);
+    await refuses(t, state => { state.distributionFiles = {}; }, /DISTRIBUTION_INVALID: expected .*; found nothing/, missing);
+  }
+});
+
+test('CLI downloads bound to another version or commit, with a wrong file set or wrong checksums are refused', async t => {
+  const manifest = state => JSON.parse(state.distributionFiles['workbench-distributions.json']);
+  const setManifest = (state, change) => { state.distributionFiles['workbench-distributions.json'] = JSON.stringify({ ...manifest(state), ...change }); };
+  await refuses(t, state => setManifest(state, { version: '0.4.0' }), /DISTRIBUTION_INVALID: the manifest names version 0\.4\.0, not 0\.5\.0/);
+  await refuses(t, state => { state.distributionFiles = { ...distributionFiles(other).bytes }; }, new RegExp(`DISTRIBUTION_INVALID: the manifest names source c{40}, not the release head ${head}`));
+  await refuses(t, state => { state.distributionFiles = { ...distributionFiles(head, '0.4.0').bytes }; }, /DISTRIBUTION_INVALID: expected workbench-shell-0\.5\.0\.zip/);
+  await refuses(t, state => { state.distributionFiles['extra.zip'] = 'x'; }, /DISTRIBUTION_INVALID: expected .* found .*extra\.zip/);
+  await refuses(t, state => { delete state.distributionFiles['workbench-SHA256SUMS']; }, /DISTRIBUTION_INVALID: expected/);
+  await refuses(t, state => { state.distributionFiles[`workbench-shell-${version}.zip`] = 'PK tampered'; }, /DISTRIBUTION_INVALID: the manifest entry for workbench-shell-0\.5\.0\.zip does not match its bytes/);
+  await refuses(t, state => { state.distributionFiles['workbench-SHA256SUMS'] = state.distributionFiles['workbench-SHA256SUMS'].replace(/^./, '0'); }, /DISTRIBUTION_INVALID: workbench-SHA256SUMS does not match the archives/);
+  await refuses(t, state => setManifest(state, { assets: manifest(state).assets.slice(0, 1) }), /DISTRIBUTION_INVALID: the manifest does not list exactly the shell and starters archives/);
+  await refuses(t, state => { state.distributionFiles['workbench-distributions.json'] = 'not json'; }, /DISTRIBUTION_INVALID: workbench-distributions\.json is not JSON/);
+});
+
+test('an existing release whose CLI download differs from the tested one is never modified', async t => {
+  await refuses(t, state => { state.releases = [{ id: 100, tag: version, draft: true, target: head, body: '', assets: [{ id: 1, name: `workbench-shell-${version}.zip`, state: 'uploaded', size: 3, digest: `sha256:${sha256('old')}` }] }]; },
+    /RELEASE_ASSET_MISMATCH: Release 0\.5\.0 has assets that differ from the candidate: workbench-shell-0\.5\.0\.zip/);
 });
 
 test('candidate bytes, provenance and notes must match the tested commit and its changelog', async t => {

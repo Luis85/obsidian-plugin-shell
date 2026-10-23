@@ -6,18 +6,20 @@
  * Requires (gh authenticated, e.g. GH_TOKEN): one open (or already merged) pull request from release/X.Y.Z
  * into the default branch; a green "Release result" check on its head SHA; the branch head equal to that SHA;
  * a successful Release workflow run for the SHA whose qualified-candidate (or retained-build) artifact holds a
- * valid retained candidate (reports/release/X.Y.Z-SHA) with matching hashes; release notes equal to the
+ * valid retained candidate (reports/release/X.Y.Z-SHA) with matching hashes and whose workbench-distributions-SHA
+ * artifact holds the CLI and starters downloads bound to X.Y.Z and the SHA; release notes equal to the
  * CHANGELOG section at the SHA. --execute then, in order and each skipped when already done:
  * mark the PR ready, merge it with a merge commit pinned to the SHA, create tag X.Y.Z at the SHA, create the
- * GitHub release (draft, upload main.js/manifest.json/styles.css, publish), delete release/X.Y.Z when its head
- * is still the SHA. Never moves a tag, replaces an asset or edits a published release. A failed write stops
- * with exit 2 (uncertain): rerun the same command; it rediscovers state and resumes. Refusals exit 1.
+ * GitHub release (draft, upload main.js/manifest.json/styles.css and the four download files, publish),
+ * delete release/X.Y.Z when its head is still the SHA. Never moves a tag, replaces an asset or edits a published
+ * release. A failed write stops with exit 2 (uncertain): rerun the same command; it rediscovers state and
+ * resumes. Refusals exit 1.
  */
 import { mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { assetNames, sha256 } from '../../src/cli/tooling/release/candidate.mjs';
+import { sha256 } from '../../src/cli/tooling/release/candidate.mjs';
 import { stableVersion } from '../../src/cli/tooling/release/prepare.mjs';
 import { createRunner } from './commands.mjs';
 import { createGitHub } from './publish-github.mjs';
@@ -33,7 +35,7 @@ export function planSteps(state) {
     done('ready', state.pr.state === 'merged' || !state.pr.draft, `Mark pull request #${state.pr.number} ready for review.`, `Pull request #${state.pr.number} is ready or merged.`),
     done('merge', state.merged, `Merge #${state.pr.number} into ${state.defaultBranch} with a merge commit pinned to ${state.sha}.`, `${state.sha} is on ${state.defaultBranch}.`),
     done('tag', state.tag === state.sha, `Create tag ${state.version} at ${state.sha}.`, `Tag ${state.version} is ${state.sha}.`),
-    done('release', release && !release.draft, release ? `Complete draft release ${release.id}: upload ${release.missing.join(', ') || 'nothing'}, then publish.` : `Create release ${state.version} with ${assetNames.join(', ')}.`, `Release ${state.version} is published with matching assets.`),
+    done('release', release && !release.draft, release ? `Complete draft release ${release.id}: upload ${release.missing.join(', ') || 'nothing'}, then publish.` : `Create release ${state.version} with ${Object.keys(state.assets.hashes).join(', ')}.`, `Release ${state.version} is published with matching assets.`),
     done('delete-branch', !state.branchHead, `Delete ${state.branch} at ${state.sha}.`, `${state.branch} is already deleted.`),
   ];
 }
@@ -61,16 +63,16 @@ const steps = {
     await confirm(async () => (await tagCommit(gh, state.version)) === state.sha, 'TAG_READBACK_MISMATCH');
   },
   async release(gh, state) {
-    const hashes = state.candidate.hashes;
+    const { hashes, files } = state.assets;
     let release = state.release;
     if (!release) {
       const created = write(() => gh.api('POST', '/releases', { body: { tag_name: state.version, target_commitish: state.sha, name: state.version,
         body: state.candidate.notes, draft: true, prerelease: false, generate_release_notes: false } }));
       if (!Number.isSafeInteger(created?.id)) throw Object.assign(coded('RELEASE_RESPONSE_INVALID'), { uncertain: true });
-      release = { id: created.id, draft: true, missing: [...assetNames] };
+      release = { id: created.id, draft: true, missing: Object.keys(hashes) };
     }
     for (const name of release.missing)
-      write(() => gh.api('POST', `https://uploads.github.com/repos/${gh.repository}/releases/${release.id}/assets?name=${name}`, { file: join(state.candidate.directory, name) }));
+      write(() => gh.api('POST', `https://uploads.github.com/repos/${gh.repository}/releases/${release.id}/assets?name=${name}`, { file: files[name] }));
     if (release.draft) write(() => gh.api('PATCH', `/releases/${release.id}`, { body: { draft: false, tag_name: state.version, make_latest: 'true' } }));
     await confirm(async () => {
       const observed = await releaseState(gh, state.version, hashes);
@@ -97,7 +99,8 @@ export async function publishRelease({ repository, version, execute = false, run
     const state = { version, ...(await discoverRelease(gh, { version, workdir })) };
     const plan = planSteps(state);
     const summary = { schemaVersion: 1, repository, version, sha: state.sha, pullRequest: state.pr, defaultBranch: state.defaultBranch,
-      releaseResult: state.check, candidate: { runId: state.candidate.runId, artifact: state.candidate.artifact, assetHashes: state.candidate.hashes, notesHash: state.notesHash } };
+      releaseResult: state.check, candidate: { runId: state.candidate.runId, artifact: state.candidate.artifact, assetHashes: state.candidate.hashes, notesHash: state.notesHash },
+      distributions: { artifact: state.candidate.distributions.artifact, assetHashes: state.candidate.distributions.hashes } };
     if (!execute) return { ...summary, mode: 'dry-run', status: plan.every(step => step.status === 'done') ? 'published' : 'planned', steps: plan };
     if (state.canPush === false) throw coded('PUSH_PERMISSION_REQUIRED', `The token cannot write to ${repository}.`);
     const completed = [];

@@ -223,6 +223,15 @@ repository settings.
 contents, pull requests and actions write on this repository). No other secret is
 referenced. Every checkout sets `persist-credentials: false`.
 
+Publish reads two artifacts of the successful Release run of the release head, and
+nothing else: the candidate (`qualified-candidate` or `retained-build`, kept 7 days)
+and the Workbench downloads (`workbench-distributions-<sha>` from
+`starter-distribution.yml`, kept 14 days). It uploads the three plugin files and the
+four download files (`workbench-shell-X.Y.Z.zip`, `workbench-starters-X.Y.Z.zip`,
+`workbench-distributions.json`, `workbench-SHA256SUMS`) only after both are bound to
+the version and head; `starter-distribution.yml` itself stays read-only and never
+attaches anything.
+
 ## Repository policy (`npm run check:repository`)
 
 `tooling/quality/check-repository.mjs` with the scoped allowances in

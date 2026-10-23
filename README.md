@@ -34,6 +34,27 @@ The guide below retains the existing framework checkout workflow and its milesto
 
 ## Start a new plugin
 
+### From a release download
+
+Each GitHub release from 0.5.0 on carries the Workbench CLI next to the plugin files:
+`workbench-shell-X.Y.Z.zip` (the CLI), `workbench-starters-X.Y.Z.zip` (the starters),
+`workbench-distributions.json` and `workbench-SHA256SUMS`. With Node.js 22.13 or newer,
+no clone, global install or `node_modules` is needed to scaffold:
+
+```sh
+sha256sum --check --ignore-missing workbench-SHA256SUMS   # both ZIPs: OK
+mkdir workbench && cd workbench
+unzip ../workbench-shell-X.Y.Z.zip && unzip ../workbench-starters-X.Y.Z.zip
+node bin/app new --list                                  # starters
+node bin/app new ../my-plugin --starter quick-capture --yes
+```
+
+Checksums detect a damaged download; they do not authenticate where it came from, so
+download from this repository's release page only. Then follow the new project's README
+(`npm ci`, `npm run check`).
+
+### From this checkout
+
 From this checkout (after `npm ci` and `npm run build:cli`), create an independent project from one of
 the reviewed starters. The target must be a new or empty folder outside this checkout.
 
