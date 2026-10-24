@@ -75,6 +75,7 @@ A plugin author who creates a project with `node bin/app new` (GitHub hosting) s
 - `tooling/tests/project-generator-hosting.checks.mjs`: the hosting matrix.
 - `src/shared/tests/companion-hosting-contract.checks.mjs`: the per-platform CI files.
 - `src/cli/tests/interactive-maker-compiler-emitters-kit.checks.mjs`: the emitted devkit paths.
+- `tests/fixtures/compiler/starter-golden.json`: the reviewed baseline, whose origins now list `obsidian-release.yml`.
 - `src/cli/adapters/framework/hosting-plan.ts`: `hosting set` entries, if the hosting table does not cover it.
 - `docs/development/WORKFLOWS.md`: generated-project workflows and the policy table.
 - `docs/development/HOSTING-PLATFORMS.md`: the files per platform.
