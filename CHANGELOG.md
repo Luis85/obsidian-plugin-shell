@@ -88,6 +88,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 ### Security
 
 - Update the transitive `source-map-js` dependency to 1.2.2 to address GHSA-68fv-2mgg-jv7q without changing direct dependency constraints.
+- Update `undici` to 8.12.3, `fast-uri` to 3.1.9 and `happy-dom` to 21.0.4, and resolve the `moment` nested under `eslint-plugin-obsidianmd` to 2.31.0 through one reviewed override, so the all-category audit passes again.
 
 ## [0.4.0] - 2026-09-23
 
