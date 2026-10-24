@@ -2,7 +2,7 @@
 type: Issue
 id: dependency-advisories
 title: "Clear the live security audit for 0.5.0"
-status: New
+status: Done
 increment: dependency-advisories
 ---
 

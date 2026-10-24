@@ -4,10 +4,16 @@ id: dependency-advisories-1
 title: "Clear the live security audit with in-range updates and one moment override"
 kind: change
 increment: dependency-advisories
-status: New
+status: Merged
 delivers: [AC-1, AC-2]
 head: "pr/dependency-advisories/dependency-advisories-1"
 base: increment/dependency-advisories
+platform: github
+repository: "Luis85/obsidian-plugin-shell"
+number: 222
+url: "https://github.com/Luis85/obsidian-plugin-shell/pull/222"
+publishedAt: 2026-10-24T16:48:58Z
+lastSyncedAt: 2026-10-24T19:06:20Z
 ---
 
 # Clear the live security audit with in-range updates and one moment override
