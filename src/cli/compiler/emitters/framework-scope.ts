@@ -1,5 +1,5 @@
 /** What of the framework repository a generated project receives. A generated project is a product: the
- * framework's own backlog, PRDs, increment handoffs (with their pull request and issue records and acceptance tests), reviews, research, milestone plans and evidence records, its repo-specific
+ * framework's own backlog, PRDs, increment handoffs (with their pull request and issue records and acceptance tests), reviews, research, concept records, milestone plans and evidence records, its repo-specific
  * prototype skill and its maintainer-only npm scripts are not copied, so an agent asked "what should I build?"
  * can only find this project's BRIEF.md, design/ and docs/project-tasks/. The framework reference docs that
  * remain live under docs/framework/ behind a banner. Policy lives here; framework-docs.ts applies it. */
@@ -11,7 +11,7 @@ const maintainerFolders = ['docs/_archive', 'docs/tasks', 'docs/prds', 'docs/rev
   'docs/requirements', 'docs/increments', 'docs/pull-requests', 'docs/issues', 'tests/acceptance', 'docs/memory', 'docs/testing/evidence', 'docs/project-setup/evidence', 'docs/development/compiler',
   '.claude/skills/companion-prototype-design', '.agents/skills/companion-prototype-design'];
 /** Dated records, milestone plans, reviews, ledgers, release/maintenance and Hindsight (project memory tool) notes. */
-const developmentRecord = /^docs\/development\/(?:ITERATION-|ACCEPTANCE-CLOSURE-|HINDSIGHT|MAINTENANCE-|RELEASE-|MILESTONE-|PR\d+-|PUBLISHED-DISTRIBUTION-|SCRIPTS-CONSOLIDATION|TEMPLATE-READINESS-|SHELL-CAPABILITY-INVENTORY|LOCAL-MCP|EXTRACTED-KIT-SETUP|DELIVERY-PIPELINE|DELIVER-A-CHANGE|CUT-AND-PUBLISH-A-RELEASE|WORKFLOWS\.md$|[A-Z0-9-]+-(?:PLAN|REVIEW(?:-[A-Z])?|CHECKPOINT|RESEARCH|EXCEPTION)\.md$)/;
+const developmentRecord = /^docs\/development\/(?:ITERATION-|ACCEPTANCE-CLOSURE-|HINDSIGHT|MAINTENANCE-|MAIN-RECONCILIATION|RELEASE-|MILESTONE-|PR\d+-|PUBLISHED-DISTRIBUTION-|SCRIPTS-CONSOLIDATION|TEMPLATE-READINESS-|SHELL-CAPABILITY-INVENTORY|LOCAL-MCP|EXTRACTED-KIT-SETUP|DELIVERY-PIPELINE|DELIVER-A-CHANGE|CUT-AND-PUBLISH-A-RELEASE|WORKFLOWS\.md$|[A-Z0-9-]+-(?:PLAN|REVIEW(?:-[A-Z])?|CHECKPOINT|RESEARCH|EXCEPTION)\.md$)/;
 /**
  * Product how-to guides whose names happen to match a record prefix. RELEASE-CANDIDATES.md documents the release-item and
  * release-candidate commands a generated project uses for its own product releases, not this repository's release
@@ -23,9 +23,12 @@ const developmentOnly = (path: string) => developmentRecord.test(path) && !devel
 const testingGuides = new Set(['OBSIDIAN-TEST-KIT', 'OBSIDIAN-DEV-LOOP', 'TEST-STRATEGY', 'TEST-CONCEPT', 'TEST-SUITES', 'HARNESS-STYLES']);
 const testingRecord = (path: string) => /^docs\/testing\/[^/]+\.md$/.test(path) && !testingGuides.has(posix.basename(path, '.md'));
 const planData = /^docs\/testing\/(?!test-plan\.json$)[a-z-]+-plan\.json$/;
+/** The companion concept's dated review, verification, research, audit, polish, commit and CI records and their verification
+ * ledgers; its design and how-to documents (README, VERIFICATION, PROJECT-JSON, ...) stay. */
+const conceptRecord = /^docs\/concepts\/companion\/(?:[A-Z0-9-]+-(?:REVIEW|VERIFICATION|RESEARCH|AUDIT|POLISH|INTEGRITY|COMMIT|CI)\.md|verification-[a-z]+\.json)$/;
 /** True for repository paths a generated project must not receive. */
 export function frameworkOnlyPath(path: string): boolean {
-  return maintainerFolders.some(folder => underFolder(path, folder)) || developmentOnly(path) || testingRecord(path) || planData.test(path);
+  return maintainerFolders.some(folder => underFolder(path, folder)) || developmentOnly(path) || testingRecord(path) || planData.test(path) || conceptRecord.test(path);
 }
 const referenceFolders = ['architecture', 'development', 'testing', 'tooling', 'security', 'design', 'project-setup', 'user-manual'];
 /** Where a kept framework Markdown document lives in a generated project, or null when it keeps its path. */

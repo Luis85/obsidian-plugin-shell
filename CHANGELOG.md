@@ -65,6 +65,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - The repository analyzer now runs the reviewed Fallow 3.33.1 contract (dead-code report schema 10). Fallow 3.33 no longer counts tools started through their `node_modules/<tool>/bin` path, so `oxlint` and `vue-tsc` join `obsidian` in `ignoreDependencies`, together with `fontless`, the reviewed transitive dependency that the dependency check resolves on purpose.
 - The repository analyzer now runs the reviewed Fallow 3.34.1 contract: the health report moves to schema 12 (additive mutation and change-coupling fields); the dead-code and dupes schemas stay at 10 and the analyzer configuration needs no change.
 - Nuxt UI is now 4.12.0 for the plugin shell and for projects generated from the Companion, the shipped stylesheet budget is 168 KiB (owner-reviewed) to fit its theme output, and the prototype bundle gate accepts a lazy import that the bundler inlined into the entry chunk while still rejecting any second chunk or other dynamic import target.
+- Generated projects no longer receive the framework's planner prototypes, the companion concept's dated records, implementation handoff or maintainer-only browser verification; brainstorm prototypes regain about 1.3 to 1.9 MB below the unchanged 32 MB first-run inventory bound, guarded by a generator test with a 500 KB margin.
 
 ### Fixed
 

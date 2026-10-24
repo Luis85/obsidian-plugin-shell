@@ -83,6 +83,12 @@ test('[GENERATOR-SCOPE-04] scope helpers classify records, relocate guides and k
   assert.equal(referenceDocPath('docs/development/RELEASE-CANDIDATES.md'), 'docs/framework/development/RELEASE-CANDIDATES.md');
   for (const record of ['docs/development/RELEASE-EXECUTION.md', 'docs/development/RELEASE-REHEARSAL.md', 'docs/development/RELEASE-OPERATION-PLANS.md', 'docs/development/RELEASE-CANDIDATES-PLAN.md',
     'docs/development/MAINTENANCE-AND-RELEASE.md']) assert.equal(frameworkOnlyPath(record), true, record);
+  // The companion concept's dated records go; its design and how-to documents (and the test kit) stay.
+  for (const record of ['docs/development/MAIN-RECONCILIATION.md', 'docs/concepts/companion/PRODUCT-REVIEW.md', 'docs/concepts/companion/ER-EDITOR-VERIFICATION.md',
+    'docs/concepts/companion/DETAIL-EDITORS-RESEARCH.md', 'docs/concepts/companion/PRODUCT-AUDIT.md', 'docs/concepts/companion/STORYMAPS-POLISH.md', 'docs/concepts/companion/PROTOTYPES-INTEGRITY.md',
+    'docs/concepts/companion/UNIFIED-COMMIT.md', 'docs/concepts/companion/PRODUCT-CI.md', 'docs/concepts/companion/verification-unified.json']) assert.equal(frameworkOnlyPath(record), true, record);
+  for (const kept of ['docs/concepts/companion/README.md', 'docs/concepts/companion/VERIFICATION.md', 'docs/concepts/companion/PROJECT-JSON.md', 'docs/concepts/companion/VISUAL-EDITORS.md',
+    'docs/concepts/companion/browser-checks.json', 'docs/concepts/companion/test-kit/engine.mjs', 'docs/development/MAINTAINABILITY.md']) assert.equal(frameworkOnlyPath(kept), false, kept);
   assert.equal(referenceDocPath('docs/testing/test-plan.json'), null); assert.equal(referenceDocPath('docs/tasks/a.md'), null); assert.equal(referenceDocPath('docs/_archive/testing/ITERATION-FOUR.md'), null); assert.equal(referenceDocPath('docs/x.md'), null);
   assert.equal(withBanner('# T\n'), `${frameworkBanner}\n\n# T\n`);
   assert.equal(withBanner(withBanner('# T\n')), `${frameworkBanner}\n\n# T\n`);
