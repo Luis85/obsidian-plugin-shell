@@ -4,10 +4,16 @@ id: obsidian-workflows-adoption-2
 title: "Obsidian draft-release workflow for generated plugins"
 kind: change
 increment: obsidian-workflows-adoption
-status: New
+status: Merged
 delivers: [AC-2, AC-3, AC-4, AC-5]
 head: "pr/obsidian-workflows-adoption/obsidian-workflows-adoption-2"
 base: increment/obsidian-workflows-adoption
+platform: github
+repository: "Luis85/obsidian-plugin-shell"
+number: 214
+url: "https://github.com/Luis85/obsidian-plugin-shell/pull/214"
+publishedAt: 2026-10-23T20:41:34Z
+lastSyncedAt: 2026-10-24T08:50:48Z
 ---
 
 # Obsidian draft-release workflow for generated plugins

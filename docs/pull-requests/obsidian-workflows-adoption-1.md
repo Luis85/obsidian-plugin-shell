@@ -4,10 +4,16 @@ id: obsidian-workflows-adoption-1
 title: "Advisory Obsidian community validation in generated CI"
 kind: change
 increment: obsidian-workflows-adoption
-status: New
+status: Merged
 delivers: [AC-1]
 head: "pr/obsidian-workflows-adoption/obsidian-workflows-adoption-1"
 base: increment/obsidian-workflows-adoption
+platform: github
+repository: "Luis85/obsidian-plugin-shell"
+number: 213
+url: "https://github.com/Luis85/obsidian-plugin-shell/pull/213"
+publishedAt: 2026-10-23T19:20:20Z
+lastSyncedAt: 2026-10-24T08:50:48Z
 ---
 
 # Advisory Obsidian community validation in generated CI
