@@ -61,6 +61,16 @@ test('bundle gate requires actually rendered Vue, Pinia, Nuxt UI and one embedde
     const value = bundle(); adjust(value); assert.throws(() => singleBundle(value), /PROTOTYPE_/);
   }
 });
+test('bundle gate accepts a lazy import the bundler inlined into the entry, never a second file', () => {
+  const inlined = bundle(); inlined.output[0].dynamicImports.push('prototype.js');
+  assert.equal(singleBundle(inlined).modules.length, 3);
+  for (const targets of [['lazy.js'], ['prototype.js', 'lazy.js'], ['chunks/toast.js']]) {
+    const value = bundle(); value.output[0].dynamicImports.push(...targets);
+    assert.throws(() => singleBundle(value), /PROTOTYPE_BUNDLE: all JavaScript must be in the single entry/);
+  }
+  const split = bundle(); split.output.push({ ...split.output[0], fileName: 'toast.js', isEntry: false, dynamicImports: [] });
+  assert.throws(() => singleBundle(split), /PROTOTYPE_BUNDLE/);
+});
 test('assembled artifact has the exact shell CSS owner and rejects malformed identities', () => {
   const project = { kind: 'obsidian-companion-project', executable: false, project: { id: 'notes-lab' } };
   const options = { javascript: 'void 0;', css: '.ps--notes-lab{color:red}', title: 'Notes', projectBytes: Buffer.from(JSON.stringify(project)) };
