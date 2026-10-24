@@ -2,7 +2,7 @@ const { test } = await (process.env.VITEST ? import('vitest') : import('node:tes
 /** Registers cleanup under either runner: node:test exposes t.after, vitest onTestFinished. */
 const after = (t, cleanup) => t.after ? t.after(cleanup) : t.onTestFinished(cleanup);
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { commandRunner, readTargetSources, resolveHostingTarget } from '../adapters/increments/hosting-target.ts';
@@ -16,7 +16,7 @@ const throwsCode = code => error => error.code === code;
 const githubOrigin = { origin: 'https://github.com/octo/demo.git', hosting: null };
 const azureOrigin = { origin: 'https://contoso@dev.azure.com/contoso/Demo/_git/demo', hosting: null };
 async function temporary(t, prefix) {
-  const path = await mkdtemp(join(tmpdir(), prefix));
+  const path = await realpath(await mkdtemp(join(tmpdir(), prefix)));
   after(t, () => rm(path, { recursive: true, force: true }));
   return path;
 }

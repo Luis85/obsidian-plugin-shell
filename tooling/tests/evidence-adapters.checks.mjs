@@ -160,11 +160,12 @@ test('native performance adapter rejects crafted classification, budget, size, g
 });
 
 test('[EVIDENCE-REGISTRATION] a tooling wrapper owns the cases of the portable .checks.mjs modules it imports; other strays still fail', async t => {
-  const { mkdtemp, rm } = await import('node:fs/promises');
+  const { mkdtemp, realpath, rm } = await import('node:fs/promises');
   const { tmpdir } = await import('node:os');
   const { spawnSync } = await import('node:child_process');
   const { pathToFileURL } = await import('node:url');
-  const root = await mkdtemp(join(tmpdir(), 'evidence-registration-'));
+  // The child reports real paths; macOS tmpdir() is under the /var -> /private/var symlink.
+  const root = await realpath(await mkdtemp(join(tmpdir(), 'evidence-registration-')));
   t.after(() => rm(root, { recursive: true, force: true }));
   const put = async (path, text) => { await mkdir(dirname(join(root, path)), { recursive: true }); await writeFile(join(root, path), text); };
   await put('skill/tests/portable.checks.mjs', 'import test from "node:test"; test("portable case", () => {});\n');
