@@ -77,6 +77,8 @@ test('framework documents and maintainer workflows move under docs/framework wit
     '.github/workflows/starter-distribution.yml', '.github/scripts/run.mjs', 'tooling/tests/qualification-trigger.checks.mjs', 'docs/concepts/sitemap-editor/x.md',
     'src/cli/tests/project-generator-native-starters.checks.mjs', 'docs/concepts/jev-prompt-editor/a', 'src/cli/tests/jev-concept-distribution.checks.mjs',
     'docs/concepts/product-family/README.md', 'docs/concepts/component-atlas/index.html', 'docs/concepts/storyloom/index.html', 'docs/concepts/sitemap-atlas/index.html', 'docs/concepts/dissect-canvas/index.html', 'docs/concepts/resource-atlas/index.html',
+    'docs/concepts/capacity-planner/index.html', 'docs/concepts/iteration-planner/README.md', 'docs/concepts/companion/handoff/visual-editors/HANDOFF.md',
+    'src/companion/tests/concepts/companion-mvp.browser.py', 'tooling/tests/concept-metrics.checks.mjs', 'tooling/concepts/run-browser-checks.py', '.github/workflows/companion-concept-verification.yml',
     '.github/workflows/dev.yml', '.github/workflows/release.yml', '.github/workflows/release-cut.yml', '.github/workflows/publish.yml', '.github/workflows/definition-of-ready.yml', '.github/workflows/definition-of-done.yml', '.github/PULL_REQUEST_TEMPLATE/release.md'])
     assert.equal(maintainerOnly(path), true, path);
   // The framework's delivery pipeline stays behind, but the qualification workflows it calls remain inert reference.
