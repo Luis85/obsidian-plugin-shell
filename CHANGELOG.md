@@ -68,6 +68,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ### Fixed
 
+- Release cut and `release:prepare` regenerate the CLI manual (`docs/user-manual/shell-cli/generated/`), which records the framework version, in the release commit, so `manual.mjs --check` passes on the release head without a follow-up commit. The release-branch gate now fails with `RELEASE_GENERATED_STALE` when a generated, version-stamped output is not current for the release version.
 - Candidate qualification gives the complete tooling evidence inventory a bounded 60-minute execution budget after measured runs exceeded the previous 30-minute cap. Individual test deadlines and other producer limits remain unchanged, and timed-out process trees still produce failed evidence.
 - Candidate runtime evidence uses the same complete runtime inventory as its coverage gate after CLI sources moved to `src/cli`; CLI coverage remains independently checked.
 

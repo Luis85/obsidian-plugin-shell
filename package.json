@@ -99,7 +99,7 @@
     "test:coverage:production": "vitest run --coverage --config configs/testing/vitest.production.config.mjs && node tooling/quality/coverage-inventory.mjs",
     "examples:remove": "node tooling/examples/cli.mjs",
     "maintenance:status": "node tooling/maintenance/status.mjs",
-    "release:prepare": "node src/cli/tooling/release/prepare.mjs",
+    "release:prepare": "node tooling/release/prepare.mjs",
     "release:rehearse": "node tooling/release/rehearse.mjs",
     "check:test-quality": "node tooling/quality/check-test-quality.mjs",
     "check:repository": "node tooling/quality/check-repository.mjs",

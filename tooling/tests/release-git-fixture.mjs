@@ -1,7 +1,17 @@
-import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { cp, mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createRunner } from '../release/commands.mjs';
+
+const repository = fileURLToPath(new URL('../../', import.meta.url));
+/** The real CLI manual generator and the command catalog it imports, copied from this checkout. */
+const manualSources = ['tooling/documentation', 'src/cli/adapters/framework', 'src/cli/compiler/domain', 'src/cli/domain', 'src/shared/contracts'];
+/** Runs the fixture's own manual.mjs (--check or generate) with the same command the Application docs job uses. */
+export function manualCommand(root, ...args) {
+  return spawnSync(process.execPath, ['--experimental-strip-types', 'tooling/documentation/manual.mjs', ...args], { cwd: root, encoding: 'utf8', windowsHide: true });
+}
 
 const repositoryBase = 'https://github.com/Example/different-plugin';
 const template = '## Release {{version}}\n\nBranch `{{release_branch}}` from `{{base}}` at {{base_sha}} ({{date}}).\n\n{{changelog}}\n\n- [ ] Release result is green\n';
@@ -11,7 +21,8 @@ export function changelogText(unreleased = '### Added\n\n- Pending capability.\n
 }
 
 /** A real repository on main pushed to a local bare origin; `gh` is the only faked executable. */
-export async function gitFixture(t, { unreleased, withTemplate = true } = {}) {
+/** withManual adds the real manual generator and commits its output for 0.3.0, as on main before a cut. */
+export async function gitFixture(t, { unreleased, withTemplate = true, withManual = false } = {}) {
   const folder = await mkdtemp(join(tmpdir(), 'release-git-'));
   t.after(() => rm(folder, { recursive: true, force: true }));
   const root = join(folder, 'work'); const origin = join(folder, 'origin.git');
@@ -30,6 +41,13 @@ export async function gitFixture(t, { unreleased, withTemplate = true } = {}) {
   };
   for (const [name, content] of Object.entries(files)) await writeFile(join(root, name), JSON.stringify(content, null, 2) + '\n');
   await writeFile(join(root, 'CHANGELOG.md'), changelogText(unreleased));
+  if (withManual) {
+    const pkg = { ...files['package.json'], type: 'module', imports: { '#shared/*': './src/shared/*' } };
+    await writeFile(join(root, 'package.json'), JSON.stringify(pkg, null, 2) + '\n');
+    for (const path of manualSources) await cp(join(repository, path), join(root, path), { recursive: true, filter: source => !source.includes('node_modules') });
+    const generated = manualCommand(root);
+    if (generated.status !== 0) throw new Error(`fixture manual: ${generated.stderr}`);
+  }
   if (withTemplate) { await mkdir(join(root, '.github/PULL_REQUEST_TEMPLATE'), { recursive: true }); await writeFile(join(root, '.github/PULL_REQUEST_TEMPLATE/release.md'), template); }
   real('git', ['init', '--quiet', '--bare', '--initial-branch=main', origin], { cwd: folder });
   git('init', '--quiet', '--initial-branch=main');
