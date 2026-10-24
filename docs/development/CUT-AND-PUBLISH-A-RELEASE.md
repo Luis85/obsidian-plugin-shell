@@ -139,8 +139,13 @@ node tooling/release/publish.mjs --version X.Y.Z --repository Luis85/obsidian-pl
 It refuses (exit 1) unless one open pull request from `release/X.Y.Z` targets
 `main`, its head has a green "Release result", the branch head is that commit, the
 successful Release run of that commit retained a valid candidate
-(`qualified-candidate` or `retained-build`) with matching hashes, and the release
-notes equal the changelog section.
+(`qualified-candidate` or `retained-build`) with matching hashes, the same run kept
+the Workbench downloads (`workbench-distributions-<sha>`: the shell and starters
+ZIPs, `workbench-distributions.json` naming this version and commit, and
+`workbench-SHA256SUMS` matching the ZIPs; `DISTRIBUTION_ARTIFACT_MISSING` or
+`DISTRIBUTION_INVALID` otherwise), and the release notes equal the changelog section.
+Both artifacts expire (the candidate after 7 days, the downloads after 14): publish
+within a week of the Release run, or rerun it.
 
 Then dispatch **Publish** from `main`:
 
@@ -149,8 +154,10 @@ Then dispatch **Publish** from `main`:
 
 After the `release` environment approval, Publish marks the pull request ready,
 merges it with a merge commit pinned to the tested head, creates tag `X.Y.Z` at
-that commit, creates the GitHub release (draft, uploads `main.js`,
-`manifest.json` and `styles.css`, publishes it as latest) and deletes
+that commit, creates the GitHub release (draft; uploads `main.js`, `manifest.json`
+and `styles.css`, then `workbench-shell-X.Y.Z.zip`, `workbench-starters-X.Y.Z.zip`,
+`workbench-distributions.json` and `workbench-SHA256SUMS`; publishes it as latest)
+and deletes
 `release/X.Y.Z`. Its log is retained as `publish-X.Y.Z-<attempt>`.
 
 ## 8. Resume after a partial failure
@@ -172,9 +179,14 @@ the protection rule (or provide `RELEASE_TOKEN`) and rerun.
 
 - The tag exists at the release head: `git fetch --tags origin` and
   `git rev-parse X.Y.Z^{commit}` equal the head the pull request showed.
-- The GitHub release `X.Y.Z` is published (not draft) with exactly `main.js`,
-  `manifest.json` and `styles.css`, and its notes are the changelog section:
+- The GitHub release `X.Y.Z` is published (not draft) with exactly the seven assets
+  (`main.js`, `manifest.json`, `styles.css`, `workbench-shell-X.Y.Z.zip`,
+  `workbench-starters-X.Y.Z.zip`, `workbench-distributions.json`,
+  `workbench-SHA256SUMS`), and its notes are the changelog section:
   `gh release view X.Y.Z`.
+- The downloads work: in an empty folder, `gh release download X.Y.Z -p 'workbench-*'`,
+  `sha256sum --check --ignore-missing workbench-SHA256SUMS`, extract both ZIPs and run
+  `node bin/app new ../check-plugin --starter quick-capture --yes`.
 - `main` contains the release head: `git merge-base --is-ancestor X.Y.Z origin/main`.
 - `release/X.Y.Z` is gone: `git ls-remote --heads origin release/X.Y.Z` prints nothing.
 - On `main`, `CHANGELOG.md` has an empty `## [Unreleased]` above `## [X.Y.Z]`, and

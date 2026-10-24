@@ -1,10 +1,12 @@
 /**
  * Read-only remote discovery for release publishing. Every blocking finding throws a coded error before any
- * write. The candidate comes from the successful Release workflow run of the exact tested head commit.
+ * write. The candidate and the Workbench distributions come from the successful Release workflow run of the
+ * exact tested head commit.
  */
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { assetNames, sha256, validateRetained } from '../../src/cli/tooling/release/candidate.mjs';
+import { sha256, validateRetained } from '../../src/cli/tooling/release/candidate.mjs';
+import { distributionArtifact, validateDistributions } from '../../src/cli/tooling/release/distribution-assets.mjs';
 import { extractNotes } from '../../src/cli/tooling/release/changelog.mjs';
 
 const candidateArtifacts = Object.freeze(['qualified-candidate', 'retained-build']);
@@ -43,7 +45,7 @@ export async function onDefaultBranch(gh, sha, defaultBranch) {
   return ['ahead', 'identical'].includes(comparison?.status) && comparison.merge_base_commit?.sha === sha;
 }
 
-/** The release row for a version with its assets compared to the candidate hashes. */
+/** The release row for a version with its assets compared to the expected hashes (asset name → SHA-256). */
 export async function releaseState(gh, version, hashes) {
   const rows = (await gh.pages('/releases')).filter(item => item?.tag_name === version);
   if (rows.length > 1) throw coded('DUPLICATE_RELEASE', `${rows.length} releases use tag ${version}.`);
@@ -56,7 +58,7 @@ export async function releaseState(gh, version, hashes) {
   }
   const names = assets.map(asset => asset.name);
   const mismatched = assets.filter(asset => !Object.hasOwn(hashes, asset.name) || asset.sha256 !== hashes[asset.name]).map(asset => asset.name);
-  const missing = assetNames.filter(name => !names.includes(name));
+  const missing = Object.keys(hashes).filter(name => !names.includes(name));
   if (new Set(names).size !== names.length) mismatched.push('duplicate');
   return { id: row.id, draft: row.draft === true, target: row.target_commitish, body: row.body ?? '', assets, missing, mismatched };
 }
@@ -83,7 +85,18 @@ async function candidate(gh, { sha, version, check, workdir }) {
   try { record = await validateRetained(directory, sha, version); }
   catch (error) { throw coded(error.code === 'ENOENT' ? 'CANDIDATE_ARTIFACT_MISSING' : 'CANDIDATE_INVALID', error.code === 'ENOENT' ? `${name} has no reports/release/${version}-${sha}.` : error.message); }
   const notes = (await readFile(join(directory, 'release-notes.md'), 'utf8')).trim();
-  return { runId: run.id, artifact: name, directory, record, notes, hashes: record.assetHashes };
+  return { runId: run.id, artifact: name, directory, record, notes, hashes: record.assetHashes,
+    distributions: await distributions(gh, { run, available, sha, version, workdir }) };
+}
+
+/** The CLI and starters downloads packed by the same Release run, bound to its version and head. */
+async function distributions(gh, { run, available, sha, version, workdir }) {
+  const name = distributionArtifact(sha);
+  if (!available.includes(name)) throw coded('DISTRIBUTION_ARTIFACT_MISSING', `Release run ${run.id} has no unexpired ${name} artifact.`);
+  const directory = join(workdir, 'distributions');
+  await gh.download(run.id, name, directory);
+  try { return { artifact: name, directory, hashes: await validateDistributions(directory, sha, version) }; }
+  catch (error) { throw error.code === 'ENOENT' ? coded('DISTRIBUTION_ARTIFACT_MISSING', `${name} is empty.`) : error; }
 }
 
 async function changelogNotes(gh, sha, version) {
@@ -110,10 +123,19 @@ export async function discoverRelease(gh, { version, workdir }) {
   if (pr.state === 'merged' && !merged) throw coded('SOURCE_NOT_ON_DEFAULT_BRANCH', `Merged ${sha} is not an ancestor of ${defaultBranch}.`);
   const tag = await tagCommit(gh, version);
   if (tag && tag !== sha) throw coded('TAG_SOURCE_MISMATCH', `Tag ${version} points to ${tag}, not ${sha}.`);
-  const release = await releaseState(gh, version, found.hashes);
+  const assets = releaseAssets(found);
+  const release = await releaseState(gh, version, assets.hashes);
   if (release?.mismatched.length) throw coded('RELEASE_ASSET_MISMATCH', `Release ${version} has assets that differ from the candidate: ${release.mismatched.join(', ')}.`);
   if (release && !release.draft && (release.missing.length || tag !== sha)) throw coded('RELEASE_ASSET_MISMATCH', `Published release ${version} is incomplete; it is never modified automatically.`);
   if (release?.draft && release.target !== sha) throw coded('RELEASE_SOURCE_MISMATCH', `Draft release ${version} targets ${release.target}.`);
   return { repository: gh.repository, defaultBranch, canPush: repo.permissions?.push ?? null, branch, pr, sha, branchHead,
-    check: { id: check.id, conclusion: check.conclusion }, candidate: found, merged, tag, release, notesHash: sha256(found.notes) };
+    check: { id: check.id, conclusion: check.conclusion }, candidate: found, assets, merged, tag, release, notesHash: sha256(found.notes) };
+}
+
+/** Every release asset in upload order, the plugin first, with its expected hash and local file. */
+function releaseAssets(found) {
+  const hashes = { ...found.hashes, ...found.distributions.hashes }, files = {};
+  for (const name of Object.keys(found.hashes)) files[name] = join(found.directory, name);
+  for (const name of Object.keys(found.distributions.hashes)) files[name] = join(found.distributions.directory, name);
+  return { hashes, files };
 }
