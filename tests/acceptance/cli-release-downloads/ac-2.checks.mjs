@@ -1,6 +1,6 @@
 // Increment: [[docs/increments/cli-release-downloads]]
 // AC-2: Publish refuses with exit 1 and a named code, before any remote write, when the distribution artifact is missing, its manifest names another version or source commit, it holds an unexpected or missing file, or a checksum does not match the bytes.
-// Runs the real publish CLI against a fake GitHub remote (src/cli/tests/support/fake-gh-cli.mjs).
+// Runs the real publish CLI against a fake GitHub remote (src/cli/tests/support/fake-gh.mjs).
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { publishCli } from '../../../src/cli/tests/support/publish-cli-fixture.mjs';

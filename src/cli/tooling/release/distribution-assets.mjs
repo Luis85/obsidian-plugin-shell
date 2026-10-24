@@ -10,7 +10,7 @@ import { stableVersion } from './prepare.mjs';
  */
 export const distributionArtifact = sha => `workbench-distributions-${sha}`;
 const zips = version => [`workbench-shell-${version}.zip`, `workbench-starters-${version}.zip`];
-export const distributionAssetNames = version => Object.freeze([...zips(version), 'workbench-distributions.json', 'workbench-SHA256SUMS']);
+const distributionAssetNames = version => Object.freeze([...zips(version), 'workbench-distributions.json', 'workbench-SHA256SUMS']);
 const coded = message => Object.assign(new Error(`DISTRIBUTION_INVALID: ${message}`), { code: 'DISTRIBUTION_INVALID' });
 
 async function regularBytes(path, name) {

@@ -1,6 +1,6 @@
 // Increment: [[docs/increments/cli-release-downloads]]
 // AC-1: Given a release run whose `workbench-distributions-<sha>` artifact matches the release version and head, the Publish plan lists `workbench-shell-X.Y.Z.zip`, `workbench-starters-X.Y.Z.zip`, `workbench-distributions.json` and `workbench-SHA256SUMS` after `main.js`, `manifest.json` and `styles.css`, and execution uploads all seven to the draft release before publishing it.
-// Runs the real publish CLI against a fake GitHub remote (src/cli/tests/support/fake-gh-cli.mjs).
+// Runs the real publish CLI against a fake GitHub remote (src/cli/tests/support/fake-gh.mjs).
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { publishCli } from '../../../src/cli/tests/support/publish-cli-fixture.mjs';

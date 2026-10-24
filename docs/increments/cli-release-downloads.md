@@ -69,8 +69,7 @@ After a release is published, a plugin author downloads `workbench-shell-X.Y.Z.z
 - `tooling/tests/release-publish.checks.mjs`: the plan and upload of the new assets.
 - `src/cli/tests/support/release-publish-fixture.mjs`: the fake remote's distribution artifact.
 - `src/cli/tests/support/publish-cli-fixture.mjs`: runs the real publish CLI against the fake remote.
-- `src/cli/tests/support/fake-gh-cli.mjs`: the file-backed gh stand-in.
-- `src/cli/tests/support/fake-gh-loader.mjs`: routes the CLI's gh calls to the stand-in.
+- `src/cli/tests/support/fake-gh.mjs`: the file-backed gh stand-in and the hook that routes the CLI's gh calls to it.
 - `tooling/tests/release-publish-refusals.checks.mjs`: the new refusals.
 - `tests/acceptance/cli-release-downloads/`: the acceptance tests.
 - `README.md`: download and scaffold section.

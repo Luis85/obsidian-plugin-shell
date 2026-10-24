@@ -1,6 +1,6 @@
 // Increment: [[docs/increments/cli-release-downloads]]
 // AC-3: A resumed Publish on an existing draft release uploads only the missing distribution files and never replaces or deletes an asset already on the release.
-// Runs the real publish CLI against a fake GitHub remote (src/cli/tests/support/fake-gh-cli.mjs).
+// Runs the real publish CLI against a fake GitHub remote (src/cli/tests/support/fake-gh.mjs).
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { publishCli } from '../../../src/cli/tests/support/publish-cli-fixture.mjs';
