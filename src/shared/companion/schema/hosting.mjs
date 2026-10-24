@@ -61,7 +61,8 @@ const githubHints = prTemplatePath => `## Hosting and pull requests
 This project is prepared for GitHub. \`.github/workflows/ci.yml\` runs the gates on every pull request and push to
 \`main\`. End-to-end checks are opt-in and always run on \`main\`, this project's Release tier: the \`ui\` job (browser
 journeys, UI review gallery) on a pull request labelled \`e2e\`, and \`.github/workflows/obsidian.yml\` (real Obsidian)
-on a pull request labelled \`e2e\` or \`run-obsidian\`.
+on a pull request labelled \`e2e\` or \`run-obsidian\`. \`.github/workflows/obsidian-release.yml\` (run it on a pushed
+\`X.Y.Z\` tag) checks a release with Obsidian's community-directory rules and creates a draft GitHub release.
 Pull requests use \`${prTemplatePath}\`. With the GitHub CLI (sign in once with \`gh auth login\`):
 
 - \`gh pr create --draft --fill\`: open a draft pull request, then fill the template with real output.
@@ -123,7 +124,8 @@ const noPermissions = Object.freeze({ allow: [], ask: [], deny: [] });
 const platformFiles = {
   github: { prTemplatePath: '.github/pull_request_template.md',
     reviewFiles: [['.github/pull_request_template.md', 'pull-request-template.md.tmpl'], ['.github/copilot-instructions.md', 'agent-pointer.md.tmpl']],
-    ciFiles: [['.github/workflows/ci.yml', 'workflow-ci.yml.tmpl'], ['.github/workflows/obsidian.yml', 'workflow-obsidian.yml.tmpl']], prune: [] },
+    ciFiles: [['.github/workflows/ci.yml', 'workflow-ci.yml.tmpl'], ['.github/workflows/obsidian.yml', 'workflow-obsidian.yml.tmpl'],
+      ['.github/workflows/obsidian-release.yml', 'workflow-obsidian-release.yml.tmpl']], prune: [] },
   'azure-devops': { prTemplatePath: '.azuredevops/pull_request_template.md',
     reviewFiles: [['.azuredevops/pull_request_template.md', 'pull-request-template.md.tmpl']],
     ciFiles: [['azure-pipelines.yml', 'azure-pipelines.yml.tmpl']], prune: ['.github/'] },

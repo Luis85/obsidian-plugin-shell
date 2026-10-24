@@ -38,8 +38,8 @@ test('[GENERATOR-DEVKIT-01] the product owns the root docs; framework docs and m
   assert.match(text('docs/framework/AGENTS.md'), /# Repository instructions/);
   assert.match(text('CLAUDE.md'), /^@AGENTS\.md\n/);
   const workflows = [...files.keys()].filter(path => path.startsWith('.github/workflows/')).sort();
-  assert.deepEqual(workflows, ['.github/workflows/ci.yml', '.github/workflows/obsidian.yml']);
-  for (const path of workflows) assert.ok(inspectWorkflow(text(path)).jobs >= 1);
+  assert.deepEqual(workflows, ['.github/workflows/ci.yml', '.github/workflows/obsidian-release.yml', '.github/workflows/obsidian.yml']);
+  for (const path of workflows) assert.ok(inspectWorkflow(text(path), posix.basename(path)).jobs >= 1);
   assert.ok(files.has('docs/framework/workflows/candidate-qualification.yml'));
   for (const name of ['dev', 'release', 'release-cut', 'publish']) assert.ok(!files.has(`docs/framework/workflows/${name}.yml`), `${name}.yml is the framework's own delivery pipeline`);
   assert.ok(![...files.keys()].some(path => path.startsWith('.github/PULL_REQUEST_TEMPLATE/')));

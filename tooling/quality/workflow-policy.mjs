@@ -2,10 +2,11 @@
  * Scoped workflow allowances for the delivery pipeline (owner-requested). Every workflow keeps read-only
  * top-level permissions. Only the files named in `privilegedWorkflows` may grant a job write scopes, and only
  * when they are dispatch-only and every write job targets the reviewer-protected `release` environment.
+ * `obsidian-release.yml` is the generated projects' draft-release workflow (templates/companion/devkit).
  * A job may call a repository-local reusable workflow by exact file name; checkRepository confirms that the
  * target exists and declares `on.workflow_call`.
  */
-export const privilegedWorkflows = Object.freeze(['release-cut.yml', 'publish.yml']);
+export const privilegedWorkflows = Object.freeze(['release-cut.yml', 'publish.yml', 'obsidian-release.yml']);
 const releaseEnvironment = 'release';
 const localWorkflow = /^\.\/\.github\/workflows\/([a-z0-9]+(?:-[a-z0-9]+)*\.ya?ml)$/;
 
