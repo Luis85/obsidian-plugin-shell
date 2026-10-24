@@ -4,7 +4,7 @@ id: obsidian-workflows-adoption
 title: "Adopt the Obsidian community workflows for generated plugins"
 owner: "Claude"
 size: M
-status: Ready
+status: In progress
 e2e: none
 refs: []
 pullRequests: [obsidian-workflows-adoption-kickoff, obsidian-workflows-adoption-1, obsidian-workflows-adoption-2]
@@ -50,11 +50,16 @@ A plugin author who creates a project with `node bin/app new` (GitHub hosting) s
 <!-- One `- [ ] AC-n: text` per criterion. At completion tick it and add
 `Evidence: \`path\`` (a test file, doc or report that exists). -->
 
-- [ ] AC-1: A project generated with `github` hosting has, in the `check` job of `.github/workflows/ci.yml`, a step using `obsidianmd/obsidian-workflows@8167caed39664214d82c86fdfa32e06d8d55f61d` with `mode: pr`, `strict: 'false'`, `build: 'false'` and `continue-on-error: true`, placed after `verify:artifacts`; the workflow passes `inspectWorkflow` and keeps top-level `contents: read`. Evidence: `tests/acceptance/obsidian-workflows-adoption/ac-1.checks.mjs`
-- [ ] AC-2: A project generated with `github` hosting has `.github/workflows/obsidian-release.yml`, triggered only by `workflow_dispatch`, whose job is skipped unless `github.ref` starts with `refs/tags/`, grants only `contents`, `id-token` and `attestations` write behind `environment: release`, copies `dist/main.js` and `dist/styles.css` to the root before running the pinned action with `mode: release` and `build: 'false'`, and passes `inspectWorkflow`. Evidence: `tests/acceptance/obsidian-workflows-adoption/ac-2.checks.mjs`
-- [ ] AC-3: The workflow policy accepts write scopes in `obsidian-release.yml` only under the existing privileged rules; a fixture with a `push` trigger, one without the `release` environment and one with a reusable workflow call each fail with their existing policy codes. Evidence: `tests/acceptance/obsidian-workflows-adoption/ac-3.checks.mjs`
-- [ ] AC-4: Projects generated with `azure-devops` or `none` hosting contain neither `.github/workflows/obsidian-release.yml` nor the action reference, and switching an existing project to `github` with `node bin/app hosting set github` plans `obsidian-release.yml` without overwriting an existing file. Evidence: `tests/acceptance/obsidian-workflows-adoption/ac-4.checks.mjs`
-- [ ] AC-5: `docs/development/WORKFLOWS.md`, `docs/development/HOSTING-PLATFORMS.md` and `docs/development/COMPANION-GENERATOR.md` describe the validation step as advisory, the release workflow's tag-and-dispatch steps, the `release` environment prerequisite and that the result is a draft release the author publishes. Evidence: `tests/acceptance/obsidian-workflows-adoption/ac-5.checks.mjs`
+- [x] AC-1: A project generated with `github` hosting has, in the `check` job of `.github/workflows/ci.yml`, a step using `obsidianmd/obsidian-workflows@8167caed39664214d82c86fdfa32e06d8d55f61d` with `mode: pr`, `strict: 'false'`, `build: 'false'` and `continue-on-error: true`, placed after `verify:artifacts`; the workflow passes `inspectWorkflow` and keeps top-level `contents: read`.
+  Evidence: `tests/acceptance/obsidian-workflows-adoption/ac-1.checks.mjs`
+- [x] AC-2: A project generated with `github` hosting has `.github/workflows/obsidian-release.yml`, triggered only by `workflow_dispatch`, whose job is skipped unless `github.ref` starts with `refs/tags/`, grants only `contents`, `id-token` and `attestations` write behind `environment: release`, copies `dist/main.js` and `dist/styles.css` to the root before running the pinned action with `mode: release` and `build: 'false'`, and passes `inspectWorkflow`.
+  Evidence: `tests/acceptance/obsidian-workflows-adoption/ac-2.checks.mjs`
+- [x] AC-3: The workflow policy accepts write scopes in `obsidian-release.yml` only under the existing privileged rules; a fixture with a `push` trigger, one without the `release` environment and one with a reusable workflow call each fail with their existing policy codes.
+  Evidence: `tests/acceptance/obsidian-workflows-adoption/ac-3.checks.mjs`
+- [x] AC-4: Projects generated with `azure-devops` or `none` hosting contain neither `.github/workflows/obsidian-release.yml` nor the action reference, and switching an existing project to `github` with `node bin/app hosting set github` plans `obsidian-release.yml` without overwriting an existing file.
+  Evidence: `tests/acceptance/obsidian-workflows-adoption/ac-4.checks.mjs`
+- [x] AC-5: `docs/development/WORKFLOWS.md`, `docs/development/HOSTING-PLATFORMS.md` and `docs/development/COMPANION-GENERATOR.md` describe the validation step as advisory, the release workflow's tag-and-dispatch steps, the `release` environment prerequisite and that the result is a draft release the author publishes.
+  Evidence: `tests/acceptance/obsidian-workflows-adoption/ac-5.checks.mjs`
 
 ## Affected areas
 
@@ -69,6 +74,7 @@ A plugin author who creates a project with `node bin/app new` (GitHub hosting) s
 - `tooling/tests/project-generator-devkit.checks.mjs`: the generated workflow set.
 - `tooling/tests/project-generator-hosting.checks.mjs`: the hosting matrix.
 - `src/shared/tests/companion-hosting-contract.checks.mjs`: the per-platform CI files.
+- `src/cli/tests/interactive-maker-compiler-emitters-kit.checks.mjs`: the emitted devkit paths.
 - `src/cli/adapters/framework/hosting-plan.ts`: `hosting set` entries, if the hosting table does not cover it.
 - `docs/development/WORKFLOWS.md`: generated-project workflows and the policy table.
 - `docs/development/HOSTING-PLATFORMS.md`: the files per platform.
@@ -99,8 +105,8 @@ A plugin author who creates a project with `node bin/app new` (GitHub hosting) s
 <!-- - `docs/path.md` (how-to): what changes   — or —   None — reason -->
 
 - `docs/development/WORKFLOWS.md` (reference): the generated-project workflows, the advisory validation and the privileged `obsidian-release.yml` rules.
-- `docs/development/HOSTING-PLATFORMS.md` (reference): `obsidian-release.yml` among the `github` files.
-- `docs/development/COMPANION-GENERATOR.md` (how-to): how a generated project cuts a draft release with the Obsidian action.
+- `docs/development/HOSTING-PLATFORMS.md` (how-to): `obsidian-release.yml` among the `github` files.
+- `docs/development/COMPANION-GENERATOR.md` (reference): how a generated project cuts a draft release with the Obsidian action.
 
 ## Changelog
 
