@@ -4,10 +4,10 @@ id: cli-release-downloads
 title: "Publish the downloadable Workbench CLI with each release"
 owner: "Claude"
 size: M
-status: Ready
+status: In progress
 e2e: none
 refs: []
-pullRequests: [cli-release-downloads-kickoff]
+pullRequests: [cli-release-downloads-kickoff, cli-release-downloads-1]
 branch: "increment/cli-release-downloads"
 base: main
 ---
@@ -48,26 +48,32 @@ After a release is published, a plugin author downloads `workbench-shell-X.Y.Z.z
 <!-- One `- [ ] AC-n: text` per criterion. At completion tick it and add
 `Evidence: \`path\`` (a test file, doc or report that exists). -->
 
-- [ ] AC-1: Given a release run whose `workbench-distributions-<sha>` artifact matches the release version and head, the Publish plan lists `workbench-shell-X.Y.Z.zip`, `workbench-starters-X.Y.Z.zip`, `workbench-distributions.json` and `workbench-SHA256SUMS` after `main.js`, `manifest.json` and `styles.css`, and execution uploads all seven to the draft release before publishing it. Evidence: `tests/acceptance/cli-release-downloads/ac-1.checks.mjs`
-- [ ] AC-2: Publish refuses with exit 1 and a named code, before any remote write, when the distribution artifact is missing, its manifest names another version or source commit, it holds an unexpected or missing file, or a checksum does not match the bytes. Evidence: `tests/acceptance/cli-release-downloads/ac-2.checks.mjs`
-- [ ] AC-3: A resumed Publish on an existing draft release uploads only the missing distribution files and never replaces or deletes an asset already on the release. Evidence: `tests/acceptance/cli-release-downloads/ac-3.checks.mjs`
-- [ ] AC-4: The shell and starters ZIPs packed from this checkout, extracted into one empty folder without `node_modules`, run `node bin/app new` with a starter and produce the project's `package.json`, `manifest.json` and `AGENTS.md`. Evidence: `tests/acceptance/cli-release-downloads/ac-4.checks.mjs`
-- [ ] AC-5: The README and `docs/development/CUT-AND-PUBLISH-A-RELEASE.md` describe the seven release assets, checking the ZIPs with `workbench-SHA256SUMS` and the scaffold command, and `starter-distribution.yml` keeps the distribution artifact as long as the qualified candidate. Evidence: `tests/acceptance/cli-release-downloads/ac-5.checks.mjs`
+- [x] AC-1: Given a release run whose `workbench-distributions-<sha>` artifact matches the release version and head, the Publish plan lists `workbench-shell-X.Y.Z.zip`, `workbench-starters-X.Y.Z.zip`, `workbench-distributions.json` and `workbench-SHA256SUMS` after `main.js`, `manifest.json` and `styles.css`, and execution uploads all seven to the draft release before publishing it.
+  Evidence: `tests/acceptance/cli-release-downloads/ac-1.checks.mjs`
+- [x] AC-2: Publish refuses with exit 1 and a named code, before any remote write, when the distribution artifact is missing, its manifest names another version or source commit, it holds an unexpected or missing file, or a checksum does not match the bytes.
+  Evidence: `tests/acceptance/cli-release-downloads/ac-2.checks.mjs`
+- [x] AC-3: A resumed Publish on an existing draft release uploads only the missing distribution files and never replaces or deletes an asset already on the release.
+  Evidence: `tests/acceptance/cli-release-downloads/ac-3.checks.mjs`
+- [x] AC-4: The shell and starters ZIPs packed from this checkout, extracted into one empty folder without `node_modules`, run `node bin/app new` with a starter and produce the project's `package.json`, `manifest.json` and `AGENTS.md`.
+  Evidence: `tests/acceptance/cli-release-downloads/ac-4.checks.mjs`
+- [x] AC-5: The README and `docs/development/CUT-AND-PUBLISH-A-RELEASE.md` describe the seven release assets, checking the ZIPs with `workbench-SHA256SUMS` and the scaffold command, and `starter-distribution.yml` keeps the distribution artifact as long as the qualified candidate.
+  Evidence: `tests/acceptance/cli-release-downloads/ac-5.checks.mjs`
 
 ## Affected areas
 
 <!-- One backticked repository path or glob per line; new files must sit under an allowed root. -->
 
 - `tooling/release/publish.mjs`: locate, verify and upload the distribution assets.
-- `src/cli/tooling/release/candidate.mjs`: the release asset names, if the distribution names join them.
+- `tooling/release/publish-discovery.mjs`: find and verify the distribution artifact of the Release run.
 - `src/cli/tooling/release/distribution-assets.mjs`: the new verification of the distribution artifact.
-- `.github/workflows/starter-distribution.yml`: retention of the distribution artifact.
-- `.github/workflows/publish.yml`: the download of the distribution artifact, if the script does not fetch it itself.
 - `tooling/tests/release-publish.checks.mjs`: the plan and upload of the new assets.
+- `src/cli/tests/support/release-publish-fixture.mjs`: the fake remote's distribution artifact.
+- `src/cli/tests/support/publish-cli-fixture.mjs`: runs the real publish CLI against the fake remote.
+- `src/cli/tests/support/fake-gh.mjs`: the file-backed gh stand-in and the hook that routes the CLI's gh calls to it.
 - `tooling/tests/release-publish-refusals.checks.mjs`: the new refusals.
-- `tooling/tests/framework-distribution.checks.mjs`: the retention and asset names, if pinned there.
 - `tests/acceptance/cli-release-downloads/`: the acceptance tests.
 - `README.md`: download and scaffold section.
+- `tooling/examples/ownership.json`: the refreshed reviewed hash of the example-owned README.
 - `docs/development/CUT-AND-PUBLISH-A-RELEASE.md`: the asset list and the download check.
 - `docs/development/WORKFLOWS.md`: Publish uploads and retention.
 - `docs/development/FRAMEWORK-CLI.md`: the published-kit route.
@@ -123,4 +129,5 @@ None
 
 <!-- wb:pull-requests generated by node bin/app; edits here are replaced -->
 - [[docs/pull-requests/cli-release-downloads-kickoff|Kick-off: Publish the downloadable Workbench CLI with each release]] · New
+- [[docs/pull-requests/cli-release-downloads-1|Publish the CLI and starters downloads with each release]] · New
 <!-- /wb:pull-requests -->

@@ -6,7 +6,9 @@ import { createGitHub } from '../release/publish-github.mjs';
 import { publishFixture, repository, version, head, notes } from '../../src/cli/tests/support/release-publish-fixture.mjs';
 
 const publish = (fixture, execute = false) => publishRelease({ repository, version, execute, run: fixture.run, lockDirectory: fixture.folder });
-const fullWrites = ['pr ready', 'PUT /pulls/12/merge', 'POST /git/refs', 'POST /releases', 'POST upload', 'POST upload', 'POST upload', 'PATCH /releases/100', `DELETE /git/refs/heads/release/${version}`];
+const uploads = count => Array(count).fill('POST upload');
+const fullWrites = ['pr ready', 'PUT /pulls/12/merge', 'POST /git/refs', 'POST /releases', ...uploads(7), 'PATCH /releases/100', `DELETE /git/refs/heads/release/${version}`];
+const releaseAssets = ['main.js', 'manifest.json', 'styles.css', `workbench-shell-${version}.zip`, `workbench-starters-${version}.zip`, 'workbench-distributions.json', 'workbench-SHA256SUMS'];
 const statuses = result => result.steps.map(step => `${step.id}:${step.status}`);
 
 test('the default publish is a read-only plan bound to the tested head, candidate and notes', async t => {
@@ -17,6 +19,8 @@ test('the default publish is a read-only plan bound to the tested head, candidat
   assert.deepEqual(plan.releaseResult, { id: 5, conclusion: 'success' });
   assert.deepEqual(plan.candidate.assetHashes, fixture.files.assetHashes);
   assert.equal(plan.candidate.artifact, 'qualified-candidate'); assert.equal(plan.candidate.runId, 900);
+  assert.deepEqual(plan.distributions, { artifact: `workbench-distributions-${head}`, assetHashes: fixture.distribution.assetHashes });
+  assert.equal(plan.steps.find(step => step.id === 'release').detail, `Create release ${version} with ${releaseAssets.join(', ')}.`);
   assert.deepEqual(fixture.state.writes, []);
 });
 
@@ -31,7 +35,8 @@ test('execute merges, tags, publishes the candidate assets with changelog notes 
   assert.equal(state.refs[`tags/${version}`], head); assert.equal(state.refs[`heads/release/${version}`], undefined);
   const [release] = state.releases;
   assert.deepEqual({ tag: release.tag, draft: release.draft, target: release.target, body: release.body }, { tag: version, draft: false, target: head, body: notes });
-  assert.deepEqual(Object.fromEntries(release.assets.map(asset => [asset.name, asset.digest.slice(7)])), fixture.files.assetHashes);
+  assert.deepEqual(release.assets.map(asset => asset.name), releaseAssets, 'the plugin assets first, then the CLI downloads');
+  assert.deepEqual(Object.fromEntries(release.assets.map(asset => [asset.name, asset.digest.slice(7)])), fixture.releaseHashes);
   const merge = state.calls.indexOf('PUT /pulls/12/merge'), tag = state.calls.indexOf('POST /git/refs'), created = state.calls.indexOf('POST /releases');
   assert.ok(merge < tag && tag < created, 'merge before tag before release');
   state.writes.length = 0;
@@ -55,7 +60,7 @@ test('a failed write at every step is uncertain (no retry) and the rerun resumes
       const counts = fixture.state.writes.reduce((map, item) => map.set(item, (map.get(item) ?? 0) + 1), new Map());
       for (const write of ['PUT /pulls/12/merge', 'POST /git/refs', 'POST /releases', `DELETE /git/refs/heads/release/${version}`])
         assert.equal(counts.get(write) - (write === key && !effect ? 1 : 0), 1, `${write} took effect once after ${key} effect=${effect}`);
-      assert.equal(fixture.state.releases.length, 1); assert.equal(fixture.state.releases[0].assets.length, 3);
+      assert.equal(fixture.state.releases.length, 1); assert.equal(fixture.state.releases[0].assets.length, 7);
       assert.equal(fixture.state.refs[`tags/${version}`], head);
     }
   }
@@ -78,9 +83,28 @@ test('an existing draft release with some assets is completed, a published ident
   assert.equal(fixture.state.releases[0].draft, true); assert.equal(fixture.state.releases[0].assets.length, 1);
   fixture.state.writes.length = 0;
   const plan = await publish(fixture);
-  assert.match(plan.steps.find(step => step.id === 'release').detail, /^Complete draft release 100: upload manifest\.json, styles\.css, then publish\.$/);
+  assert.equal(plan.steps.find(step => step.id === 'release').detail, `Complete draft release 100: upload ${releaseAssets.slice(1).join(', ')}, then publish.`);
   assert.equal((await publish(fixture, true)).status, 'published');
-  assert.deepEqual(fixture.state.writes, ['POST upload', 'POST upload', 'PATCH /releases/100', `DELETE /git/refs/heads/release/${version}`]);
+  assert.deepEqual(fixture.state.writes, [...uploads(6), 'PATCH /releases/100', `DELETE /git/refs/heads/release/${version}`]);
+});
+
+test('a resumed publish uploads only the missing CLI downloads and never replaces or deletes an uploaded asset', async t => {
+  const fixture = await publishFixture(t);
+  // Stop after the plugin assets and the shell kit reached the draft: the fifth upload fails without effect.
+  let seen = 0; const run = fixture.run;
+  fixture.run = (command, args, options) => (args.at(-1)?.startsWith('https://uploads.github.com/') && ++seen === 5 ? { status: 1, stdout: '', stderr: 'gh: Server Error (HTTP 502)\n' } : run(command, args, options));
+  assert.equal((await publish(fixture, true)).status, 'uncertain');
+  const [draft] = fixture.state.releases;
+  assert.deepEqual(draft.assets.map(asset => asset.name), releaseAssets.slice(0, 4));
+  const kept = draft.assets.map(asset => ({ ...asset }));
+  fixture.run = run; fixture.state.writes.length = 0;
+  const plan = await publish(fixture);
+  assert.equal(plan.steps.find(step => step.id === 'release').detail, `Complete draft release 100: upload ${releaseAssets.slice(4).join(', ')}, then publish.`);
+  assert.equal((await publish(fixture, true)).status, 'published');
+  assert.deepEqual(fixture.state.writes, [...uploads(3), 'PATCH /releases/100', `DELETE /git/refs/heads/release/${version}`]);
+  assert.deepEqual(draft.assets.slice(0, 4), kept, 'uploaded assets are left exactly as they were');
+  assert.deepEqual(draft.assets.map(asset => asset.name), releaseAssets);
+  assert.ok(!fixture.state.calls.some(call => call.startsWith('DELETE /releases') || call.startsWith('PATCH /releases/assets')), 'no asset is deleted or edited');
 });
 
 test('a held lock refuses a concurrent execution and is not removed by the refused run', async t => {

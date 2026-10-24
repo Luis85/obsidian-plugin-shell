@@ -25,6 +25,16 @@ export function candidateFiles(commit = head) {
   return { bytes, assetHashes, prefix: `reports/release/${version}-${commit}` };
 }
 
+/** The workbench-distributions-<sha> artifact exactly as starter-distribution.yml packs it on the Release tier. */
+export function distributionFiles(commit = head, release = version) {
+  const zips = { [`workbench-shell-${release}.zip`]: 'PK\u0003\u0004 shell kit', [`workbench-starters-${release}.zip`]: 'PK\u0003\u0004 starters' };
+  const assets = Object.entries(zips).map(([name, value], index) => ({ kind: index ? 'starters' : 'shell', name, bytes: Buffer.byteLength(value), sha256: sha256(value) }));
+  const bytes = { ...zips,
+    'workbench-distributions.json': JSON.stringify({ schemaVersion: 1, version: release, sourceCommit: commit, starterSchemaVersion: 1, assets, publication: 'separate-explicit-approval' }, null, 2) + '\n',
+    'workbench-SHA256SUMS': assets.map(asset => `${asset.sha256}  ${asset.name}\n`).join('') };
+  return { bytes, name: `workbench-distributions-${commit}`, assetHashes: Object.fromEntries(Object.entries(bytes).map(([name, value]) => [name, sha256(value)])) };
+}
+
 const pr = () => ({ number: 12, state: 'open', draft: true, merged_at: null, html_url: 'https://github.com/Example/plugin/pull/12',
   head: { ref: `release/${version}`, sha: head, repo: { full_name: repository } }, base: { ref: 'main' } });
 
@@ -32,14 +42,14 @@ const pr = () => ({ number: 12, state: 'open', draft: true, merged_at: null, htm
 export async function publishFixture(t) {
   const folder = await mkdtemp(join(tmpdir(), 'release-publish-test-'));
   t.after(() => rm(folder, { recursive: true, force: true }));
-  const files = candidateFiles();
+  const files = candidateFiles(); const distribution = distributionFiles();
   const state = {
     repo: { full_name: repository, default_branch: 'main', permissions: { push: true } },
     pulls: [pr()], refs: { [`heads/release/${version}`]: head, 'heads/main': base }, onMain: new Set([base]),
     checkRuns: [{ id: 5, name: 'Release result', status: 'completed', conclusion: 'success', check_suite: { id: 300 } }],
     runs: [{ id: 900, head_sha: head, conclusion: 'success', check_suite_id: 300 }],
-    artifacts: [{ id: 1, name: 'qualified-candidate', expired: false }],
-    artifactFiles: { [`${files.prefix}`]: files.bytes, 'dist': { 'main.js': files.bytes['main.js'] } },
+    artifacts: [{ id: 1, name: 'qualified-candidate', expired: false }, { id: 2, name: distribution.name, expired: false }],
+    artifactFiles: { [`${files.prefix}`]: files.bytes, 'dist': { 'main.js': files.bytes['main.js'] } }, distributionFiles: { ...distribution.bytes },
     changelog, releases: [], nextId: 100, fail: {}, writes: [], calls: [],
   };
   const json = value => ({ status: 0, stdout: value === undefined ? '' : JSON.stringify(value), stderr: '' });
@@ -88,6 +98,11 @@ export async function publishFixture(t) {
   }
   function download(args) {
     const directory = args[args.indexOf('--dir') + 1];
+    if (args[args.indexOf('--name') + 1] === distribution.name) {
+      mkdirSync(directory, { recursive: true });
+      for (const [name, value] of Object.entries(state.distributionFiles)) writeFileSync(join(directory, name), value);
+      return json();
+    }
     for (const [prefix, entries] of Object.entries(state.artifactFiles)) {
       mkdirSync(join(directory, prefix), { recursive: true });
       for (const [name, value] of Object.entries(entries)) writeFileSync(join(directory, prefix, name), value);
@@ -120,6 +135,6 @@ export async function publishFixture(t) {
     }
     return handle(args, options);
   };
-  return { state, run, folder, files };
+  return { state, run, folder, files, distribution, releaseHashes: { ...files.assetHashes, ...distribution.assetHashes } };
 }
 
