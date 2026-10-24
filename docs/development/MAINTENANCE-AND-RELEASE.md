@@ -114,7 +114,7 @@ The local command, which Release cut also runs on the release branch, is:
 npm run release:prepare -- --version 0.1.0
 ```
 
-It must validate the version before changing files and support dry run. It updates `package.json`, relevant lockfile metadata, `manifest.json`, `versions.json`, and the changelog consistently. It shows the diff and any compatibility-floor change.
+It must validate the version before changing files and support dry run. It updates `package.json`, relevant lockfile metadata, `manifest.json`, `versions.json`, the changelog, and the generated, version-stamped CLI manual (`docs/user-manual/shell-cli/generated/`, through `tooling/release/generated-outputs.mjs`) consistently. It shows the diff and any compatibility-floor change.
 
 The host floor carries forward unchanged by default. Raising it is a reviewed decision: pass `--min-app-version A.B.C` (release preparation, `node tooling/release/cut.mjs` and the Release cut `min_app_version` input). The new floor must be a stable version above the current one (`HOST_FLOOR_INVALID`, `HOST_FLOOR_NOT_RAISED`); the release commit then writes it to `manifest.minAppVersion` and the new `versions.json` entry together and reports `hostFloorChanged: true`. A floor edited directly in the source still refuses with `UNREVIEWED_HOST_FLOOR_CHANGE`, with or without the option. Promotion needs native acceptance on the new minimum host (`MINIMUM_HOST_ACCEPTANCE_REQUIRED`).
 

@@ -67,6 +67,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - The repository analyzer now runs the reviewed Fallow 3.33.1 contract (dead-code report schema 10). Fallow 3.33 no longer counts tools started through their `node_modules/<tool>/bin` path, so `oxlint` and `vue-tsc` join `obsidian` in `ignoreDependencies`, together with `fontless`, the reviewed transitive dependency that the dependency check resolves on purpose.
 - The repository analyzer now runs the reviewed Fallow 3.34.1 contract: the health report moves to schema 12 (additive mutation and change-coupling fields); the dead-code and dupes schemas stay at 10 and the analyzer configuration needs no change.
 - Nuxt UI is now 4.12.0 for the plugin shell and for projects generated from the Companion, the shipped stylesheet budget is 168 KiB (owner-reviewed) to fit its theme output, and the prototype bundle gate accepts a lazy import that the bundler inlined into the entry chunk while still rejecting any second chunk or other dynamic import target.
+- Generated projects no longer receive the framework's planner prototypes, the companion concept's dated records, implementation handoff or maintainer-only browser verification; brainstorm prototypes regain about 1.3 to 1.9 MB below the unchanged 32 MB first-run inventory bound, guarded by a generator test with a 500 KB margin.
 
 ### Fixed
 
@@ -85,10 +86,12 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - `node bin/app check` no longer times out its node --test suite steps (`maker-tests` and fast-mode `suites`) at the 10-minute step default; they get a 60-minute budget. An explicit `--timeout` still bounds every step.
 - Reconcile dependency checks and disposed Vue settings actions after the main merge.
 - The Definition of Ready no longer rejects a handoff Test plan gate that starts with a configured prefix, such as the template's own `node bin/app check` example; unknown gates are still rejected.
+- Release cut and `release:prepare` regenerate the CLI manual (`docs/user-manual/shell-cli/generated/`), which records the framework version, in the release commit, so `manual.mjs --check` passes on the release head without a follow-up commit. The release-branch gate now fails with `RELEASE_GENERATED_STALE` when a generated, version-stamped output is not current for the release version.
 
 ### Security
 
 - Update the transitive `source-map-js` dependency to 1.2.2 to address GHSA-68fv-2mgg-jv7q without changing direct dependency constraints.
+- Update `undici` to 8.12.3, `fast-uri` to 3.1.9 and `happy-dom` to 21.0.4, and resolve the `moment` nested under `eslint-plugin-obsidianmd` to 2.31.0 through one reviewed override, so the all-category audit passes again.
 
 ## [0.4.0] - 2026-09-23
 

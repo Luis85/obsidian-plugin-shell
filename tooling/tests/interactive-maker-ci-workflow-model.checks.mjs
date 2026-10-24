@@ -232,6 +232,36 @@ test('the release tier calls every gated pull-request workflow and candidate qua
   assert.match(release.jobs.metadata.steps.map(step => step.run ?? '').join('\n'), /branch\.mjs verify --version "\$VERSION"/);
   assert.ok(!Object.values(release.jobs).some(job => job.permissions), 'the release tier stays read-only');
 });
+// GitHub rejects a run at startup (no jobs, `startup_failure`) when a called workflow, or any of its jobs, requests a
+// permission above what the calling job grants: the first Release tier run failed so on ci.yml's `checks: read`.
+const levels = ['none', 'read', 'write'];
+const scopes = ['actions', 'attestations', 'checks', 'contents', 'deployments', 'discussions', 'id-token', 'issues', 'models', 'packages', 'pages', 'pull-requests', 'repository-projects', 'security-events', 'statuses'];
+const permissionMap = value => typeof value === 'string' ? Object.fromEntries(scopes.map(scope => [scope, value.replace('-all', '')])) : { ...value };
+const callExcess = (caller, job, callee) => {
+  const grant = permissionMap(job.permissions ?? caller.permissions), requests = [['workflow', callee.permissions], ...Object.entries(callee.jobs).map(([id, entry]) => [`job ${id}`, entry.permissions])];
+  return requests.filter(([, value]) => value !== undefined).flatMap(([where, value]) => Object.entries(permissionMap(value))
+    .filter(([scope, level]) => levels.indexOf(level) > levels.indexOf(grant[scope] ?? 'none')).map(([scope, level]) => `${where} requests ${scope}: ${level}, caller grants ${grant[scope] ?? 'none'}`));
+};
+test('every job that calls a local reusable workflow grants each permission the callee or its jobs request', async () => {
+  const parse = await workflowParser(), directory = join(root, '.github/workflows'), read = async file => parse(await readFile(join(directory, file), 'utf8')).toJS();
+  const files = (await readdir(directory)).filter(name => /\.ya?ml$/.test(name)), checked = [];
+  for (const file of files) {
+    const caller = await read(file);
+    for (const [id, job] of Object.entries(caller.jobs).filter(([, entry]) => entry.uses?.startsWith('./.github/workflows/'))) {
+      // Without an explicit grant the repository's default token permissions decide, which no checkout can verify.
+      assert.ok(job.permissions ?? caller.permissions, `${file}/${id} declares the permissions it grants ${job.uses}`);
+      assert.deepEqual(callExcess(caller, job, await read(job.uses.replace('./.github/workflows/', ''))), [], `${file}/${id} calls ${job.uses}`);
+      checked.push(`${file}/${id}`);
+    }
+  }
+  const release = await read('release.yml');
+  assert.equal(checked.filter(call => call.startsWith('release.yml/')).length, Object.values(release.jobs).filter(job => job.uses).length, 'every Release tier call is checked');
+  // The startup failure itself: ci.yml's CI result reads check runs, so a caller granting only contents is rejected.
+  const ci = await read('ci.yml'), call = Object.values(release.jobs).find(job => job.uses === './.github/workflows/ci.yml');
+  assert.deepEqual(callExcess({ ...release, permissions: { contents: 'read' } }, call, ci), ['job ci-result requests checks: read, caller grants none']);
+  assert.deepEqual(callExcess({ permissions: 'read-all' }, call, { permissions: { contents: 'write' }, jobs: { work: { permissions: 'read-all' } } }), ['workflow requests contents: write, caller grants read']);
+  assert.deepEqual(callExcess({ permissions: 'write-all' }, { permissions: { contents: 'read' } }, ci), ['job ci-result requests checks: read, caller grants none'], 'a job-level grant replaces the workflow grant');
+});
 test('workflow normalization accepts the documented shapes and rejects the rest', () => {
   assert.deepEqual(workflow('name: A\non: push\njobs: {}\n').triggers, ['push']);
   assert.deepEqual(workflow('name: A\non: [push, pull_request]\njobs: {}\n').triggers, ['push', 'pull_request']);
