@@ -15,8 +15,11 @@ on:
     paths-ignore:
       - 'projects/**'
   workflow_dispatch:
+# checks: read only because ci.yml's "CI result" reads check runs, and a called
+# job may not request more than its caller grants (GitHub rejects the run at startup).
 permissions:
   contents: read
+  checks: read
 # Distinct from every called workflow's group (ci-, airship-, ...): a shared group
 # between caller and callee would deadlock. A newer push supersedes the run.
 concurrency:
