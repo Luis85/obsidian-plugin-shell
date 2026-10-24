@@ -4,10 +4,16 @@ id: cli-release-downloads-1
 title: "Publish the CLI and starters downloads with each release"
 kind: change
 increment: cli-release-downloads
-status: New
+status: Merged
 delivers: [AC-1, AC-2, AC-3, AC-4, AC-5]
 head: "pr/cli-release-downloads/cli-release-downloads-1"
 base: increment/cli-release-downloads
+platform: github
+repository: "Luis85/obsidian-plugin-shell"
+number: 216
+url: "https://github.com/Luis85/obsidian-plugin-shell/pull/216"
+publishedAt: 2026-10-23T20:41:56Z
+lastSyncedAt: 2026-10-24T09:05:09Z
 ---
 
 # Publish the CLI and starters downloads with each release
