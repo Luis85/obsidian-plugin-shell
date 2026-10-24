@@ -4,7 +4,7 @@ id: dependency-advisories
 title: "Clear the live security audit for 0.5.0"
 owner: "Claude"
 size: S
-status: Ready
+status: In progress
 e2e: none
 refs: []
 pullRequests: [dependency-advisories-kickoff, dependency-advisories-1]
@@ -45,8 +45,8 @@ A fresh `npm ci` of the committed lockfile passes `npm run check:security` with 
 <!-- One `- [ ] AC-n: text` per criterion. At completion tick it and add
 `Evidence: \`path\`` (a test file, doc or report that exists). -->
 
-- [ ] AC-1: Given the committed `package-lock.json`, every installed `undici`, `fast-uri`, `happy-dom` and `moment` resolves outside the advisory ranges (undici 8.0.0-8.12.1, fast-uri 3.0.0-3.1.8, happy-dom 17.0.0-21.0.3, moment 2.29.2-2.30.1), and a fresh install passes `npm run check:security`. Evidence: `tests/acceptance/dependency-advisories/ac-1.checks.mjs`
-- [ ] AC-2: `package.json` overrides hold exactly the reviewed `fontless@0.2.1` and `obsidian@1.12.3` entries, `tooling/security/dependency-policy.json` pins `moment` 2.31.0 and records the reason, and `npm run check:dependencies` passes on the installed graph. Evidence: `tests/acceptance/dependency-advisories/ac-2.checks.mjs`
+- [x] AC-1: Given the committed `package-lock.json`, every installed `undici`, `fast-uri`, `happy-dom` and `moment` resolves outside the advisory ranges (undici 8.0.0-8.12.1, fast-uri 3.0.0-3.1.8, happy-dom 17.0.0-21.0.3, moment 2.29.2-2.30.1), and a fresh install passes `npm run check:security`. Evidence: `tests/acceptance/dependency-advisories/ac-1.checks.mjs`
+- [x] AC-2: `package.json` overrides hold exactly the reviewed `fontless@0.2.1` and `obsidian@1.12.3` entries, `tooling/security/dependency-policy.json` pins `moment` 2.31.0 and records the reason, and `npm run check:dependencies` passes on the installed graph. Evidence: `tests/acceptance/dependency-advisories/ac-2.checks.mjs`
 
 ## Affected areas
 
