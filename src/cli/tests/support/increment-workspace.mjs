@@ -4,7 +4,7 @@
  * services (clock, hosting remote, lock folder). Never contacts a network host.
  */
 import { execFileSync } from 'node:child_process';
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync, existsSync } from 'node:fs';
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,7 +19,8 @@ const git = (cwd, ...args) => execFileSync('git', [...identity, ...args], { cwd,
  * extension keys unless `narrow`); `git: false` leaves it without a repository; `origin` adds a local bare remote.
  */
 export function createWorkspace({ delivery = false, narrow = false, git: withGit = true, origin = false } = {}) {
-  const base = mkdtempSync(join(tmpdir(), 'workbench-increments-')), root = join(base, 'project');
+  // Real path: file plans refuse symlinked ancestors such as macOS /var -> /private/var.
+  const base = realpathSync(mkdtempSync(join(tmpdir(), 'workbench-increments-'))), root = join(base, 'project');
   mkdirSync(root, { recursive: true });
   if (delivery) {
     cpSync(join(frameworkRoot, 'configs/delivery'), join(root, 'configs/delivery'), { recursive: true });
