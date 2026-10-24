@@ -18,9 +18,21 @@ const cli = (app, cwd, args) => {
   return { status: result.status, result: JSON.parse(result.stdout || 'null'), stderr: result.stderr };
 };
 
+// Only the framework checkout packs release downloads; a renamed or generated consumer (CI's template-authoring legs)
+// must keep refusing, as tooling/tests/framework-checkout-build.checks.mjs also asserts.
+const exists = path => access(join(root, path)).then(() => true, () => false);
+const framework = JSON.parse(await readFile(join(root, 'manifest.json'), 'utf8')).id === 'plugin-shell'
+  && !await exists('shell.config.json') && !await exists('.companion/generation.json');
+
 test('[AC-4] the extracted shell and starters downloads scaffold a plugin without node_modules', async t => {
   const folder = await realpath(await mkdtemp(join(tmpdir(), 'cli-downloads-'))); t.after(() => rm(folder, { recursive: true, force: true }));
   const shellZip = join(folder, `workbench-shell-${version}.zip`), startersZip = join(folder, `workbench-starters-${version}.zip`);
+  if (!framework) {
+    const refused = cli(join(root, 'bin/app'), root, ['framework', 'pack', '--out', shellZip, '--yes']);
+    assert.equal(refused.status, 1, refused.stderr); assert.equal(refused.result.diagnostics[0].code, 'KIT_AUTHORING_ROOT');
+    await assert.rejects(access(shellZip), { code: 'ENOENT' }, 'a consumer checkout writes no release download');
+    return;
+  }
   for (const [kind, out] of [['framework', shellZip], ['starters', startersZip]]) {
     const packed = cli(join(root, 'bin/app'), root, [kind, 'pack', '--out', out, '--yes']);
     assert.equal(packed.status, 0, `${kind} pack: ${JSON.stringify(packed.result?.diagnostics)} ${packed.stderr}`);
