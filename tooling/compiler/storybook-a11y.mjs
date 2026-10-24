@@ -23,7 +23,8 @@ export async function auditStories({ page, base, ids }) {
   for (const theme of themes) {
     const other = themes.find(name => name !== theme), visited = [], violations = {};
     for (const id of ids) {
-      await page.goto(`${base}/iframe.html?id=${id}&viewMode=story&globals=theme:${theme}`);
+      // a11y.manual stops the a11y addon's automatic run after render, which would race this audit ("Axe is already running").
+      await page.goto(`${base}/iframe.html?id=${id}&viewMode=story&globals=theme:${theme};a11y.manual:!true`);
       await page.waitForFunction(([mine, theirs]) => document.body.classList.contains('theme-' + mine) && !document.body.classList.contains('theme-' + theirs), [theme, other]);
       if (await settle(page)) { result.placeholders.push(`${theme}:${id}`); continue; }
       const found = summarizeViolations((await new AxeBuilder({ page }).include('[data-story-host]').withTags(tags).analyze()).violations);
