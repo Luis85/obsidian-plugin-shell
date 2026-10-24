@@ -1,6 +1,7 @@
 {
   "entry": [
     "src/cli/launcher.mjs",
+    "src/cli/tooling/release/prepare.mjs",
     "tooling/concepts/export-golden-project.mjs",
     "tooling/concepts/contract-bundle.mjs",
     "tooling/concepts/concept-contract.ts",

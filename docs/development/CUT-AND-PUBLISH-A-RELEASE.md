@@ -65,7 +65,9 @@ node tooling/release/cut.mjs --version X.Y.Z [--min-app-version A.B.C]
 
 The dry run prints the planned branch, the files release preparation changes
 (`package.json`, `package-lock.json`, `manifest.json`, `versions.json`,
-`CHANGELOG.md`), the host floor (`FLOOR    minAppVersion 1.13.7 -> 1.14.4 (reviewed
+`CHANGELOG.md`, and the generated CLI manual in
+`docs/user-manual/shell-cli/generated/`: `reference.md`, `commands.json` and
+`manifest.json`, which record the framework version), the host floor (`FLOOR    minAppVersion 1.13.7 -> 1.14.4 (reviewed
 raise; ...)` or `... (unchanged)`), the promoted changelog section and every blocker
 (`CUT_NOT_ON_BASE`, `CUT_TREE_NOT_CLEAN`, `CUT_BASE_NOT_CURRENT`,
 `CUT_BRANCH_EXISTS`, `CUT_TAG_EXISTS`, `VERSION_NOT_NEW`, ...). It exits 1 when
@@ -81,8 +83,9 @@ Dispatch **Release cut** from `main`:
   (add `-f min_app_version=A.B.C` to raise the floor).
 
 A reviewer of the `release` environment approves the run. The job creates
-`release/X.Y.Z` from `main`, commits `release: X.Y.Z` with the prepared metadata,
-pushes it, opens the draft pull request "Release X.Y.Z" from
+`release/X.Y.Z` from `main`, commits `release: X.Y.Z` with the prepared metadata
+and the CLI manual regenerated for `X.Y.Z` (so the Release tier's
+`manual.mjs --check` passes without a follow-up commit), pushes it, opens the draft pull request "Release X.Y.Z" from
 `.github/PULL_REQUEST_TEMPLATE/release.md` and dispatches the Release workflow on
 the branch. Its log is retained as the `release-cut-X.Y.Z-<attempt>` artifact.
 

@@ -1,6 +1,6 @@
 name: Release cut
 # Owner-dispatched: creates release/X.Y.Z from main, runs release:prepare (version
-# bump and changelog promotion), commits, pushes, opens the draft release pull
+# bump, changelog promotion and the regenerated CLI manual), commits, pushes, opens the draft release pull
 # request and dispatches the Release workflow on the new branch. The optional
 # min_app_version input is a reviewed host-floor raise: the release commit writes
 # it to manifest.json and the new versions.json entry; released entries never change.

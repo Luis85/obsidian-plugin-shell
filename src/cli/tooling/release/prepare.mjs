@@ -2,6 +2,8 @@
  * Plan (default apply, or --dry-run) one stable version bump across package.json, package-lock.json,
  * manifest.json, versions.json and CHANGELOG.md. The changelog's Unreleased section (merged with an optional
  * --notes-file) becomes "## [X.Y.Z] - date" and link references are rewritten. Never commits, tags or pushes.
+ * Callers may add generated, version-stamped outputs (the Workbench repository adds its CLI manual through
+ * tooling/release/prepare.mjs and the cut); they join the same reviewed plan and stale-input check.
  *
  *   npm run release:prepare -- --version X.Y.Z [--date YYYY-MM-DD] [--notes-file notes.md] [--min-app-version A.B.C] [--dry-run]
  *
@@ -33,18 +35,23 @@ export function hostFloor(value) {
 }
 /** notes is optional extra Markdown; Unreleased plus notes must not be empty (RELEASE_NOTES_EMPTY).
  * minAppVersion is an explicit, reviewed host floor that must be higher than the current one (HOST_FLOOR_NOT_RAISED).
+ * generated lists outputs derived from the new version: render(version) must return exactly the declared paths
+ * (RELEASE_GENERATED_CONTRACT); their current bytes are part of the stale-input check.
+ * @typedef {{ id: string, paths: readonly string[], render: (version: string) => Promise<Record<string, string>> }} GeneratedOutput
  * @param {string} root
  * @param {string} version
  * @param {string} [notes]
- * @param {{ beforeFinalize?: () => unknown, date?: string, minAppVersion?: string }} [options] */
-export async function prepareVersion(root, version, notes = '', { beforeFinalize, date = today(), minAppVersion } = {}) {
+ * @param {{ beforeFinalize?: () => unknown, date?: string, minAppVersion?: string, generated?: readonly GeneratedOutput[] }} [options] */
+export async function prepareVersion(root, version, notes = '', { beforeFinalize, date = today(), minAppVersion, generated = [] } = {}) {
   stableVersion(version);
   if (minAppVersion !== undefined) hostFloor(minAppVersion);
   if (typeof notes !== 'string') throw new Error('RELEASE_NOTES_INVALID');
   if (!validDate(date)) throw new Error('RELEASE_DATE_INVALID');
   const dependencyPins = await checkDependencyPins(root);
   const names = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'CHANGELOG.md'];
-  const initial = await createFilePlan(root, names.map(path => ({ path, content: null })));
+  const derived = generated.flatMap(output => output.paths);
+  if (new Set([...names, ...derived]).size !== names.length + derived.length) throw new Error('RELEASE_GENERATED_CONTRACT: duplicate output path');
+  const initial = await createFilePlan(root, [...names, ...derived].map(path => ({ path, content: null })));
   const hashes = new Map(initial.changes.map(change => [change.path, change.beforeHash]));
   const read = async name => {
     let content = null;
@@ -67,13 +74,18 @@ export async function prepareVersion(root, version, notes = '', { beforeFinalize
   versions[version] = manifest.minAppVersion;
   const entries = Object.entries({ 'package.json': pkg, 'package-lock.json': lock, 'manifest.json': manifest, 'versions.json': versions }).map(([path, value]) => ({ path, content: JSON.stringify(value, null, 2) + '\n' }));
   entries.push({ path: 'CHANGELOG.md', content: changelog.text });
+  for (const output of generated) {
+    const files = await output.render(version);
+    if (Object.keys(files).sort().join('\0') !== [...output.paths].sort().join('\0') || Object.values(files).some(content => typeof content !== 'string')) throw new Error(`RELEASE_GENERATED_CONTRACT: ${output.id}`);
+    for (const path of output.paths) entries.push({ path, content: files[path] });
+  }
   await beforeFinalize?.();
   const plan = await createFilePlan(root, entries);
   for (const change of plan.changes) if (hashes.get(change.path) !== change.beforeHash) throw new Error(`RELEASE_STALE_INPUT: ${change.path}`);
   const finalPins = await checkDependencyPins(root);
   if (JSON.stringify(finalPins) !== JSON.stringify(dependencyPins)) throw new Error('DEPENDENCY_PINS_STALE: Dependency manifests or lockfile changed while preparing the release.');
   return { plan, version, date, minAppVersion: manifest.minAppVersion, previousMinAppVersion, hostFloorChanged: manifest.minAppVersion !== previousMinAppVersion, dependencyPins,
-    changelog: { section: changelog.section, linkReferences: changelog.linkReferences } };
+    changelog: { section: changelog.section, linkReferences: changelog.linkReferences }, generated: generated.map(({ id, paths }) => ({ id, paths: [...paths] })) };
 }
 export function parsePrepareArguments(args) {
   const options = {}; const seen = new Set();
@@ -95,14 +107,17 @@ export function parsePrepareArguments(args) {
   if (options.minAppVersion !== undefined) hostFloor(options.minAppVersion);
   stableVersion(options.version); return options;
 }
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+/** The release:prepare command line; generated outputs come from the caller (see tooling/release/prepare.mjs). */
+export async function runPrepare(args, { cwd = process.cwd(), generated = [] } = {}) {
   try {
-    const options = parsePrepareArguments(process.argv.slice(2));
-    if (options.help) { process.stdout.write('npm run release:prepare -- --version X.Y.Z [--date YYYY-MM-DD] [--notes-file <file>] [--min-app-version A.B.C] [--dry-run]\nPromotes CHANGELOG [Unreleased] (plus optional notes) into the version and reviews or applies consistent source metadata only. --min-app-version raises the reviewed host floor in manifest.json and the new versions.json entry. No commit, tag, push or publication.\n'); process.exit(0); }
+    const options = parsePrepareArguments(args);
+    if (options.help) { process.stdout.write('npm run release:prepare -- --version X.Y.Z [--date YYYY-MM-DD] [--notes-file <file>] [--min-app-version A.B.C] [--dry-run]\nPromotes CHANGELOG [Unreleased] (plus optional notes) into the version and reviews or applies consistent source metadata and generated, version-stamped outputs only. --min-app-version raises the reviewed host floor in manifest.json and the new versions.json entry. No commit, tag, push or publication.\n'); return 0; }
     const notes = options.notes ? await readFile(resolve(options.notes), 'utf8') : '';
     const { date, minAppVersion } = options;
-    const result = await prepareVersion(process.cwd(), options.version, notes, { ...(date ? { date } : {}), ...(minAppVersion ? { minAppVersion } : {}) });
+    const result = await prepareVersion(cwd, options.version, notes, { ...(date ? { date } : {}), ...(minAppVersion ? { minAppVersion } : {}), generated });
     console.log(JSON.stringify({ ...result, mode: options.dryRun ? 'dry-run' : 'apply' }, null, 2));
     if (!options.dryRun) console.log(JSON.stringify(await applyFilePlan(result.plan)));
-  } catch (error) { console.error(error.message); process.exitCode = 1; }
+    return 0;
+  } catch (error) { console.error(error.message); return 1; }
 }
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) process.exitCode = await runPrepare(process.argv.slice(2));
