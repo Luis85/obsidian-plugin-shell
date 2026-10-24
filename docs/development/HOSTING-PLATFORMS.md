@@ -9,7 +9,7 @@ agent hint and Claude Code permissions a generated project receives:
 
 | Platform | Generated files | CLI | Pull-request template |
 | --- | --- | --- | --- |
-| `github` (default) | `.github/workflows/ci.yml`, `.github/workflows/obsidian.yml`, Dependabot, Copilot pointer | `gh` | `.github/pull_request_template.md` |
+| `github` (default) | `.github/workflows/ci.yml` (with advisory Obsidian community-directory validation), `.github/workflows/obsidian.yml`, `.github/workflows/obsidian-release.yml` (draft release from a tag), Dependabot, Copilot pointer | `gh` | `.github/pull_request_template.md` |
 | `azure-devops` | `azure-pipelines.yml` (Check, UI and Obsidian stages) | `az repos`, `az pipelines`, `az boards` | `.azuredevops/pull_request_template.md` |
 | `none` | no CI | none | `docs/project-tasks/CHANGE-SUMMARY.md` |
 

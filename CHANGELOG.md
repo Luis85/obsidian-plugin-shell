@@ -43,6 +43,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - Release preparation and the release cut take a reviewed `--min-app-version` that raises the Obsidian host floor in `manifest.json` and the new `versions.json` entry; the native and real-Obsidian tests now run Obsidian 1.14.4.
 - Resource Atlas as the fifth Obsidian Product Family project (`projects/resource-atlas`): roles, FTE and person-day planning as a self-contained browser prototype built from its own Vue 3 + Nuxt UI source, with its own lock, tests and CI. The other four family projects now list it in their shared exchange protocol.
 - `cloud-project-handoff` skill that turns an idea into a generated, checked plugin project in a cloud session and hands it over as a zip, project JSON and takeover prompt.
+- Generated GitHub projects run the official Obsidian community-directory validation (advisory) on pull requests and get an "Obsidian release" workflow that creates an attested draft release from a tag.
 - GitHub releases include the downloadable Workbench CLI and starters (`workbench-shell-X.Y.Z.zip`, `workbench-starters-X.Y.Z.zip`) with a manifest and SHA-256 checksums, so a plugin can be scaffolded without cloning this repository.
 
 ### Changed

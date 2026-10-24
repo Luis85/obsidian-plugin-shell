@@ -109,7 +109,7 @@ test('repository checker leaves the docs working directory out of the Markdown g
 const dispatched = workflow.replace('on: pull_request', 'on:\n  workflow_dispatch:\n    inputs:\n      version:\n        type: string')
   .replace('    runs-on: ubuntu-latest', '    runs-on: ubuntu-latest\n    environment: release\n    permissions:\n      contents: write\n      pull-requests: write');
 test('only the allowlisted dispatch-only release workflows may grant write scopes, and only behind the release environment', () => {
-  for (const file of ['release-cut.yml', 'publish.yml']) assert.deepEqual(inspectWorkflow(dispatched, file), { jobs: 1, localActions: [], localWorkflows: [], callable: false }, file);
+  for (const file of ['release-cut.yml', 'publish.yml', 'obsidian-release.yml']) assert.deepEqual(inspectWorkflow(dispatched, file), { jobs: 1, localActions: [], localWorkflows: [], callable: false }, file);
   for (const file of [undefined, 'ci.yml', 'release.yml', 'starter-distribution.yml', 'publish.yaml', 'nested/publish.yml'])
     assert.throws(() => inspectWorkflow(dispatched, file), /WORKFLOW_PERMISSIONS_NOT_READ_ONLY/, String(file));
   assert.throws(() => inspectWorkflow(dispatched.replace('permissions:\n  contents: read\njobs', 'permissions:\n  contents: write\njobs'), 'publish.yml'), /WORKFLOW_PERMISSIONS_NOT_READ_ONLY/);
