@@ -51,7 +51,7 @@ The double hyphens are outside the valid ID grammar, keeping these marker catego
 disjoint from retained root IDs and each other. Readable `data-plugin-ui` markers
 remain; variable/keyframe namespaces and hash guards are unchanged. Negative
 controls reject foreign, suffix and sibling selectors, while actual renamed
-consumer artifacts remain subject to the 160 KiB stylesheet limit.
+consumer artifacts remain subject to the 168 KiB stylesheet limit.
 
 **Stylesheet budget change (owner-reviewed, 2026-09-27).** The CSS limit in `check-artifacts.mjs` and the performance
 report rose from 100 KiB to 160 KiB, a deviation from NFR-04's 100 KiB target. Nuxt UI `experimental.componentDetection`
@@ -61,6 +61,14 @@ prototypes select component themes the plugin never renders. Measured on `6178b1
 `src` was tried and rejected: Nuxt UI writes its generated templates under its root, and many owned-source walkers
 assume `src/` holds only owned source. New component mentions anywhere in the repository, including `docs/`, can
 still grow the stylesheet.
+
+**Stylesheet budget change (owner-reviewed, 2026-10-22).** The CSS limit rose from 160 KiB to 168 KiB for Nuxt UI 4.12.0
+(pull request #205). Measured in the CI source-archive build (`Template authoring / source archive`: archive of the
+committed tree, `setup`, then build) with the same 33 detected components: `main` on Nuxt UI 4.11.3 was 163,320 B, only 520 B
+under the previous limit, and 4.12.0 is 165,755 B. The growth is Nuxt UI's own theme output: the new Chart colour roles
+(`--ui-chart-*`, light and dark), wider `not-has-aria-disabled` checkbox and radio selectors and a larger hover block; the
+shell uses none of the Chart component. The new limit leaves about 6 KiB of headroom. The limit remains a deviation from
+NFR-04's 100 KiB target; scoping component detection is still rejected for the reasons above.
 
 `npm run check:test-quality` parses every TypeScript file in `src/plugin/tests/unit` and
 `src/plugin/tests/e2e` with the installed TypeScript AST. It rejects focused/skipped/todo/

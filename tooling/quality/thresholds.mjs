@@ -15,7 +15,7 @@ export const thresholdFloors = deepFreeze({
   },
   codeLines: { source: 400, tests: 450, mainTs: 100 },
   maintainability: { cyclomatic: 10, cognitive: 15, duplicationPercent: 3, duplicationMinTokens: 50, duplicationMinLines: 5 },
-  performance: { warmInitializationMs: 200, itemsReadinessMs: 500, mainJsBytes: 1048576, stylesCssBytes: 163840 },
+  performance: { warmInitializationMs: 200, itemsReadinessMs: 500, mainJsBytes: 1048576, stylesCssBytes: 172032 },
 });
 function deepFreeze(value) {
   for (const child of Object.values(value)) if (child && typeof child === 'object') deepFreeze(child);

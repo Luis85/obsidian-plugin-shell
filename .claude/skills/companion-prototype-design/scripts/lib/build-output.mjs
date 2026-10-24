@@ -5,7 +5,9 @@ export function singleBundle(result) {
   const outputs = bundles[0].output;
   const chunks = outputs.filter(file => file.type === 'chunk');
   const assets = outputs.filter(file => file.type === 'asset');
-  if (chunks.length !== 1 || !chunks[0].isEntry || chunks[0].imports.length || chunks[0].dynamicImports.length) {
+  // With code splitting off, a lazy import such as Nuxt UI's Toaster -> Toast.vue is inlined and the chunk lists itself.
+  // Any other target would be a second file, so only a self-reference is accepted.
+  if (chunks.length !== 1 || !chunks[0].isEntry || chunks[0].imports.length || chunks[0].dynamicImports.some(name => name !== chunks[0].fileName)) {
     throw new Error('PROTOTYPE_BUNDLE: all JavaScript must be in the single entry');
   }
   if (assets.length !== 1 || !assets[0].fileName.endsWith('.css')) throw new Error('PROTOTYPE_BUNDLE: exactly one CSS asset; inline all other assets');

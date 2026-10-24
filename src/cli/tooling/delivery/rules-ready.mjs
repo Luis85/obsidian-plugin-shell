@@ -27,9 +27,10 @@ function handoffProblems(context, params) {
 function gateCommand(context, command, prefixes) {
   const npm = /^npm run ([\w:.-]+)/.exec(command);
   if (npm) return Object.hasOwn(context.scripts, npm[1]);
+  // The configured prefixes come first: `node bin/app` is a generated, untracked launcher, so the file lookup below can never find it.
+  if (prefixes.some(prefix => command.startsWith(prefix))) return true;
   const node = /^node\s+((?:--[\w-]+(?:=\S+)?\s+)*)(\S+)/.exec(command);
-  if (node && !node[2].startsWith('-')) return known(context.files, node[2]);
-  return prefixes.some(prefix => command.startsWith(prefix));
+  return Boolean(node) && !node[2].startsWith('-') && known(context.files, node[2]);
 }
 function areaProblem(context, pattern, roots) {
   if (!pattern) return 'is not a backticked path or glob';
