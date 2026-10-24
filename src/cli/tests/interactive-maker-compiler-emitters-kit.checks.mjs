@@ -18,7 +18,7 @@ test('the developer kit renders every template, follows custom roots and owns it
   const rendered = ['README.md', 'AGENTS.md', 'CLAUDE.md', '.claude/settings.json', ...skills.map(skill => `.claude/skills/${skill}/SKILL.md`),
     'BRIEF.md', 'docs/project-tasks/TEMPLATE.md', '.github/pull_request_template.md',
     '.github/copilot-instructions.md', '.cursor/rules/project.mdc', '.vscode/extensions.json', '.vscode/settings.json', '.vscode/launch.json', '.vscode/tasks.json', '.editorconfig',
-    '.github/workflows/ci.yml', '.github/workflows/obsidian.yml', ...skills.map(skill => `.agents/skills/${skill}/SKILL.md`)];
+    '.github/workflows/ci.yml', '.github/workflows/obsidian.yml', '.github/workflows/obsidian-release.yml', ...skills.map(skill => `.agents/skills/${skill}/SKILL.md`)];
   // Only the prototype skill's offline click-dummy worker ships (under scripts/clickdummy/), never the maintainer skill itself.
   const clickdummyBuilder = ['build-single-file.mjs', 'lib/build-output.mjs', 'lib/build-worker.mjs', 'lib/io.mjs', 'lib/offline.mjs', 'lib/worker-output.mjs'].map(file => `scripts/clickdummy/${file}`);
   assert.deepEqual([...out.files.keys()], [...rendered, ...clickdummyBuilder, 'configs/testing/vitest.project.config.mjs', 'checks/project/ui-bootstrap.mjs',

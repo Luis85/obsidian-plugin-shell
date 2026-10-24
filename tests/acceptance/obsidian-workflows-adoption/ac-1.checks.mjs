@@ -4,12 +4,13 @@
 // tooling/tests/project-generator-devkit.checks.mjs; root tests never import tooling/.
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 import { compileProject, loadTemplateSnapshot } from '../../../src/cli/compiler/index.ts';
 import { starterDocument } from '../../../src/shared/testing/starter-documents.mjs';
 import { withHostingOption } from '../../../src/shared/companion/tooling-options.ts';
 
-const root = new URL('../../../', import.meta.url).pathname;
+const root = fileURLToPath(new URL('../../../', import.meta.url));
 const action = 'obsidianmd/obsidian-workflows@8167caed39664214d82c86fdfa32e06d8d55f61d';
 const template = await loadTemplateSnapshot(root);
 async function ciWorkflow(document) {

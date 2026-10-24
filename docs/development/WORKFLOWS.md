@@ -244,10 +244,10 @@ are in `tooling/tests/repository.checks.mjs` and
 | `./.github/actions/<name>` must exist and be a composite action with pinned uses, explicit shells and no input interpolation | `WORKFLOW_LOCAL_ACTION_MISSING`, `ACTION_NOT_COMPOSITE`, `ACTION_STEP_INVALID`, `ACTION_LAYOUT_INVALID` |
 | A job-level `uses: ./.github/workflows/<file>.yml` must exist and declare `on.workflow_call` | `WORKFLOW_LOCAL_WORKFLOW_MISSING`, `WORKFLOW_LOCAL_WORKFLOW_NOT_CALLABLE` |
 | A reusable call passes no `secrets` | `WORKFLOW_CALL_SECRETS_FORBIDDEN` |
-| Job-level write scopes only in `release-cut.yml` and `publish.yml`; anywhere else they fail as not read-only | `WORKFLOW_PERMISSIONS_NOT_READ_ONLY` |
-| Those two files: `workflow_dispatch` is the only trigger | `PRIVILEGED_WORKFLOW_TRIGGER_FORBIDDEN` |
-| Those two files: every job with a write scope declares `environment: release` | `PRIVILEGED_JOB_WITHOUT_ENVIRONMENT` |
-| Those two files call no reusable workflow | `PRIVILEGED_WORKFLOW_CALL_FORBIDDEN` |
+| Job-level write scopes only in `release-cut.yml`, `publish.yml` and the generated projects' `obsidian-release.yml`; anywhere else they fail as not read-only | `WORKFLOW_PERMISSIONS_NOT_READ_ONLY` |
+| Those three files: `workflow_dispatch` is the only trigger | `PRIVILEGED_WORKFLOW_TRIGGER_FORBIDDEN` |
+| Those three files: every job with a write scope declares `environment: release` | `PRIVILEGED_JOB_WITHOUT_ENVIRONMENT` |
+| Those three files call no reusable workflow | `PRIVILEGED_WORKFLOW_CALL_FORBIDDEN` |
 | An end-to-end step ([classification](#end-to-end-opt-in)) is false for a ready pull request, a push to `main` and a dispatch without `e2e`; true for the `e2e` label or input; true for `tier: release`. An undecidable gate fails | `WORKFLOW_E2E_NOT_OPT_IN`, `WORKFLOW_E2E_OPT_IN_IGNORED`, `WORKFLOW_E2E_NOT_RELEASE_MANDATORY` |
 | A workflow with end-to-end steps declares a boolean `e2e` input on `workflow_call`/`workflow_dispatch` and, with a pull-request trigger, the `labeled` type | `WORKFLOW_E2E_INPUT_MISSING`, `WORKFLOW_E2E_LABEL_TRIGGER_MISSING` |
 | A workflow with end-to-end steps and `labeled`: the concurrency group names the label; another label starts no job; the `e2e` label starts no job without e2e steps except an aggregator under another check name | `WORKFLOW_LABEL_CANCELS_RUN`, `WORKFLOW_LABEL_RERUNS_GATES` |
@@ -256,6 +256,26 @@ are in `tooling/tests/repository.checks.mjs` and
 The same command checks owned CSS and the local links of `README.md`, `AGENTS.md`
 and `CHANGELOG.md`, then runs the retired-launcher scan (`check:docs-launchers`).
 It is a focused policy, not the GitHub Actions schema or actionlint.
+
+## Generated projects' workflows
+
+A project generated with GitHub hosting gets its own `.github/workflows/` from `templates/companion/devkit/`
+(this repository's workflows above are not copied; they move to `docs/framework/workflows/` as inert reference).
+`inspectWorkflow` reviews each one under its file name in `tooling/tests/project-generator-devkit.checks.mjs`.
+
+| Workflow | Trigger | What it does |
+| --- | --- | --- |
+| `ci.yml` | push to `main`, pull requests, manual | `check`, `verify:artifacts`, then two **advisory** steps: `check:submission` and the Obsidian community-directory validation ([`obsidianmd/obsidian-workflows`](https://github.com/obsidianmd/obsidian-workflows) in `pr` mode, pinned by SHA, with the directory scanner's lint rules and `strict: 'false'`). Policy findings are warnings; a correctness error such as a missing license fails the step but never the job. The `ui` job is opt-in end-to-end. |
+| `obsidian.yml` | `main`, manual, pull requests labelled `e2e` or `run-obsidian` | Real-Obsidian tests and dev-loop smoke with uploaded evidence. |
+| `obsidian-release.yml` | manual dispatch on a tag | The same action in `release` mode: scanner lint, release assets, `manifest.json` version equal to the tag, build attestation of `main.js` and `styles.css`, and a **draft** GitHub release. |
+
+To release a generated plugin, set `manifest.json` and `versions.json` to the new `X.Y.Z`, push the tag `X.Y.Z`,
+then run "Obsidian release" with "Use workflow from" set to that tag. A run on a branch is skipped. The job has
+`contents`, `id-token` and `attestations` write behind the `release` environment, so create that environment
+with required reviewers (Settings › Environments) before the first release. The workflow builds with the
+project's pinned npm and copies `dist/main.js` and `dist/styles.css` to the project root, where the action reads
+release assets. Review the draft on the Releases page and publish it yourself; nothing here submits to the
+community plugin list.
 
 ## Reproduce a job locally
 
