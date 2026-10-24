@@ -84,6 +84,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - `node bin/app check` no longer times out its node --test suite steps (`maker-tests` and fast-mode `suites`) at the 10-minute step default; they get a 60-minute budget. An explicit `--timeout` still bounds every step.
 - Reconcile dependency checks and disposed Vue settings actions after the main merge.
 - The Definition of Ready no longer rejects a handoff Test plan gate that starts with a configured prefix, such as the template's own `node bin/app check` example; unknown gates are still rejected.
+- Release cut and `release:prepare` regenerate the CLI manual (`docs/user-manual/shell-cli/generated/`), which records the framework version, in the release commit, so `manual.mjs --check` passes on the release head without a follow-up commit. The release-branch gate now fails with `RELEASE_GENERATED_STALE` when a generated, version-stamped output is not current for the release version.
 
 ### Security
 

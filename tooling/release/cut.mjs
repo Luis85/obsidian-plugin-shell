@@ -7,8 +7,9 @@
  * plan shows the change and the new versions.json entry records it; released entries never change. Without it the
  * floor carries forward. Promotion then needs native acceptance on the new minimum host.
  * A dry run lists every blocker (exit 1) next to the plan. --execute: requires a clean tree on <base> matching origin/<base> (when fetched), no release/X.Y.Z branch
- * and no X.Y.Z tag; creates release/X.Y.Z, runs release preparation in-process (Unreleased -> X.Y.Z) and
- * commits "release: X.Y.Z". Rerunning on that branch resumes after the commit.
+ * and no X.Y.Z tag; creates release/X.Y.Z, runs release preparation in-process (Unreleased -> X.Y.Z, plus the
+ * generated, version-stamped outputs such as the CLI manual) and commits "release: X.Y.Z". Rerunning on that branch
+ * resumes after the commit.
  * --remote (with --execute): pushes the branch (GH_TOKEN through the gh credential helper for that one command,
  * because checkouts use persist-credentials: false), opens a DRAFT pull request to <base> titled "Release X.Y.Z"
  * whose body is .github/PULL_REQUEST_TEMPLATE/release.md with {{version}}, {{base}}, {{base_sha}},
@@ -25,8 +26,9 @@ import { hostFloor, prepareVersion, stableVersion, today } from '../../src/cli/t
 import { extractNotes, validDate } from '../../src/cli/tooling/release/changelog.mjs';
 import { verifyReleaseBranch } from './branch.mjs';
 import { createRunner, gitSucceeds, gitText, safeDetail } from './commands.mjs';
+import { releaseOutputs } from './generated-outputs.mjs';
 
-const releaseFiles = ['package.json', 'package-lock.json', 'manifest.json', 'versions.json', 'CHANGELOG.md'];
+const changedPaths = prepared => prepared.plan.changes.filter(change => change.status !== 'unchanged').map(change => change.path);
 const refusal = (code, message) => Object.assign(new Error(`${code}: ${message}`), { code });
 const fallbackBody = '## Release {{version}}\n\nRelease branch `{{release_branch}}` cut from `{{base}}` at {{base_sha}} on {{date}}.\nHost floor: {{host_floor}}.\n\n### Changelog\n\n{{changelog}}\n';
 
@@ -78,10 +80,10 @@ async function preflight({ run, root, version, base, branch, execute, remote, da
     if (remoteSha(run, 'tag', version)) throw refusal('CUT_TAG_EXISTS', `origin has tag ${version}.`);
   }
   let prepared;
-  try { prepared = await prepareVersion(root, version, '', { date, ...(minAppVersion === undefined ? {} : { minAppVersion }) }); }
+  try { prepared = await prepareVersion(root, version, '', { date, generated: await releaseOutputs(root), ...(minAppVersion === undefined ? {} : { minAppVersion }) }); }
   catch (error) { if (execute) throw error; blockers.push(error.message); return null; }
   steps.push({ id: 'create-branch', status: 'planned', detail: `git switch -c ${branch}` },
-    { id: 'prepare', status: 'planned', detail: `Update ${prepared.plan.changes.map(change => change.path).join(', ')}; host floor ${hostFloorText(preparedFloor(prepared))}.` },
+    { id: 'prepare', status: 'planned', detail: `Update ${changedPaths(prepared).join(', ')}; host floor ${hostFloorText(preparedFloor(prepared))}.` },
     { id: 'commit', status: 'planned', detail: `git commit -m "release: ${version}"` });
   return prepared;
 }
@@ -147,7 +149,7 @@ export async function cutRelease({ root = process.cwd(), version, date, minAppVe
   if (prepared) {
     gitText(run, ['switch', '--quiet', '-c', branch]); steps.find(item => item.id === 'create-branch').status = 'done';
     await applyFilePlan(prepared.plan); steps.find(item => item.id === 'prepare').status = 'done';
-    gitText(run, ['add', '--', ...releaseFiles]);
+    gitText(run, ['add', '--', ...changedPaths(prepared)]);
     gitText(run, ['commit', '--quiet', '-m', `release: ${version}`]); steps.find(item => item.id === 'commit').status = 'done';
   }
   const check = await verifyReleaseBranch({ root, version, branch, base, run, env: {} });

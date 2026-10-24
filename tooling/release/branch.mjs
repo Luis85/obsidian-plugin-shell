@@ -5,8 +5,9 @@
  *
  * Checks: branch name release/X.Y.Z (--branch, else GITHUB_HEAD_REF, GITHUB_REF_NAME, then the checked-out
  * branch), package/lock/manifest versions, versions.json entry, a valid Keep a Changelog with a non-empty
- * "## [X.Y.Z] - date" section, no local tag X.Y.Z, and shared history with origin/<base> when it was fetched
- * (a warning otherwise). Exit 0 passed (warnings allowed), 1 failed.
+ * "## [X.Y.Z] - date" section, generated version-stamped outputs (the CLI manual) current for X.Y.Z, no local tag
+ * X.Y.Z, and shared history with origin/<base> when it was fetched (a warning otherwise). Exit 0 passed (warnings
+ * allowed), 1 failed.
  */
 import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
@@ -14,6 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { stableVersion } from '../../src/cli/tooling/release/prepare.mjs';
 import { validateChangelog, sectionBody } from '../../src/cli/tooling/release/changelog.mjs';
 import { createRunner, gitSucceeds, gitText } from './commands.mjs';
+import { staleOutputs } from './generated-outputs.mjs';
 
 async function readJson(root, name) {
   try { return JSON.parse(await readFile(join(root, name), 'utf8')); } catch { return null; }
@@ -24,6 +26,15 @@ function branchName({ branch, env, run }) {
   if (env.GITHUB_REF_NAME) return env.GITHUB_REF_NAME;
   const result = run('git', ['rev-parse', '--abbrev-ref', 'HEAD']);
   return result.status === 0 ? result.stdout.trim() : '';
+}
+async function generatedOutputs(root, version, add) {
+  let results;
+  try { results = await staleOutputs(root, version); }
+  catch (error) { add('generated-outputs', 'failed', 'RELEASE_GENERATED_INVALID', error.message); return; }
+  for (const { id, regenerate, stale } of results) {
+    if (stale.length) add(id, 'failed', 'RELEASE_GENERATED_STALE', `${stale.join(', ')} not current for ${version}; run ${regenerate}.`);
+    else add(id, 'passed', 'RELEASE_GENERATED_CURRENT', `${id} is current for ${version}.`);
+  }
 }
 function ancestry(run, base, add) {
   const remote = `refs/remotes/origin/${base}`;
@@ -69,6 +80,7 @@ export async function verifyReleaseBranch({ root = process.cwd(), version, branc
     if (!section || !sectionBody(result.model, section)) add('release-notes', 'failed', 'RELEASE_NOTES_MISSING', `CHANGELOG.md needs a non-empty "## [${version}] - YYYY-MM-DD" section.`);
     else add('release-notes', 'passed', 'RELEASE_NOTES', `Section ${version} dated ${section.date}.`);
   }
+  await generatedOutputs(root, version, add);
   const tags = run('git', ['tag', '-l', version]);
   if (tags.status !== 0) add('tag-absent', 'failed', 'GIT_UNAVAILABLE', 'git tag -l failed.');
   else if (tags.stdout.trim()) add('tag-absent', 'failed', 'RELEASE_TAG_EXISTS', `Tag ${version} already exists locally.`);

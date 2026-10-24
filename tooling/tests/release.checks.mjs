@@ -44,6 +44,26 @@ test('prepare reviews all five files without writes then preserves history on ap
   assert.equal(await readFile(join(root, 'CHANGELOG.md'), 'utf8'), '# Changelog\n\n## [Unreleased]\n\n## [0.4.0] - 2026-10-01\n\nAdd a reviewed capability.\n\n### Added\n\n- Pending capability.\n\n' +
     '## [0.3.0] - 2026-09-01\n\nExisting notes.\n\n[Unreleased]: https://github.com/Example/different-plugin/compare/0.4.0...HEAD\n[0.4.0]: https://github.com/Example/different-plugin/releases/tag/0.4.0\n[0.3.0]: https://github.com/Example/different-plugin/releases/tag/0.3.0\n');
 });
+test('prepare plans generated outputs for the new version without writes and refuses a broken contract or a generated file changed meanwhile', async t => {
+  const { root } = await fixture(t); const stamp = join(root, 'docs/stamp.txt');
+  await mkdir(join(root, 'docs')); await writeFile(stamp, 'version 0.3.0\n');
+  const output = render => ({ id: 'stamp', paths: ['docs/stamp.txt'], render });
+  const stamped = output(async version => ({ 'docs/stamp.txt': `version ${version}\n` }));
+  const result = await prepareVersion(root, '0.4.0', '', { date: '2026-10-01', generated: [stamped] });
+  assert.deepEqual(result.generated, [{ id: 'stamp', paths: ['docs/stamp.txt'] }]);
+  const change = result.plan.changes.find(item => item.path === 'docs/stamp.txt');
+  assert.equal(change.status, 'update'); assert.equal(change.content, 'version 0.4.0\n'); assert.equal(result.plan.changes.length, 6);
+  assert.equal(await readFile(stamp, 'utf8'), 'version 0.3.0\n');
+  await assert.rejects(prepareVersion(root, '0.4.0', '', { generated: [output(async () => ({}))] }), /RELEASE_GENERATED_CONTRACT: stamp/);
+  await assert.rejects(prepareVersion(root, '0.4.0', '', { generated: [output(async () => ({ 'docs/stamp.txt': 'x', 'docs/other.txt': 'y' }))] }), /RELEASE_GENERATED_CONTRACT: stamp/);
+  await assert.rejects(prepareVersion(root, '0.4.0', '', { generated: [output(async () => ({ 'docs/stamp.txt': null }))] }), /RELEASE_GENERATED_CONTRACT: stamp/);
+  await assert.rejects(prepareVersion(root, '0.4.0', '', { generated: [{ ...stamped, paths: ['package.json'] }] }), /RELEASE_GENERATED_CONTRACT: duplicate output path/);
+  await assert.rejects(prepareVersion(root, '0.4.0', '', { generated: [stamped], beforeFinalize: () => writeFile(stamp, 'edited\n') }), /RELEASE_STALE_INPUT: docs\/stamp\.txt/);
+  await writeFile(stamp, 'version 0.3.0\n');
+  await applyFilePlan((await prepareVersion(root, '0.4.0', '', { date: '2026-10-01', generated: [stamped] })).plan);
+  assert.equal(await readFile(stamp, 'utf8'), 'version 0.4.0\n');
+  await assert.rejects(prepareVersion(root, '0.4.0', '', { generated: [stamped] }), /VERSION_NOT_NEW/);
+});
 test('prepare promotes Unreleased alone, refuses empty notes, reused changelog versions and legacy changelogs', async t => {
   const { root } = await fixture(t); const path = join(root, 'CHANGELOG.md');
   const promoted = await prepareVersion(root, '0.4.0', '', { date: '2026-10-01' });

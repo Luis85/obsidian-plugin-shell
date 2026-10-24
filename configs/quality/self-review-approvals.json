@@ -3506,6 +3506,17 @@
       "removed": [
         "  performance: { warmInitializationMs: 200, itemsReadinessMs: 500, mainJsBytes: 1048576, stylesCssBytes: 163840 },"
       ]
+    },
+    {
+      "rule": "SR-QUALITY-CONFIG",
+      "file": "configs/quality/fallow.json",
+      "approvedBy": "@Luis85",
+      "pullRequest": 220,
+      "reason": "Declare src/cli/tooling/release/prepare.mjs as an analyzer entry: release:prepare now runs the tooling wrapper, and the src script is still executed directly (reviewed-host-floor acceptance rows, bundled kit). Adds an entry, no ignore or suppression.",
+      "added": [
+        "    \"src/cli/tooling/release/prepare.mjs\","
+      ],
+      "removed": []
     }
   ]
 }

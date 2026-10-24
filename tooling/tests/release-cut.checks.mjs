@@ -2,9 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, writeFile } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { cutRelease, parseCutArguments, releaseBody } from '../release/cut.mjs';
-import { gitFixture, changelogText } from './release-git-fixture.mjs';
+import { verifyReleaseBranch } from '../release/branch.mjs';
+import { gitFixture, changelogText, manualCommand } from './release-git-fixture.mjs';
 
 const options = fixture => ({ root: fixture.root, version: '0.4.0', date: '2026-10-01', run: fixture.run, env: {} });
 const ok = stdout => ({ status: 0, stdout, stderr: '' });
@@ -34,6 +37,52 @@ test('execute creates release/X.Y.Z with one prepared commit and never touches t
   assert.equal(JSON.parse(await readFile(join(fixture.root, 'manifest.json'))).version, '0.4.0');
   assert.ok((await readFile(join(fixture.root, 'CHANGELOG.md'), 'utf8')).includes('## [Unreleased]\n\n## [0.4.0] - 2026-10-01\n\n### Added\n\n- Pending capability.\n'));
   assert.equal(fixture.git('ls-remote', '--heads', 'origin', 'release/0.4.0'), ''); assert.deepEqual(fixture.gh.calls, []);
+});
+
+const manualFiles = ['commands.json', 'manifest.json', 'reference.md'].map(name => `docs/user-manual/shell-cli/generated/${name}`);
+const releaseFiles = ['CHANGELOG.md', 'manifest.json', 'package-lock.json', 'package.json', 'versions.json'];
+
+test('the release commit carries the CLI manual regenerated for the bumped version, so manual.mjs --check passes on the release head', async t => {
+  const fixture = await gitFixture(t, { withManual: true });
+  assert.equal(manualCommand(fixture.root, '--check').status, 0, 'main starts with a current 0.3.0 manual');
+  const plan = await cutRelease(options(fixture));
+  assert.equal(plan.status, 'planned');
+  assert.equal(plan.steps.find(step => step.id === 'prepare').detail,
+    `Update package.json, package-lock.json, manifest.json, versions.json, CHANGELOG.md, ${manualFiles[2]}, ${manualFiles[0]}, ${manualFiles[1]}; host floor 1.13.7 (unchanged).`);
+  assert.equal(fixture.git('status', '--porcelain'), ''); assert.equal(fixture.git('branch', '--list', 'release/*'), '');
+  const result = await cutRelease({ ...options(fixture), execute: true });
+  assert.equal(result.status, 'committed'); assert.equal(fixture.git('log', '-1', '--format=%s'), 'release: 0.4.0');
+  assert.deepEqual(fixture.git('diff', '--name-only', 'main', 'HEAD').split('\n').sort(), [...releaseFiles, ...manualFiles].sort());
+  assert.equal(fixture.git('status', '--porcelain'), '');
+  assert.equal(JSON.parse(fixture.git('show', `HEAD:${manualFiles[1]}`)).frameworkVersion, '0.4.0');
+  assert.match(fixture.git('show', `HEAD:${manualFiles[2]}`), /^Framework version: \*\*0\.4\.0\*\*\. /m);
+  const check = manualCommand(fixture.root, '--check');
+  assert.equal(check.status, 0, check.stderr); assert.match(check.stdout, /^Manual checked: \d+ commands; 0 changed files\.$/m);
+  assert.equal((await cutRelease({ ...options(fixture), execute: true })).steps.slice(0, 3).every(step => step.status === 'skipped'), true);
+  // A release branch whose manual still records the old version fails both the branch gate and the manual check.
+  fixture.git('checkout', 'main', '--', ...manualFiles); fixture.git('commit', '--quiet', '-m', 'Restore the 0.3.0 manual');
+  const stale = await verifyReleaseBranch({ root: fixture.root, version: '0.4.0', run: fixture.run, env: {} });
+  assert.equal(stale.status, 'failed');
+  assert.deepEqual(stale.checks.find(item => item.id === 'cli-manual'), { id: 'cli-manual', status: 'failed', code: 'RELEASE_GENERATED_STALE',
+    message: `${manualFiles[2]}, ${manualFiles[0]}, ${manualFiles[1]} not current for 0.4.0; run node --experimental-strip-types tooling/documentation/manual.mjs.` });
+  assert.match(manualCommand(fixture.root, '--check').stderr, /MANUAL_STALE: reference\.md, commands\.json, manifest\.json/);
+});
+
+test('release:prepare plans the manual without writes, and an unowned file in the generated manual blocks the cut', async t => {
+  const fixture = await gitFixture(t, { withManual: true });
+  const script = fileURLToPath(new URL('../release/prepare.mjs', import.meta.url));
+  const dry = spawnSync(process.execPath, [script, '--version', '0.4.0', '--date', '2026-10-01', '--dry-run'], { cwd: fixture.root, encoding: 'utf8', windowsHide: true });
+  assert.equal(dry.status, 0, dry.stderr);
+  const report = JSON.parse(dry.stdout);
+  assert.equal(report.mode, 'dry-run'); assert.deepEqual(report.generated.map(output => output.id), ['cli-manual']);
+  assert.deepEqual(report.plan.changes.filter(change => change.status !== 'unchanged').map(change => change.path).sort(), [...releaseFiles, ...manualFiles].sort());
+  assert.equal(fixture.git('status', '--porcelain'), '');
+  await writeFile(join(fixture.root, 'docs/user-manual/shell-cli/generated/notes.md'), 'Authored.\n');
+  fixture.git('add', '.'); fixture.git('commit', '--quiet', '-m', 'Authored note'); fixture.git('push', '--quiet', 'origin', 'main'); fixture.git('fetch', '--quiet', 'origin');
+  const blocked = await cutRelease(options(fixture));
+  assert.equal(blocked.status, 'blocked'); assert.match(blocked.blockers[0], /^MANUAL_UNOWNED_FILE: .*notes\.md$/);
+  await assert.rejects(cutRelease({ ...options(fixture), execute: true }), /MANUAL_UNOWNED_FILE/);
+  assert.equal(fixture.git('rev-parse', '--abbrev-ref', 'HEAD'), 'main'); assert.equal(fixture.git('branch', '--list', 'release/*'), '');
 });
 
 test('remote cut pushes, opens a filled draft pull request and dispatches Release once; a rerun skips every done step', async t => {

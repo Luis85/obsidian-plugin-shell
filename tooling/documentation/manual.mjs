@@ -31,19 +31,20 @@ async function safeDirectory(base, relative, create) {
   }
   return true;
 }
-export async function outputs(base = root) {
+/** version renders the manual for a release that has not written package.json yet; it defaults to package.json /version. */
+export async function outputs(base = root, { version } = {}) {
   const [{ commands, parameterKinds }, { commandHelp, groups }, { diagnosticCatalog }] = await Promise.all([
     import(pathToFileURL(join(base, 'src/cli/adapters/framework/catalog.ts')).href),
     import(pathToFileURL(join(base, 'src/cli/adapters/framework/help-text.ts')).href),
     import(pathToFileURL(join(base, 'src/cli/compiler/domain/diagnostics.ts')).href),
   ]);
-  const pkg = JSON.parse(await readFile(join(base, 'package.json'), 'utf8'));
-  const model = buildModel(commands, commandHelp, parameterKinds, groups, pkg.version, diagnosticCatalog);
+  const frameworkVersion = version ?? JSON.parse(await readFile(join(base, 'package.json'), 'utf8')).version;
+  const model = buildModel(commands, commandHelp, parameterKinds, groups, frameworkVersion, diagnosticCatalog);
   // The machine catalog is vendored into generated projects; compact JSON preserves every field without padding their bounded inputs.
   const files = { 'reference.md': renderReference(model), 'diagnostics.md': renderDiagnostics(model), 'commands.json': JSON.stringify(model) + '\n' };
   const sources = await Promise.all(inputs.map(async path => ({ path, sha256: hash(await readFile(join(base, path))) })));
-  sources.unshift({ path: 'package.json', selector: '/version', sha256: hash(json(pkg.version)) });
-  files['manifest.json'] = json({ schemaVersion: 2, frameworkVersion: pkg.version, commandCount: model.commands.length, sources,
+  sources.unshift({ path: 'package.json', selector: '/version', sha256: hash(json(frameworkVersion)) });
+  files['manifest.json'] = json({ schemaVersion: 2, frameworkVersion, commandCount: model.commands.length, sources,
     outputs: Object.entries(files).map(([path, content]) => ({ path, sha256: hash(content) })) });
   return files;
 }
@@ -67,6 +68,14 @@ export async function synchronize(files, { base = root, check = false } = {}) {
     }
   }
   return stale;
+}
+/** Repository paths of the generated manual, as release preparation plans them. */
+export const releasePaths = Object.freeze(owned.map(name => `${destination}/${name}`));
+/** The manual a release commit for `version` must carry, keyed by repository path. Refuses an unsafe or unowned generated/ folder like --check; never writes. */
+export async function releaseOutputs(version, base = root) {
+  const files = await outputs(base, { version });
+  await synchronize(files, { base, check: true });
+  return Object.fromEntries(owned.map(name => [`${destination}/${name}`, files[name]]));
 }
 export async function main(args = process.argv.slice(2)) {
   if (args.length === 1 && args[0] === '--help') {
