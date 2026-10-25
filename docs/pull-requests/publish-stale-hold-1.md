@@ -4,10 +4,16 @@ id: publish-stale-hold-1
 title: "Re-run the stale release-PR CI hold in Publish"
 kind: change
 increment: publish-stale-hold
-status: New
+status: Merged
 delivers: [AC-1, AC-2, AC-3]
 head: "pr/publish-stale-hold/publish-stale-hold-1"
 base: increment/publish-stale-hold
+platform: github
+repository: "Luis85/obsidian-plugin-shell"
+number: 228
+url: "https://github.com/Luis85/obsidian-plugin-shell/pull/228"
+publishedAt: 2026-10-25T17:34:19Z
+lastSyncedAt: 2026-10-25T20:17:16Z
 ---
 
 # Re-run the stale release-PR CI hold in Publish

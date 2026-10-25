@@ -2,7 +2,7 @@
 type: Issue
 id: publish-stale-hold
 title: "Re-run the stale release-PR CI hold in Publish"
-status: New
+status: Done
 increment: publish-stale-hold
 ---
 
