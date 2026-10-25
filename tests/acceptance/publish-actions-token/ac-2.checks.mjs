@@ -1,25 +1,36 @@
 // Increment: [[docs/increments/publish-actions-token]]
 // AC-2: The token probe issues only `GET /user`, reports `user` on success and `integration` on HTTP 403, and any other failure fails closed with a coded error that carries no raw gh output; Publish calls it only when the repository reports `push: false`.
+// Runs the real publish CLI against a fake GitHub remote (src/cli/tests/support/fake-gh.mjs).
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createGitHub } from '../../../tooling/release/publish-github.mjs';
 import { publishCli } from '../../../src/cli/tests/support/publish-cli-fixture.mjs';
-import { repository } from '../../../src/cli/tests/support/release-publish-fixture.mjs';
 
-test('[AC-2] the probe maps success, 403 and other failures without echoing gh output', () => {
-  const targets = [];
-  const probe = result => createGitHub({ repository, run: (command, args) => { targets.push(`${args[2]} ${args.at(-1)}`); return result; } }).tokenKind();
-  assert.equal(probe({ status: 0, stdout: '{"login":"octo"}', stderr: '' }), 'user');
-  assert.equal(probe({ status: 1, stdout: '', stderr: 'gh: Resource not accessible by integration (HTTP 403)\n' }), 'integration');
-  assert.throws(() => probe({ status: 1, stdout: '', stderr: 'gh: secret-ghs_0123456789 (HTTP 500)\n' }), error => error.message === 'GITHUB_API_FAILED_HTTP_500' && !error.message.includes('ghs_'));
-  assert.deepEqual(new Set(targets), new Set(['GET user']));
+const noPush = (token, extra = () => {}) => state => { state.token = token; state.repo.permissions.push = false; extra(state); };
+const probes = calls => calls.filter(call => call === 'GET /user').length;
+
+test('[AC-2] a user token answers the probe and is refused; an installation token gets 403 and proceeds', async t => {
+  const user = await publishCli(t, noPush('user'));
+  assert.equal(user.run('--execute').status, 1);
+  assert.equal(probes((await user.state()).calls), 1);
+  const integration = await publishCli(t, noPush('integration'));
+  assert.equal(integration.run('--execute').status, 0);
+  assert.equal(probes((await integration.state()).calls), 1);
+});
+
+test('[AC-2] any other probe failure fails closed with a code and no gh output, before any write', async t => {
+  const cli = await publishCli(t, noPush('user', state => { state.fail['GET /user'] = { stderr: 'gh: secret-ghs_0123456789 (HTTP 500)\n' }; }));
+  const result = cli.run('--execute');
+  assert.equal(result.status, 1, result.stderr);
+  assert.equal(result.output.error, 'GITHUB_API_FAILED_HTTP_500');
+  assert.ok(!`${result.stdout}${result.stderr}`.includes('ghs_'));
+  assert.deepEqual((await cli.state()).writes, []);
 });
 
 test('[AC-2] Publish probes the token only when the repository reports no push', async t => {
   const granted = await publishCli(t);
   assert.equal(granted.run('--execute').status, 0);
-  assert.ok(!(await granted.state()).calls.includes('GET /user'));
+  assert.equal(probes((await granted.state()).calls), 0);
   const unknown = await publishCli(t, state => { delete state.repo.permissions; });
   assert.equal(unknown.run('--execute').status, 0);
-  assert.ok(!(await unknown.state()).calls.includes('GET /user'));
+  assert.equal(probes((await unknown.state()).calls), 0);
 });
