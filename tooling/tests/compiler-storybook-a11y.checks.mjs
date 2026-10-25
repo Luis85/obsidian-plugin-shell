@@ -32,7 +32,8 @@ test('the audit drives every story through both Obsidian themes before analysing
     // @axe-core/playwright reads the page through these members; the double supplies the minimum so the real builder runs its argument handling.
   };
   await assert.rejects(auditStories({ page, base: 'http://127.0.0.1:1', ids: ['s--default'] }), /./);
-  assert.deepEqual(visits, ['http://127.0.0.1:1/iframe.html?id=s--default&viewMode=story&globals=theme:light']);
+  // a11y.manual keeps the addon's automatic axe run from racing the audit.
+  assert.deepEqual(visits, ['http://127.0.0.1:1/iframe.html?id=s--default&viewMode=story&globals=theme:light;a11y.manual:!true']);
   assert.deepEqual(waits, [['light', 'dark']]);
   assert.deepEqual(themes, ['light', 'dark']);
 });
