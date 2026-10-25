@@ -4,10 +4,16 @@ id: publish-actions-token-1
 title: "Let Publish run with the built-in Actions token"
 kind: change
 increment: publish-actions-token
-status: New
+status: Merged
 delivers: [AC-1, AC-2]
 head: "pr/publish-actions-token/publish-actions-token-1"
 base: increment/publish-actions-token
+platform: github
+repository: "Luis85/obsidian-plugin-shell"
+number: 224
+url: "https://github.com/Luis85/obsidian-plugin-shell/pull/224"
+publishedAt: 2026-10-25T10:58:08Z
+lastSyncedAt: 2026-10-25T13:32:12Z
 ---
 
 # Let Publish run with the built-in Actions token

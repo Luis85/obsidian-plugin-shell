@@ -2,7 +2,7 @@
 type: Issue
 id: publish-actions-token
 title: "Let Publish run with the built-in Actions token"
-status: New
+status: Done
 increment: publish-actions-token
 ---
 
