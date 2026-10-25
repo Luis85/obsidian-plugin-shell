@@ -133,6 +133,16 @@ test('the gh adapter maps missing CLI, missing authentication and HTTP failures 
   assert.throws(() => gh({ status: 1, stdout: '', stderr: 'gh: Pull request is in clean status (HTTP 422)\n' }).prReady(12), error => error.code === 'PR_READY_FAILED' && error.status === 422);
 });
 
+test('the token probe reads only GET /user: a user token answers, an installation token gets 403, anything else fails closed', () => {
+  const calls = [];
+  const gh = result => createGitHub({ repository, run: (command, args) => { calls.push([command, ...args]); return result; } });
+  assert.equal(gh({ status: 0, stdout: '{"login":"octo"}', stderr: '' }).tokenKind(), 'user');
+  assert.equal(gh({ status: 1, stdout: '', stderr: 'gh: Resource not accessible by integration (HTTP 403)\n' }).tokenKind(), 'integration');
+  assert.throws(() => gh({ status: 1, stdout: '', stderr: 'gh: token ghp_abcdefghijk leaked (HTTP 502)\n' }).tokenKind(), error => error.message === 'GITHUB_API_FAILED_HTTP_502');
+  assert.throws(() => gh({ status: 1, stdout: '', stderr: 'gh: Bad credentials (HTTP 401)\n' }).tokenKind(), /GITHUB_AUTH_REQUIRED/);
+  for (const call of calls) assert.deepEqual([call[0], call[1], call[2], call[3], call.at(-1)], ['gh', 'api', '--method', 'GET', 'user']);
+});
+
 test('publish arguments require a stable version and an owner/repo repository', () => {
   assert.deepEqual(parsePublishArguments([]), { help: true });
   assert.deepEqual(parsePublishArguments(['--version', '1.0.0', '--repository', 'Owner/repo', '--execute', '--json']), { version: '1.0.0', repository: 'Owner/repo', execute: true, json: true });
