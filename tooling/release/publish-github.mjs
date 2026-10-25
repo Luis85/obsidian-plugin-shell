@@ -1,5 +1,5 @@
 /**
- * Narrow `gh` adapter for release publishing. Only fixed repository API routes, `gh pr ready` and
+ * Narrow `gh` adapter for release publishing. Only fixed repository API routes, `GET /user`, `gh pr ready` and
  * `gh run download` are issued, always through the injectable runner. Error output can contain secrets,
  * so failures carry a code and HTTP status, never gh's raw text.
  */
@@ -54,7 +54,15 @@ export function createGitHub({ run, repository }) {
     if (result.status !== 0) { const error = failure(result); throw error.code.startsWith('GITHUB_API_FAILED') ? new GitHubError(code, error.status) : error; }
     return result.stdout;
   }
+  /** An installation token (GITHUB_TOKEN, a GitHub App) cannot read GET /user (HTTP 403); a user token can. */
+  function tokenKind() {
+    const result = run('gh', ['api', '--method', 'GET', '-H', 'Accept: application/vnd.github+json', '-H', 'X-GitHub-Api-Version: 2022-11-28', 'user']);
+    if (result.status === 0) return 'user';
+    const error = failure(result);
+    if (error.status === 403) return 'integration';
+    throw error;
+  }
   const prReady = number => command(['pr', 'ready', String(number)], 'PR_READY_FAILED');
   const download = (runId, name, directory) => command(['run', 'download', String(runId), '--name', name, '--dir', directory], 'CANDIDATE_DOWNLOAD_FAILED');
-  return { repository, api, optional, pages, prReady, download };
+  return { repository, api, optional, pages, tokenKind, prReady, download };
 }
