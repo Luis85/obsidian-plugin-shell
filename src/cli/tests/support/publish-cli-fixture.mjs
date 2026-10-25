@@ -18,7 +18,7 @@ export async function publishCli(t, mutate = () => {}) {
   await writeFile(statePath, JSON.stringify({ ...fixture.state, onMain: [...fixture.state.onMain] }));
   // A private TMPDIR keeps the publish lock and work folders of parallel runs apart.
   const temp = join(folder, 'tmp'); await mkdir(temp);
-  const env = { ...process.env, FAKE_GH_STATE: statePath, FAKE_GH_PRELOAD: '1', TMPDIR: temp, TEMP: temp, TMP: temp, NODE_OPTIONS: '' };
+  const env = { ...process.env, FAKE_GH_STATE: statePath, FAKE_GH_PRELOAD: '1', PUBLISH_HOLD_WAIT_SECONDS: '0', TMPDIR: temp, TEMP: temp, TMP: temp, NODE_OPTIONS: '' };
   delete env.NODE_TEST_CONTEXT;
   const state = async () => JSON.parse(await readFile(statePath, 'utf8'));
   const update = async change => { const current = await state(); change(current); await writeFile(statePath, JSON.stringify(current)); };

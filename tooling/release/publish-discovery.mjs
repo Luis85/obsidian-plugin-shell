@@ -8,6 +8,7 @@ import { join } from 'node:path';
 import { sha256, validateRetained } from '../../src/cli/tooling/release/candidate.mjs';
 import { distributionArtifact, validateDistributions } from '../../src/cli/tooling/release/distribution-assets.mjs';
 import { extractNotes } from '../../src/cli/tooling/release/changelog.mjs';
+import { staleHold } from './publish-hold.mjs';
 
 const candidateArtifacts = Object.freeze(['qualified-candidate', 'retained-build']);
 const releaseCheckName = 'Release result';
@@ -130,12 +131,13 @@ export async function discoverRelease(gh, { version, workdir }) {
   if (pr.state === 'merged' && !merged) throw coded('SOURCE_NOT_ON_DEFAULT_BRANCH', `Merged ${sha} is not an ancestor of ${defaultBranch}.`);
   const tag = await tagCommit(gh, version);
   if (tag && tag !== sha) throw coded('TAG_SOURCE_MISMATCH', `Tag ${version} points to ${tag}, not ${sha}.`);
+  const hold = pr.state === 'open' ? await staleHold(gh, sha) : null;
   const assets = releaseAssets(found);
   const release = await releaseState(gh, version, assets.hashes);
   if (release?.mismatched.length) throw coded('RELEASE_ASSET_MISMATCH', `Release ${version} has assets that differ from the candidate: ${release.mismatched.join(', ')}.`);
   if (release && !release.draft && (release.missing.length || tag !== sha)) throw coded('RELEASE_ASSET_MISMATCH', `Published release ${version} is incomplete; it is never modified automatically.`);
   if (release?.draft && release.target !== sha) throw coded('RELEASE_SOURCE_MISMATCH', `Draft release ${version} targets ${release.target}.`);
-  return { repository: gh.repository, defaultBranch, canPush: pushPermission(gh, repo), branch, pr, sha, branchHead,
+  return { repository: gh.repository, defaultBranch, canPush: pushPermission(gh, repo), branch, pr, sha, branchHead, hold,
     check: { id: check.id, conclusion: check.conclusion }, candidate: found, assets, merged, tag, release, notesHash: sha256(found.notes) };
 }
 

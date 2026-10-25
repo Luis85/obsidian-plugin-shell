@@ -15,7 +15,7 @@ test('the default publish is a read-only plan bound to the tested head, candidat
   const fixture = await publishFixture(t);
   const plan = await publish(fixture);
   assert.equal(plan.status, 'planned'); assert.equal(plan.mode, 'dry-run'); assert.equal(plan.sha, head);
-  assert.deepEqual(statuses(plan), ['ready:pending', 'merge:pending', 'tag:pending', 'release:pending', 'delete-branch:pending']);
+  assert.deepEqual(statuses(plan), ['ready:pending', 'requalify:done', 'merge:pending', 'tag:pending', 'release:pending', 'delete-branch:pending']);
   assert.deepEqual(plan.releaseResult, { id: 5, conclusion: 'success' });
   assert.deepEqual(plan.candidate.assetHashes, fixture.files.assetHashes);
   assert.equal(plan.candidate.artifact, 'qualified-candidate'); assert.equal(plan.candidate.runId, 900);
@@ -42,7 +42,7 @@ test('execute merges, tags, publishes the candidate assets with changelog notes 
   state.writes.length = 0;
   const again = await publish(fixture, true);
   assert.equal(again.status, 'published'); assert.deepEqual(again.completed, []); assert.deepEqual(fixture.state.writes, []);
-  assert.deepEqual(statuses(again), ['ready:done', 'merge:done', 'tag:done', 'release:done', 'delete-branch:done']);
+  assert.deepEqual(statuses(again), ['ready:done', 'requalify:done', 'merge:done', 'tag:done', 'release:done', 'delete-branch:done']);
 });
 
 test('a failed write at every step is uncertain (no retry) and the rerun resumes without repeating finished effects', async t => {
@@ -70,7 +70,7 @@ test('an already merged release pull request skips merging and finishes tag, rel
   const fixture = await publishFixture(t);
   Object.assign(fixture.state.pulls[0], { state: 'closed', draft: false, merged_at: '2026-10-02T09:00:00Z' }); fixture.state.onMain.add(head);
   const plan = await publish(fixture);
-  assert.deepEqual(statuses(plan), ['ready:done', 'merge:done', 'tag:pending', 'release:pending', 'delete-branch:pending']);
+  assert.deepEqual(statuses(plan), ['ready:done', 'requalify:done', 'merge:done', 'tag:pending', 'release:pending', 'delete-branch:pending']);
   const result = await publish(fixture, true);
   assert.equal(result.status, 'published'); assert.deepEqual(result.completed, ['tag', 'release', 'delete-branch']);
   assert.ok(!fixture.state.writes.includes('PUT /pulls/12/merge') && !fixture.state.writes.includes('pr ready'));
