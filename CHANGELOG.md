@@ -6,6 +6,10 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ## [Unreleased]
 
+### Fixed
+
+- Publish no longer refuses the built-in `GITHUB_TOKEN` with `PUSH_PERMISSION_REQUIRED`: GitHub reports `push: false` for Actions installation tokens, so the pre-write check now applies only to user tokens and the job's granted permissions decide for `GITHUB_TOKEN`.
+
 ## [0.5.0] - 2026-10-24
 
 ### Added
@@ -71,7 +75,6 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ### Fixed
 
-- Publish no longer refuses the built-in `GITHUB_TOKEN` with `PUSH_PERMISSION_REQUIRED`: GitHub reports `push: false` for Actions installation tokens, so the pre-write check now applies only to user tokens and the job's granted permissions decide for `GITHUB_TOKEN`.
 - Candidate qualification gives the complete tooling evidence inventory a bounded 60-minute execution budget after measured runs exceeded the previous 30-minute cap. Individual test deadlines and other producer limits remain unchanged, and timed-out process trees still produce failed evidence.
 - Candidate runtime evidence uses the same complete runtime inventory as its coverage gate after CLI sources moved to `src/cli`; CLI coverage remains independently checked.
 
