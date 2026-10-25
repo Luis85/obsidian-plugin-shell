@@ -24,6 +24,7 @@ import { stableVersion } from '../../src/cli/tooling/release/prepare.mjs';
 import { createRunner } from './commands.mjs';
 import { createGitHub } from './publish-github.mjs';
 import { discoverRelease, onDefaultBranch, releaseState, tagCommit } from './publish-discovery.mjs';
+import { awaitRun, defaultHoldWait, holdWaitFromEnvironment } from './publish-hold.mjs';
 
 const coded = (code, message) => Object.assign(new Error(message ? `${code}: ${message}` : code), { code });
 export const publishLockPath = (repository, version, directory = tmpdir()) => join(directory, `plugin-publish-${sha256(`${repository.toLowerCase()}/${version}`)}.lock`);
@@ -33,6 +34,7 @@ export function planSteps(state) {
   const release = state.release;
   return [
     done('ready', state.pr.state === 'merged' || !state.pr.draft, `Mark pull request #${state.pr.number} ready for review.`, `Pull request #${state.pr.number} is ready or merged.`),
+    done('requalify', !state.hold, state.hold && `${state.hold.running ? 'Wait for' : 'Re-run the failed jobs of'} CI run ${state.hold.runId}, the stale "CI result" hold on ${state.sha}.`, `No stale "CI result" hold on ${state.sha}.`),
     done('merge', state.merged, `Merge #${state.pr.number} into ${state.defaultBranch} with a merge commit pinned to ${state.sha}.`, `${state.sha} is on ${state.defaultBranch}.`),
     done('tag', state.tag === state.sha, `Create tag ${state.version} at ${state.sha}.`, `Tag ${state.version} is ${state.sha}.`),
     done('release', release && !release.draft, release ? `Complete draft release ${release.id}: upload ${release.missing.join(', ') || 'nothing'}, then publish.` : `Create release ${state.version} with ${Object.keys(state.assets.hashes).join(', ')}.`, `Release ${state.version} is published with matching assets.`),
@@ -53,6 +55,14 @@ const steps = {
   async ready(gh, state) {
     write(() => gh.prReady(state.pr.number));
     await confirm(async () => (await gh.api('GET', `/pulls/${state.pr.number}`))?.draft === false, 'READY_READBACK_MISMATCH');
+  },
+  async requalify(gh, state) {
+    const { runId, attempt, running } = state.hold;
+    if (!running) write(() => gh.api('POST', `/actions/runs/${runId}/rerun-failed-jobs`));
+    let run;
+    try { run = await awaitRun(gh, runId, running ? attempt : attempt + 1, state.holdWait); } catch (error) { throw Object.assign(error, { uncertain: true }); }
+    if (!run) throw Object.assign(coded('HOLD_RERUN_TIMEOUT', `CI run ${runId} is still running; rerun Publish to keep waiting.`), { uncertain: true });
+    if (run.conclusion !== 'success') throw coded('HOLD_RERUN_FAILED', `CI run ${runId} attempt ${run.run_attempt} concluded ${run.conclusion}.`);
   },
   async merge(gh, state) {
     write(() => gh.api('PUT', `/pulls/${state.pr.number}/merge`, { body: { merge_method: 'merge', sha: state.sha, commit_title: `Merge release ${state.version} (#${state.pr.number})` } }));
@@ -85,7 +95,7 @@ const steps = {
   },
 };
 
-export async function publishRelease({ repository, version, execute = false, run = createRunner(), lockDirectory = tmpdir() }) {
+export async function publishRelease({ repository, version, execute = false, run = createRunner(), lockDirectory = tmpdir(), holdWait = defaultHoldWait }) {
   stableVersion(version);
   const gh = createGitHub({ run, repository });
   const workdir = await mkdtemp(join(tmpdir(), 'release-publish-'));
@@ -96,7 +106,7 @@ export async function publishRelease({ repository, version, execute = false, run
       try { await mkdir(path, { mode: 0o700 }); lock = path; }
       catch (error) { throw error.code === 'EEXIST' ? Object.assign(coded('PUBLISH_LOCKED', `Another publish holds ${path}; remove it only after confirming no run is active.`), { lockPath: path }) : error; }
     }
-    const state = { version, ...(await discoverRelease(gh, { version, workdir })) };
+    const state = { version, holdWait, ...(await discoverRelease(gh, { version, workdir })) };
     const plan = planSteps(state);
     const summary = { schemaVersion: 1, repository, version, sha: state.sha, pullRequest: state.pr, defaultBranch: state.defaultBranch,
       releaseResult: state.check, candidate: { runId: state.candidate.runId, artifact: state.candidate.artifact, assetHashes: state.candidate.hashes, notesHash: state.notesHash },
@@ -145,7 +155,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const options = parsePublishArguments(process.argv.slice(2));
     if (options.help) console.log('node tooling/release/publish.mjs --version X.Y.Z --repository owner/repo [--execute] [--json]\nDefault: read-only discovery and plan. --execute merges, tags, releases and deletes the branch; each step resumes on rerun.');
     else {
-      const result = await publishRelease(options);
+      const result = await publishRelease({ ...options, holdWait: holdWaitFromEnvironment(process.env.PUBLISH_HOLD_WAIT_SECONDS) });
       if (options.json) console.log(JSON.stringify(result, null, 2));
       else {
         console.log(`Release ${result.version} from ${result.sha} (PR #${result.pullRequest.number}, Release result ${result.releaseResult.conclusion}, candidate run ${result.candidate.runId}/${result.candidate.artifact}).`);

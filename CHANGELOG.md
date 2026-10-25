@@ -8,6 +8,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ### Fixed
 
+- Publish re-runs the release pull request's stale "CI result" hold once "Release result" is green and waits for it before merging, so a fix-forward push to a release branch no longer blocks the merge.
 - Publish no longer refuses the built-in `GITHUB_TOKEN` with `PUSH_PERMISSION_REQUIRED`: GitHub reports `push: false` for Actions installation tokens, so the pre-write check now applies only to user tokens and the job's granted permissions decide for `GITHUB_TOKEN`.
 
 ## [0.5.0] - 2026-10-24

@@ -156,7 +156,8 @@ Then dispatch **Publish** from `main`:
 - GitHub CLI: `gh workflow run publish.yml --ref main -f version=X.Y.Z`.
 
 After the `release` environment approval, Publish marks the pull request ready,
-merges it with a merge commit pinned to the tested head, creates tag `X.Y.Z` at
+re-runs a stale "CI result" hold if there is one (see below), merges it with a
+merge commit pinned to the tested head, creates tag `X.Y.Z` at
 that commit, creates the GitHub release (draft; uploads `main.js`, `manifest.json`
 and `styles.css`, then `workbench-shell-X.Y.Z.zip`, `workbench-starters-X.Y.Z.zip`,
 `workbench-distributions.json` and `workbench-SHA256SUMS`; publishes it as latest)
@@ -183,6 +184,16 @@ permissions report no push access. GitHub reports `push: false` for the built-in
 `GITHUB_TOKEN` and other installation tokens whatever the job grants, and they
 cannot read `GET /user`, so Publish does not apply that check to them: the job's
 `contents: write` and `pull-requests: write` decide.
+
+A push by a person to `release/X.Y.Z` (a fix forward) starts the release pull
+request's own CI, whose "CI result" fails until "Release result" is green on that
+head. GitHub keeps that failure, and marking the pull request ready with
+`GITHUB_TOKEN` starts no new run, so Publish's `requalify` step re-runs that run's
+failed jobs before merging (the publish job has `actions: write` for this) and
+waits up to `PUBLISH_HOLD_WAIT_SECONDS` (default 600) for it to pass.
+`HOLD_RERUN_FAILED` (exit 1) means the re-run did not pass: open the named CI run.
+`HOLD_RERUN_TIMEOUT` (exit 2) means it was still running: dispatch Publish again,
+and it waits for that run instead of starting another.
 
 ## 9. Verify the release
 
