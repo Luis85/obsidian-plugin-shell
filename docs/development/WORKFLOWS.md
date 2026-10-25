@@ -216,7 +216,7 @@ repository settings.
 | Job | Job permissions | Environment | Token |
 | --- | --- | --- | --- |
 | `release-cut.yml` › `cut` | `contents: write`, `pull-requests: write`, `actions: write` | `release` | `GH_TOKEN: secrets.RELEASE_TOKEN \|\| github.token` |
-| `publish.yml` › `publish` | `contents: write`, `pull-requests: write`, `actions: read`, `checks: read` | `release` | `GH_TOKEN: secrets.RELEASE_TOKEN \|\| github.token` |
+| `publish.yml` › `publish` | `contents: write`, `pull-requests: write`, `actions: write`, `checks: read` | `release` | `GH_TOKEN: secrets.RELEASE_TOKEN \|\| github.token` |
 | every other job | inherits read-only `contents: read` | none | none; reusable calls pass no secrets |
 
 `RELEASE_TOKEN` is optional (a fine-grained token or GitHub App token with

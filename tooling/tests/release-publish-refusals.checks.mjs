@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { publishRelease } from '../release/publish.mjs';
 import { sha256 } from '../../src/cli/tooling/release/candidate.mjs';
-import { publishFixture, candidateFiles, distributionFiles, repository, version, head, other, changelog } from '../../src/cli/tests/support/release-publish-fixture.mjs';
+import { publishFixture, candidateFiles, distributionFiles, repository, version, head, other, changelog, addStaleHold } from '../../src/cli/tests/support/release-publish-fixture.mjs';
+import { awaitRun, holdWaitFromEnvironment } from '../release/publish-hold.mjs';
 
 /** Every refusal happens during read-only discovery: no write is attempted, in plan or execute mode. */
 async function refuses(t, mutate, expected, { execute = true } = {}) {
@@ -113,4 +114,59 @@ test('an installation token whose repository permissions say no push still execu
   const granted = await publishFixture(t);
   assert.equal((await publishRelease({ repository, version, run: granted.run, lockDirectory: granted.folder })).status, 'planned');
   assert.ok(!granted.state.calls.includes('GET /user'), 'no probe when the repository reports push access');
+});
+
+const instant = { intervalMs: 0, attempts: 2, sleep: async () => {} };
+const hold = (fixture, execute = true) => publishRelease({ repository, version, execute, run: fixture.run, lockDirectory: fixture.folder, holdWait: instant });
+const rerunCall = 'POST /actions/runs/700/rerun-failed-jobs';
+
+test('a stale CI result hold is re-run before the merge; a failed re-run stops before merging', async t => {
+  const fixture = await publishFixture(t); addStaleHold(fixture.state);
+  const plan = await hold(fixture, false);
+  assert.match(plan.steps.find(step => step.id === 'requalify').detail, /Re-run the failed jobs of CI run 700/);
+  assert.equal((await hold(fixture)).status, 'published');
+  assert.deepEqual(fixture.state.writes.slice(0, 3), ['pr ready', rerunCall, 'PUT /pulls/12/merge']);
+  const failing = await publishFixture(t); addStaleHold(failing.state); failing.state.rerunOutcome = 'failure';
+  await assert.rejects(hold(failing), /^Error: HOLD_RERUN_FAILED: CI run 700 attempt 2 concluded failure/);
+  assert.deepEqual(failing.state.writes, ['pr ready', rerunCall]);
+});
+
+test('a re-run still running at the end of the budget is uncertain; the next publish waits instead of re-running', async t => {
+  const fixture = await publishFixture(t); addStaleHold(fixture.state); fixture.state.rerunOutcome = 'running';
+  const first = await hold(fixture);
+  assert.deepEqual([first.status, first.failedStep], ['uncertain', 'requalify']); assert.match(first.error, /^HOLD_RERUN_TIMEOUT/);
+  fixture.state.writes = [];
+  const [run] = fixture.state.workflowRuns;
+  const finishes = { intervalMs: 0, attempts: 2, sleep: async () => { Object.assign(run, { status: 'completed', conclusion: 'success' }); } };
+  const second = await publishRelease({ repository, version, execute: true, run: fixture.run, lockDirectory: fixture.folder, holdWait: finishes });
+  assert.equal(second.status, 'published');
+  assert.match(second.steps.find(step => step.id === 'requalify').detail, /Wait for CI run 700/);
+  assert.ok(!fixture.state.writes.includes(rerunCall), 'no second re-run while one is in progress');
+});
+
+test('only a failing ci.yml pull_request hold on the head counts, and not once the pull request is merged', async t => {
+  for (const change of [run => { run.event = 'push'; }, run => { run.path = '.github/workflows/release.yml'; }, run => { run.head_sha = other; }]) {
+    const fixture = await publishFixture(t); addStaleHold(fixture.state); change(fixture.state.workflowRuns[0]);
+    assert.equal((await hold(fixture, false)).steps.find(step => step.id === 'requalify').status, 'done');
+  }
+  const green = await publishFixture(t); addStaleHold(green.state, { conclusion: 'success' });
+  assert.equal((await hold(green, false)).steps.find(step => step.id === 'requalify').status, 'done');
+  assert.ok(!green.state.calls.some(call => call.startsWith('GET /actions/runs?')), 'a green hold needs no run lookup');
+  const lagging = await publishFixture(t); addStaleHold(lagging.state, { status: 'in_progress', conclusion: null });
+  Object.assign(lagging.state.workflowRuns[0], { status: 'completed', conclusion: 'success' });
+  assert.equal((await hold(lagging, false)).steps.find(step => step.id === 'requalify').status, 'done', 'the run outranks a lagging check');
+  const merged = await publishFixture(t); addStaleHold(merged.state);
+  Object.assign(merged.state.pulls[0], { state: 'closed', merged_at: '2026-10-02T09:00:00Z', draft: false }); merged.state.onMain.add(head);
+  assert.equal((await hold(merged, false)).steps.find(step => step.id === 'requalify').status, 'done');
+});
+
+test('the hold wait budget is whole seconds and polling never sleeps after the last check', async () => {
+  assert.equal(holdWaitFromEnvironment(undefined).attempts, 40);
+  assert.equal(holdWaitFromEnvironment('0').attempts, 1);
+  assert.equal(holdWaitFromEnvironment('60').attempts, 5);
+  for (const bad of ['-1', '1.5', 'ten', '999999']) assert.throws(() => holdWaitFromEnvironment(bad), /INVALID_HOLD_WAIT/);
+  let sleeps = 0;
+  const gh = { api: async () => ({ status: 'in_progress', run_attempt: 2 }) };
+  assert.equal(await awaitRun(gh, 700, 2, { intervalMs: 1, attempts: 3, sleep: async () => { sleeps++; } }), null);
+  assert.equal(sleeps, 2);
 });

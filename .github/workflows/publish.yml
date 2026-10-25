@@ -3,8 +3,9 @@ name: Publish
 # re-checks that result, merges the release pull request into main (merge
 # commit), tags X.Y.Z on the tested release head, creates the GitHub release
 # with the changelog section and the candidate assets, then deletes the release
-# branch. The script is idempotent and resumable and never replaces a tag,
-# release or asset.
+# branch. Before merging it re-runs a stale "CI result" hold of the release
+# pull request's own CI (actions: write). The script is idempotent and resumable
+# and never replaces a tag, release or asset.
 # Privileged by a scoped, reviewed allowance (tooling/quality/workflow-policy.mjs):
 # manual dispatch only, read-only top level, and the one write job waits for the
 # reviewers of the protected "release" environment.
@@ -32,7 +33,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-      actions: read
+      actions: write
       checks: read
     env:
       VERSION: ${{ inputs.version }}

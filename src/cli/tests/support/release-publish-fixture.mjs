@@ -50,7 +50,7 @@ export async function publishFixture(t) {
     runs: [{ id: 900, head_sha: head, conclusion: 'success', check_suite_id: 300 }],
     artifacts: [{ id: 1, name: 'qualified-candidate', expired: false }, { id: 2, name: distribution.name, expired: false }],
     artifactFiles: { [`${files.prefix}`]: files.bytes, 'dist': { 'main.js': files.bytes['main.js'] } }, distributionFiles: { ...distribution.bytes },
-    changelog, releases: [], nextId: 100, fail: {}, writes: [], calls: [], token: 'user',
+    changelog, releases: [], nextId: 100, fail: {}, writes: [], calls: [], token: 'user', workflowRuns: [], rerunOutcome: 'success',
   };
   const json = value => ({ status: 0, stdout: value === undefined ? '' : JSON.stringify(value), stderr: '' });
   const missing = { status: 1, stdout: '', stderr: 'gh: Not Found (HTTP 404)\n' };
@@ -76,6 +76,12 @@ export async function publishFixture(t) {
     if ((match = /^\/git\/refs\/(.+)$/.exec(path)) && method === 'DELETE') { delete state.refs[match[1]]; return json(); }
     if ((match = /^\/commits\/([a-f0-9]{40})\/check-runs$/.exec(path))) return json({ check_runs: page(match[1] === head ? state.checkRuns : [], query) });
     if (path === '/actions/workflows/release.yml/runs') return json({ workflow_runs: page(state.runs, query) });
+    if (path === '/actions/runs' && method === 'GET') {
+      const suite = Number(new URLSearchParams(query).get('check_suite_id'));
+      return json({ workflow_runs: state.workflowRuns.filter(item => item.check_suite_id === suite) });
+    }
+    if ((match = /^\/actions\/runs\/(\d+)$/.exec(path)) && method === 'GET') return json(state.workflowRuns.find(item => item.id === Number(match[1])));
+    if ((match = /^\/actions\/runs\/(\d+)\/rerun-failed-jobs$/.exec(path)) && method === 'POST') return json(rerun(Number(match[1])));
     if ((match = /^\/actions\/runs\/(\d+)\/artifacts$/.exec(path))) return json({ artifacts: page(Number(match[1]) === 900 ? state.artifacts : [], query) });
     if (path === '/contents/CHANGELOG.md') return json({ encoding: 'base64', content: Buffer.from(state.changelog).toString('base64') });
     if ((match = /^\/compare\/([a-f0-9]{40})\.\.\.main$/.exec(path))) return json(state.onMain.has(match[1]) ? { status: 'ahead', merge_base_commit: { sha: match[1] } } : { status: 'diverged', merge_base_commit: { sha: base } });
@@ -89,6 +95,14 @@ export async function publishFixture(t) {
       const item = state.releases.find(entry => entry.id === Number(match[1])); item.draft = input.draft; return json(releaseRow(item));
     }
     throw new Error(`Unexpected gh route ${method} ${path}`);
+  }
+  /** Re-running the hold adds an attempt; `rerunOutcome` 'running' leaves it in progress, anything else completes it. */
+  function rerun(id) {
+    const item = state.workflowRuns.find(entry => entry.id === id); item.run_attempt += 1;
+    if (state.rerunOutcome === 'running') Object.assign(item, { status: 'in_progress', conclusion: null });
+    else Object.assign(item, { status: 'completed', conclusion: state.rerunOutcome });
+    state.checkRuns.push({ id: state.checkRuns.length + 100, name: 'CI result', status: item.status, conclusion: item.conclusion, check_suite: { id: item.check_suite_id } });
+    return undefined;
   }
   function upload(url, file) {
     const [, id, name] = /\/releases\/(\d+)\/assets\?name=(.+)$/.exec(url);
@@ -140,3 +154,8 @@ export async function publishFixture(t) {
   return { state, run, folder, files, distribution, releaseHashes: { ...files.assetHashes, ...distribution.assetHashes } };
 }
 
+/** A failed "CI result" hold from the release pull request's own ci.yml run (suite 400, run 700) on the head. */
+export function addStaleHold(state, { status = 'completed', conclusion = 'failure' } = {}) {
+  state.checkRuns.push({ id: 7, name: 'CI result', status, conclusion, check_suite: { id: 400 } });
+  state.workflowRuns.push({ id: 700, path: '.github/workflows/ci.yml', event: 'pull_request', head_sha: head, check_suite_id: 400, run_attempt: 1, status, conclusion });
+}

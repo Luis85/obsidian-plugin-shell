@@ -722,9 +722,10 @@ jobs:
       # On a release/* pull request every gate above skips, so this run would report a
       # green "CI result" before the Release tier finished. It passes only when the
       # Release workflow already reported a successful "Release result" on the same
-      # head commit; otherwise it fails, and the Release workflow's own "CI result"
-      # alias, reported after "Release result" succeeds, becomes the latest check of
-      # that name. Marking the release PR ready after Release finished stays green.
+      # head commit; otherwise it fails. GitHub keeps that failure in this run's check
+      # suite even after the Release workflow's own "CI result" alias succeeds, and a
+      # ready_for_review by GITHUB_TOKEN starts no run, so Publish re-runs this run's
+      # failed jobs (its requalify step) before merging.
       - name: Hold release pull requests until the Release tier passed on this head
         env:
           HEAD_REF: ${{ github.head_ref }}
