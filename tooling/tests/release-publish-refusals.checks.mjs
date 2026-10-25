@@ -104,3 +104,13 @@ test('a token without push permission may plan but not execute', async t => {
   delete fixture.state.repo.permissions;
   assert.equal((await publishRelease({ repository, version, execute: true, run: fixture.run, lockDirectory: fixture.folder })).status, 'published');
 });
+
+test('an installation token whose repository permissions say no push still executes; the job grants decide', async t => {
+  const fixture = await publishFixture(t);
+  Object.assign(fixture.state, { token: 'integration' }); fixture.state.repo.permissions.push = false;
+  assert.equal((await publishRelease({ repository, version, execute: true, run: fixture.run, lockDirectory: fixture.folder })).status, 'published');
+  assert.ok(fixture.state.calls.includes('GET /user'));
+  const granted = await publishFixture(t);
+  assert.equal((await publishRelease({ repository, version, run: granted.run, lockDirectory: granted.folder })).status, 'planned');
+  assert.ok(!granted.state.calls.includes('GET /user'), 'no probe when the repository reports push access');
+});

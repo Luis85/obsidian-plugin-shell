@@ -106,6 +106,13 @@ async function changelogNotes(gh, sha, version) {
   catch (error) { throw coded('CHANGELOG_NOTES_UNAVAILABLE', error.message); }
 }
 
+/** Repository permissions describe a user token. For an installation token they report no push whatever the job grants, so they say nothing. */
+function pushPermission(gh, repo) {
+  const push = repo.permissions?.push;
+  if (push !== false) return push ?? null;
+  return gh.tokenKind() === 'integration' ? null : false;
+}
+
 export async function discoverRelease(gh, { version, workdir }) {
   const repo = await gh.api('GET', '');
   if (typeof repo?.default_branch !== 'string' || String(repo.full_name).toLowerCase() !== gh.repository.toLowerCase()) throw coded('GITHUB_API_RESPONSE_INVALID');
@@ -128,7 +135,7 @@ export async function discoverRelease(gh, { version, workdir }) {
   if (release?.mismatched.length) throw coded('RELEASE_ASSET_MISMATCH', `Release ${version} has assets that differ from the candidate: ${release.mismatched.join(', ')}.`);
   if (release && !release.draft && (release.missing.length || tag !== sha)) throw coded('RELEASE_ASSET_MISMATCH', `Published release ${version} is incomplete; it is never modified automatically.`);
   if (release?.draft && release.target !== sha) throw coded('RELEASE_SOURCE_MISMATCH', `Draft release ${version} targets ${release.target}.`);
-  return { repository: gh.repository, defaultBranch, canPush: repo.permissions?.push ?? null, branch, pr, sha, branchHead,
+  return { repository: gh.repository, defaultBranch, canPush: pushPermission(gh, repo), branch, pr, sha, branchHead,
     check: { id: check.id, conclusion: check.conclusion }, candidate: found, assets, merged, tag, release, notesHash: sha256(found.notes) };
 }
 

@@ -178,6 +178,12 @@ what is done. The exit code tells you what to do next.
 publish is running. A merge refused by branch protection reports exit 2: satisfy
 the protection rule (or provide `RELEASE_TOKEN`) and rerun.
 
+`PUSH_PERMISSION_REQUIRED` (exit 1) refuses a personal token whose repository
+permissions report no push access. GitHub reports `push: false` for the built-in
+`GITHUB_TOKEN` and other installation tokens whatever the job grants, and they
+cannot read `GET /user`, so Publish does not apply that check to them: the job's
+`contents: write` and `pull-requests: write` decide.
+
 ## 9. Verify the release
 
 - The tag exists at the release head: `git fetch --tags origin` and

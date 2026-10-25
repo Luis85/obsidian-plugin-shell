@@ -50,7 +50,7 @@ export async function publishFixture(t) {
     runs: [{ id: 900, head_sha: head, conclusion: 'success', check_suite_id: 300 }],
     artifacts: [{ id: 1, name: 'qualified-candidate', expired: false }, { id: 2, name: distribution.name, expired: false }],
     artifactFiles: { [`${files.prefix}`]: files.bytes, 'dist': { 'main.js': files.bytes['main.js'] } }, distributionFiles: { ...distribution.bytes },
-    changelog, releases: [], nextId: 100, fail: {}, writes: [], calls: [],
+    changelog, releases: [], nextId: 100, fail: {}, writes: [], calls: [], token: 'user',
   };
   const json = value => ({ status: 0, stdout: value === undefined ? '' : JSON.stringify(value), stderr: '' });
   const missing = { status: 1, stdout: '', stderr: 'gh: Not Found (HTTP 404)\n' };
@@ -113,6 +113,7 @@ export async function publishFixture(t) {
     if (args[0] === 'pr' && args[1] === 'ready') { state.pulls.find(item => item.number === Number(args[2])).draft = false; return json(); }
     if (args[0] === 'run' && args[1] === 'download') return download(args);
     const method = args[args.indexOf('--method') + 1]; const target = args.at(-1);
+    if (target === 'user') return state.token === 'user' ? json({ login: 'octo' }) : { status: 1, stdout: '', stderr: 'gh: Resource not accessible by integration (HTTP 403)\n' };
     if (target.startsWith('https://uploads.github.com/')) return upload(target, args[args.indexOf('--input') + 1]);
     const [path, query = ''] = target.slice(`repos/${repository}`.length).split('?');
     return route(method, path, query, options?.input ? JSON.parse(options.input) : undefined);
@@ -120,6 +121,7 @@ export async function publishFixture(t) {
   const keyOf = args => {
     if (args[0] !== 'api') return `${args[0]} ${args[1]}`;
     const target = args.at(-1);
+    if (target === 'user') return `${args[args.indexOf('--method') + 1]} /user`;
     return `${args[args.indexOf('--method') + 1]} ${target.startsWith('https://') ? 'upload' : target.slice(`repos/${repository}`.length).split('?')[0]}`;
   };
   /** Synchronous like spawnSync. */
