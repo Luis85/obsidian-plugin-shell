@@ -2,7 +2,7 @@
 type: Issue
 id: changelog-publish-entry
 title: "Move the Publish token fix back to Unreleased"
-status: New
+status: Done
 increment: changelog-publish-entry
 ---
 

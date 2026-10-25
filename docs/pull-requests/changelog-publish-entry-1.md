@@ -4,10 +4,16 @@ id: changelog-publish-entry-1
 title: "Move the Publish token fix back to Unreleased"
 kind: change
 increment: changelog-publish-entry
-status: New
+status: Merged
 delivers: [AC-1]
 head: "pr/changelog-publish-entry/changelog-publish-entry-1"
 base: increment/changelog-publish-entry
+platform: github
+repository: "Luis85/obsidian-plugin-shell"
+number: 226
+url: "https://github.com/Luis85/obsidian-plugin-shell/pull/226"
+publishedAt: 2026-10-25T14:39:38Z
+lastSyncedAt: 2026-10-25T15:54:54Z
 ---
 
 # Move the Publish token fix back to Unreleased
