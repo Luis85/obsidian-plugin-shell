@@ -28,7 +28,7 @@
     "obsidian": "1.14.4",
     "oxlint": "1.89.0",
     "postcss": "8.5.31",
-    "postcss-selector-parser": "7.1.6",
+    "postcss-selector-parser": "7.1.7",
     "prettier": "3.9.10",
     "tailwindcss": "4.3.3",
     "typescript": "6.0.3",
