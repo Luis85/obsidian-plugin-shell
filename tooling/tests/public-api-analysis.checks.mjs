@@ -12,7 +12,7 @@ async function analyzerProject(scratch, configure = config => config) {
   await writeFile(join(scratch, 'package.json'), JSON.stringify({ name: 'framework-api-analysis', private: true, type: 'module' }));
   await mkdir(join(scratch, 'configs/quality'), { recursive: true });
   await writeFile(join(scratch, 'configs/quality/fallow.json'), JSON.stringify(configure({ ...config,
-    entry: [...config.entry.filter(path => ['src/plugin/main.ts', 'src/plugin/features/api.ts'].includes(path)), 'tooling/quality/check-analyzer.mjs', 'tooling/quality/fallow-contract.mjs'], plugins: [],
+    entry: ['src/plugin/main.ts', ...config.entry.filter(path => path === 'src/plugin/features/api.ts'), 'tooling/quality/check-analyzer.mjs', 'tooling/quality/fallow-contract.mjs'], plugins: [], ignorePatterns: [],
   })));
   for (const script of ['check-analyzer.mjs', 'fallow-contract.mjs']) await copyFile(`tooling/quality/${script}`, join(scripts, script));
   await symlink(resolve('node_modules'), join(scratch, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');

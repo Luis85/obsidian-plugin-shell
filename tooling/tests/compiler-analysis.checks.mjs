@@ -14,7 +14,7 @@ test('compiler public exports are recognized without exempting private compiler 
     await mkdir(join(scratch, 'tooling/quality'), { recursive: true });
     await writeFile(join(scratch, 'package.json'), '{"name":"compiler-analysis","private":true,"type":"module"}');
     await mkdir(join(scratch, 'configs/quality'), { recursive: true });
-    await writeFile(join(scratch, 'configs/quality/fallow.json'), JSON.stringify({ ...config, plugins: [],
+    await writeFile(join(scratch, 'configs/quality/fallow.json'), JSON.stringify({ ...config, plugins: [], ignorePatterns: [],
       entry: ['src/cli/compiler/index.ts', 'tooling/quality/check-analyzer.mjs', 'tooling/quality/fallow-contract.mjs'] }));
     for (const script of ['check-analyzer.mjs', 'fallow-contract.mjs'])
       await copyFile(`tooling/quality/${script}`, join(scratch, 'tooling/quality', script));

@@ -2,7 +2,7 @@
   "name": "template-node-qualification",
   "detection": {
     "type": "fileExists",
-    "pattern": "tooling/tests/*.{checks,test}.mjs"
+    "pattern": "tooling/tests/**/*.{checks,test}.mjs"
   },
   "entryPointRole": "test",
   "entryPoints": [

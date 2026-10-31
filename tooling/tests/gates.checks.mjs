@@ -41,7 +41,13 @@ test('[ANALYZER-ARCHIVE] exact generated assets do not hide maintained or unappr
     assert.equal(command('git', ['rev-parse', '--show-toplevel'], extracted).status, 128);
     assert.deepEqual((await sourceInputs(extracted)).files, source.files);
     for (const policy of policies) assert.deepEqual(await readFile(join(extracted, policy.path)), policy.bytes);
-    await cp(resolve('dist'), join(extracted, 'dist'), { recursive: true });
+    // Fallow 3.37 reports an ignore pattern that matches nothing as a diagnostic. The archive carries no dist
+    // (default-excluded; the hidden-source probe below still creates it) and none of the ignored project or
+    // template-package paths, so give the config's patterns real files to match.
+    await mkdir(join(extracted, 'projects/probe'), { recursive: true });
+    await writeFile(join(extracted, 'projects/probe/ignored.ts'), 'export const ignoredProject = 1;\n');
+    await mkdir(join(extracted, 'bin/template'), { recursive: true });
+    await writeFile(join(extracted, 'bin/template/package.json'), '{"name":"ignored-template","private":true}\n');
     await symlink(resolve('node_modules'), join(extracted, 'node_modules'), process.platform === 'win32' ? 'junction' : 'dir');
     const check = () => command(process.execPath, ['tooling/quality/check-analyzer.mjs'], extracted);
     const valid = check(); assert.equal(valid.status, 0, valid.stdout + valid.stderr);
@@ -68,6 +74,7 @@ test('[ANALYZER-ARCHIVE] exact generated assets do not hide maintained or unappr
     assert.notEqual(check().status, 0);
     assert.ok((await diagnostic()).summary.unused_files > 0);
     await rm(maintained);
+    await mkdir(join(extracted, 'dist'), { recursive: true });
     const hidden = join(extracted, 'dist/unapproved-source.ts');
     await writeFile(hidden, 'export const hiddenMaintainedSource = 1;\n');
     assert.notEqual(check().status, 0);
