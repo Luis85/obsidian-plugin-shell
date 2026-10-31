@@ -14,7 +14,9 @@ test('build and prototype helpers have activating detection and support/test rol
   assert.ok(config.framework.find(item=>item.name==='prototype-build-tools').entryPoints.includes('tooling/concepts/build-mvp.mjs'));
 });
 test('runtime and dependency gates remain enabled without ignoring the CSS compiler dependency',()=> {
-  assert.ok(config.entry.includes('src/plugin/main.ts'));
+  // Fallow 3.37 detects src/plugin/main.ts as an entry point itself and reports a manual entry as redundant,
+  // so the runtime root must stay detectable (not ignored) and the analyzer must never list it as unused.
+  assert.equal(config.ignorePatterns.some(pattern => pattern.startsWith('src/plugin')), false);
   assert.equal(config.ignoreDependencies.includes('postcss-selector-parser'),false);
   assert.notEqual(config.rules['dev-dependencies-in-production'],'off');
   assert.notEqual(config.rules['unused-file'],'off');

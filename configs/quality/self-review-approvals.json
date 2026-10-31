@@ -3517,6 +3517,26 @@
         "    \"src/cli/tooling/release/prepare.mjs\","
       ],
       "removed": []
+    },
+    {
+      "rule": "SR-QUALITY-CONFIG",
+      "file": "configs/quality/fallow.json",
+      "approvedBy": "@Luis85",
+      "pullRequest": 249,
+      "reason": "Fallow 3.37.0 reports ignore/entry/dependency-ignore entries that match nothing as workspace diagnostics, which the analyzer gate rejects. Drop the redundant main.ts entry, obsidian dependency ignore and the dist/dist-harness/reports ignore patterns (gitignored or default-excluded, so they excluded nothing), and widen src/*/tests/** to src/**/tests/** because * no longer matches / (same files as before). Owner approved this edit in the PR 249 session.",
+      "added": [
+        "          \"src/**/tests/**\","
+      ],
+      "removed": [
+        "    \"src/plugin/main.ts\",",
+        "    \"dist/main.js\",",
+        "    \"dist/styles.css\",",
+        "    \"dist/manifest.json\",",
+        "    \"dist-harness/**\",",
+        "    \"reports/**\",",
+        "          \"src/*/tests/**\",",
+        "    \"obsidian\","
+      ]
     }
   ]
 }

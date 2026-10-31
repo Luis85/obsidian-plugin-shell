@@ -7,7 +7,6 @@
     "tooling/concepts/concept-contract.ts",
     "src/cli/compiler/index.ts",
     "tooling/compiler/build-clickdummy.mjs",
-    "src/plugin/main.ts",
     "src/plugin/features/api.ts",
     "src/plugin/harness/app/main.ts",
     "src/plugin/harness/style-fixture/fixture.js",
@@ -203,11 +202,6 @@
     "tooling/quality/fallow-node-tests.json"
   ],
   "ignorePatterns": [
-    "dist/main.js",
-    "dist/styles.css",
-    "dist/manifest.json",
-    "dist-harness/**",
-    "reports/**",
     "docs/**",
     "src/companion/app/**",
     "src/companion/editor/**",
@@ -341,7 +335,7 @@
         "name": "test",
         "patterns": [
           "tests/**",
-          "src/*/tests/**",
+          "src/**/tests/**",
           "tooling/tests/**"
         ]
       },
@@ -914,7 +908,6 @@
     ]
   },
   "ignoreDependencies": [
-    "obsidian",
     "fontless",
     "oxlint",
     "vue-tsc"
