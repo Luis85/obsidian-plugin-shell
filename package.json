@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
-    "@iconify-json/lucide": "1.2.146",
+    "@iconify-json/lucide": "1.2.148",
     "@playwright/test": "1.64.1",
     "@types/node": "26.6.5",
     "@vitejs/plugin-vue": "6.0.10",
