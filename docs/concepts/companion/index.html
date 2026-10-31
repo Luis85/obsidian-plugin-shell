@@ -13334,7 +13334,7 @@ Edge: ${id2}`,
 </script>
 <script data-contract="CompanionContract">var CompanionContract = (function(exports) {
 	Object.defineProperty(exports, Symbol.toStringTag, { value: "Module" });
-	//#region src/shared/companion/prd-limits.mjs
+	// src/shared/companion/prd-limits.mjs
 	var PRD_LIMITS = Object.freeze({
 		count: 256,
 		bytes: 25e4,
@@ -13342,8 +13342,7 @@ Edge: ${id2}`,
 		scanEntries: 2e3,
 		scanDepth: 20
 	});
-	//#endregion
-	//#region src/shared/companion/native-contract.mjs
+	// src/shared/companion/native-contract.mjs
 	/** Optional v5 project namespace. JSON describes capabilities, never executable handlers. */
 	var nativeReservedExtensions = Object.freeze([
 		"md",
@@ -13426,8 +13425,7 @@ Edge: ${id2}`,
 		}
 		return value;
 	}
-	//#endregion
-	//#region src/shared/companion/design-system-roles.mjs
+	// src/shared/companion/design-system-roles.mjs
 	var dsRole = (label, group, defaults, ui = [], shell = []) => ({
 		label,
 		group,
@@ -13505,8 +13503,7 @@ Edge: ${id2}`,
 		}
 		return errors;
 	}
-	//#endregion
-	//#region src/shared/companion/design-system-contract.mjs
+	// src/shared/companion/design-system-contract.mjs
 	var DESIGN_SYSTEM_GROUPS = Object.freeze({
 		fonts: "Fonts",
 		typography: "Typography",
@@ -13623,8 +13620,7 @@ Edge: ${id2}`,
 		if (errors.length) throw new Error("DESIGN_SYSTEM_INVALID: " + errors.join(" "));
 		return value;
 	}
-	//#endregion
-	//#region src/shared/companion/storymap-contract.mjs
+	// src/shared/companion/storymap-contract.mjs
 	var STORYMAP_LIMITS = Object.freeze({
 		maps: 12,
 		activities: 24,
@@ -13949,8 +13945,7 @@ Edge: ${id2}`,
 		for (const t of system.colors || []) cpAssert(cpRef(t.id) && /^#[0-9a-f]{6}$/i.test(t.light) && /^#[0-9a-f]{6}$/i.test(t.dark), "Invalid theme color token.");
 		for (const t of system.typography || []) cpAssert(cpRef(t.id) && cpMetric(t, "type") && cpNumber(t.weight, 100, 900) && cpNumber(t.lineHeight, .5, 5) && cpNumber(t.letterSpacing, -10, 20), "Invalid typography token.");
 	}
-	//#endregion
-	//#region src/shared/companion/visual/visual-ir.mjs
+	// src/shared/companion/visual/visual-ir.mjs
 	var VISUAL_CATALOG = Object.freeze({
 		id: "nuxt-ui",
 		version: 1
@@ -14478,8 +14473,7 @@ Edge: ${id2}`,
 		vcatLayout("builtin-form", "Form workflow", "form", "Sectioned form with actions", vcatForm),
 		vcatLayout("builtin-settings", "Settings", "settings", "Settings navigation and grouped forms", (s) => vcatShell(s, vcatSettings(s)))
 	]);
-	//#endregion
-	//#region src/shared/companion/visual/visual-composition.mjs
+	// src/shared/companion/visual/visual-composition.mjs
 	function vcmpEdges(nodes) {
 		const out = [];
 		visualWalk(nodes, (n) => {
@@ -14512,8 +14506,7 @@ Edge: ${id2}`,
 		};
 		for (const key of graphs.keys()) visit(key);
 	}
-	//#endregion
-	//#region src/shared/companion/visual/visual-mapping.mjs
+	// src/shared/companion/visual/visual-mapping.mjs
 	var VISUAL_CONTROL_KINDS = Object.freeze([
 		"text",
 		"textarea",
@@ -14589,8 +14582,7 @@ Edge: ${id2}`,
 		].includes(control.kind) && Number.isSafeInteger(control.maxBytes) && control.maxBytes > 0 && control.maxBytes <= 4e6, "Invalid control byte limit.");
 		return control;
 	}
-	//#endregion
-	//#region src/shared/companion/visual/visual-validate.mjs
+	// src/shared/companion/visual/visual-validate.mjs
 	var vvCommon = [
 		"name",
 		"visibleIn",
@@ -15101,8 +15093,7 @@ Edge: ${id2}`,
 		visualCompositionGraph(store);
 		return store;
 	}
-	//#endregion
-	//#region src/shared/companion/sitemap/model.ts
+	// src/shared/companion/sitemap/model.ts
 	var SITEMAP_LIMITS = Object.freeze({
 		nodes: 60,
 		links: 120,
@@ -15119,8 +15110,7 @@ Edge: ${id2}`,
 		history: 20,
 		historyBytes: 8e6
 	});
-	//#endregion
-	//#region src/shared/companion/sitemap/safety.ts
+	// src/shared/companion/sitemap/safety.ts
 	var SitemapError = class extends Error {
 		code;
 		constructor(code, message) {
@@ -15211,8 +15201,7 @@ Edge: ${id2}`,
 		};
 		return render(value);
 	}
-	//#endregion
-	//#region src/shared/companion/schema/hosting.mjs
+	// src/shared/companion/schema/hosting.mjs
 	/** Optional hosting-platform setting (`tooling.hosting`) of a project schema 6 document, and the pure profile the
 	* compiler emits from it. Absent means GitHub, the behaviour every project had before this field existed.
 	* Only non-secret identifiers are stored: personal access tokens are never part of a project document (sign in with
@@ -15276,8 +15265,7 @@ Edge: ${id2}`,
 		ask: [],
 		deny: []
 	});
-	//#endregion
-	//#region src/shared/companion/tooling-contract.mjs
+	// src/shared/companion/tooling-contract.mjs
 	/** Inert optional development settings. No package, process or host is acquired here. */
 	var AIRSHIP_DEFAULTS = Object.freeze({
 		enabled: false,
@@ -15355,13 +15343,11 @@ Edge: ${id2}`,
 		for (const key of ["targetPort", "port"]) requireTooling(item[key] === void 0 || Number.isInteger(item[key]) && item[key] >= 1024 && item[key] <= 65535, key + " must be an unprivileged TCP port.");
 		requireTooling((item.targetPort ?? AIRSHIP_DEFAULTS.targetPort) !== (item.port ?? AIRSHIP_DEFAULTS.port), "Preview and proxy ports must differ.");
 	}
-	//#endregion
-	//#region src/shared/companion/tooling-contract.ts
+	// src/shared/companion/tooling-contract.ts
 	function validateProjectTooling(value) {
 		validateTooling(value);
 	}
-	//#endregion
-	//#region src/shared/companion/sitemap/extension.ts
+	// src/shared/companion/sitemap/extension.ts
 	function validateSitemapExtension(value, design) {
 		sitemapObject(value, [
 			"schema",
@@ -15502,8 +15488,7 @@ Edge: ${id2}`,
 		};
 		featureIds.forEach(visit);
 	}
-	//#endregion
-	//#region src/shared/companion/sitemap/acceptance.ts
+	// src/shared/companion/sitemap/acceptance.ts
 	/** Optional per-surface UX acceptance block: structural validation and default resolution. No host or UI imports. */
 	var SURFACE_ACCEPTANCE_STATES = [
 		"default",
@@ -15556,8 +15541,7 @@ Edge: ${id2}`,
 		requireSitemap(width === void 0 || typeof width === "number" && Number.isInteger(width) && width >= SURFACE_ACCEPTANCE_MIN_WIDTH.minimum && width <= SURFACE_ACCEPTANCE_MIN_WIDTH.maximum, "SITEMAP_ACCEPTANCE", `Acceptance minWidth must be a whole number of pixels from ${SURFACE_ACCEPTANCE_MIN_WIDTH.minimum} to ${SURFACE_ACCEPTANCE_MIN_WIDTH.maximum}.`);
 		requireSitemap(value.notes === void 0 || typeof value.notes === "string" && value.notes.length <= SURFACE_ACCEPTANCE_LIMITS.notes, "SITEMAP_ACCEPTANCE", `Acceptance notes must be text of at most ${SURFACE_ACCEPTANCE_LIMITS.notes} characters.`);
 	}
-	//#endregion
-	//#region src/shared/companion/sitemap/validate.ts
+	// src/shared/companion/sitemap/validate.ts
 	function assertDesign(value) {
 		requireSitemap(record$2(value), "SITEMAP_SHAPE", "Expected the canonical design object.");
 		list(value.nodes, SITEMAP_LIMITS.nodes);
@@ -15659,8 +15643,7 @@ Edge: ${id2}`,
 			};
 		});
 	}
-	//#endregion
-	//#region src/shared/companion/authoring-contract.ts
+	// src/shared/companion/authoring-contract.ts
 	/** The Companion project transfer contract. Schema 6 is the only readable format; earlier formats are rejected, never migrated. */
 	var COMPANION_FORMAT = "obsidian-companion-project";
 	var AUTHORING_VERSION = 6;
@@ -15973,8 +15956,7 @@ Edge: ${id2}`,
 	function assertDesignData(value) {
 		return checkData(value, designLimits);
 	}
-	//#endregion
-	//#region src/shared/platform/protected-directories.ts
+	// src/shared/platform/protected-directories.ts
 	/**
 	* The one framework-free source of protected project directory names. Every set is lower-case; callers compare a
 	* case-folded path segment, so `.GIT` or `Node_Modules` on case-insensitive volumes are refused as well.
@@ -16024,8 +16006,7 @@ Edge: ${id2}`,
 	function isProtectedSegment(segment, names = PROTECTED_PROJECT_SEGMENTS) {
 		return names.includes(segment.toLowerCase());
 	}
-	//#endregion
-	//#region src/shared/contracts/errors.ts
+	// src/shared/contracts/errors.ts
 	/** Host-independent operation error primitives shared by CLI adapters and core utilities. */
 	var OperationError = class extends Error {
 		code;
@@ -16041,8 +16022,7 @@ Edge: ${id2}`,
 	function requireThat(value, code, message) {
 		if (!value) throw new OperationError(code, message);
 	}
-	//#endregion
-	//#region src/shared/companion/starters/project-generator.ts
+	// src/shared/companion/starters/project-generator.ts
 	/** A violated project starter rule; the message names the violation. */
 	var ProjectStarterError = class extends Error {
 		constructor(message) {
@@ -16122,8 +16102,7 @@ Edge: ${id2}`,
 			...readSelectionFields(data)
 		};
 	}
-	//#endregion
-	//#region src/shared/companion/starters/validation.ts
+	// src/shared/companion/starters/validation.ts
 	function record(value) {
 		requireThat(value !== null && typeof value === "object" && !Array.isArray(value), "STARTER_INVALID", "Expected an object.");
 		return value;
@@ -16411,8 +16390,7 @@ Edge: ${id2}`,
 			nextSteps
 		};
 	}
-	//#endregion
-	//#region src/shared/companion/starters/render.ts
+	// src/shared/companion/starters/render.ts
 	function resolveValues(definition, supplied) {
 		const source = record(supplied), values = {};
 		requireThat(Object.keys(source).every((key) => definition.inputs.some((input) => input.id === key)), "STARTER_INPUT", "Unknown input name.");
@@ -16423,8 +16401,7 @@ Edge: ${id2}`,
 		}
 		return values;
 	}
-	//#endregion
-	//#region src/shared/companion/starters/customize.ts
+	// src/shared/companion/starters/customize.ts
 	/** Turns a loaded Companion starter into an independent, editable project v6 document. No catalog projection or execution trust. */
 	var FIELDS = [
 		"id",
@@ -16567,7 +16544,6 @@ Edge: ${id2}`,
 			}
 		});
 	}
-	//#endregion
 	exports.AUTHORING_VERSION = AUTHORING_VERSION;
 	exports.COMPANION_FORMAT = COMPANION_FORMAT;
 	exports.COMPANION_MAX_BYTES = COMPANION_MAX_BYTES;
