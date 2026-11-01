@@ -6,6 +6,8 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-01
+
 ### Added
 
 - Each release offers the Workbench CLI as two alternative downloads: `workbench-shell-X.Y.Z.zip` (the CLI only) and `workbench-shell-with-starters-X.Y.Z.zip` (the CLI with every starter in `configs/starters/`, ready for `node bin/app new`). `node bin/app framework pack --with-starters` builds the second one locally.
@@ -119,7 +121,8 @@ feature authoring and a Vue/Nuxt UI showcase. This version is not a published
 release. Consult the iteration guides and actual test records for qualification
 and outstanding support limitations.
 
-[Unreleased]: https://github.com/Luis85/obsidian-plugin-shell/compare/0.5.0...HEAD
+[Unreleased]: https://github.com/Luis85/obsidian-plugin-shell/compare/0.6.0...HEAD
+[0.6.0]: https://github.com/Luis85/obsidian-plugin-shell/releases/tag/0.6.0
 [0.5.0]: https://github.com/Luis85/obsidian-plugin-shell/releases/tag/0.5.0
 [0.4.0]: https://github.com/Luis85/obsidian-plugin-shell/releases/tag/0.4.0
 [0.3.0]: https://github.com/Luis85/obsidian-plugin-shell/releases/tag/0.3.0
