@@ -10,9 +10,8 @@ import { stableVersion } from './prepare.mjs';
  */
 export const distributionArtifact = sha => `workbench-distributions-${sha}`;
 /** Manifest schema 2: the two downloads are alternatives (with or without starters), not parts to extract together. */
-export const distributionSchemaVersion = 2;
-export const distributionZips = version => [`workbench-shell-${version}.zip`, `workbench-shell-with-starters-${version}.zip`];
-const zips = distributionZips;
+const distributionSchemaVersion = 2;
+const zips = version => [`workbench-shell-${version}.zip`, `workbench-shell-with-starters-${version}.zip`];
 const distributionAssetNames = version => Object.freeze([...zips(version), 'workbench-distributions.json', 'workbench-SHA256SUMS']);
 const coded = message => Object.assign(new Error(`DISTRIBUTION_INVALID: ${message}`), { code: 'DISTRIBUTION_INVALID' });
 
