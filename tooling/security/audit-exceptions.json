@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "exceptions": [
+    {
+      "advisory": "GHSA-g3hv-75wg-m249",
+      "package": "minimatch",
+      "severity": "moderate",
+      "scope": "development",
+      "approvedBy": "Luis85",
+      "approvedOn": "2026-11-01",
+      "expires": "2027-02-01",
+      "reason": "Published while 0.6.0 was qualifying. Every copy below 11.0.1 comes from ESLint, its plugins (including eslint-plugin-obsidianmd), typescript-eslint and editorconfig; none accepts minimatch 11, which removed the callable default export they use. Nothing ships it: it is not in main.js or bin/app.js. See docs/development/SECURITY-AUDIT-EXCEPTIONS.md."
+    },
+    {
+      "advisory": "GHSA-3g3m-2fjr-6pw4",
+      "package": "glob",
+      "severity": "moderate",
+      "scope": "development",
+      "approvedBy": "Luis85",
+      "approvedOn": "2026-11-01",
+      "expires": "2027-02-01",
+      "reason": "Published while 0.6.0 was qualifying. The only copy in the range is glob 13 under js-beautify, a dependency of @vue/test-utils (tests only). Nothing ships it: it is not in main.js or bin/app.js. See docs/development/SECURITY-AUDIT-EXCEPTIONS.md."
+    }
+  ]
+}

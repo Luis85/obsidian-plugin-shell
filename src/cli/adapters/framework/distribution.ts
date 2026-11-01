@@ -10,6 +10,8 @@ const excludedRoots = [deliveryPipelineFolder, '.github/workflows/projects--', '
 const excludedFiles = new Set(['docs/concepts/companion/index.html', '.github/workflows/companion-concept-verification.yml', '.github/workflows/projects-boundary.yml', '.github/workflows/projects-required-checks.yml', 'tooling/tests/projects-boundary.checks.mjs', 'tooling/tests/companion-boundaries.checks.mjs', 'tooling/tests/concept-metrics.checks.mjs', 'src/cli/tests/jev-concept-distribution.checks.mjs', 'src/cli/tests/project-generator-native-starters.checks.mjs',
   // The developer guide describes working in the framework checkout, not an extracted kit.
   'DEVELOPER_GUIDE.md',
+  // The framework owner's audit exceptions cover the framework's own dependency graph, never a consumer's.
+  'tooling/security/audit-exceptions.json',
   // The isolated manual renderer's own npm package (tooling/documentation) was never a template root.
   ...['.gitignore', 'package.json', 'package-lock.json'].map(name => `tooling/documentation/${name}`),
   // Site template qualification builds the framework's own templates/sites; kits carry the templates, not this tooling.

@@ -24,6 +24,8 @@ export function relocatedPath(path: string): string {
 const maintainerFiles: ReadonlySet<string> = new Set(['DEVELOPER_GUIDE.md', '.github/workflows/starter-distribution.yml', ...deliveryPipelineFiles,
   'tooling/tests/qualification-trigger.checks.mjs', 'src/cli/tests/project-generator-native-starters.checks.mjs', 'src/cli/tests/jev-concept-distribution.checks.mjs',
   'tooling/testing/qualify-project-handoff.mjs', 'src/cli/tests/agent-project-handoff.checks.mjs', 'docs/README.md',
+  // The framework owner's audit exceptions cover the framework's own graph; a generated project's owner approves its own.
+  'tooling/security/audit-exceptions.json',
   'src/plugin/tests/unit/shell-entry-lifecycle.test.ts', 'templates/examples/tests__runtime__shell-entry-lifecycle.test.ts.txt', 'src/plugin/tests/unit/obsidian-test-kit-shell-entry.test.ts',
   '.github/workflows/projects-boundary.yml', '.github/workflows/projects-required-checks.yml', 'tooling/tests/projects-boundary.checks.mjs',
   // Site template qualification builds the framework's own templates/sites from a maintainer fixture vault.

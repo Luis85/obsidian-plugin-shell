@@ -58,8 +58,8 @@ export async function discover({ pkg, manifest, now = new Date(), fetcher = fetc
     return { candidate: commit.sha, tag: release.tag_name, state: commit.sha === pin.commit ? 'current' : 'update-available', reason: 'Full action revision compared to current release tag; review before changing pin.' };
   });
   rows.push({ ...base('all-category-security', 'npm audit (separate live check)', null), candidate: null,
-    state: audit?.status === 'passed' && Date.parse(audit.capturedAt) <= now.getTime() && now.getTime() - Date.parse(audit.capturedAt) < 86400000 ? 'current' : 'blocked',
-    reason: audit ? `Recorded audit: ${audit.status}, captured ${audit.capturedAt}; this discovery did not run an audit.` : 'No recent all-category security record; run npm run check:security.' });
+    state: ['passed', 'passed-with-exceptions'].includes(audit?.status) && Date.parse(audit.capturedAt) <= now.getTime() && now.getTime() - Date.parse(audit.capturedAt) < 86400000 ? 'current' : 'blocked',
+    reason: audit ? `Recorded audit: ${audit.status}${audit.exceptions ? ` (excepted: ${audit.exceptions.map(entry => `${entry.advisory} until ${entry.expires}`).join(', ')})` : ''}, captured ${audit.capturedAt}; this discovery did not run an audit.` : 'No recent all-category security record; run npm run check:security.' });
   rows.push({ ...base('upstream-eslint-support', 'docs/development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md', 'nested ESLint 9.39.5'), candidate: null,
     state: 'incompatible', reason: 'Official Obsidian preset SDL/import/React dependencies retain unsupported ESLint-9 peers. A current root version or clean audit does not close this exception.' });
   rows.push({ ...base('typescript-parser-qualification', 'docs/development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md', dependencies.typescript), candidate: null,

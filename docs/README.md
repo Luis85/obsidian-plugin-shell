@@ -196,6 +196,7 @@ shown by this index and by a `Type:` line under its title, not by its folder.
 | [Milestone context](development/MILESTONE-CONTEXT.md) | How the recent milestones relate; links into historical records. |
 | [Upstream lint dependency exception](development/ITERATION-TWO-DEPENDENCY-EXCEPTION.md) | The unresolved nested ESLint 9 support criterion (normative). |
 | [Moment advisory exception](development/MOMENT-ADVISORY-EXCEPTION.md) | The open `moment` advisory through the Obsidian API package and why `check:security` still fails. |
+| [Security audit exceptions](development/SECURITY-AUDIT-EXCEPTIONS.md) | Owner-approved, dated exceptions for development-only advisories, the rules `check:security` enforces and the current entries. |
 | [Hindsight and Git/GitHub](development/HINDSIGHT-GIT-GITHUB.md) | Research and decisions behind the optional memory integration. |
 | [Main reconciliation review](development/MAIN-RECONCILIATION.md) | findings, dependency decisions and measured verification limits. |
 | [Obsidian Product Family — delivery 2.0.0](concepts/product-family/README.md) | the family, its delivery and what was and was not re-verified. |

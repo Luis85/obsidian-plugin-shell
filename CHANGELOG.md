@@ -6,6 +6,8 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-01
+
 ### Added
 
 - Each release offers the Workbench CLI as two alternative downloads: `workbench-shell-X.Y.Z.zip` (the CLI only) and `workbench-shell-with-starters-X.Y.Z.zip` (the CLI with every starter in `configs/starters/`, ready for `node bin/app new`). `node bin/app framework pack --with-starters` builds the second one locally.
@@ -20,6 +22,10 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - The repository analyzer now runs the reviewed Fallow 3.37.0 contract: the dead-code, health and dupes report schemas (10, 12, 10) and the analyzer configuration are unchanged, so only the pinned version moves.
 - Publish re-runs the release pull request's stale "CI result" hold once "Release result" is green and waits for it before merging, so a fix-forward push to a release branch no longer blocks the merge.
 - Publish no longer refuses the built-in `GITHUB_TOKEN` with `PUSH_PERMISSION_REQUIRED`: GitHub reports `push: false` for Actions installation tokens, so the pre-write check now applies only to user tokens and the job's granted permissions decide for `GITHUB_TOKEN`.
+
+### Security
+
+- `npm run check:security` accepts owner-approved, dated exceptions for named advisories that reach only development dependencies (`tooling/security/audit-exceptions.json`, documented in `docs/development/SECURITY-AUDIT-EXCEPTIONS.md`). Any other advisory, a higher severity, an advisory reaching production dependencies, an expired or an unused exception still fails. The first two cover GHSA-g3hv-75wg-m249 (minimatch) and GHSA-3g3m-2fjr-6pw4 (glob) in the ESLint and test toolchain until 2027-02-01; neither package ships in the plugin or the CLI.
 
 ## [0.5.0] - 2026-10-24
 
@@ -119,7 +125,8 @@ feature authoring and a Vue/Nuxt UI showcase. This version is not a published
 release. Consult the iteration guides and actual test records for qualification
 and outstanding support limitations.
 
-[Unreleased]: https://github.com/Luis85/obsidian-plugin-shell/compare/0.5.0...HEAD
+[Unreleased]: https://github.com/Luis85/obsidian-plugin-shell/compare/0.6.0...HEAD
+[0.6.0]: https://github.com/Luis85/obsidian-plugin-shell/releases/tag/0.6.0
 [0.5.0]: https://github.com/Luis85/obsidian-plugin-shell/releases/tag/0.5.0
 [0.4.0]: https://github.com/Luis85/obsidian-plugin-shell/releases/tag/0.4.0
 [0.3.0]: https://github.com/Luis85/obsidian-plugin-shell/releases/tag/0.3.0

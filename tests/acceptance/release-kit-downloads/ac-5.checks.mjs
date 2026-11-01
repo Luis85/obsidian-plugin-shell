@@ -21,8 +21,9 @@ test('[AC-5] the README, publish guide, CLI reference and changelog name the two
   assert.match(reference, /framework pack --with-starters/);
   for (const name of downloads) assert.ok(reference.includes(name), `CLI reference: ${name}`);
   const changelog = await text('CHANGELOG.md');
-  const unreleased = changelog.slice(changelog.indexOf('## [Unreleased]'), changelog.indexOf('\n## [', changelog.indexOf('## [Unreleased]') + 1));
-  for (const name of [...downloads, 'workbench-starters-X.Y.Z.zip']) assert.ok(unreleased.includes(name), `changelog: ${name}`);
+  // Everything newer than 0.5.0: `## [Unreleased]` until the release cut promotes it, then the new version's section.
+  const pending = changelog.slice(changelog.indexOf('## [Unreleased]'), changelog.indexOf('\n## [0.5.0]'));
+  for (const name of [...downloads, 'workbench-starters-X.Y.Z.zip']) assert.ok(pending.includes(name), `changelog: ${name}`);
 });
 
 test('[AC-5] no live how-to still extracts the retired starters ZIP', async () => {
