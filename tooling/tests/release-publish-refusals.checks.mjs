@@ -51,13 +51,15 @@ test('CLI downloads bound to another version or commit, with a wrong file set or
   const manifest = state => JSON.parse(state.distributionFiles['workbench-distributions.json']);
   const setManifest = (state, change) => { state.distributionFiles['workbench-distributions.json'] = JSON.stringify({ ...manifest(state), ...change }); };
   await refuses(t, state => setManifest(state, { version: '0.4.0' }), /DISTRIBUTION_INVALID: the manifest names version 0\.4\.0, not 0\.5\.0/);
+  // A schema 1 manifest listed a CLI and a separate data-only starters ZIP; schema 2 lists two alternative kits.
+  await refuses(t, state => setManifest(state, { schemaVersion: 1 }), /DISTRIBUTION_INVALID: the manifest has schema 1, not 2/);
   await refuses(t, state => { state.distributionFiles = { ...distributionFiles(other).bytes }; }, new RegExp(`DISTRIBUTION_INVALID: the manifest names source c{40}, not the release head ${head}`));
   await refuses(t, state => { state.distributionFiles = { ...distributionFiles(head, '0.4.0').bytes }; }, /DISTRIBUTION_INVALID: expected workbench-shell-0\.5\.0\.zip/);
   await refuses(t, state => { state.distributionFiles['extra.zip'] = 'x'; }, /DISTRIBUTION_INVALID: expected .* found .*extra\.zip/);
   await refuses(t, state => { delete state.distributionFiles['workbench-SHA256SUMS']; }, /DISTRIBUTION_INVALID: expected/);
   await refuses(t, state => { state.distributionFiles[`workbench-shell-${version}.zip`] = 'PK tampered'; }, /DISTRIBUTION_INVALID: the manifest entry for workbench-shell-0\.5\.0\.zip does not match its bytes/);
   await refuses(t, state => { state.distributionFiles['workbench-SHA256SUMS'] = state.distributionFiles['workbench-SHA256SUMS'].replace(/^./, '0'); }, /DISTRIBUTION_INVALID: workbench-SHA256SUMS does not match the archives/);
-  await refuses(t, state => setManifest(state, { assets: manifest(state).assets.slice(0, 1) }), /DISTRIBUTION_INVALID: the manifest does not list exactly the shell and starters archives/);
+  await refuses(t, state => setManifest(state, { assets: manifest(state).assets.slice(0, 1) }), /DISTRIBUTION_INVALID: the manifest does not list exactly the shell and shell-with-starters archives/);
   await refuses(t, state => { state.distributionFiles['workbench-distributions.json'] = 'not json'; }, /DISTRIBUTION_INVALID: workbench-distributions\.json is not JSON/);
 });
 

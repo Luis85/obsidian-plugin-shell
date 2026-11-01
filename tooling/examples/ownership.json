@@ -272,7 +272,7 @@
     },
     {
       "path": "README.md",
-      "sha256": "f32d1cb5adc331c2bd5040c5fcca493fa2008ad54eb9a2514ef174837b075980",
+      "sha256": "206cbe308dfbdc572603c3fc8b323cf1f35ac08a82823a2df14cea5e0fd4f3c9",
       "template": "README.md.txt",
       "generated": "retain"
     },

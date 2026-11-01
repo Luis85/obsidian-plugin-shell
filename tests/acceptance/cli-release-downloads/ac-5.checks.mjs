@@ -7,7 +7,7 @@ import { resolve } from 'node:path';
 
 const root = resolve(import.meta.dirname, '../../..');
 const text = path => readFile(resolve(root, path), 'utf8');
-const downloads = ['workbench-shell-X.Y.Z.zip', 'workbench-starters-X.Y.Z.zip', 'workbench-distributions.json', 'workbench-SHA256SUMS'];
+const downloads = ['workbench-shell-X.Y.Z.zip', 'workbench-shell-with-starters-X.Y.Z.zip', 'workbench-distributions.json', 'workbench-SHA256SUMS'];
 const retention = (workflow, artifact) => {
   const at = workflow.indexOf(artifact); assert.ok(at >= 0, artifact);
   const days = /retention-days: (\d+)/.exec(workflow.slice(at)); assert.ok(days, artifact); return Number(days[1]);

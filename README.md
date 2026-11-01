@@ -36,15 +36,21 @@ The guide below retains the existing framework checkout workflow and its milesto
 
 ### From a release download
 
-Each GitHub release from 0.5.0 on carries the Workbench CLI next to the plugin files:
-`workbench-shell-X.Y.Z.zip` (the CLI), `workbench-starters-X.Y.Z.zip` (the starters),
-`workbench-distributions.json` and `workbench-SHA256SUMS`. With Node.js 22.13 or newer,
-no clone, global install or `node_modules` is needed to scaffold:
+Each GitHub release carries the Workbench CLI next to the plugin files, as two
+alternative downloads:
+
+| Download | Contains |
+| --- | --- |
+| `workbench-shell-with-starters-X.Y.Z.zip` | The CLI and every starter in `configs/starters/`: start or migrate a plugin right away. |
+| `workbench-shell-X.Y.Z.zip` | The CLI only: for `new --from <project.json>` or `adopt` on an existing project. |
+
+`workbench-distributions.json` and `workbench-SHA256SUMS` describe both. With Node.js
+22.13 or newer, no clone, global install or `node_modules` is needed to scaffold:
 
 ```sh
-sha256sum --check --ignore-missing workbench-SHA256SUMS   # both ZIPs: OK
+sha256sum --check --ignore-missing workbench-SHA256SUMS   # the downloaded ZIP: OK
 mkdir workbench && cd workbench
-unzip ../workbench-shell-X.Y.Z.zip && unzip ../workbench-starters-X.Y.Z.zip
+unzip ../workbench-shell-with-starters-X.Y.Z.zip
 node bin/app new --list                                  # starters
 node bin/app new ../my-plugin --starter quick-capture --yes
 ```
@@ -52,6 +58,11 @@ node bin/app new ../my-plugin --starter quick-capture --yes
 Checksums detect a damaged download; they do not authenticate where it came from, so
 download from this repository's release page only. Then follow the new project's README
 (`npm ci`, `npm run check`).
+
+The extracted folder's own README (source: [src/cli/KIT-README.md](src/cli/KIT-README.md))
+is short: what the download holds, the quick start, the framework boundaries a plugin
+must stay inside, and two copy-paste prompts for an AI coding agent, one to install
+Workbench and start a new plugin and one to migrate an existing plugin into a clean shell.
 
 ### From this checkout
 

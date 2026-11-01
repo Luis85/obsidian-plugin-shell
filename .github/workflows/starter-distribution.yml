@@ -18,6 +18,8 @@ on:
       - 'src/companion/tests/concepts/starter-workspace.browser.mjs'
       - 'src/cli/adapters/framework/**'
       - 'src/cli/adapters/framework-cli.ts'
+      - 'src/cli/KIT-README.md'
+      - 'src/cli/tooling/release/distribution-assets.mjs'
       - 'src/cli/presentation/terminal/**'
       - 'src/tui/**'
       - 'src/shared/companion/starter-*.mjs'
@@ -143,20 +145,26 @@ jobs:
         run: |
           mkdir -p reports/workbench-distributions
           node bin/app framework pack --out "reports/workbench-distributions/workbench-shell-$RELEASE_VERSION.zip" --yes --json
-          node bin/app starters pack --out "reports/workbench-distributions/workbench-starters-$RELEASE_VERSION.zip" --yes --json
+          node bin/app framework pack --with-starters --out "reports/workbench-distributions/workbench-shell-with-starters-$RELEASE_VERSION.zip" --yes --json
           node --input-type=module <<'NODE'
           import { readFile, writeFile } from 'node:fs/promises';
           import { createHash } from 'node:crypto';
           const version = process.env.RELEASE_VERSION, sourceCommit = process.env.SOURCE_COMMIT;
           const root = 'reports/workbench-distributions/';
           const assets = [];
-          for (const kind of ['shell', 'starters']) {
+          for (const kind of ['shell', 'shell-with-starters']) {
             const name = `workbench-${kind}-${version}.zip`, bytes = await readFile(root + name);
             assets.push({ kind, name, bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') });
           }
-          await writeFile(root + 'workbench-distributions.json', JSON.stringify({ schemaVersion: 1, version, sourceCommit, starterSchemaVersion: 1, assets, publication: 'separate-explicit-approval' }, null, 2) + '\n');
+          await writeFile(root + 'workbench-distributions.json', JSON.stringify({ schemaVersion: 2, version, sourceCommit, starterSchemaVersion: 1, assets, publication: 'separate-explicit-approval' }, null, 2) + '\n');
           await writeFile(root + 'workbench-SHA256SUMS', assets.map(asset => `${asset.sha256}  ${asset.name}\n`).join(''));
           NODE
+      - name: Verify the assets exactly as Publish will
+        env:
+          RELEASE_VERSION: ${{ steps.identity.outputs.version }}
+          SOURCE_COMMIT: ${{ steps.identity.outputs.source }}
+        run: |
+          node --input-type=module -e "import { validateDistributions } from './src/cli/tooling/release/distribution-assets.mjs'; await validateDistributions('reports/workbench-distributions', process.env.SOURCE_COMMIT, process.env.RELEASE_VERSION);"
       - name: Retain separate assets and their manifest
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

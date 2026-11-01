@@ -46,11 +46,18 @@ The final npm scope is release configuration; the commands above define the inte
 GitHub Releases retain a package-manager-independent path:
 
 ```text
-workbench-cli-<version>.zip
-workbench-starters-<version>.zip
-workbench-distributions.json
+workbench-shell-<version>.zip                 CLI only
+workbench-shell-with-starters-<version>.zip   CLI plus configs/starters/*.json
+workbench-distributions.json                  schema 2
 workbench-SHA256SUMS
 ```
+
+Implemented: the two ZIPs are alternatives, so a user downloads and extracts exactly
+one. Up to 0.5.0 releases shipped `workbench-starters-<version>.zip`, a data-only
+archive extracted on top of the CLI ZIP; `node bin/app starters pack` still builds it
+locally. Each kit's root `README.md` is the short kit guide from
+`src/cli/KIT-README.md` (quick start, framework boundaries, and agent prompts for a new
+plugin and for migrating an existing one), not the framework repository's README.
 
 After extraction:
 
@@ -70,7 +77,7 @@ workbench/
 └── LICENSE
 ```
 
-The CLI ZIP is independently runnable. The starter ZIP adds only `configs/starters/*.json`.
+The CLI ZIP is independently runnable. The with-starters ZIP adds only `configs/starters/*.json`.
 
 ### Owner journey: observed layout and open gaps
 
@@ -85,7 +92,7 @@ extracted on top, and checked by `src/cli/tests/framework-journey.mjs`
 | Stage | Top level of the extracted folder |
 | --- | --- |
 | CLI kit only | `LICENSE`, `README.md`, `bin/`, `package.json` |
-| plus starters ZIP | adds `configs/starters/` |
+| with-starters ZIP | adds `configs/starters/` |
 | `new --input <request> --out projects/<name> --apply <planHash>` | adds `projects/<name>/` with `configs/<project-id>-config.json`, the prepared package and `source/` (`configs/`, `src/`, `tests/`, `package.json`, `README.md`, ...; `docs/` only for Nuxt UI starters, which carry licence notices there) |
 | `prototype` (default `--out prototypes/prepared-prototype`) | adds `prototypes/` |
 | framework `setup` + `generate` in place | adds `src/`, `tests/`, `docs/`, `configs/` tooling folders, `design/` and `shell.config.json`, but no `configs/<project-id>-config.json` and no `prototypes/` |

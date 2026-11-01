@@ -4,12 +4,15 @@ import { sha256 } from '#shared/platform/hash.ts';
 import { stableVersion } from './prepare.mjs';
 
 /**
- * The downloadable Workbench CLI that a release carries next to the plugin assets: the framework kit and the
- * starters that "Independent Workbench distributions" packs on the Release tier (artifact
+ * The downloadable Workbench CLI that a release carries next to the plugin assets: the framework kit on its own and
+ * the same kit with every starter, which "Independent Workbench distributions" packs on the Release tier (artifact
  * `workbench-distributions-<sha>`), their manifest and checksums. Publish uploads exactly these files.
  */
 export const distributionArtifact = sha => `workbench-distributions-${sha}`;
-const zips = version => [`workbench-shell-${version}.zip`, `workbench-starters-${version}.zip`];
+/** Manifest schema 2: the two downloads are alternatives (with or without starters), not parts to extract together. */
+export const distributionSchemaVersion = 2;
+export const distributionZips = version => [`workbench-shell-${version}.zip`, `workbench-shell-with-starters-${version}.zip`];
+const zips = distributionZips;
 const distributionAssetNames = version => Object.freeze([...zips(version), 'workbench-distributions.json', 'workbench-SHA256SUMS']);
 const coded = message => Object.assign(new Error(`DISTRIBUTION_INVALID: ${message}`), { code: 'DISTRIBUTION_INVALID' });
 
@@ -30,10 +33,11 @@ export async function validateDistributions(directory, sha, version) {
   let manifest;
   try { manifest = JSON.parse(bytes['workbench-distributions.json'].toString('utf8')); }
   catch { throw coded('workbench-distributions.json is not JSON.'); }
-  if (manifest?.schemaVersion !== 1 || manifest.version !== version) throw coded(`the manifest names version ${manifest?.version}, not ${version}.`);
+  if (manifest?.schemaVersion !== distributionSchemaVersion) throw coded(`the manifest has schema ${manifest?.schemaVersion}, not ${distributionSchemaVersion}.`);
+  if (manifest.version !== version) throw coded(`the manifest names version ${manifest?.version}, not ${version}.`);
   if (manifest.sourceCommit !== sha) throw coded(`the manifest names source ${manifest.sourceCommit}, not the release head ${sha}.`);
   const listed = Array.isArray(manifest.assets) ? manifest.assets : [];
-  if (JSON.stringify(listed.map(asset => asset?.name)) !== JSON.stringify(zips(version))) throw coded('the manifest does not list exactly the shell and starters archives.');
+  if (JSON.stringify(listed.map(asset => asset?.name)) !== JSON.stringify(zips(version))) throw coded('the manifest does not list exactly the shell and shell-with-starters archives.');
   for (const asset of listed)
     if (asset.sha256 !== hashes[asset.name] || asset.bytes !== bytes[asset.name].length) throw coded(`the manifest entry for ${asset.name} does not match its bytes.`);
   const sums = zips(version).map(name => `${hashes[name]}  ${name}\n`).join('');

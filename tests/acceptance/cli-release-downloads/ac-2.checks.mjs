@@ -13,7 +13,7 @@ const cases = [
   ['another version', state => { state.distributionFiles['workbench-distributions.json'] = JSON.stringify({ ...manifest(state), version: '0.4.0' }); }, /^DISTRIBUTION_INVALID: the manifest names version 0\.4\.0/],
   ['another source commit', state => { state.distributionFiles = { ...distributionFiles(other).bytes }; }, /^DISTRIBUTION_INVALID: the manifest names source c{40}/],
   ['an unexpected file', state => { state.distributionFiles['notes.txt'] = 'x'; }, /^DISTRIBUTION_INVALID: expected /],
-  ['a missing file', state => { delete state.distributionFiles[`workbench-starters-${version}.zip`]; }, /^DISTRIBUTION_INVALID: expected /],
+  ['a missing file', state => { delete state.distributionFiles[`workbench-shell-with-starters-${version}.zip`]; }, /^DISTRIBUTION_INVALID: expected /],
   ['a checksum that does not match', state => { state.distributionFiles['workbench-SHA256SUMS'] = state.distributionFiles['workbench-SHA256SUMS'].replace(/^./, '0'); }, /^DISTRIBUTION_INVALID: workbench-SHA256SUMS does not match/],
 ];
 

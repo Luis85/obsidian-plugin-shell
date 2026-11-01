@@ -1,12 +1,13 @@
 // Increment: [[docs/increments/cli-release-downloads]]
 // AC-1: Given a release run whose `workbench-distributions-<sha>` artifact matches the release version and head, the Publish plan lists `workbench-shell-X.Y.Z.zip`, `workbench-starters-X.Y.Z.zip`, `workbench-distributions.json` and `workbench-SHA256SUMS` after `main.js`, `manifest.json` and `styles.css`, and execution uploads all seven to the draft release before publishing it.
-// Runs the real publish CLI against a fake GitHub remote (src/cli/tests/support/fake-gh.mjs).
+// Runs the real publish CLI against a fake GitHub remote (src/cli/tests/support/fake-gh.mjs). Since the
+// release-kit-downloads increment the starters ship inside `workbench-shell-with-starters-X.Y.Z.zip`.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { publishCli } from '../../../src/cli/tests/support/publish-cli-fixture.mjs';
 import { head, version } from '../../../src/cli/tests/support/release-publish-fixture.mjs';
 
-const assets = ['main.js', 'manifest.json', 'styles.css', `workbench-shell-${version}.zip`, `workbench-starters-${version}.zip`, 'workbench-distributions.json', 'workbench-SHA256SUMS'];
+const assets = ['main.js', 'manifest.json', 'styles.css', `workbench-shell-${version}.zip`, `workbench-shell-with-starters-${version}.zip`, 'workbench-distributions.json', 'workbench-SHA256SUMS'];
 
 test('[AC-1] the publish plan names the seven release assets, the plugin first, and the distribution artifact of the run', async t => {
   const cli = await publishCli(t);
