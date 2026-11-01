@@ -23,6 +23,10 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 - Publish re-runs the release pull request's stale "CI result" hold once "Release result" is green and waits for it before merging, so a fix-forward push to a release branch no longer blocks the merge.
 - Publish no longer refuses the built-in `GITHUB_TOKEN` with `PUSH_PERMISSION_REQUIRED`: GitHub reports `push: false` for Actions installation tokens, so the pre-write check now applies only to user tokens and the job's granted permissions decide for `GITHUB_TOKEN`.
 
+### Security
+
+- `npm run check:security` accepts owner-approved, dated exceptions for named advisories that reach only development dependencies (`tooling/security/audit-exceptions.json`, documented in `docs/development/SECURITY-AUDIT-EXCEPTIONS.md`). Any other advisory, a higher severity, an advisory reaching production dependencies, an expired or an unused exception still fails. The first two cover GHSA-g3hv-75wg-m249 (minimatch) and GHSA-3g3m-2fjr-6pw4 (glob) in the ESLint and test toolchain until 2027-02-01; neither package ships in the plugin or the CLI.
+
 ## [0.5.0] - 2026-10-24
 
 ### Added
