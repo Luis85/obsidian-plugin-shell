@@ -172,7 +172,7 @@ Plugin starters enter the same discovery list as `configs/starters/*.json`. They
 
 The example plugin contributes `webapp-react`; because the plugin is disabled by default, that starter is absent from ordinary discovery until the developer enables the plugin.
 
-Plugin-provided starters are **not copied into the standalone `workbench-starters-*.zip`**. That archive remains data-only and contains only `configs/starters/*.json`. A plugin starter stays with the registered plugin that supplies its framework adapter and other trusted capabilities; normal Workbench discovery merges both sources at runtime. Plugin-local tests/qualification own that extension path instead of requiring the core starter-pack matrix to know every third-party starter.
+Plugin-provided starters are **not copied into the packed starters** (`framework pack --with-starters`, `starters pack`). Those contain only the data-only `configs/starters/*.json`. A plugin starter stays with the registered plugin that supplies its framework adapter and other trusted capabilities; normal Workbench discovery merges both sources at runtime. Plugin-local tests/qualification own that extension path instead of requiring the core starter-pack matrix to know every third-party starter.
 
 ## Safety and compatibility boundaries
 

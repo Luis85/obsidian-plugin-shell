@@ -45,18 +45,19 @@ function documentation(path: string, source: string): string {
 }
 /**
  * The kit root README sits beside bin/, while the documents it links ship under bin/template/.
- * Every relative link is rebased onto that shipped copy so it resolves in an extracted kit.
+ * Every relative link, written relative to the source file's folder `base`, is rebased onto that shipped copy so it
+ * resolves in an extracted kit.
  */
-export function kitRootReadme(bytes: Buffer): Buffer {
+export function kitRootReadme(bytes: Buffer, base = '.'): Buffer {
   const rebased = mapLinks(bytes.toString('utf8'), (original, _label, target) => external(target)
-    ? original : original.replace(`](${target})`, `](${posix.join('bin/template', target)})`));
+    ? original : original.replace(`](${target})`, `](${posix.join('bin/template', base, target)})`));
   return Buffer.from(rebased);
 }
 export function standaloneSource(path: string, bytes: Buffer): Buffer {
   // Normalize only distributed UTF-8 text; never rewrite checkout files or binary fixtures.
   if (!path.endsWith('.gz')) bytes = Buffer.from(new TextDecoder('utf-8', { fatal: true }).decode(bytes).replace(/\r\n/g, '\n'));
   if (path.endsWith('.md') || path.endsWith('.md.txt')) {
-    const intro = path === 'README.md' ? '# Framework developer kit\n\nStart in this extracted folder with `node bin/app setup` or `npm run setup`. The compiled CLI runs before dependency installation. Choose a project JSON or an explicit blank design, review generation, then approve dependency installation separately. Starters are a separate download: extract workbench-starters-<version>.zip into the same package root to populate configs/starters, then run node bin/app starters list. The CLI itself is self-contained under bin/; no starter definitions are bundled in the shell archive.\n\nFor automation use `node bin/app help --json` and `node bin/app schema --json`. Run `node bin/app build`, `test`, and `verify --profile project` after generation and installation. Actual native qualification and public-release approval remain separate.\n\nSee [CLI workflow](docs/development/FRAMEWORK-CLI.md) for invocation, safe plan/apply, fixtures, maintenance and release boundaries.\n\n## Retained framework reference\n\n' : '';
+    const intro = path === 'README.md' ? '# Framework developer kit\n\nStart in this extracted folder with `node bin/app setup` or `npm run setup`. The compiled CLI runs before dependency installation. Choose a project JSON or an explicit blank design, review generation, then approve dependency installation separately. Starters ship in the workbench-shell-with-starters-<version>.zip download under configs/starters; the workbench-shell-<version>.zip download is the CLI alone. Run node bin/app starters list to see what is installed. The CLI itself is self-contained under bin/.\n\nFor automation use `node bin/app help --json` and `node bin/app schema --json`. Run `node bin/app build`, `test`, and `verify --profile project` after generation and installation. Actual native qualification and public-release approval remain separate.\n\nSee [CLI workflow](docs/development/FRAMEWORK-CLI.md) for invocation, safe plan/apply, fixtures, maintenance and release boundaries.\n\n## Retained framework reference\n\n' : '';
     return Buffer.from(intro + documentation(path, bytes.toString('utf8')));
   }
   if (path === 'configs/quality/fallow.json') {

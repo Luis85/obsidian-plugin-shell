@@ -121,10 +121,11 @@ function dryRunPlan(request: Request): Result | null {
 async function frameworkPack(request: Request, context: Context, host: Host): Promise<Result> {
   const output = stringOption(request.options, 'out');
   requireThat(output, 'OUTPUT_REQUIRED', 'Supply --out <archive.zip>.');
+  const starters = request.options['with-starters'] === true;
   if (!request.options.yes || request.options['dry-run']) {
-    return result(request.command, { output, requires: '--yes', publication: 'not-authorized' }, 'planned');
+    return result(request.command, { output, starters, requires: '--yes', publication: 'not-authorized' }, 'planned');
   }
-  return result(request.command, await host.pack(context, output), 'applied');
+  return result(request.command, await host.pack(context, output, { starters }), 'applied');
 }
 /** Real host operations unless a contract test injects one. */
 function hostFor(dependencies: ProcessOperationDependencies): Host {

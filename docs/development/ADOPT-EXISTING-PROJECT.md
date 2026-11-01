@@ -12,8 +12,7 @@ The commands run from the root of the existing project. The released CLI kit is 
 # 1. Obtain the released CLI kit and verify it (see PUBLISHED-DISTRIBUTION-PLAN.md), then extract it
 mkdir -p tools/shell-cli
 sha256sum -c workbench-SHA256SUMS --ignore-missing
-unzip workbench-cli-<version>.zip -d tools/shell-cli
-unzip workbench-starters-<version>.zip -d tools/shell-cli   # optional: lets the report read the Angular target
+unzip workbench-shell-with-starters-<version>.zip -d tools/shell-cli   # starters let the report read the Angular target
 node tools/shell-cli/bin/app framework status --root tools/shell-cli
 
 # 2. Analyze (read-only) and review the findings
@@ -28,7 +27,7 @@ node tools/shell-cli/bin/app adopt skill
 node tools/shell-cli/bin/app adopt skill --apply <planHash>
 ```
 
-No release is published yet. Until one exists, `node bin/app framework pack --out ./workbench-cli.zip --yes` builds a local kit from a checkout; that is a candidate, not a released or qualified artifact.
+Releases carry the kit as `workbench-shell-with-starters-<version>.zip` and the CLI-only `workbench-shell-<version>.zip`. From a checkout, `node bin/app framework pack --with-starters --out ./workbench-cli.zip --yes` builds the same layout locally; that is a candidate, not a released or qualified artifact. To migrate an old Obsidian plugin into a clean shell rather than plan an integration, use the migration prompt in the kit's README ([src/cli/KIT-README.md](../../src/cli/KIT-README.md)).
 
 The `adopt-existing-project` skill (`.claude/skills/` and the Codex copy under `.agents/skills/`) runs the same commands, reads the code the report points to, refines the plan file, asks the owner the open questions and stops. It may edit only the plan file until the owner approves a named phase.
 
@@ -65,7 +64,7 @@ The report is `workbench-adoption-report/v1` JSON: target identity and Git facts
 
 Angular facts come from `angular.json` or Nx `project.json` files: projects, builders (application, esbuild, webpack, library), standalone versus NgModule component and module counts, route files and a route-entry estimate with the top-level paths, services, pipes, directives, signal-API usage, Angular Material and CDK and other libraries, NgRx and other state libraries, SSR, i18n and zoneless setup. Counts come from regular expressions over bounded source reading; treat them as sizing aids. React, Next, Vue, Nuxt, Svelte, Astro and plain TypeScript or JavaScript projects are recognised, and so is an Obsidian plugin (a `manifest.json` with `id` and `minAppVersion`).
 
-The comparison targets are read from the installed kit or checkout, never hard-coded: the Angular version from `configs/starters/webapp-angular.json` (the starters ZIP extracted beside the kit; otherwise the finding says it is unknown), Node from `.nvmrc` and the TypeScript pin from `package.json`.
+The comparison targets are read from the installed kit or checkout, never hard-coded: the Angular version from `configs/starters/webapp-angular.json` (present in the with-starters kit; otherwise the finding says it is unknown), Node from `.nvmrc` and the TypeScript pin from `package.json`.
 
 Each finding has an id, a severity (`info`, `warn`, `block`), a message and evidence paths. Findings are ordered by severity, id and evidence. A `block` rules out the options it names; it does not stop design-only use. Examples: `ANGULAR_TARGET_GAP` (two or more majors behind the generated Angular), `ANGULAR_NGMODULE_BASED`, `ANGULAR_WEBPACK_BUILDER`, `NODE_MAJOR_DIFFERS`, `NODE_ENGINES_EXCLUDE_TARGET`, `TYPESCRIPT_MAJOR_DIFFERS`, `TYPESCRIPT_NOT_STRICT`, `MULTIPLE_LOCKFILES`, `TOOL_CONFIG_CONFLICT`, `PATH_COLLISION` and `PATH_COLLISION_FILE` (for `tools/shell-cli/`, `design/`, `docs/workbench/`, `apps/workbench-app/` and the skill folders), `GIT_ABSENT`, `GIT_DIRTY`, `WORKBENCH_PRESENT`, `SCAN_TRUNCATED` and `MALFORMED_CONFIG`.
 

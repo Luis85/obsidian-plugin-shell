@@ -3,7 +3,7 @@ import { cliArtifact } from './cli-artifact.ts';
 import { bundleReleaseCli } from './release-bundle.ts';
 import { serializeJson as json } from '#shared/contracts/serialization.ts';
 import { prototypeSkillFiles } from './prototype-skill.ts';
-import { join, dirname, basename, resolve, relative, sep } from 'node:path';
+import { join, dirname, basename, resolve, relative, sep, posix } from 'node:path';
 import { createFilePlan, applyFilePlan } from '#shared/platform/file-plan.ts';
 import { readBounded, hash, readJson, exists } from './files.ts';
 import { bootstrapFiles, launcherFiles, listFiles, pluginConfigFiles, readPluginConfig, verifyKit, type Kit, type KitFile } from './kit-integrity.ts';
@@ -15,6 +15,7 @@ import { stat } from 'node:fs/promises';
 import { isProtectedSegment } from '#shared/platform/protected-directories.ts';
 import { templateRootFiles as templateFiles, templateRoots } from '../../compiler/domain/template-inputs.ts';
 import { communityPluginsFolder } from '../../domain/community-plugin.ts';
+import { assembleStarterPack } from '../starters/operations.ts';
 export interface Compiler { version: string; compile: (source: string, path: string) => string }
 export async function installedCompiler(): Promise<Compiler> {
   const ts = (await import('typescript')).default;
@@ -33,18 +34,23 @@ export const kitScripts: Readonly<Record<string, string>> = Object.freeze({
 });
 const pluginGuide = `${communityPluginsFolder}/DEVELOPER-GUIDE.md`;
 const pluginGuideSource = 'src/cli/plugins/DEVELOPER-GUIDE.md';
-async function bootstrapSource(root: string, path: string): Promise<Buffer> {
+/** The kit's own short README: what the download holds, the quick start, the framework boundaries and the agent prompts. */
+const kitReadmeSource = 'src/cli/KIT-README.md';
+async function bootstrapSource(root: string, path: string, version: string): Promise<Buffer> {
   if (path === 'bin/README.md') return Buffer.from('# Workbench CLI\n\nKeep this entire folder together. With Node.js 22.13 or newer, run `node app help`.\nThe runtime, authoring tools, templates, plugin defaults and license notices are included.\nProject build, test and browser commands use the target project’s installed dependencies.\n');
+  if (path === 'README.md') {
+    const text = (await readBounded(join(root, kitReadmeSource), 1_000_000)).toString('utf8').replace(/\r\n/g, '\n');
+    return kitRootReadme(Buffer.from(text.replaceAll('X.Y.Z', version)), posix.dirname(kitReadmeSource));
+  }
   const source = path === 'bin/app' ? 'src/cli/launcher.mjs' : path.replace(/^bin\//, '');
-  const bytes = standaloneSource(source, await readBounded(join(root, source), 8_000_000));
-  return path === 'README.md' ? kitRootReadme(bytes) : bytes;
+  return standaloneSource(source, await readBounded(join(root, source), 8_000_000));
 }
 async function assembleBootstrap(root: string, pkg: Record<string, unknown>): Promise<{ files: ArchiveFile[]; bootstrap: Kit['bootstrap'] }> {
   const files: ArchiveFile[] = [], bootstrap: Kit['bootstrap'] = [];
   const kitPackage = { ...pkg, bin: { 'obs-shell': 'bin/app' }, scripts: { ...kitScripts } };
   for (const path of bootstrapFiles) {
     const bytes = path === 'bin/package.json' ? Buffer.from(json({ name: String(pkg.name) + '-cli', version: pkg.version, type: 'module', private: true }))
-      : path === 'package.json' ? Buffer.from(json(kitPackage)) : await bootstrapSource(root, path);
+      : path === 'package.json' ? Buffer.from(json(kitPackage)) : await bootstrapSource(root, path, String(pkg.version));
     files.push({ path, bytes }); bootstrap.push({ path, hash: hash(bytes) });
   }
   return { files, bootstrap };
@@ -105,7 +111,9 @@ export async function assembleKit(context: Context, compiler: Compiler): Promise
   files.push({ path: 'bin/kit.json', bytes: Buffer.from(json(kit)) });
   return files;
 }
-export async function packKit(context: Context, output: string) {
+/** Optional extras of a packed kit: `starters` adds every installed data-only starter under configs/starters/. */
+export interface PackOptions { starters?: boolean }
+export async function packKit(context: Context, output: string, options: PackOptions = {}) {
   // The requested output is validated before the source is inspected, so a bad path fails the same way everywhere.
   const destination = resolve(context.root, output), parts = relative(context.root, destination).split(sep);
   requireThat(destination.endsWith('.zip') && !parts.some(part => isProtectedSegment(part)), 'KIT_OUTPUT_PATH', 'Choose a ZIP output outside protected project directories.');
@@ -113,11 +121,15 @@ export async function packKit(context: Context, output: string) {
   const identity = object(await readJson(join(context.frameworkRoot, 'manifest.json')));
   requireThat(identity.id === 'plugin-shell' && !await exists(join(context.frameworkRoot, '.companion/generation.json')), 'KIT_AUTHORING_ROOT', 'Consumer plugins are not framework distribution sources.');
   const compiler = await installedCompiler();
-  const files = await assembleKit(context, compiler), bytes = zip(files), path = resolve(context.root, output);
+  const files = await assembleKit(context, compiler);
+  // Starters are data beside bin/, exactly where extracting the separate starter pack would put them; not kit inventory.
+  const starters = options.starters ? await assembleStarterPack(context) : [];
+  files.push(...starters);
+  const bytes = zip(files), path = resolve(context.root, output);
   const plan = await createFilePlan(dirname(path), [{ path: basename(path), content: bytes.toString('base64'), encoding: 'base64' }]);
   requireThat(!plan.changes.some(change => change.status === 'update'), 'KIT_OUTPUT_EXISTS', 'Refusing to replace a different existing archive.');
   await applyFilePlan(plan);
-  return { archive: path, sha256: hash(bytes), bytes: bytes.length, files: files.length, compiler: compiler.version, publication: 'not-authorized' };
+  return { archive: path, sha256: hash(bytes), bytes: bytes.length, files: files.length, starters: starters.length, compiler: compiler.version, publication: 'not-authorized' };
 }
 /** An upgrade source is an extracted kit folder; a ZIP or other file gets an explicit extraction step instead of a raw I/O error. */
 async function extractedKitRoot(context: Context, from: string): Promise<string> {

@@ -95,7 +95,9 @@ test('distribution workflow is read-only: it builds separate assets and never pu
   assert.doesNotThrow(() => inspectWorkflow(workflow));
   assert.doesNotMatch(workflow, /contents:\s*write|gh release|--clobber|pull_request_target|environment:/);
   assert.match(workflow, /workbench-shell-\$RELEASE_VERSION\.zip/);
-  assert.match(workflow, /workbench-starters-\$RELEASE_VERSION\.zip/);
+  assert.match(workflow, /framework pack --with-starters --out "reports\/workbench-distributions\/workbench-shell-with-starters-\$RELEASE_VERSION\.zip"/);
+  assert.doesNotMatch(workflow, /starters pack|workbench-starters-/, 'the data-only starters ZIP is no longer a release asset');
+  assert.match(workflow, /validateDistributions\('reports\/workbench-distributions'/);
   assert.match(workflow, /workbench-SHA256SUMS/);
   assert.match(workflow, /publication: 'separate-explicit-approval'/);
   for (const pin of workflow.matchAll(/uses: actions\/[^@]+@([^\s]+)/g)) assert.match(pin[1], /^[a-f0-9]{40}$/);

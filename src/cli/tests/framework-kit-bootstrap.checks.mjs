@@ -32,6 +32,9 @@ test('kit root README rebases only relative links onto the shipped bin/template 
   const source = '[CLI](docs/development/FRAMEWORK-CLI.md#top) [web](https://example.com) [here](#anchor)\n```sh\n[kept](docs/x.md)\n```\n';
   assert.equal(kitRootReadme(Buffer.from(source)).toString('utf8'),
     '[CLI](bin/template/docs/development/FRAMEWORK-CLI.md#top) [web](https://example.com) [here](#anchor)\n```sh\n[kept](docs/x.md)\n```\n');
+  // A README written inside src/cli links relative to that folder; the rebased link still lands on the shipped copy.
+  assert.equal(kitRootReadme(Buffer.from('[guide](../../docs/development/BUILD-A-FEATURE.md)'), 'src/cli').toString('utf8'),
+    '[guide](bin/template/docs/development/BUILD-A-FEATURE.md)');
 });
 
 test('a freshly extracted kit resolves every README link and every package script before generation', { timeout: 300000 }, async t => {
@@ -41,8 +44,15 @@ test('a freshly extracted kit resolves every README link and every package scrip
   await extractArchive(zip(await assembleKit({ root, frameworkRoot: root }, await installedCompiler())), dir);
 
   const readme = await readFile(join(dir, 'README.md'), 'utf8');
+  const { version } = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
+  // The kit's own short README, not the framework repository's README with its maintainer history.
+  assert.ok(readme.startsWith(`# Workbench ${version}: Obsidian plugin shell kit\n`), readme.slice(0, 80));
+  assert.doesNotMatch(readme, /X\.Y\.Z|Retained framework reference|maintainer asset/);
+  for (const name of [`workbench-shell-${version}.zip`, `workbench-shell-with-starters-${version}.zip`, `releases/tag/${version}`]) assert.ok(readme.includes(name), name);
+  for (const heading of ['## Stay inside the framework', '### 1. Install Workbench and start a new plugin', '### 2. Migrate an existing plugin into a clean shell'])
+    assert.ok(readme.includes(heading), heading);
   const links = relativeLinks(readme);
-  assert.ok(links.length > 20, `expected the retained reference links, found ${links.length}`);
+  assert.ok(links.length >= 7, `expected the framework guide links, found ${links.length}`);
   const broken = [];
   for (const link of links) {
     const target = posix.normalize(decodeURIComponent(link.split(/[?#]/, 1)[0]));

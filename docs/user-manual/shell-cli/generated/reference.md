@@ -263,7 +263,7 @@ The tables list options with documented command semantics. Some common flags are
 
 - [verify](#verify) — Run existing full verification; project scope is explicitly separate.
 - [framework status](#framework-status) — Inspect the pinned kit and its integrity.
-- [framework pack](#framework-pack) — Build a deterministic compiled developer-kit ZIP locally.
+- [framework pack](#framework-pack) — Build a deterministic compiled developer-kit ZIP locally; --with-starters also packs every installed starter.
 - [framework upgrade](#framework-upgrade) — Plan an explicit kit replacement; deletes only verified retired kit files and keeps edited plugin configs or reports a conflict.
 - [release prepare](#release-prepare) — Plan source version and release-note changes.
 - [release check](#release-check) — Inspect packaging and optionally validate a retained release plan.
@@ -5971,7 +5971,7 @@ node bin/app framework status
 
 ## framework pack
 
-Build a deterministic compiled developer-kit ZIP locally.
+Build a deterministic compiled developer-kit ZIP locally; --with-starters also packs every installed starter.
 
 ```sh
 node bin/app framework pack [options]
@@ -5984,6 +5984,7 @@ node bin/app framework pack [options]
 | Option | Kind | Meaning | Values / default |
 | --- | --- | --- | --- |
 | --out | value | Output file path. | See command semantics |
+| --with-starters | flag | Also pack every installed starter definition under configs/starters/, so the extracted kit can run new --starter &lt;id&gt; without a second download. | See command semantics |
 | --dry-run | flag | Preview the operation without applying it or launching its process; explicit --plan-out still writes the requested plan file. | See command semantics |
 | --yes | flag | Apply the freshly rebuilt plan (or run the process) without prompting. | See command semantics |
 | --timeout | value | Child-process timeout in milliseconds (1..3600000). | Default: 600000 |
@@ -5998,6 +5999,7 @@ Parser-accepted common flags without documented semantics here: `--apply`, `--pl
 
 ```sh
 node bin/app framework pack --out ./plugin-framework.zip --yes
+node bin/app framework pack --out ./plugin-framework-with-starters.zip --with-starters --yes
 ```
 
 ## framework upgrade

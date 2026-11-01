@@ -19,7 +19,7 @@ test('[AC-3] after an uncertain upload the rerun uploads only the missing assets
   assert.equal(remote.releases.length, 1);
   assert.deepEqual(remote.writes, [...Array(6).fill('POST upload'), 'PATCH /releases/100', `DELETE /git/refs/heads/release/${version}`]);
   assert.deepEqual(release.assets[0], draft.assets[0], 'the asset uploaded first is untouched');
-  assert.deepEqual(release.assets.map(asset => asset.name), ['main.js', 'manifest.json', 'styles.css', `workbench-shell-${version}.zip`, `workbench-starters-${version}.zip`, 'workbench-distributions.json', 'workbench-SHA256SUMS']);
+  assert.deepEqual(release.assets.map(asset => asset.name), ['main.js', 'manifest.json', 'styles.css', `workbench-shell-${version}.zip`, `workbench-shell-with-starters-${version}.zip`, 'workbench-distributions.json', 'workbench-SHA256SUMS']);
   assert.equal(release.assets.filter(asset => asset.name === 'main.js').length, 1);
 });
 

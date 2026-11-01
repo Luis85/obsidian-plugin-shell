@@ -143,8 +143,8 @@ It refuses (exit 1) unless one open pull request from `release/X.Y.Z` targets
 `main`, its head has a green "Release result", the branch head is that commit, the
 successful Release run of that commit retained a valid candidate
 (`qualified-candidate` or `retained-build`) with matching hashes, the same run kept
-the Workbench downloads (`workbench-distributions-<sha>`: the shell and starters
-ZIPs, `workbench-distributions.json` naming this version and commit, and
+the Workbench downloads (`workbench-distributions-<sha>`: the CLI-only and the
+with-starters ZIPs, `workbench-distributions.json` (schema 2) naming this version and commit, and
 `workbench-SHA256SUMS` matching the ZIPs; `DISTRIBUTION_ARTIFACT_MISSING` or
 `DISTRIBUTION_INVALID` otherwise), and the release notes equal the changelog section.
 Both artifacts expire (the candidate after 7 days, the downloads after 14): publish
@@ -159,7 +159,7 @@ After the `release` environment approval, Publish marks the pull request ready,
 re-runs a stale "CI result" hold if there is one (see below), merges it with a
 merge commit pinned to the tested head, creates tag `X.Y.Z` at
 that commit, creates the GitHub release (draft; uploads `main.js`, `manifest.json`
-and `styles.css`, then `workbench-shell-X.Y.Z.zip`, `workbench-starters-X.Y.Z.zip`,
+and `styles.css`, then `workbench-shell-X.Y.Z.zip`, `workbench-shell-with-starters-X.Y.Z.zip`,
 `workbench-distributions.json` and `workbench-SHA256SUMS`; publishes it as latest)
 and deletes
 `release/X.Y.Z`. Its log is retained as `publish-X.Y.Z-<attempt>`.
@@ -201,12 +201,14 @@ and it waits for that run instead of starting another.
   `git rev-parse X.Y.Z^{commit}` equal the head the pull request showed.
 - The GitHub release `X.Y.Z` is published (not draft) with exactly the seven assets
   (`main.js`, `manifest.json`, `styles.css`, `workbench-shell-X.Y.Z.zip`,
-  `workbench-starters-X.Y.Z.zip`, `workbench-distributions.json`,
+  `workbench-shell-with-starters-X.Y.Z.zip`, `workbench-distributions.json`,
   `workbench-SHA256SUMS`), and its notes are the changelog section:
   `gh release view X.Y.Z`.
 - The downloads work: in an empty folder, `gh release download X.Y.Z -p 'workbench-*'`,
-  `sha256sum --check --ignore-missing workbench-SHA256SUMS`, extract both ZIPs and run
-  `node bin/app new ../check-plugin --starter quick-capture --yes`.
+  `sha256sum --check --ignore-missing workbench-SHA256SUMS`, extract
+  `workbench-shell-with-starters-X.Y.Z.zip` and run
+  `node bin/app new ../check-plugin --starter quick-capture --yes`. Its README names
+  version X.Y.Z and carries the two agent prompts.
 - `main` contains the release head: `git merge-base --is-ancestor X.Y.Z origin/main`.
 - `release/X.Y.Z` is gone: `git ls-remote --heads origin release/X.Y.Z` prints nothing.
 - On `main`, `CHANGELOG.md` has an empty `## [Unreleased]` above `## [X.Y.Z]`, and

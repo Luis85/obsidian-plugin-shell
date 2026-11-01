@@ -41,10 +41,11 @@ remains the separate import of an existing exported Companion project.
 
 ## Installation and discovery
 
-Extract the shell release in the folder from which it will be invoked. Extract
-`workbench-starters-<version>.zip` there as well, or copy only selected JSON files
-from that archive. The resulting starter files must sit next to the launcher as
-`configs/starters/*.json`, not inside `.framework`.
+Extract the shell release in the folder from which it will be invoked.
+`workbench-shell-with-starters-<version>.zip` already holds every starter; with the
+CLI-only `workbench-shell-<version>.zip`, add your own definitions or copy selected
+JSON files from the with-starters download. The starter files must sit next to the
+launcher as `configs/starters/*.json`, not inside `.framework`.
 
 ```text
 workspace/
@@ -260,11 +261,12 @@ plan does not automatically run subsequent processes.
 ```sh
 mkdir -p reports/workbench-distributions
 node bin/app framework pack --out reports/workbench-distributions/workbench-shell-0.4.0.zip --yes
-node bin/app starters pack --out reports/workbench-distributions/workbench-starters-0.4.0.zip --yes
+node bin/app framework pack --with-starters --out reports/workbench-distributions/workbench-shell-with-starters-0.4.0.zip --yes
 ```
 
 Use the version committed in `package.json`; `0.4.0` is the implementation baseline.
-The second archive contains only `configs/starters/*.json`. Definitions retain
+The second archive is the same kit plus `configs/starters/*.json`. `node bin/app starters pack --out <file>.zip --yes`
+still builds a data-only archive of just `configs/starters/*.json` for sharing definitions; releases no longer ship it. Definitions retain
 their exact UTF-8 bytes. Archives are deterministic for the same input snapshot.
 Neither command creates a tag, release or remote upload, and neither overwrites a
 different existing archive. Changing the installed recipes changes the starter

@@ -6,6 +6,15 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ## [Unreleased]
 
+### Added
+
+- Each release offers the Workbench CLI as two alternative downloads: `workbench-shell-X.Y.Z.zip` (the CLI only) and `workbench-shell-with-starters-X.Y.Z.zip` (the CLI with every starter in `configs/starters/`, ready for `node bin/app new`). `node bin/app framework pack --with-starters` builds the second one locally.
+- The extracted kit's `README.md` is now a short kit guide instead of the framework repository's README: which download it is, a five-command quick start, the framework boundaries a plugin must stay inside, and two copy-paste prompts for an AI coding agent, one to install Workbench and start a new plugin and one to migrate an existing Obsidian plugin into a clean shell.
+
+### Removed
+
+- Releases no longer ship the separate data-only `workbench-starters-X.Y.Z.zip`; download `workbench-shell-with-starters-X.Y.Z.zip` instead. `workbench-distributions.json` moves to schema 2 and lists the two kits.
+
 ### Fixed
 
 - The repository analyzer now runs the reviewed Fallow 3.37.0 contract: the dead-code, health and dupes report schemas (10, 12, 10) and the analyzer configuration are unchanged, so only the pinned version moves.

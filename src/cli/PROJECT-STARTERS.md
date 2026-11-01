@@ -1,9 +1,9 @@
 # Project starters and target-aware prototype creation
 
 Creating a project always runs a **project starter**: a JSON definition in
-`configs/starters/<id>.json` whose `generator.kind` is `project`. The shell ZIP
-contains no starters. Extract the separate `workbench-starters-<version>.zip` into the same package root
-(or add your own definition) first; the maker reads project starters
+`configs/starters/<id>.json` whose `generator.kind` is `project`. The
+`workbench-shell-with-starters-<version>.zip` download carries every starter; the CLI-only
+`workbench-shell-<version>.zip` contains none, so add a definition first; the maker reads project starters
 from that folder, honoring its `configs/user-settings.json` `paths.startersFolder`.
 An empty folder lists no starters, and creation fails closed rather than falling back.
 

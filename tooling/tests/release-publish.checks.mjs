@@ -8,7 +8,7 @@ import { publishFixture, repository, version, head, notes } from '../../src/cli/
 const publish = (fixture, execute = false) => publishRelease({ repository, version, execute, run: fixture.run, lockDirectory: fixture.folder });
 const uploads = count => Array(count).fill('POST upload');
 const fullWrites = ['pr ready', 'PUT /pulls/12/merge', 'POST /git/refs', 'POST /releases', ...uploads(7), 'PATCH /releases/100', `DELETE /git/refs/heads/release/${version}`];
-const releaseAssets = ['main.js', 'manifest.json', 'styles.css', `workbench-shell-${version}.zip`, `workbench-starters-${version}.zip`, 'workbench-distributions.json', 'workbench-SHA256SUMS'];
+const releaseAssets = ['main.js', 'manifest.json', 'styles.css', `workbench-shell-${version}.zip`, `workbench-shell-with-starters-${version}.zip`, 'workbench-distributions.json', 'workbench-SHA256SUMS'];
 const statuses = result => result.steps.map(step => `${step.id}:${step.status}`);
 
 test('the default publish is a read-only plan bound to the tested head, candidate and notes', async t => {

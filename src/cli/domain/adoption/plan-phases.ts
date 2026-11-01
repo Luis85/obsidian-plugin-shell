@@ -45,7 +45,7 @@ function kitNotes(report: AdoptionReport): string[] {
 export function phaseOne(report: AdoptionReport): string[][] {
   return phase(1, 'Install the CLI kit as a sidecar', {
     goal: `Make the Workbench CLI available inside the project, from the project root, without installing anything into its dependency graph.`,
-    commands: `mkdir -p ${kitDirectory}\n# Download workbench-cli-<version>.zip and workbench-SHA256SUMS from the Workbench release, then:\nsha256sum -c workbench-SHA256SUMS --ignore-missing\nunzip workbench-cli-<version>.zip -d ${kitDirectory}\n# Optional: workbench-starters-<version>.zip into the same folder, for configs/starters\nls ${kitDirectory}/bin/app   # bin/app must sit directly in the kit folder, not in a nested folder\n${kitCommand} framework status --root ${kitDirectory}\n${kitCommand} help`,
+    commands: `mkdir -p ${kitDirectory}\n# Download workbench-shell-with-starters-<version>.zip and workbench-SHA256SUMS from the Workbench release, then:\nsha256sum -c workbench-SHA256SUMS --ignore-missing\nunzip workbench-shell-with-starters-<version>.zip -d ${kitDirectory}\nls ${kitDirectory}/bin/app   # bin/app must sit directly in the kit folder, not in a nested folder\n${kitCommand} framework status --root ${kitDirectory}\n${kitCommand} help`,
     files: [`${code(kitDirectory + '/**')} (new; the kit is self-contained and runs before any npm install)`, ...ignoreFiles(report)],
     acceptance: [`${code('framework status --root ' + kitDirectory)} verifies the kit files against ${code('bin/kit.json')} (checksums, not signatures).`, 'The legacy build and test baseline from phase 0 gives identical results.', `${code('git status')} shows only ${code(kitDirectory)} and the ignore-file edits.`],
     notes: kitNotes(report),

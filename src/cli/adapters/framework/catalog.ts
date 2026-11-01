@@ -124,7 +124,7 @@ export const commands: readonly Command[] = [
   { id: 'site new', summary: 'Plan a standalone Astro website in projects/<name> from a site template; previews unless --yes. Never installs or builds.', options: values('template', 'title'), maxArgs: 1, effect: 'plan' },
   { id: 'site collections', summary: 'Plan the Bases collection snapshots (src/data/collections/<name>.collection.json) a site project lists in workbench.project.json.', options: {}, maxArgs: 1, effect: 'plan' },
   { id: 'framework status', summary: 'Inspect the pinned kit and its integrity.', options: {}, maxArgs: 0, effect: 'read' },
-  { id: 'framework pack', summary: 'Build a deterministic compiled developer-kit ZIP locally.', options: values('out'), maxArgs: 0, effect: 'process' },
+  { id: 'framework pack', summary: 'Build a deterministic compiled developer-kit ZIP locally; --with-starters also packs every installed starter.', options: { ...values('out'), 'with-starters': 'flag' }, maxArgs: 0, effect: 'process' },
   { id: 'framework upgrade', summary: 'Plan an explicit kit replacement; deletes only verified retired kit files and keeps edited plugin configs or reports a conflict.', options: values('from'), maxArgs: 0, effect: 'plan' },
   { id: 'release prepare', summary: 'Plan source version and release-note changes.', options: values('version', 'notes-file', 'min-app-version'), maxArgs: 0, effect: 'plan' },
   { id: 'release check', summary: 'Inspect packaging and optionally validate a retained release plan.', options: values('input'), maxArgs: 0, effect: 'read' },

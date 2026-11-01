@@ -1,7 +1,9 @@
 // Increment: [[docs/increments/cli-release-downloads]]
 // AC-4: The shell and starters ZIPs packed from this checkout, extracted into one empty folder without `node_modules`, run `node bin/app new` with a starter and produce the project's `package.json`, `manifest.json` and `AGENTS.md`.
-// Packs both downloads with the same commands the Release tier runs (starter-distribution.yml), then uses only the
-// extracted files: no repository checkout, no node_modules and no global install.
+// The starters now ship inside `workbench-shell-with-starters-X.Y.Z.zip`, the alternative to the CLI-only
+// `workbench-shell-X.Y.Z.zip`. Packs both downloads with the same commands the Release tier runs
+// (starter-distribution.yml), then uses only the extracted files: no repository checkout, no node_modules and no
+// global install.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { access, mkdir, mkdtemp, readFile, readdir, realpath, rm } from 'node:fs/promises';
@@ -24,23 +26,28 @@ const exists = path => access(join(root, path)).then(() => true, () => false);
 const framework = JSON.parse(await readFile(join(root, 'manifest.json'), 'utf8')).id === 'plugin-shell'
   && !await exists('shell.config.json') && !await exists('.companion/generation.json');
 
-test('[AC-4] the extracted shell and starters downloads scaffold a plugin without node_modules', async t => {
+test('[AC-4] each extracted download stands alone; the with-starters one scaffolds a plugin without node_modules', async t => {
   const folder = await realpath(await mkdtemp(join(tmpdir(), 'cli-downloads-'))); t.after(() => rm(folder, { recursive: true, force: true }));
-  const shellZip = join(folder, `workbench-shell-${version}.zip`), startersZip = join(folder, `workbench-starters-${version}.zip`);
+  const shellZip = join(folder, `workbench-shell-${version}.zip`), fullZip = join(folder, `workbench-shell-with-starters-${version}.zip`);
   if (!framework) {
     const refused = cli(join(root, 'bin/app'), root, ['framework', 'pack', '--out', shellZip, '--yes']);
     assert.equal(refused.status, 1, refused.stderr); assert.equal(refused.result.diagnostics[0].code, 'KIT_AUTHORING_ROOT');
     await assert.rejects(access(shellZip), { code: 'ENOENT' }, 'a consumer checkout writes no release download');
     return;
   }
-  for (const [kind, out] of [['framework', shellZip], ['starters', startersZip]]) {
-    const packed = cli(join(root, 'bin/app'), root, [kind, 'pack', '--out', out, '--yes']);
-    assert.equal(packed.status, 0, `${kind} pack: ${JSON.stringify(packed.result?.diagnostics)} ${packed.stderr}`);
+  for (const [out, extra] of [[shellZip, []], [fullZip, ['--with-starters']]]) {
+    const packed = cli(join(root, 'bin/app'), root, ['framework', 'pack', ...extra, '--out', out, '--yes']);
+    assert.equal(packed.status, 0, `pack ${extra}: ${JSON.stringify(packed.result?.diagnostics)} ${packed.stderr}`);
     assert.equal(packed.result.data.publication, 'not-authorized');
+    assert.equal(packed.result.data.starters > 0, extra.length > 0, 'only the with-starters download carries starters');
   }
-  const download = join(folder, 'download'); await mkdir(download);
-  for (const archive of [shellZip, startersZip]) await extractArchive(await readFile(archive), download);
-  await assert.rejects(access(join(download, 'node_modules')), { code: 'ENOENT' });
+  const lean = join(folder, 'lean'), download = join(folder, 'download');
+  await mkdir(lean); await mkdir(download);
+  await extractArchive(await readFile(shellZip), lean);
+  await extractArchive(await readFile(fullZip), download);
+  const bare = cli(join(lean, 'bin/app'), lean, ['starters', 'list']);
+  assert.equal(bare.status, 0, bare.stderr); assert.deepEqual(bare.result.data.starters, []);
+  for (const kit of [lean, download]) await assert.rejects(access(join(kit, 'node_modules')), { code: 'ENOENT' });
   const app = join(download, 'bin/app');
   const listed = cli(app, download, ['starters', 'list']);
   assert.equal(listed.status, 0, listed.stderr); assert.ok(listed.result.data.starters.some(starter => starter.id === 'quick-capture'));

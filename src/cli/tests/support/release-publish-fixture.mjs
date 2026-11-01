@@ -27,10 +27,10 @@ export function candidateFiles(commit = head) {
 
 /** The workbench-distributions-<sha> artifact exactly as starter-distribution.yml packs it on the Release tier. */
 export function distributionFiles(commit = head, release = version) {
-  const zips = { [`workbench-shell-${release}.zip`]: 'PK\u0003\u0004 shell kit', [`workbench-starters-${release}.zip`]: 'PK\u0003\u0004 starters' };
-  const assets = Object.entries(zips).map(([name, value], index) => ({ kind: index ? 'starters' : 'shell', name, bytes: Buffer.byteLength(value), sha256: sha256(value) }));
+  const zips = { [`workbench-shell-${release}.zip`]: 'PK\u0003\u0004 shell kit', [`workbench-shell-with-starters-${release}.zip`]: 'PK\u0003\u0004 shell kit with starters' };
+  const assets = Object.entries(zips).map(([name, value], index) => ({ kind: index ? 'shell-with-starters' : 'shell', name, bytes: Buffer.byteLength(value), sha256: sha256(value) }));
   const bytes = { ...zips,
-    'workbench-distributions.json': JSON.stringify({ schemaVersion: 1, version: release, sourceCommit: commit, starterSchemaVersion: 1, assets, publication: 'separate-explicit-approval' }, null, 2) + '\n',
+    'workbench-distributions.json': JSON.stringify({ schemaVersion: 2, version: release, sourceCommit: commit, starterSchemaVersion: 1, assets, publication: 'separate-explicit-approval' }, null, 2) + '\n',
     'workbench-SHA256SUMS': assets.map(asset => `${asset.sha256}  ${asset.name}\n`).join('') };
   return { bytes, name: `workbench-distributions-${commit}`, assetHashes: Object.fromEntries(Object.entries(bytes).map(([name, value]) => [name, sha256(value)])) };
 }
