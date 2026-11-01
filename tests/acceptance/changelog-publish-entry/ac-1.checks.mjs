@@ -14,11 +14,19 @@ function section(changelog, name) {
   return changelog.slice(start, end < 0 ? undefined : end);
 }
 
+/** The section holding `entry` among those newer than 0.5.0: `Unreleased` until a release cut promotes it into the next version. */
+function pendingSection(changelog) {
+  const newer = changelog.slice(changelog.indexOf('## [Unreleased]'), changelog.indexOf('\n## [0.5.0]'));
+  const at = newer.indexOf(entry); assert.ok(at >= 0, 'the entry is in Unreleased or a version after 0.5.0');
+  const start = newer.lastIndexOf('## [', at);
+  const end = newer.indexOf('\n## [', at);
+  return newer.slice(start, end < 0 ? undefined : end);
+}
+
 test('[AC-1] the Publish token fix is listed once, under Unreleased › Fixed, and not under 0.5.0', async () => {
   const changelog = await readFile(resolve(root, 'CHANGELOG.md'), 'utf8');
   assert.equal(changelog.split(entry).length - 1, 1);
-  const unreleased = section(changelog, 'Unreleased');
-  assert.ok(unreleased.includes(entry));
-  assert.ok(unreleased.indexOf('### Fixed') >= 0 && unreleased.indexOf('### Fixed') < unreleased.indexOf(entry));
+  const pending = pendingSection(changelog);
+  assert.ok(pending.indexOf('### Fixed') >= 0 && pending.indexOf('### Fixed') < pending.indexOf(entry));
   assert.ok(!section(changelog, '0.5.0').includes(entry));
 });
