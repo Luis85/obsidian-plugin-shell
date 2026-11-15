@@ -6,6 +6,10 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ## [Unreleased]
 
+### Changed
+
+- Updated development dependencies: Vue 3.5.45, Vite 8.3, Tailwind CSS 4.3.5, Playwright 1.65.0, Astro 7.4.7 and `@iconify-json/lucide` 1.2.152 in the standalone projects, oxlint, typescript-eslint, Prettier, happy-dom and `@iconify-json/lucide` in the companion project, and `@iconify-json/lucide` in the repository root. No behavior change.
+
 ## [0.6.0] - 2026-11-01
 
 ### Added
