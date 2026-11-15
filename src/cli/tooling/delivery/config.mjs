@@ -119,8 +119,8 @@ export function validateDeliveryConfig(data, file = configFiles.delivery) {
   validateDocuments(file, 'issues', data.issues, []);
   validateBranches(file, data.branches);
   data.acceptance = validateAcceptance(file, data.acceptance, data.handoff.statuses);
-  exactKeys(file, 'exemptions', data.exemptions, ['branches', 'actors']);
-  for (const key of ['branches', 'actors']) listOf(file, `exemptions.${key}`, data.exemptions[key]);
+  exactKeys(file, 'exemptions', data.exemptions, ['branches', 'actors'], ['paths']);
+  for (const key of ['branches', 'actors', ...(Object.hasOwn(data.exemptions, 'paths') ? ['paths'] : [])]) listOf(file, `exemptions.${key}`, data.exemptions[key]);
   if (!isObject(data.sizes) || !Object.keys(data.sizes).length) fail(file, 'sizes must name at least one size');
   for (const [size, budget] of Object.entries(data.sizes)) {
     exactKeys(file, `sizes.${size}`, budget, ['maxAcceptanceCriteria', 'maxAffectedAreas']);

@@ -8,11 +8,20 @@ import { parseFrontmatter } from './handoff.mjs';
 import { parseBranch, referencePath } from './documents.mjs';
 import { matchesAny, safeRelative } from './paths.mjs';
 
-/** The exemption notice for a head branch or pull-request author the config exempts, else null. */
-export function exemption(delivery, { headRef = '', actor = '' }) {
+/**
+ * The exemption notice for a head branch or pull-request author the config exempts, or for a diff (`changed`, the
+ * changed paths) that touches only the lightweight lane (`exemptions.paths`), else null. A delivery document
+ * (Increment, PullRequest or Issue) is never in the lane: changing one keeps the full check.
+ */
+export function exemption(delivery, { headRef = '', actor = '', changed = null }) {
   const branch = delivery.exemptions.branches.find(prefix => headRef.startsWith(prefix));
   if (branch) return `Head branch ${headRef} is exempt (${branch}*): no increment handoff is required.`;
   if (delivery.exemptions.actors.includes(actor)) return `Pull requests by ${actor} are exempt: no increment handoff is required.`;
+  const lane = delivery.exemptions.paths ?? [];
+  const documents = [delivery.handoff.glob, delivery.pullRequests.glob, delivery.issues.glob];
+  if (lane.length && changed?.length && changed.every(path => matchesAny(lane, path) && !matchesAny(documents, path))) {
+    return `Only lightweight-lane files changed (${changed.length}, all under ${lane.join(', ')}): no increment handoff is required.`;
+  }
   return null;
 }
 

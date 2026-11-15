@@ -123,6 +123,15 @@ Pull requests whose head starts with a prefix in `exemptions.branches`
 release template; `release.yml` reports both check names for them after "Release
 result".
 
+The **lightweight lane** (`exemptions.paths`) exempts a pull request whose changed
+files all sit under those paths: `docs/`, Markdown at the repository root (such as
+`CHANGELOG.md` or `README.md`), the root and `projects/*` lockfiles, and
+`.github/dependabot.yml`. A docs fix, a changelog entry or a lockfile-only
+dependency bump then needs no increment handoff. One file outside the lane, or any
+Increment, PullRequest or Issue document in the diff, keeps the full check.
+`package.json` is not in the lane because it can change scripts. The lane skips the
+handoff only: every CI gate still runs.
+
 ## Acceptance test stubs
 
 Every acceptance criterion gets a generated, pending test stub at
