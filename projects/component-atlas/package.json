@@ -23,7 +23,7 @@
     "@iconify-json/lucide": "1.2.152",
     "@vitejs/plugin-vue": "6.0.10",
     "playwright": "1.65.0",
-    "tailwindcss": "4.3.3",
+    "tailwindcss": "4.3.5",
     "vite": "8.3.6"
   }
 }
