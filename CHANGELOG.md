@@ -6,6 +6,8 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-15
+
 ### Changed
 
 - Updated development dependencies (Vue, Vite, Tailwind CSS, Playwright, Astro, oxlint, typescript-eslint, Prettier, happy-dom and `@iconify-json/lucide`). No behavior change.
@@ -129,7 +131,8 @@ feature authoring and a Vue/Nuxt UI showcase. This version is not a published
 release. Consult the iteration guides and actual test records for qualification
 and outstanding support limitations.
 
-[Unreleased]: https://github.com/Luis85/obsidian-plugin-shell/compare/0.6.0...HEAD
+[Unreleased]: https://github.com/Luis85/obsidian-plugin-shell/compare/0.6.1...HEAD
+[0.6.1]: https://github.com/Luis85/obsidian-plugin-shell/releases/tag/0.6.1
 [0.6.0]: https://github.com/Luis85/obsidian-plugin-shell/releases/tag/0.6.0
 [0.5.0]: https://github.com/Luis85/obsidian-plugin-shell/releases/tag/0.5.0
 [0.4.0]: https://github.com/Luis85/obsidian-plugin-shell/releases/tag/0.4.0
