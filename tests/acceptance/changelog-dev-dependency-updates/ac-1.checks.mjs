@@ -15,11 +15,19 @@ function section(changelog, name) {
   return changelog.slice(start, end < 0 ? undefined : end);
 }
 
-test('[AC-1] the development dependency update is listed once, under Unreleased › Changed, and not under 0.6.0', async () => {
+/** The section holding `entry` among those newer than 0.6.0: `Unreleased` until a release cut promotes it into the next version. */
+function pendingSection(changelog) {
+  const newer = changelog.slice(changelog.indexOf('## [Unreleased]'), changelog.indexOf('\n## [0.6.0]'));
+  const at = newer.indexOf(entry); assert.ok(at >= 0, 'the entry is in Unreleased or a version after 0.6.0');
+  const start = newer.lastIndexOf('## [', at);
+  const end = newer.indexOf('\n## [', at);
+  return newer.slice(start, end < 0 ? undefined : end);
+}
+
+test('[AC-1] the development dependency update is listed once, under Changed in Unreleased or the release that promoted it, and not under 0.6.0', async () => {
   const changelog = await readFile(resolve(root, 'CHANGELOG.md'), 'utf8');
   assert.equal(changelog.split(entry).length - 1, 1);
-  const unreleased = section(changelog, 'Unreleased');
-  assert.ok(unreleased.includes('### Changed'));
-  assert.ok(unreleased.indexOf('### Changed') < unreleased.indexOf(entry));
+  const pending = pendingSection(changelog);
+  assert.ok(pending.indexOf('### Changed') >= 0 && pending.indexOf('### Changed') < pending.indexOf(entry));
   assert.ok(!section(changelog, '0.6.0').includes(entry));
 });
