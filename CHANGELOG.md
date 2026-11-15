@@ -6,6 +6,10 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ## [Unreleased]
 
+### Changed
+
+- Updated development dependencies (Vue, Vite, Tailwind CSS, Playwright, Astro, oxlint, typescript-eslint, Prettier, happy-dom and `@iconify-json/lucide`). No behavior change.
+
 ## [0.6.0] - 2026-11-01
 
 ### Added
