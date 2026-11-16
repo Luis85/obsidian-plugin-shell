@@ -6,6 +6,10 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ## [Unreleased]
 
+### Changed
+
+- Release cut no longer waits for a `release` environment approval (it runs in `release-cut`); Publish keeps the reviewer-protected `release` environment, so a release needs one approval instead of two.
+
 ## [0.6.1] - 2026-11-15
 
 ### Changed

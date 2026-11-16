@@ -49,7 +49,7 @@ export function inspectWorkflow(text, file = '') {
   if (!jobs.length) throw new Error('WORKFLOW_NO_JOBS');
   for (const job of jobs) {
     if (!job || typeof job !== 'object') throw new Error('WORKFLOW_JOB_INVALID');
-    inspectJobPrivileges(job, privileged);
+    inspectJobPrivileges(job, privileged, file);
     if (job.uses) {
       const called = localWorkflowCall(job.uses);
       if (called) localWorkflows.add(called); else pinned(job.uses);

@@ -1,13 +1,16 @@
 /**
  * Scoped workflow allowances for the delivery pipeline (owner-requested). Every workflow keeps read-only
  * top-level permissions. Only the files named in `privilegedWorkflows` may grant a job write scopes, and only
- * when they are dispatch-only and every write job targets the reviewer-protected `release` environment.
+ * when they are dispatch-only and every write job targets that file's environment (`writeEnvironments`):
+ * the reviewer-protected `release` environment for Publish and generated releases, and `release-cut` for the
+ * cut, which only opens a release branch and draft pull request and publishes nothing (owner decision:
+ * approve once, on Publish).
  * `obsidian-release.yml` is the generated projects' draft-release workflow (templates/companion/devkit).
  * A job may call a repository-local reusable workflow by exact file name; checkRepository confirms that the
  * target exists and declares `on.workflow_call`.
  */
 export const privilegedWorkflows = Object.freeze(['release-cut.yml', 'publish.yml', 'obsidian-release.yml']);
-const releaseEnvironment = 'release';
+const writeEnvironments = Object.freeze({ 'release-cut.yml': 'release-cut', 'publish.yml': 'release', 'obsidian-release.yml': 'release' });
 const localWorkflow = /^\.\/\.github\/workflows\/([a-z0-9]+(?:-[a-z0-9]+)*\.ya?ml)$/;
 
 /** The workflow file a job-level `uses:` calls, or null when it is not an exact repository-local reference. */
@@ -30,13 +33,13 @@ export function checkPermissions(value, allowWrite = false) {
 }
 const environmentName = value => typeof value === 'string' ? value : value && typeof value === 'object' ? value.name : undefined;
 
-/** Job-level rules: write scopes only in an allowlisted file and only behind the release environment. */
-export function inspectJobPrivileges(job, privileged) {
+/** Job-level rules: write scopes only in an allowlisted file and only behind that file's environment. */
+export function inspectJobPrivileges(job, privileged, file = '') {
   if (privileged && job.uses) throw new Error('PRIVILEGED_WORKFLOW_CALL_FORBIDDEN');
   if (job.uses && job.secrets !== undefined) throw new Error('WORKFLOW_CALL_SECRETS_FORBIDDEN');
   if (job.permissions === undefined) return;
   const writes = checkPermissions(job.permissions, privileged);
-  if (writes && environmentName(job.environment) !== releaseEnvironment) throw new Error('PRIVILEGED_JOB_WITHOUT_ENVIRONMENT');
+  if (writes && environmentName(job.environment) !== writeEnvironments[file]) throw new Error('PRIVILEGED_JOB_WITHOUT_ENVIRONMENT');
 }
 
 /** Workflow-level rules for an allowlisted file: manual dispatch is its only trigger. */
