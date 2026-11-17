@@ -14,6 +14,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 - Pull requests that change only docs, root Markdown, lockfiles or the Dependabot configuration take a lightweight lane and need no increment handoff; every CI gate still runs.
 - Release cut no longer waits for a `release` environment approval (it runs in `release-cut`); Publish keeps the reviewer-protected `release` environment, so a release needs one approval instead of two.
+- Ready pull requests run the core shell gate; generator and starter qualification runs only when its inputs change, and the full breadth, including the Windows complete verify, runs nightly on main and in every Release run.
 
 ## [0.6.1] - 2026-11-15
 

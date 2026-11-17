@@ -75,7 +75,10 @@ reviewed selectable language.
 **Delivery process.** Branch from `main` (or stack on another pull request's
 branch) and keep a **draft** pull request: only the fast Dev tier ("Dev checks")
 runs. Marking it ready for review starts the Integration tier ("CI result" and every
-pull-request workflow); merge a green pull request with a merge commit. A
+pull-request workflow): the core shell gate, plus generator and starter
+qualification only when a generator input (`configs/quality/ci-scope.json`)
+changes; `nightly.yml` runs the full breadth, including the Windows complete
+verify, on `main`. Merge a green pull request with a merge commit. A
 `release/X.Y.Z` branch runs the Release tier, and the owner-dispatched Publish
 workflow merges its pull request, tags `X.Y.Z` and creates the GitHub release; never
 merge a release pull request manually. Agents never dispatch Release cut or Publish,

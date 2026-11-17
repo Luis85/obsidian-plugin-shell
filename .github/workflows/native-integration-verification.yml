@@ -7,18 +7,35 @@ name: Native integration starters
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+    # Generator inputs only (configs/quality/ci-scope.json, kept equal by
+    # tooling/tests/ci-scope.checks.mjs); nightly.yml and the release tier run it regardless.
     paths:
-      - '**'
-      - '.*'
-      - '.*/**'
-      - '!docs/**'
-      - '!README.md'
-      - '!AGENTS.md'
-      - 'docs/concepts/**'
-      - 'docs/testing/acceptance-crosswalk.json'
-      - 'docs/testing/native-evidence-checks.json'
-      - 'docs/testing/test-plan.json'
-      - 'docs/design/obsidian-tokens.json'
+      - 'templates/**'
+      - 'configs/starters/**'
+      - 'configs/wizards/**'
+      - 'configs/forms/**'
+      - 'src/cli/compiler/**'
+      - 'src/cli/sdk/**'
+      - 'src/cli/adapters/starters/**'
+      - 'src/cli/adapters/framework/**'
+      - 'src/cli/adapters/framework-cli.ts'
+      - 'src/shared/companion/**'
+      - 'tooling/airship/**'
+      - 'tooling/bundling/**'
+      - 'tooling/companion-tools/**'
+      - 'tooling/compiler/**'
+      - 'tooling/concepts/**'
+      - 'tooling/examples/**'
+      - 'tooling/makers/**'
+      - 'tooling/starters/**'
+      - 'tooling/setup.mjs'
+      - 'tooling/setup/**'
+      - 'tooling/quality/ci-scope.mjs'
+      - 'configs/quality/ci-scope.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/actions/**'
+      - '.github/workflows/**'
       - '!projects/**'
   # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
   workflow_call:

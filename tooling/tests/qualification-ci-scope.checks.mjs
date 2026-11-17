@@ -23,6 +23,7 @@ const verifyLines = text => [...text.matchAll(/run verify -- ([^\n|]*)/g)].map(m
 const templateJobs = ['renamed-feature', 'source-archive', 'example-removal'];
 const lookup = values => path => Object.hasOwn(values, path) ? values[path] : /^(?:github|inputs)\./.test(path) ? '' : undefined;
 const dispatch = lookup({ 'github.event_name': 'workflow_dispatch', 'inputs.tier': 'integration' });
+const inScope = scenario => path => path === 'needs.scope.outputs.generators' ? 'true' : scenario(path);
 /** Steps of a job that run in a scenario (an undecidable step condition counts as running). */
 const active = (job, scenario) => job.steps.filter(step => gateValue([step.if], scenario) !== false);
 
@@ -65,18 +66,31 @@ test('an e2e label run rebuilds only what the served steps need in both template
   }
 });
 
-test('a push to main skips the template-authoring jobs and the Ubuntu showcase leg, which run on pull requests, dispatch and release', async () => {
+test('a push to main skips the template-authoring jobs, which run on pull requests, dispatch and release', async () => {
   const ci = await load('.github/workflows/ci.yml');
   for (const id of templateJobs) {
     assert.equal(gateValue([ci.jobs[id].if], e2eScenarios.pushToMain), false, `${id} skips main pushes`);
-    for (const scenario of [e2eScenarios.readyPullRequest, e2eScenarios.release, dispatch]) assert.equal(gateValue([ci.jobs[id].if], scenario), true, id);
+    // Outside a pull request the scope job reports every generator job in scope.
+    for (const scenario of [e2eScenarios.release, dispatch].map(inScope)) assert.equal(gateValue([ci.jobs[id].if], scenario), true, id);
     assert.ok(ci['jobs']['ci-result'].needs.includes(id), `CI result aggregates ${id}`);
   }
-  const ubuntu = /fromJSON\(\((.+?)\) && '\["ubuntu-24\.04", "windows-latest"\]' \|\| '\["windows-latest"\]'\)/.exec(ci.jobs.showcase.strategy.matrix.os);
-  assert.ok(ubuntu, 'the showcase matrix adds Ubuntu by one condition');
-  assert.deepEqual([e2eScenarios.pushToMain, e2eScenarios.readyPullRequest, e2eScenarios.release, dispatch].map(scenario => gateValue([ubuntu[1]], scenario)), [false, false, true, true]);
-  assert.equal(gateValue([ci.jobs.showcase.if], e2eScenarios.pushToMain), true, 'the Windows complete verify still runs on main');
+  for (const id of ['renamed-feature', 'source-archive']) assert.equal(gateValue([ci.jobs[id].if], e2eScenarios.readyPullRequest), true, `${id} is part of the core pull-request gate`);
   assert.match(ci.jobs['ci-result'].steps[0].run, /\.value\.result != "success" and \.value\.result != "skipped"/, 'a job skipped by its own condition counts as passing');
+});
+
+test('Showcase runs nightly, on dispatch and in the release tier; a pull request runs only its Ubuntu served showcase, with the e2e label', async () => {
+  const ci = await load('.github/workflows/ci.yml'), job = ci.jobs.showcase;
+  const nightly = lookup({ 'github.event_name': 'schedule', 'github.ref': 'refs/heads/main', 'inputs.tier': 'integration' });
+  const runs = [e2eScenarios.pushToMain, e2eScenarios.readyPullRequest, e2eScenarios.labelledPullRequest, e2eScenarios.otherLabelAdded, e2eScenarios.release, dispatch, nightly].map(scenario => gateValue([job.if], scenario));
+  assert.deepEqual(runs, [false, false, true, false, true, true, true]);
+  const matrix = /^\$\{\{ fromJSON\((.+)\) \}\}$/.exec(job.strategy.matrix.os.trim());
+  assert.ok(matrix, 'the showcase matrix is one expression');
+  const legs = scenario => {
+    const both = gateValue([matrix[1].split(" && '[\"ubuntu-24.04\", \"windows-latest\"]'")[0]], scenario);
+    return both ? 'both' : gateValue(["github.event_name == 'schedule'"], scenario) ? 'windows' : 'ubuntu';
+  };
+  assert.match(matrix[1], /^\(inputs\.tier == 'release' \|\| github\.event_name == 'workflow_dispatch'\) && '\["ubuntu-24\.04", "windows-latest"\]' \|\| github\.event_name == 'schedule' && '\["windows-latest"\]' \|\| '\["ubuntu-24\.04"\]'$/);
+  assert.deepEqual([e2eScenarios.release, dispatch, nightly, e2eScenarios.labelledPullRequest].map(legs), ['both', 'both', 'windows', 'ubuntu']);
 });
 
 test('setup-compatibility runs every gate but the tooling suites on Node 24.15.0 (Ubuntu) and a targeted Windows npm 12 leg', async () => {

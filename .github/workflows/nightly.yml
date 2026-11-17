@@ -1,0 +1,98 @@
+name: Nightly
+# Full Integration breadth on main every night (owner decision): pull requests run
+# the core shell gate, generator and starter qualification runs on a pull request
+# only when its inputs change (configs/quality/ci-scope.json), and the Windows
+# complete verify (CI's Showcase / windows-latest) runs on no pull request or push.
+# This run calls CI (where every job runs, Showcase included) and every other
+# workflow the Release tier calls, except Candidate qualification, which already
+# qualifies every push to main. Tier integration: three-OS matrices run Linux,
+# e2e stays opt-in (dispatch with e2e). The Release tier is unchanged.
+on:
+  schedule:
+    - cron: '23 2 * * *'
+  workflow_dispatch:
+# checks: read only because ci.yml's "CI result" reads check runs, and a called
+# job may not request more than its caller grants (GitHub rejects the run at startup).
+permissions:
+  contents: read
+  checks: read
+# Distinct from every called workflow's group; a newer nightly supersedes the run.
+concurrency:
+  group: nightly-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+    with:
+      tier: integration
+  airship-compatibility:
+    name: Airship
+    uses: ./.github/workflows/airship-compatibility.yml
+    with:
+      tier: integration
+  angular-setup-acceptance:
+    name: Angular setup
+    uses: ./.github/workflows/angular-setup-acceptance.yml
+    with:
+      tier: integration
+  application-docs:
+    name: Application docs
+    uses: ./.github/workflows/application-docs.yml
+    with:
+      tier: integration
+  companion-concept-verification:
+    name: Companion concept
+    uses: ./.github/workflows/companion-concept-verification.yml
+    with:
+      tier: integration
+  compiler-qualification:
+    name: Compiler
+    uses: ./.github/workflows/compiler-qualification.yml
+    with:
+      tier: integration
+  hindsight-tooling:
+    name: Memory tooling
+    uses: ./.github/workflows/hindsight-tooling.yml
+    with:
+      tier: integration
+  interactive-maker:
+    name: Interactive maker
+    uses: ./.github/workflows/interactive-maker.yml
+    with:
+      tier: integration
+  native-integration-verification:
+    name: Native integrations
+    uses: ./.github/workflows/native-integration-verification.yml
+    with:
+      tier: integration
+  optional-storybook:
+    name: Optional Storybook
+    uses: ./.github/workflows/optional-storybook.yml
+    with:
+      tier: integration
+  project-starter-qualification:
+    name: Project starters
+    uses: ./.github/workflows/project-starter-qualification.yml
+    with:
+      tier: integration
+  setup-compatibility:
+    name: Setup compatibility
+    uses: ./.github/workflows/setup-compatibility.yml
+    with:
+      tier: integration
+  starter-distribution:
+    name: Starter distribution
+    uses: ./.github/workflows/starter-distribution.yml
+    with:
+      tier: integration
+  projects-boundary:
+    name: Projects boundary
+    uses: ./.github/workflows/projects-boundary.yml
+    with:
+      tier: integration
+  site-templates:
+    name: Site templates
+    uses: ./.github/workflows/site-templates.yml
+    with:
+      tier: integration

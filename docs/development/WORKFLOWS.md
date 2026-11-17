@@ -17,7 +17,7 @@ is explained in [Delivery pipeline](DELIVERY-PIPELINE.md); the task guides are
 | Integration | the same events on a non-draft pull request whose head is not `release/*`; pushes to `main` for `ci.yml` and the push-triggered workflows; end-to-end steps only when opted in, and `labeled` (the `e2e` label) starts just those | `ci.yml`, `definition-of-done.yml` and every other pull-request workflow | **CI result** and **Definition of Done** (required); the other workflows report their own job checks; a label run reports **E2E result** (not required) |
 | Release | push to `release/**`, or manual dispatch on a release branch | `release.yml`, which calls every pull-request workflow with `tier: release` plus `candidate-qualification.yml`; every end-to-end step is mandatory | **Release result** (Publish requires it; not a branch-protection check) |
 | Publish | manual dispatch from `main` only; Publish behind the `release` environment, the cut in `release-cut` (no reviewer) | `release-cut.yml`, `publish.yml` | environment reviewers' approval |
-| Scheduled / manual | `schedule` or `workflow_dispatch` | `maintenance-status.yml`, `offline-qualification-inputs.yml`, `release-rehearsal.yml` | none (they gate nothing) |
+| Scheduled / manual | `schedule` or `workflow_dispatch` | `nightly.yml` (full Integration breadth on `main`, see [Core shell gate](#core-shell-gate-and-nightly)), `maintenance-status.yml`, `offline-qualification-inputs.yml`, `release-rehearsal.yml` | none (they gate nothing) |
 
 ## Workflow table
 
@@ -32,17 +32,17 @@ abbreviated **ready-gate** below. Retention is the `retention-days` of each
 | `dev.yml` (Dev) | Dev | `pull_request` | `fast` "Dev checks", ubuntu-24.04, 20 min, no gate | none |
 | `definition-of-ready.yml` (Definition of Ready) | Dev | `pull_request` (`opened`, `synchronize`, `reopened`, `edited`, `ready_for_review`), no branch filter | `ready` "Definition of Ready", ubuntu-24.04, 5 min, no install, full history; skips `release/*` heads; `node tooling/delivery/ready.mjs --base origin/<base>` | `definition-of-ready-<attempt>` (7): the refinement brief |
 | `definition-of-done.yml` (Definition of Done) | Integration | `pull_request` (the same plus `labeled`, `unlabeled`), no branch filter | `done` "Definition of Done", ubuntu-24.04, 5 min, no install, full history; skips drafts and `release/*` heads; `node tooling/delivery/done.mjs --base origin/<base>` | `definition-of-done-<attempt>` (7): the generated Completion record, changelog entries and index rows |
-| `ci.yml` (CI) | Integration | `pull_request` (+ `labeled`), push `main`, `workflow_call` (`tier`, `e2e`), `workflow_dispatch` (`tier`, `e2e`) | `baseline` (ubuntu-24.04, windows-latest), `showcase` (pull request and push: windows-latest; dispatch and `tier: release`: ubuntu-24.04 + windows-latest): ready-gate; Windows runs setup with the complete verify, Ubuntu defers it and builds only the plugin and served harness for the e2e steps. `renamed-feature` (complete verify), `source-archive` and `example-removal` (targeted verify, see [Template authoring](#template-authoring-in-ciyml)), `framework-cli` (Linux; all three OSes for `tier: release`), `generated-companion`, `starter` (3 groups): ready-gate and not on push. `real-obsidian`: end-to-end, only when opted in (always for `tier: release`). `self-review`, `security-audit` (continue-on-error, informational): pull requests only, not draft, not `release/*`. `ci-result` "CI result" ("E2E result" in a run started by the `e2e` label): `always()`, `checks: read`; on a `release/*` head green only after "Release result" succeeded on that commit | `baseline-<os>-<attempt>`, `showcase-<os>-<attempt>`, `renamed-template-authoring`, `template-authoring-source-archive`, `template-authoring-example-removal`, `framework-cli-<os>`, `real-obsidian-evidence`, `project-generator-evidence`, `starters-<group>-evidence` (7); `ui-review-gallery`, `security-audit` (14) |
-| `airship-compatibility.yml` | Integration | `pull_request`, `workflow_call`, `workflow_dispatch` (`tier`) | `contracts`: ready-gate; Linux, all three OSes for `tier: release` | `airship-compatibility-<os>` (7) |
-| `angular-setup-acceptance.yml` | Integration | `pull_request`, `workflow_call`, `workflow_dispatch` (`tier`) | `generated-app`: ready-gate; Linux, all three OSes for `tier: release` | `angular-setup-acceptance-<os>` (7) |
+| `ci.yml` (CI) | Integration | `pull_request` (+ `labeled`), push `main`, `workflow_call` (`tier`, `e2e`), `workflow_dispatch` (`tier`, `e2e`) | `baseline` (ubuntu-24.04, windows-latest): ready-gate. `scope` "Scope": ready-gate, no install; `node tooling/quality/ci-scope.mjs` reports `generators` (on a pull request, whether a changed file is a generator input; true for every other event). `showcase` (no pull request or push: the nightly run windows-latest, dispatch and `tier: release` ubuntu-24.04 + windows-latest, a pull request with the `e2e` label ubuntu-24.04 only): Windows runs setup with the complete verify, Ubuntu defers it and builds only the plugin and served harness for the e2e steps. `renamed-feature` (complete verify), `source-archive` and `example-removal` (targeted verify, see [Template authoring](#template-authoring-in-ciyml)), `framework-cli` (Linux; all three OSes for `tier: release`): ready-gate and not on push. `example-removal`, `generated-companion`, `starter` (3 groups) also need `scope`: on a pull request only when `generators` is true (or, for the two with e2e steps, with the `e2e` label). `real-obsidian`: end-to-end, only when opted in (always for `tier: release`). `self-review`, `security-audit` (continue-on-error, informational): pull requests only, not draft, not `release/*`. `ci-result` "CI result" ("E2E result" in a run started by the `e2e` label): `always()`, `checks: read`; on a `release/*` head green only after "Release result" succeeded on that commit | `baseline-<os>-<attempt>`, `showcase-<os>-<attempt>`, `renamed-template-authoring`, `template-authoring-source-archive`, `template-authoring-example-removal`, `framework-cli-<os>`, `real-obsidian-evidence`, `project-generator-evidence`, `starters-<group>-evidence` (7); `ui-review-gallery`, `security-audit` (14) |
+| `airship-compatibility.yml` | Integration | `pull_request` (the generator inputs of `configs/quality/ci-scope.json`), `workflow_call`, `workflow_dispatch` (`tier`) | `contracts`: ready-gate; Linux, all three OSes for `tier: release` | `airship-compatibility-<os>` (7) |
+| `angular-setup-acceptance.yml` | Integration | `pull_request` (the generator inputs of `configs/quality/ci-scope.json`), `workflow_call`, `workflow_dispatch` (`tier`) | `generated-app`: ready-gate; Linux, all three OSes for `tier: release` | `angular-setup-acceptance-<os>` (7) |
 | `application-docs.yml` (Typed Markdown documentation) | Integration | `pull_request` (22 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `qualify` (ubuntu-24.04, windows-latest), `site` "Command handbook site" (needs `qualify`): ready-gate | `shell-cli-manual-markdown-<os>`, `application-docs-qualification-<os>` (7); `shell-cli-manual-site` (14) |
 | `companion-concept-verification.yml` | Integration | `pull_request` and push `main` (42 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `source`, `browser`, `journey-editor`, `journey-native`, `jev-typescript6`: ready-gate | `companion-review-source`, `companion-browser-evidence`, `companion-mvp-authoring`, `generated-journey-native-evidence`, `jev-typescript6-evidence` (7) |
-| `compiler-qualification.yml` | Integration | `pull_request`, `workflow_call`, `workflow_dispatch` (`tier`) | `contracts`: ready-gate; Linux, all three OSes for `tier: release` | `compiler-qualification-<os>` (7) |
+| `compiler-qualification.yml` | Integration | `pull_request` (the generator inputs of `configs/quality/ci-scope.json`), `workflow_call`, `workflow_dispatch` (`tier`) | `contracts`: ready-gate; Linux, all three OSes for `tier: release` | `compiler-qualification-<os>` (7) |
 | `hindsight-tooling.yml` (Optional memory tooling contracts) | Integration | `pull_request` and push `main` (13 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `contracts`: ready-gate; Linux, all three OSes for `tier: release` | none |
-| `interactive-maker.yml` | Integration | `pull_request`, `workflow_call`, `workflow_dispatch` (`tier`) | `maker`: ready-gate; Linux, all three OSes for `tier: release` | `maker-qualification-<os>` (7) |
-| `native-integration-verification.yml` | Integration | `pull_request` (11 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `contracts-and-adapters`, `generated-starters` (2 starters): ready-gate | `native-starter-<starter>` (7) |
+| `interactive-maker.yml` | Integration | `pull_request` (the generator inputs of `configs/quality/ci-scope.json`), `workflow_call`, `workflow_dispatch` (`tier`) | `maker`: ready-gate; Linux, all three OSes for `tier: release` | `maker-qualification-<os>` (7) |
+| `native-integration-verification.yml` | Integration | `pull_request` (the generator inputs of `configs/quality/ci-scope.json`), `workflow_call`, `workflow_dispatch` (`tier`) | `contracts-and-adapters`, `generated-starters` (2 starters): ready-gate | `native-starter-<starter>` (7) |
 | `optional-storybook.yml` | Integration | `pull_request` (15 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `optional-workspace`: ready-gate | `optional-storybook-evidence` (7) |
-| `project-starter-qualification.yml` | Integration | `pull_request`, `workflow_call`, `workflow_dispatch` (`tier`) | `generated-project` (4 groups), `project-handoff`: ready-gate | `project-starters-<group>`, `project-handoff-<starter>` (7) |
+| `project-starter-qualification.yml` | Integration | `pull_request` (the generator inputs of `configs/quality/ci-scope.json`), `workflow_call`, `workflow_dispatch` (`tier`) | `generated-project` (4 groups), `project-handoff`: ready-gate | `project-starters-<group>`, `project-handoff-<starter>` (7) |
 | `setup-compatibility.yml` (Setup npm policy compatibility) | Integration | `pull_request` and push `main` (12 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `setup`: four legs (Node 24.15.0/npm 12.0.2 and Node 24.21.0/npm 11.19.1 on ubuntu-24.04 and windows-latest), ready-gate; every leg runs a cold fresh setup and the npm policy fixture; Ubuntu Node 24.15.0/npm 12 runs every verify gate except the framework tooling suites (`verify --skip tooling`), Windows Node 24.15.0/npm 12 runs `verify --only dependency-policy,build,typecheck,artifacts` and the `setup` suite, and the qualified legs defer verify to `ci.yml` | `setup-policy-<os>-npm-<npm>` (7) |
 | `starter-distribution.yml` (Independent Workbench distributions) | Integration | `pull_request` (25 path filters), `workflow_call`, `workflow_dispatch` (`tier`) | `package`: ready-gate | `companion-starter-evidence-<sha>`, `workbench-distributions-<source>` (14) |
 | `projects-boundary.yml` (Projects boundary) | Integration | `pull_request` and push `main` (14 path filters; the only shell workflow that watches `projects/**`), `workflow_call`, `workflow_dispatch` (`tier`) | `boundary` "Projects boundary": ready-gate; `node tooling/projects/projects.mjs check` and `check-repository.mjs` | none |
@@ -52,6 +52,7 @@ abbreviated **ready-gate** below. Retention is the `retention-days` of each
 | `release-cut.yml` (Release cut) | Publish | `workflow_dispatch` (`version`) | `cut` "Cut release branch", `environment: release-cut` | `release-cut-<version>-<attempt>` (30) |
 | `publish.yml` (Publish) | Publish | `workflow_dispatch` (`version`) | `publish` "Publish release", `environment: release` | `publish-<version>-<attempt>` (30) |
 | `release-rehearsal.yml` | manual | `workflow_dispatch` (`source_commit`, `version`, `draft_snapshot`) | `rehearsal` | `release-rehearsal-<version>-<sha>`, `release-qualification-<version>-<sha>` (repository default) |
+| `nightly.yml` (Nightly) | scheduled | `schedule` (daily 02:23 UTC), `workflow_dispatch` | calls `ci.yml` and every workflow `release.yml` calls except `candidate-qualification.yml`, each with `tier: integration` (`contents: read`, `checks: read`): every job runs, including Showcase's Windows complete verify; e2e stays opt-in | the called workflows' artifacts |
 | `maintenance-status.yml` | scheduled | `schedule` (Mondays 07:17 UTC), `workflow_dispatch` | `discover` | `maintenance-status` (14) |
 | `projects-required-checks.yml` (Projects-only required checks) | outside the tiers | `pull_request` (`opened`, `synchronize`, `reopened`, `edited`, `ready_for_review`) on `projects/**` | `scope` "Projects-only scope" (full history; is every changed path under `projects/`?), then `report` ×4: "Dev checks", "Definition of Ready", "CI result", "Definition of Done" for a projects-only pull request, "<check> (shell changes)" otherwise | none |
 | `projects--<project>--<file>.yml` | the project's own | as written in `projects/<project>/.github/workflows/<file>`, scoped to `projects/<project>/**` | copies made by `npm run projects:sync`, never edited here ([projects](../../projects/README.md)); outside the shell's tiers: `check-repository` applies the portable review (pins, permissions, credentials) but not the tier and e2e rules, and `release.yml` does not call them | the project's own |
@@ -89,11 +90,44 @@ download is cached as `playwright-chromium-<os>-<Playwright version>` on Linux i
 | --- | --- | --- | --- |
 | `renamed-feature` | `setup --defer-verify`, makers, then the complete `npm run verify` (the Ubuntu complete verify the deferred qualified `setup-compatibility` leg relies on) | `verify --only build,harness-build`, served components | skipped |
 | `source-archive` | `git archive` extract with `GIT_CEILING_DIRECTORIES`, `setup --defer-verify`, `verify --only suites-check,build,typecheck,repository,projects,source,artifacts`, runtime and artifact evidence | skipped | skipped |
-| `example-removal` | the renamed-feature state, `examples:remove` dry run and apply with the consumer hash check, `verify --only build,typecheck,entities,events,harness-build`, `make feature reading`, a targeted verify of every step whose inputs removal changes (all but `dependency-policy`, `tooling`, `workbench-suite`, `workbench-check`, `analyzer-after-tooling`), the `native`, `makers` and `generator` suites, coverage and artifact evidence | `verify --only build,harness-build` after removal and after the new feature, served components and browser evidence | skipped |
+| `example-removal` | on a pull request only with a generator input (see below); the renamed-feature state, `examples:remove` dry run and apply with the consumer hash check, `verify --only build,typecheck,entities,events,harness-build`, `make feature reading`, a targeted verify of every step whose inputs removal changes (all but `dependency-policy`, `tooling`, `workbench-suite`, `workbench-check`, `analyzer-after-tooling`), the `native`, `makers` and `generator` suites, coverage and artifact evidence | `verify --only build,harness-build` after removal and after the new feature, served components and browser evidence | skipped |
 
 A step or job skipped by its own condition counts as passing in "CI result". On a
 push to `main` the tree is the one its pull request's merge-ref run qualified (when
 the branch was up to date with `main`); the release tier runs every job again.
+
+## Core shell gate and nightly
+
+Owner decision: a ready pull request runs the core shell gate, and qualification
+of generated consumer projects runs only when the pull request changes what they
+are generated from.
+
+- **Always on a ready pull request:** `baseline`, `framework-cli`,
+  `renamed-feature` (the complete Ubuntu verify), `source-archive`, `self-review`,
+  the Definitions of Ready and Done, and every workflow whose own path filters
+  match.
+- **Only for generator inputs:** the one list is `configs/quality/ci-scope.json`
+  (templates, starters, wizards and forms, the compiler, SDK, starter and framework
+  adapters, the companion schema, the companion, Airship, compiler, concept,
+  example, maker, starter, setup and bundling tooling, `package.json`, the lock,
+  `.github/actions` and the workflows). In `ci.yml` the `scope` job runs
+  `node tooling/quality/ci-scope.mjs` on the merge commit and gates
+  `example-removal`, `generated-companion` and `starter`; the Airship, Angular
+  setup, compiler, interactive maker, project starter and native integration
+  workflows use the same list as their `pull_request` paths (followed by
+  `!projects/**`). `tooling/tests/ci-scope.checks.mjs` keeps them equal.
+- **Not on pull requests or pushes:** `showcase`, the only Windows complete verify.
+  It runs in `nightly.yml`, on dispatch and in the release tier; with the `e2e`
+  label a pull request runs its Ubuntu leg for the served showcase.
+- **Nightly:** `nightly.yml` calls `ci.yml` and every workflow the release tier
+  calls except `candidate-qualification.yml` (which already runs on every push to
+  `main`), with `tier: integration`. Every job runs there; three-OS matrices stay
+  on Linux and e2e stays opt-in.
+
+A core change that breaks a generated project or fails only on Windows is then
+caught by the next nightly run or the release tier, not by its own pull request.
+To qualify a branch at full breadth before merging, dispatch `nightly.yml` (or
+`ci.yml` with `tier: release`) on it.
 
 ## End-to-end opt-in
 
@@ -124,7 +158,7 @@ listed steps and keeps the rest of the job unconditional):
 
 | Workflow | Job | Gate | E2E steps |
 | --- | --- | --- | --- |
-| `ci.yml` | `showcase` | step | served showcase, UI review gallery (Linux legs only: dispatch, release) |
+| `ci.yml` | `showcase` | step | served showcase, UI review gallery (Linux legs only: dispatch, release, `e2e` label) |
 | `ci.yml` | `renamed-feature` | step | Chromium and served components |
 | `ci.yml` | `example-removal` | step | Chromium, served components after removal, served browser evidence |
 | `ci.yml` | `real-obsidian` | job | Electron libraries, real-Obsidian suite, agent loop smoke |

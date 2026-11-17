@@ -16,9 +16,15 @@ name: CI
 # aggregator reports as "E2E result", never as the required "CI result". In that
 # label run the template-authoring jobs rebuild only what the served steps need
 # (build and harness-build), not their verify gates, which the ready run already ran.
-# A push to main skips the three template-authoring jobs and the Ubuntu showcase
-# leg: the pull request's merge-ref run already qualified that tree. They still
-# run on pull requests, manual dispatch and the release tier.
+# A push to main skips the three template-authoring jobs: the pull request's
+# merge-ref run already qualified that tree. They still run on pull requests,
+# manual dispatch and the release tier.
+# Pull requests run the core shell gate (owner decision): the generator jobs
+# (example removal, generated companion, starters) run only when the scope job
+# finds a generator input (configs/quality/ci-scope.json) among the changed files,
+# and Showcase (the Windows complete verify) runs on no pull request or push.
+# nightly.yml calls this workflow every night on main, where every job runs, and
+# the release tier still runs everything.
 # Jobs that install dependencies restore the npm download cache (~/.npm, keyed on
 # the OS and package-lock.json); node_modules is never cached, so every
 # "clean checkout without node_modules" install stays a real npm ci.
@@ -55,7 +61,8 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: ci-${{ github.ref }}${{ github.event.action == 'labeled' && format('-label-{0}', github.event.label.name) || '' }}
+  # The nightly call gets its own group, so a push to main never cancels it.
+  group: ci-${{ github.ref }}${{ github.event.action == 'labeled' && format('-label-{0}', github.event.label.name) || '' }}${{ github.event_name == 'schedule' && '-nightly' || '' }}
   cancel-in-progress: true
 jobs:
   baseline:
@@ -90,8 +97,33 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
-  showcase:
+  # Which optional qualification this run needs: on a pull request, whether a
+  # changed file is a generator input (configs/quality/ci-scope.json); every other
+  # event counts as in scope. Dependency-free, so no install. Not on a label run,
+  # whose e2e jobs run on the label alone; "CI result" fails when this job fails.
+  scope:
+    name: Scope
     if: inputs.tier == 'release' || (github.event.action != 'labeled' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      generators: ${{ steps.scope.outputs.generators }}
+    steps:
+      # The pull request's merge commit and its first parent, the base it merges into.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - *setup-node
+      - name: Classify the changed files against the generator inputs
+        id: scope
+        run: node tooling/quality/ci-scope.mjs
+
+  showcase:
+    # Not on pushes or ordinary pull requests (owner decision): the Windows complete
+    # verify runs nightly (nightly.yml), on manual dispatch and in the release tier.
+    # A pull request with the e2e label runs only the Ubuntu leg's served showcase.
+    if: inputs.tier == 'release' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/') && contains(github.event.pull_request.labels.*.name, 'e2e'))
     name: Showcase / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     # Windows: guided setup runs the complete verify gates once before the served
@@ -106,19 +138,18 @@ jobs:
     # get 55 minutes of headroom instead of the earlier 30-minute budget.
     # Windows verify then measured 72.4 minutes (job 73.8 of 75), and the data-driven
     # wizard suites add about 6.5 minutes of Windows tooling, so Windows gets 95.
-    # This Windows leg is the only complete verify on Windows for pull requests and
-    # main (setup-compatibility's Windows legs run targeted gates only).
+    # This Windows leg is the only complete verify on Windows, nightly and in the
+    # release tier (setup-compatibility's Windows legs run targeted gates only).
     # This is a job budget, not a test deadline or product performance threshold.
     timeout-minutes: ${{ matrix.os == 'windows-latest' && 95 || 55 }}
     strategy:
       fail-fast: false
       matrix:
-        # On pull requests template-authoring's renamed-feature job already runs
-        # setup, the complete verify and served e2e on Ubuntu with the same
-        # toolchain. A push to main is the tree that pull request's merge-ref run
-        # already qualified, so the Ubuntu leg runs only on manual dispatch and in
-        # the release tier (a release/* push is a push too, hence the tier check).
-        os: ${{ fromJSON((inputs.tier == 'release' || github.event_name == 'workflow_dispatch') && '["ubuntu-24.04", "windows-latest"]' || '["windows-latest"]') }}
+        # Template-authoring's renamed-feature job already runs setup, the complete
+        # verify and served e2e on Ubuntu with the same toolchain, so the Ubuntu leg
+        # runs on manual dispatch, in the release tier and for the e2e label (its
+        # served showcase); the nightly run is the Windows leg only.
+        os: ${{ fromJSON((inputs.tier == 'release' || github.event_name == 'workflow_dispatch') && '["ubuntu-24.04", "windows-latest"]' || github.event_name == 'schedule' && '["windows-latest"]' || '["ubuntu-24.04"]') }}
     steps:
       - *checkout
       - &windows-dev-drive
@@ -349,7 +380,10 @@ jobs:
           if-no-files-found: error
 
   example-removal:
-    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    # A generator job: on a pull request only for generator inputs or the e2e label.
+    # !cancelled() keeps it on a label run, where the scope job is skipped.
+    needs: scope
+    if: ${{ !cancelled() && (inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/') && (needs.scope.outputs.generators == 'true' || contains(github.event.pull_request.labels.*.name, 'e2e')))) }}
     name: Template authoring / example removal
     runs-on: ubuntu-24.04
     # Measured at 73-77 minutes with two complete verify runs, e2e and four
@@ -549,7 +583,8 @@ jobs:
 
   generated-companion:
     name: Project generator / generated companion
-    if: inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    needs: scope
+    if: ${{ !cancelled() && (inputs.tier == 'release' || ((github.event.action != 'labeled' || github.event.label.name == 'e2e') && github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/') && (needs.scope.outputs.generators == 'true' || contains(github.event.pull_request.labels.*.name, 'e2e')))) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     steps:
@@ -609,7 +644,8 @@ jobs:
   # disposable workspace; three per job avoids nine runner slots of setup.
   starter:
     name: Project generator / starters ${{ matrix.ids }}
-    if: inputs.tier == 'release' || (github.event.action != 'labeled' && github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/'))
+    needs: scope
+    if: ${{ !cancelled() && (inputs.tier == 'release' || (github.event.action != 'labeled' && github.event_name != 'push' && github.event.pull_request.draft != true && !startsWith(github.head_ref, 'release/') && needs.scope.outputs.generators == 'true')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
@@ -704,7 +740,8 @@ jobs:
 
   # One required check for branch protection. A job skipped by its own condition
   # (framework-cli, the three template-authoring jobs, real-obsidian and the
-  # generators on push, real-obsidian without
+  # generators on push, the generators on a pull request without generator
+  # inputs, showcase outside the nightly run, dispatch and release, real-obsidian without
   # the e2e opt-in, self-review outside pull requests, every gate on a draft or
   # release/* pull request) counts as passing; any failure or cancellation fails
   # this check. The informational security-audit job is deliberately not listed.
@@ -714,7 +751,7 @@ jobs:
   ci-result:
     name: ${{ github.event.action == 'labeled' && 'E2E result' || 'CI result' }}
     if: always() && (github.event.action != 'labeled' || github.event.label.name == 'e2e')
-    needs: [baseline, showcase, renamed-feature, source-archive, example-removal, framework-cli, real-obsidian, generated-companion, starter, self-review]
+    needs: [scope, baseline, showcase, renamed-feature, source-archive, example-removal, framework-cli, real-obsidian, generated-companion, starter, self-review]
     permissions:
       contents: read
       checks: read

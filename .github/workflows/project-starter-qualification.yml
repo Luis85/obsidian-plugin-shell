@@ -2,8 +2,36 @@ name: Project starter qualification
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review, labeled]
-    paths-ignore:
-      - 'projects/**'
+    # Generator inputs only (configs/quality/ci-scope.json, kept equal by
+    # tooling/tests/ci-scope.checks.mjs); nightly.yml and the release tier run it regardless.
+    paths:
+      - 'templates/**'
+      - 'configs/starters/**'
+      - 'configs/wizards/**'
+      - 'configs/forms/**'
+      - 'src/cli/compiler/**'
+      - 'src/cli/sdk/**'
+      - 'src/cli/adapters/starters/**'
+      - 'src/cli/adapters/framework/**'
+      - 'src/cli/adapters/framework-cli.ts'
+      - 'src/shared/companion/**'
+      - 'tooling/airship/**'
+      - 'tooling/bundling/**'
+      - 'tooling/companion-tools/**'
+      - 'tooling/compiler/**'
+      - 'tooling/concepts/**'
+      - 'tooling/examples/**'
+      - 'tooling/makers/**'
+      - 'tooling/starters/**'
+      - 'tooling/setup.mjs'
+      - 'tooling/setup/**'
+      - 'tooling/quality/ci-scope.mjs'
+      - 'configs/quality/ci-scope.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/actions/**'
+      - '.github/workflows/**'
+      - '!projects/**'
   # release.yml calls this workflow with tier release: every matrix leg, whatever the path filters say.
   workflow_call:
     inputs:
