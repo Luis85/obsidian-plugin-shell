@@ -113,6 +113,7 @@
     "release:operate": "node tooling/release/cli.mjs",
     "release:changelog": "node src/cli/tooling/release/changelog.mjs",
     "release:cut": "node tooling/release/cut.mjs",
+    "release:preflight": "node tooling/release/preflight.mjs",
     "release:publish": "node tooling/release/publish.mjs",
     "increment:new": "node tooling/delivery/increment.mjs new",
     "dor": "node tooling/delivery/ready.mjs",
