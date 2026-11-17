@@ -6,6 +6,10 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ## [Unreleased]
 
+### Added
+
+- `npm run release:preflight -- --version X.Y.Z` checks in minutes, without writing anything, whether a release cut would be blocked, whether acceptance tests that read the changelog still pass once it is promoted, and whether the live security audit passes.
+
 ### Changed
 
 - Pull requests that change only docs, root Markdown, lockfiles or the Dependabot configuration take a lightweight lane and need no increment handoff; every CI gate still runs.
