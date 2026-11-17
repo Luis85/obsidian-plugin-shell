@@ -8,6 +8,7 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ### Changed
 
+- Pull requests that change only docs, root Markdown, lockfiles or the Dependabot configuration take a lightweight lane and need no increment handoff; every CI gate still runs.
 - Release cut no longer waits for a `release` environment approval (it runs in `release-cut`); Publish keeps the reviewer-protected `release` environment, so a release needs one approval instead of two.
 
 ## [0.6.1] - 2026-11-15
