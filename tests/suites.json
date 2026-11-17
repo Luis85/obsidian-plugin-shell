@@ -1096,7 +1096,8 @@
         "tooling/tests/delivery-*.checks.mjs",
         "tooling/tests/security.checks.mjs",
         "tooling/tests/maintenance.checks.mjs",
-        "tooling/tests/qualification-*.checks.mjs"
+        "tooling/tests/qualification-*.checks.mjs",
+        "tooling/tests/ci-scope.checks.mjs"
       ],
       "verify": "tooling",
       "npmScript": "test:release",

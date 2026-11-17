@@ -35,13 +35,14 @@ tier: a tier selects which gates run, it never relaxes a gate that runs.
                                            merge green PR to main     Publish: merge → tag → release → delete
 ```
 
-## The four tiers
+## The tiers
 
 | Tier | Trigger | What runs | Gate |
 | --- | --- | --- | --- |
 | Dev | Every pull-request event (`opened`, `synchronize`, `reopened`, `ready_for_review`), drafts included | `dev.yml` "Dev checks" on ubuntu-24.04 (about ten minutes): `node bin/app check --fast --skip-suites` against the base branch (typecheck, lint and eslint on changed files, related Vitest tests, the maker type-check), suite registration, repository policy, changelog structure and the self-review guard in `--warn-only` mode; `definition-of-ready.yml` checks the increment documents (seconds, no install) | "Dev checks" and "Definition of Ready", required by branch protection |
-| Integration | The same events on a pull request that is not a draft and whose head is not `release/*`; pushes to `main` | `ci.yml` and every other pull-request workflow; three-OS matrices run their Linux leg only; `ci.yml` adds the blocking self-review guard and an informational live audit; end-to-end steps only when opted in ([below](#end-to-end-tests-opt-in-mandatory-in-release)); `definition-of-done.yml` checks the increment against the diff | "CI result" and "Definition of Done", required by branch protection, plus each workflow's own job checks |
+| Integration | The same events on a pull request that is not a draft and whose head is not `release/*`; pushes to `main` | The core shell gate: `ci.yml` and every pull-request workflow whose path filters match; generated-project qualification (starters, generated companion, example removal and six consumer workflows) only when a generator input changes, and the Windows complete verify not at all ([core shell gate](WORKFLOWS.md#core-shell-gate-and-nightly)); three-OS matrices run their Linux leg only; `ci.yml` adds the blocking self-review guard and an informational live audit; end-to-end steps only when opted in ([below](#end-to-end-tests-opt-in-mandatory-in-release)); `definition-of-done.yml` checks the increment against the diff | "CI result" and "Definition of Done", required by branch protection, plus each workflow's own job checks |
 | Release | Push to `release/**`, or a manual dispatch on that branch | `release.yml`: release metadata, every pull-request workflow called with `tier: release` (all matrix legs, path filters ignored, every end-to-end step), and `candidate-qualification.yml` (fixed-source rehearsal, served browser, three native sessions, the blocking live audit) | "Release result", which Publish requires |
+| Nightly | Daily schedule on `main`, or a manual dispatch | `nightly.yml`: `ci.yml` (Windows complete verify included) and every workflow the Release tier calls except Candidate qualification, with `tier: integration` | None; a red nightly run is fixed forward on `main` |
 | Publish | Manual dispatch from `main` by the owner, after the `release` environment's reviewers approve | `release-cut.yml` (cut the release branch) and `publish.yml` (merge, tag, release, delete) | Environment approval |
 
 The `node --test` suites a diff selects are listed as skipped in the Dev tier, not
