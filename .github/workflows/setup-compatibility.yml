@@ -50,9 +50,11 @@ jobs:
     # Every leg runs the fresh install under the forwarded configuration and the
     # real policy fixture without any dependency cache (cold on purpose: the rows
     # qualify npm's install policy). The Ubuntu Node 24.15.0 / npm 12 leg then runs
-    # every verify gate once: the only complete verify on Node 24.15.0, measured at
-    # about 39 minutes earlier and 58 on the bfe0a5f7 pull request run, so it gets
-    # 75 minutes. Windows legs run no complete verify (the npm 12 leg measured 91
+    # every verify gate except the framework tooling suites (owner decision: those
+    # suites run once per platform, on the qualified toolchain in "Template
+    # authoring / renamed feature" and "Showcase / windows-latest"); the complete
+    # verify here measured 39-58 minutes, of which the tooling suites are about
+    # three quarters. The budget stays 75 minutes. Windows legs run no complete verify (the npm 12 leg measured 91
     # minutes with it); the npm 12 leg runs the targeted gates below, estimated at
     # 20-30 minutes (not yet measured), and the deferred legs about 1-5 minutes,
     # so Windows gets 60 (room for a runner about 1.7 times slower).
@@ -65,7 +67,7 @@ jobs:
           - os: ubuntu-24.04
             node: '24.15.0'
             npm: '12.0.2'
-            verify: complete
+            verify: partial
           # Windows on Node 24.15.0 / npm 12 defers the complete verify and runs
           # only what npm 12 and this Node can change on Windows: the dependency
           # policy, the build, types and built artifacts, and the setup suite
@@ -120,8 +122,14 @@ jobs:
           SETUP_VERIFY: ${{ matrix.verify }}
         run: |
           $extra = @()
-          if ($env:SETUP_VERIFY -eq 'deferred') { $extra += '--defer-verify' }
+          if ($env:SETUP_VERIFY -ne 'complete') { $extra += '--defer-verify' }
           node "$env:QUALIFIED_NPM_CLI" run setup -- --yes --no-interaction @extra
+      - name: Every verify gate except the framework tooling suites on this toolchain
+        if: matrix.verify == 'partial'
+        shell: pwsh
+        run: |
+          node "$env:QUALIFIED_NPM_CLI" run verify -- --skip tooling
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Targeted gates on this toolchain (dependency policy, build, types, artifacts, setup suite)
         if: matrix.targeted
         shell: pwsh
