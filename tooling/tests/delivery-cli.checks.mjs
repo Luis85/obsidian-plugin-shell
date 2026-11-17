@@ -85,6 +85,18 @@ test('end to end: exemptions, refinement output, handoff choice, usage, configur
   const exempt = repo.run('ready.mjs', ['--json'], { DELIVERY_HEAD_REF: 'release/1.2.3' });
   assert.equal(exempt.exit, 0); assert.equal(exempt.json().status, 'exempt'); assert.match(exempt.json().notices[0], /release\/1\.2\.3 is exempt/);
   assert.equal(repo.run('done.mjs', [], { DELIVERY_ACTOR: 'dependabot[bot]' }).exit, 0);
+  repo.git('checkout', '--quiet', '-b', 'docs-only', 'main');
+  await repo.write('docs/guide.md', '# Guide\n'); await repo.write('CHANGELOG.md', `${await repo.read('CHANGELOG.md')}\n`);
+  repo.git('add', '.'); repo.git('commit', '--quiet', '-m', 'Docs only');
+  for (const gate of ['ready.mjs', 'done.mjs']) {
+    const lane = repo.run(gate, ['--base', 'main', '--json'], { DELIVERY_HEAD_REF: 'docs-only' });
+    assert.equal(lane.exit, 0, lane.stdout + lane.stderr); assert.equal(lane.json().status, 'exempt');
+    assert.match(lane.json().notices[0], /Only lightweight-lane files changed \(2,/);
+  }
+  await repo.write('src/features/existing.ts', 'export const a = 2;\n'); repo.git('commit', '--quiet', '-am', 'And a source change');
+  const mixed = repo.run('ready.mjs', ['--base', 'main', '--json'], { DELIVERY_HEAD_REF: 'docs-only' });
+  assert.equal(mixed.exit, 1, 'a source file leaves the lane'); assert.notEqual(mixed.json().status, 'exempt');
+  repo.git('checkout', '--quiet', 'feature/greeting');
   await repo.write(handoffPath, readyHandoff().replace('## Open questions\n\nNone.', '## Open questions\n\n- Which palette group?'));
   const out = join(repo.folder, 'brief');
   const notReady = repo.run('ready.mjs', ['--base', 'main', '--out', out, '--summary', join(repo.folder, 's.md')]);

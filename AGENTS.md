@@ -86,7 +86,9 @@ conversation. Add user-facing changes under `## [Unreleased]` in `CHANGELOG.md`.
 [cut and publish a release](docs/development/CUT-AND-PUBLISH-A-RELEASE.md).
 
 **Increments.** Plan work as an increment with `node bin/app increment`, `pr` and
-`issue`. The Increment, PullRequest and Issue documents (`docs/increments/`,
+`issue`. Docs-, root-Markdown-, lockfile- and Dependabot-config-only pull requests
+take the lightweight lane instead: no increment handoff, every CI gate still runs
+(`exemptions.paths`, see the Definition of Ready and Done). The Increment, PullRequest and Issue documents (`docs/increments/`,
 `docs/pull-requests/`, `docs/issues/`) are the source of truth; change them
 through the CLI's reviewed plans (preview, then `--apply <planHash>` or `--yes`),
 never by hand-editing generated lists or bindings. Implement only after the

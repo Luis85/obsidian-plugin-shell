@@ -6,6 +6,10 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ## [Unreleased]
 
+### Changed
+
+- Pull requests that change only docs, root Markdown, lockfiles or the Dependabot configuration take a lightweight lane and need no increment handoff; every CI gate still runs.
+
 ## [0.6.1] - 2026-11-15
 
 ### Changed

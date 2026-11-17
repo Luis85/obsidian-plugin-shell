@@ -78,6 +78,21 @@ test('handoff selection: explicit, pull-request body, one in the diff, none or s
   assert.equal(exemption(config.delivery, { headRef: 'feature/release/x', actor: 'person' }), null);
 });
 
+test('the lightweight lane: a diff of only docs, root Markdown, lockfiles or Dependabot config is exempt; anything else is not', () => {
+  const lane = changed => exemption(config.delivery, { headRef: 'feature', actor: 'person', changed });
+  for (const changed of [['CHANGELOG.md'], ['docs/guide.md', 'docs/sub/page.md', 'README.md'], ['package-lock.json'], ['projects/companion/package-lock.json'], ['.github/dependabot.yml']]) {
+    assert.match(lane(changed), new RegExp(`Only lightweight-lane files changed \\(${changed.length},`), changed.join(', '));
+  }
+  assert.equal(lane(['CHANGELOG.md', 'src/x.ts']), null, 'one file outside the lane keeps the full check');
+  assert.equal(lane(['package.json']), null, 'package.json can change scripts, so it is not in the lane');
+  assert.equal(lane(['projects/companion/package.json']), null);
+  assert.equal(lane(['src/docs/x.md']), null, 'Markdown below the root is not docs/');
+  assert.equal(lane(['docs/guide.md', handoffPath]), null, 'an Increment document always keeps the full check');
+  assert.equal(lane(['docs/pull-requests/sample-increment-kickoff.md']), null, 'a PullRequest document always keeps the full check');
+  assert.equal(lane([]), null, 'an empty diff is not exempt'); assert.equal(lane(null), null);
+  assert.equal(exemption({ ...config.delivery, exemptions: { branches: [], actors: [] } }, { changed: ['docs/guide.md'] }), null, 'no paths, no lane');
+});
+
 test('a not-ready run carries a refinement brief naming the skills, and --write scaffolds missing sections only', () => {
   const text = readyHandoff().replace(/## Risks and rollback[\s\S]*?## Open questions\n\nNone\.\n/, '## Open questions\n\n- Who decides the palette group?\n');
   const context = baseContext(config, text);

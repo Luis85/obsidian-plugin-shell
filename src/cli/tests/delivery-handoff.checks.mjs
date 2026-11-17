@@ -66,7 +66,8 @@ test('the shipped delivery configuration and template load strictly', async () =
   const ready = await loadConfig(repositoryRoot, 'ready', readyRules);
   const done = await loadConfig(repositoryRoot, 'done', doneRules);
   assert.deepEqual(Object.keys(ready.rules), Object.keys(readyRules)); assert.deepEqual(Object.keys(done.rules), Object.keys(doneRules));
-  assert.deepEqual(ready.delivery.exemptions, { branches: ['release/', 'dependabot/'], actors: ['dependabot[bot]'] });
+  assert.deepEqual(ready.delivery.exemptions, { branches: ['release/', 'dependabot/'], actors: ['dependabot[bot]'],
+    paths: ['docs', '*.md', 'package-lock.json', 'projects/*/package-lock.json', '.github/dependabot.yml'] });
   const template = parseHandoff(await read(ready.delivery.handoff.template));
   for (const name of ready.delivery.handoff.sections) assert.ok(template.section(name), `template has ## ${name}`);
   assert.equal(template.frontmatter.data.e2e, 'optional');
@@ -83,7 +84,8 @@ test('negative: unknown keys, missing rules, bad severities, params and regular 
     value => { value.rules['DOR-04'].params.patterns.push('('); }, value => { value.rules['DOR-07'].params.resolved = '['; }, value => { value.schemaVersion = 2; }];
   for (const mutate of mutations) { const copy = clone(rules); mutate(copy); assert.throws(() => validateRulesConfig(copy, readyRules, 'r.json'), invalid, mutate.toString()); }
   const deliveryMutations = [value => { value.handoff.unknown = true; }, value => { value.pullRequests.incrementKey = ''; }, value => { value.sizes.S.maxAffectedAreas = 0; },
-    value => { value.exemptions.branches = 'release/'; }, value => { delete value.refinement; }, value => { value.handoff.slugPattern = '('; },
+    value => { value.exemptions.branches = 'release/'; }, value => { value.exemptions.paths = 'docs'; }, value => { value.exemptions.unknown = []; },
+    value => { delete value.refinement; }, value => { value.handoff.slugPattern = '('; },
     value => { value.branches.pullRequest = 'increment/{increment}/{pr}'; }, value => { value.branches.increment = 'main/{id}'; }, value => { value.branches.pullRequest = 'pr/{pr}'; },
     value => { value.branches.extra = 'x'; }, value => { value.pullRequests.kinds = ['change']; }, value => { value.pullRequests.requiredKeys = ['type', 'id', 'status']; },
     value => { delete value.issues; }, value => { value.issues.statuses = []; }, value => { value.acceptance = 'tests/acceptance/{ac}.checks.mjs'; },
