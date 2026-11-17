@@ -108,15 +108,21 @@ test('repository checker leaves the docs working directory out of the Markdown g
 });
 const dispatched = workflow.replace('on: pull_request', 'on:\n  workflow_dispatch:\n    inputs:\n      version:\n        type: string')
   .replace('    runs-on: ubuntu-latest', '    runs-on: ubuntu-latest\n    environment: release\n    permissions:\n      contents: write\n      pull-requests: write');
-test('only the allowlisted dispatch-only release workflows may grant write scopes, and only behind the release environment', () => {
-  for (const file of ['release-cut.yml', 'publish.yml', 'obsidian-release.yml']) assert.deepEqual(inspectWorkflow(dispatched, file), { jobs: 1, localActions: [], localWorkflows: [], callable: false }, file);
+const cutDispatched = dispatched.replace('environment: release', 'environment: release-cut');
+test('only the allowlisted dispatch-only release workflows may grant write scopes, and only behind their own environment', () => {
+  for (const file of ['publish.yml', 'obsidian-release.yml']) assert.deepEqual(inspectWorkflow(dispatched, file), { jobs: 1, localActions: [], localWorkflows: [], callable: false }, file);
+  assert.deepEqual(inspectWorkflow(cutDispatched, 'release-cut.yml'), { jobs: 1, localActions: [], localWorkflows: [], callable: false });
+  // Publish and generated releases keep the reviewer-protected release environment; only the cut uses release-cut.
+  for (const file of ['publish.yml', 'obsidian-release.yml']) assert.throws(() => inspectWorkflow(cutDispatched, file), /PRIVILEGED_JOB_WITHOUT_ENVIRONMENT/, file);
+  assert.throws(() => inspectWorkflow(dispatched, 'release-cut.yml'), /PRIVILEGED_JOB_WITHOUT_ENVIRONMENT/, 'the cut runs in release-cut, not release');
   for (const file of [undefined, 'ci.yml', 'release.yml', 'starter-distribution.yml', 'publish.yaml', 'nested/publish.yml'])
     assert.throws(() => inspectWorkflow(dispatched, file), /WORKFLOW_PERMISSIONS_NOT_READ_ONLY/, String(file));
   assert.throws(() => inspectWorkflow(dispatched.replace('permissions:\n  contents: read\njobs', 'permissions:\n  contents: write\njobs'), 'publish.yml'), /WORKFLOW_PERMISSIONS_NOT_READ_ONLY/);
   assert.throws(() => inspectWorkflow(dispatched.replace('contents: write', 'contents: admin'), 'publish.yml'), /WORKFLOW_PERMISSIONS_NOT_READ_ONLY/);
   assert.throws(() => inspectWorkflow(dispatched.replace('    environment: release\n', ''), 'publish.yml'), /PRIVILEGED_JOB_WITHOUT_ENVIRONMENT/);
   assert.throws(() => inspectWorkflow(dispatched.replace('environment: release', 'environment: staging'), 'release-cut.yml'), /PRIVILEGED_JOB_WITHOUT_ENVIRONMENT/);
-  assert.doesNotThrow(() => inspectWorkflow(dispatched.replace('environment: release', 'environment:\n      name: release'), 'release-cut.yml'));
+  assert.doesNotThrow(() => inspectWorkflow(dispatched.replace('environment: release', 'environment:\n      name: release-cut'), 'release-cut.yml'));
+  assert.doesNotThrow(() => inspectWorkflow(dispatched.replace('environment: release', 'environment:\n      name: release'), 'publish.yml'));
   for (const trigger of ['  pull_request:\n', '  push:\n', '  workflow_call:\n', '  schedule:\n    - cron: "1 1 * * 1"\n', '  pull_request_target:\n'])
     assert.throws(() => inspectWorkflow(dispatched.replace('on:\n', `on:\n${trigger}`), 'publish.yml'), /PRIVILEGED_WORKFLOW_TRIGGER_FORBIDDEN/, trigger);
   const caller = 'name: Call\non: workflow_dispatch\npermissions:\n  contents: read\njobs:\n  call:\n    environment: release\n    permissions:\n      contents: write\n    uses: ./.github/workflows/ci.yml\n';

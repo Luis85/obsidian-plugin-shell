@@ -16,9 +16,14 @@ as the qualification run and keep its logs.
 ## Prerequisites (owner, once)
 
 - **Release environment.** Settings → Environments → create `release` and add
-  required reviewers. Create it before the first dispatch: GitHub creates a missing
-  environment on first use without protection. Optionally restrict it to the
-  `main` branch.
+  required reviewers; it gates Publish. Create it before the first dispatch: GitHub
+  creates a missing environment on first use without protection. Optionally restrict
+  it to the `main` branch.
+- **Release cut environment.** Release cut runs in `release-cut`, which needs no
+  reviewers: the cut only opens a branch and a draft pull request and publishes
+  nothing. GitHub creates it on first use. If `RELEASE_TOKEN` is an environment
+  secret of `release`, add it to `release-cut` as well (or make it a repository
+  secret).
 - **Branch protection on `main`.** Require the status checks "Dev checks" and
   "CI result". Do not require "Release result"; it never runs on ordinary pull
   requests.
@@ -82,7 +87,7 @@ Dispatch **Release cut** from `main`:
 - GitHub CLI: `gh workflow run release-cut.yml --ref main -f version=X.Y.Z`
   (add `-f min_app_version=A.B.C` to raise the floor).
 
-A reviewer of the `release` environment approves the run. The job creates
+The run needs no approval (environment `release-cut`). The job creates
 `release/X.Y.Z` from `main`, commits `release: X.Y.Z` with the prepared metadata
 and the CLI manual regenerated for `X.Y.Z` (so the Release tier's
 `manual.mjs --check` passes without a follow-up commit), pushes it, opens the draft pull request "Release X.Y.Z" from

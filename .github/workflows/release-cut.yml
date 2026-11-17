@@ -5,8 +5,9 @@ name: Release cut
 # min_app_version input is a reviewed host-floor raise: the release commit writes
 # it to manifest.json and the new versions.json entry; released entries never change.
 # Privileged by a scoped, reviewed allowance (tooling/quality/workflow-policy.mjs):
-# manual dispatch only, read-only top level, and the one write job waits for the
-# reviewers of the protected "release" environment.
+# manual dispatch only, read-only top level, and the one write job runs in the
+# "release-cut" environment. The cut publishes nothing, so it needs no reviewer;
+# the reviewers of the protected "release" environment approve Publish.
 # Tokens: pushes and pull requests made with GITHUB_TOKEN start no workflows, so
 # the cut dispatches release.yml itself (actions: write). The optional
 # RELEASE_TOKEN secret (a fine-grained PAT or GitHub App token with contents,
@@ -36,7 +37,7 @@ jobs:
     name: Cut release branch
     runs-on: ubuntu-24.04
     timeout-minutes: 20
-    environment: release
+    environment: release-cut
     permissions:
       contents: write
       pull-requests: write
