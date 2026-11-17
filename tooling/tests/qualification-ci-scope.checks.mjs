@@ -79,18 +79,31 @@ test('a push to main skips the template-authoring jobs and the Ubuntu showcase l
   assert.match(ci.jobs['ci-result'].steps[0].run, /\.value\.result != "success" and \.value\.result != "skipped"/, 'a job skipped by its own condition counts as passing');
 });
 
-test('setup-compatibility keeps the only Node 24.15.0 complete verify on Ubuntu and a targeted Windows npm 12 leg', async () => {
+test('setup-compatibility runs every gate but the tooling suites on Node 24.15.0 (Ubuntu) and a targeted Windows npm 12 leg', async () => {
   const workflow = await load('.github/workflows/setup-compatibility.yml'), job = workflow.jobs.setup;
   assert.deepEqual(job.strategy.matrix.include.map(row => [row.os, row.node, row.npm, row.verify, row.targeted ?? false]), [
-    ['ubuntu-24.04', '24.15.0', '12.0.2', 'complete', false], ['windows-latest', '24.15.0', '12.0.2', 'deferred', true],
+    ['ubuntu-24.04', '24.15.0', '12.0.2', 'partial', false], ['windows-latest', '24.15.0', '12.0.2', 'deferred', true],
     ['ubuntu-24.04', '24.21.0', '11.19.1', 'deferred', false], ['windows-latest', '24.21.0', '11.19.1', 'deferred', false]]);
   const setup = job.steps.find(step => /run setup --/.test(step.run ?? ''));
-  assert.match(setup.run, /if \(\$env:SETUP_VERIFY -eq 'deferred'\) \{ \$extra \+= '--defer-verify' \}/, 'only deferred rows skip setup\'s complete verify');
+  assert.match(setup.run, /if \(\$env:SETUP_VERIFY -ne 'complete'\) \{ \$extra \+= '--defer-verify' \}/, 'every row but a complete one defers setup\'s verify');
+  const partial = job.steps.find(step => step.if === "matrix.verify == 'partial'");
+  assert.deepEqual(verifyLines(partial.run), ['--skip tooling'], 'the Node 24.15.0 leg runs every gate except the framework tooling suites');
+  assert.deepEqual(planSteps(verifySteps(), parseVerifyArgs(['--skip', 'tooling'])).filter(item => item.action !== 'run').map(item => item.step.id), ['tooling'], 'only the tooling step is left out');
+  assert.match(partial.run, /if \(\$LASTEXITCODE -ne 0\) \{ exit \$LASTEXITCODE \}/, 'pwsh fails on the verify exit code');
   const targeted = job.steps.find(step => step.if === 'matrix.targeted');
   assert.match(targeted.run, /run verify -- --only dependency-policy,build,typecheck,artifacts\n/);
   assert.match(targeted.run, /suites\.mjs setup\n/);
   assert.equal([...targeted.run.matchAll(/if \(\$LASTEXITCODE -ne 0\) \{ exit \$LASTEXITCODE \}/g)].length, 2, 'pwsh fails on either command');
   assert.ok(!job.steps.some(step => step.uses?.startsWith('actions/cache')), 'the install-policy rows stay cold');
+});
+
+test('the Windows showcase keeps the complete verify; the Ubuntu leg builds only what the served showcase needs', async () => {
+  const ci = await load('.github/workflows/ci.yml');
+  const setup = ci.jobs.showcase.steps.find(step => /run setup --/.test(step.run ?? '')).run;
+  assert.match(setup, /if \(\$env:RUNNER_OS -eq 'Linux'\) \{ \$extra \+= '--defer-verify' \}/, 'only Linux defers setup\'s complete verify');
+  assert.deepEqual(verifyLines(setup), ['--only build,harness-build'], 'Linux builds the plugin and served harness and nothing else');
+  assert.ok(setup.indexOf("if ($env:RUNNER_OS -eq 'Linux') {") < setup.indexOf('run verify -- --only build,harness-build'), 'the build-only verify is Linux-only');
+  assert.equal([...setup.matchAll(/if \(\$LASTEXITCODE -ne 0\) \{ exit \$LASTEXITCODE \}/g)].length, 2, 'pwsh fails on setup or the build');
 });
 
 test('every workflow verify --only list and suite name is real, so a renamed step or suite fails here instead of on a runner', async () => {
