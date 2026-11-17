@@ -56,12 +56,22 @@ A new `[Unreleased]` entry on `main` makes the release pull request conflict in
 
 ## 2. Preview the cut (optional, read-only)
 
-On an up-to-date `main` checkout with a clean tree:
+On an up-to-date `main` checkout with a clean tree, run the preflight first:
 
 ```sh
 git switch main && git pull --ff-only
+npm run release:preflight -- --version X.Y.Z
 node tooling/release/cut.mjs --version X.Y.Z [--min-app-version A.B.C]
 ```
+
+The preflight is read-only and takes minutes. It reports three checks and exits 1
+when one fails: `cut-plan` (the cut's own dry run below), `changelog-tests` (every
+acceptance test that reads `CHANGELOG.md`, run against the promoted changelog in a
+throwaway git worktree, so a test pinned to `## [Unreleased]` fails now instead of
+in the Release tier) and `security` (the live `check:security` audit Candidate
+qualification gates on; `--skip-security` reports it as skipped when the registry is
+unreachable). Each failure it catches would otherwise cost a Release run of more
+than an hour.
 
 The dry run prints the planned branch, the files release preparation changes
 (`package.json`, `package-lock.json`, `manifest.json`, `versions.json`,

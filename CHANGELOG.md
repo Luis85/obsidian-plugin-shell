@@ -6,6 +6,10 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ## [Unreleased]
 
+### Added
+
+- `npm run release:preflight -- --version X.Y.Z` checks in minutes, without writing anything, whether a release cut would be blocked, whether acceptance tests that read the changelog still pass once it is promoted, and whether the live security audit passes.
+
 ## [0.6.1] - 2026-11-15
 
 ### Changed
