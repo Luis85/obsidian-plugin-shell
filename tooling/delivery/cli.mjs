@@ -65,17 +65,22 @@ async function runGate(gate, args, { root = process.cwd(), env = process.env } =
     const definitions = gate === 'ready' ? readyRules : doneRules;
     const config = await loadConfig(root, gate, definitions);
     if (gate === 'done') config.ready = (await loadConfig(root, 'ready', readyRules)).rules;
-    const notice = exemption(config.delivery, { headRef: env.DELIVERY_HEAD_REF ?? '', actor: env.DELIVERY_ACTOR ?? '' });
-    if (notice) return { result: { gate, status: 'exempt', notices: [notice], rules: [], generated: {} }, exitCode: 0, options };
+    const exempt = notice => ({ result: { gate, status: 'exempt', notices: [notice], rules: [], generated: {} }, exitCode: 0, options });
+    const refs = { headRef: env.DELIVERY_HEAD_REF ?? '', actor: env.DELIVERY_ACTOR ?? '' };
+    const byRef = exemption(config.delivery, refs);
+    if (byRef) return exempt(byRef);
     const baseRef = options.base ?? 'origin/main';
     const labelsEnv = gate === 'done' ? config.rules['DOD-10'].params.env : 'PR_LABELS';
     const snap = () => repositorySnapshot(root, baseRef, { env, labelsEnv });
+    const snapshot = snap();
+    const byPaths = exemption(config.delivery, { ...refs, changed: snapshot.diff.map(file => file.path) });
+    if (byPaths) return exempt(byPaths);
     const io = { write: (path, text) => writeFileSync(join(root, path), text), refresh: snap,
       create: (path, text) => { mkdirSync(dirname(join(root, path)), { recursive: true }); writeFileSync(join(root, path), text, { flag: 'wx' }); },
       template: () => readFileSync(join(root, config.delivery.handoff.template), 'utf8'),
       stubTemplate: () => { try { return readFileSync(join(root, config.delivery.acceptance.template), 'utf8'); } catch { return null; } },
       gates: () => options.noPlan ? null : checkPlanGates(root, baseRef) };
-    const result = gate === 'ready' ? runReady(config, snap(), options, io) : runDone(config, snap(), options, io);
+    const result = gate === 'ready' ? runReady(config, snapshot, options, io) : runDone(config, snapshot, options, io);
     if (options.out) {
       const files = gate === 'done' ? (options.write ? {} : result.generated.files ?? {})
         : { ...(result.refinement ? { 'refinement-brief.md': refinementMarkdown(result) } : {}), ...(options.write ? {} : result.generated.files) };

@@ -53,7 +53,8 @@
   },
   "exemptions": {
     "branches": ["release/", "dependabot/"],
-    "actors": ["dependabot[bot]"]
+    "actors": ["dependabot[bot]"],
+    "paths": ["docs", "*.md", "package-lock.json", "projects/*/package-lock.json", ".github/dependabot.yml"]
   },
   "sizes": {
     "S": { "maxAcceptanceCriteria": 5, "maxAffectedAreas": 8 },
