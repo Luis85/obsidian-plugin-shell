@@ -212,9 +212,16 @@ workflows, whatever token opened the pull request.
 
 ## Approvals: the release environment
 
-Both write jobs declare `environment: release`. With required reviewers configured
-on that environment, each dispatch waits until a reviewer approves it, so cutting
-and publishing need two deliberate human decisions: the dispatch and the approval.
+Publish declares `environment: release`. With required reviewers configured on that
+environment, a Publish dispatch waits until a reviewer approves it, so publishing
+needs two deliberate human decisions: the dispatch and the approval. Release cut
+declares `environment: release-cut` and needs no reviewer: it only opens a release
+branch and a draft pull request and publishes nothing, so one approval per release
+(on Publish) is enough. `tooling/quality/workflow-policy.mjs` pins each file to its
+environment, so Publish cannot move to `release-cut`.
+When a `RELEASE_TOKEN` opens the release pull request, its pull-request workflows can
+show `action_required`; they are not required and can be ignored, because Release
+reports the required checks on the release head itself.
 The environment must exist with its reviewers before the first dispatch; GitHub
 creates a missing environment on first use without any protection rule. The
 workflows also refuse a dispatch from any ref other than `main` and a version that

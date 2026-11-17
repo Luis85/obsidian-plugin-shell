@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: daily
+      interval: weekly
     open-pull-requests-limit: 5
     versioning-strategy: increase
     cooldown:
@@ -11,23 +11,9 @@ updates:
       semver-minor-days: 3
       semver-major-days: 7
     groups:
-      vue:
-        patterns: [vue, '@vue/*', pinia, vue-i18n]
-        update-types: [minor, patch]
-      typescript:
-        patterns: [typescript, vue-tsc]
-        update-types: [minor, patch]
-      vite:
-        patterns: [vite, '@vitejs/*']
-        update-types: [minor, patch]
-      vitest:
-        patterns: [vitest, '@vitest/*']
-        update-types: [minor, patch]
-      lint:
-        patterns: [eslint, 'eslint-*', typescript-eslint, '@typescript-eslint/*']
-        update-types: [minor, patch]
-      playwright:
-        patterns: ['@playwright/*', playwright]
+      # One weekly pull request for every minor and patch update; majors stay separate.
+      minor-and-patch:
+        patterns: ['*']
         update-types: [minor, patch]
   # Standalone projects (projects/README.md): Dependabot reads only this root file.
   - package-ecosystem: npm
@@ -41,8 +27,8 @@ updates:
       semver-minor-days: 3
       semver-major-days: 7
     groups:
-      vitest:
-        patterns: [vitest, '@vitest/*']
+      minor-and-patch:
+        patterns: ['*']
         update-types: [minor, patch]
   - package-ecosystem: npm
     directory: /projects/workbench-site
@@ -54,6 +40,10 @@ updates:
       semver-patch-days: 3
       semver-minor-days: 3
       semver-major-days: 7
+    groups:
+      minor-and-patch:
+        patterns: ['*']
+        update-types: [minor, patch]
   - package-ecosystem: npm
     directory: /projects/component-atlas
     schedule:
@@ -64,6 +54,10 @@ updates:
       semver-patch-days: 3
       semver-minor-days: 3
       semver-major-days: 7
+    groups:
+      minor-and-patch:
+        patterns: ['*']
+        update-types: [minor, patch]
   - package-ecosystem: npm
     directory: /projects/storyloom
     schedule:
@@ -74,6 +68,10 @@ updates:
       semver-patch-days: 3
       semver-minor-days: 3
       semver-major-days: 7
+    groups:
+      minor-and-patch:
+        patterns: ['*']
+        update-types: [minor, patch]
   - package-ecosystem: npm
     directory: /projects/sitemap-atlas
     schedule:
@@ -84,6 +82,10 @@ updates:
       semver-patch-days: 3
       semver-minor-days: 3
       semver-major-days: 7
+    groups:
+      minor-and-patch:
+        patterns: ['*']
+        update-types: [minor, patch]
   - package-ecosystem: npm
     directory: /projects/dissect-canvas
     schedule:
@@ -94,6 +96,10 @@ updates:
       semver-patch-days: 3
       semver-minor-days: 3
       semver-major-days: 7
+    groups:
+      minor-and-patch:
+        patterns: ['*']
+        update-types: [minor, patch]
   - package-ecosystem: npm
     directory: /projects/resource-atlas
     schedule:
@@ -104,6 +110,10 @@ updates:
       semver-patch-days: 3
       semver-minor-days: 3
       semver-major-days: 7
+    groups:
+      minor-and-patch:
+        patterns: ['*']
+        update-types: [minor, patch]
   - package-ecosystem: github-actions
     directories: [/, /projects/companion, /projects/workbench-site, /projects/component-atlas, /projects/storyloom, /projects/sitemap-atlas, /projects/dissect-canvas, /projects/resource-atlas]
     schedule:
