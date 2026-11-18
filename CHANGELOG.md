@@ -6,6 +6,8 @@ Versions 0.4.0 and 0.3.0 predate this format: their original prose is kept uncha
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-18
+
 ### Added
 
 - `npm run release:preflight -- --version X.Y.Z` checks in minutes, without writing anything, whether a release cut would be blocked, whether acceptance tests that read the changelog still pass once it is promoted, and whether the live security audit passes.
@@ -141,7 +143,8 @@ feature authoring and a Vue/Nuxt UI showcase. This version is not a published
 release. Consult the iteration guides and actual test records for qualification
 and outstanding support limitations.
 
-[Unreleased]: https://github.com/Luis85/obsidian-plugin-shell/compare/0.6.1...HEAD
+[Unreleased]: https://github.com/Luis85/obsidian-plugin-shell/compare/0.7.0...HEAD
+[0.7.0]: https://github.com/Luis85/obsidian-plugin-shell/releases/tag/0.7.0
 [0.6.1]: https://github.com/Luis85/obsidian-plugin-shell/releases/tag/0.6.1
 [0.6.0]: https://github.com/Luis85/obsidian-plugin-shell/releases/tag/0.6.0
 [0.5.0]: https://github.com/Luis85/obsidian-plugin-shell/releases/tag/0.5.0
