@@ -15,15 +15,15 @@
     "check": "npm run build && npm test"
   },
   "dependencies": {
-    "@nuxt/ui": "4.12.0",
-    "vue": "3.5.45",
-    "vue-router": "5.4.0"
+    "@nuxt/ui": "4.13.0",
+    "vue": "3.5.46",
+    "vue-router": "5.5.1"
   },
   "devDependencies": {
-    "@iconify-json/lucide": "1.2.152",
-    "@vitejs/plugin-vue": "6.0.10",
-    "playwright": "1.65.0",
+    "@iconify-json/lucide": "1.2.158",
+    "@vitejs/plugin-vue": "6.0.11",
+    "playwright": "1.65.1",
     "tailwindcss": "4.3.5",
-    "vite": "8.3.6"
+    "vite": "8.3.8"
   }
 }
